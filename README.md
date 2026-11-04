@@ -32,8 +32,8 @@ python -m n3xtbyt3
 
 ## Spielen
 
-1. Im Hauptmenü ein System wählen (Pfeiltasten oder 1–4, dann Enter). Systeme ohne Szenarien
-   stehen grau als „kommt noch“ da.
+1. Im Hauptmenü ein System wählen (Pfeiltasten oder 1–4, dann Enter) – oder 5 für die Tickets.
+   Bereiche ohne Szenarien stehen grau als „kommt noch“ da.
 2. In der Liste **Zufälliges Szenario** nehmen (ungelöste und schwache kommen öfter) oder ein
    bestimmtes wählen.
 3. Rechts steht die Ausgangslage. Links tippst du Befehle wie im echten System.
@@ -44,6 +44,7 @@ python -m n3xtbyt3
 |---|---|
 | F1 | nächster Hinweis |
 | F2 | nächstes Szenario |
+| F3 | Ticket schließen (nur bei Tickets, wenn das Problem behoben ist) |
 | Esc | zurück zur Liste / zum Menü |
 | Pfeil hoch/runter | frühere Befehle |
 | Bild hoch/runter, Mausrad | blättern |
