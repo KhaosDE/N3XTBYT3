@@ -28,7 +28,8 @@ PFLICHTFELDER = (
     "datum", "ausgangslage", "zustand", "befehle", "ziel", "hinweise", "erklaerung",
     "begriffe", "loesung",
 )
-FREIE_FELDER = ("shell", "dateien")
+FREIE_FELDER = ("shell", "dateien", "rechner", "ticket")
+DRINGLICHKEIT = ("niedrig", "mittel", "hoch", "kritisch")
 
 
 class SzenarioFehler(Exception):
@@ -84,6 +85,23 @@ class Allgemein:
 
 
 @dataclass
+class RechnerDef:
+    """Ein weiterer simulierter Rechner im Szenario (erreichbar per ssh/Enter-PSSession)."""
+
+    name: str
+    system: System
+    allgemein: "Allgemein"
+    zustand: dict[str, Any]
+    befehle: list[Befehl]
+    zugang: list[str]
+    vorbereitet_zugang: list = field(default_factory=list, repr=False)
+
+    @property
+    def shell(self) -> str:
+        return self.system.start_shell
+
+
+@dataclass
 class Szenario:
     id: str
     system: System
@@ -104,6 +122,9 @@ class Szenario:
     shell: str
     datei: Path | None = None
     eigen: bool = False  # liegt im Datenordner des Nutzers
+    rechner: dict[str, RechnerDef] = field(default_factory=dict)
+    hauptrechner: str = ""
+    ticket: dict[str, Any] | None = None
 
     @property
     def bestaetigt(self) -> bool:
@@ -393,7 +414,86 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
     if "dateien" in roh and "bash" not in system.shell_ids:
         fehler.append("„dateien“ gibt es nur bei Linux-Systemen.")
     zustand.update(dateien_zu_zustand(roh.get("dateien"), "dateien", fehler))
-    bekannte = set(allgemein.zustand) | set(zustand)
+    eigene = set(allgemein.zustand) | set(zustand)
+    hauptrechner = str({**allgemein.zustand, **zustand}.get("hostname", system.id)).lower()
+
+    # Weitere Rechner: erst die Zustände sammeln (für Schlüssel mit „rechner:“-Vorsilbe), dann die Befehle
+    rechner_roh = roh.get("rechner") or {}
+    rechner_daten: dict[str, tuple[System, Allgemein, dict]] = {}
+    if not isinstance(rechner_roh, dict):
+        fehler.append("„rechner“: Objekt „name“: {system, zustand, dateien, befehle}.")
+        rechner_roh = {}
+    for name, r in rechner_roh.items():
+        stelle = f"rechner[{name}]"
+        if not isinstance(name, str) or not re.match(r"^[a-z0-9][a-z0-9-]*$", name):
+            fehler.append(f"{stelle}: Name nur Kleinbuchstaben, Ziffern, Bindestrich (wie ein Rechnername).")
+            continue
+        if name == hauptrechner:
+            fehler.append(f"{stelle}: So heißt schon der Rechner, an dem das Szenario beginnt.")
+            continue
+        if name in ("datei", "rechte", "besitzer", "zeit", "verzeichnis"):
+            fehler.append(f"{stelle}: Dieser Name ist für Dateien reserviert.")
+            continue
+        if not isinstance(r, dict) or r.get("system") not in SYSTEME:
+            fehler.append(f"{stelle}: braucht „system“ ({', '.join(REIHENFOLGE)}).")
+            continue
+        for k in r:
+            if k not in ("system", "zustand", "dateien", "befehle", "zugang") and not k.startswith("_"):
+                fehler.append(f"{stelle}: unbekanntes Feld „{k}“.")
+        r_system = SYSTEME[r["system"]]
+        try:
+            r_allgemein = lade_allgemein(r_system.id)
+        except SzenarioFehler as e:
+            fehler.append(f"{stelle}: allgemeine Befehle fehlerhaft: {e}")
+            continue
+        r_zustand = _pruefe_zustand(r.get("zustand", {}), f"{stelle}.zustand", fehler)
+        if "dateien" in r and "bash" not in r_system.shell_ids:
+            fehler.append(f"{stelle}: „dateien“ gibt es nur bei Linux-Systemen.")
+        r_zustand.update(dateien_zu_zustand(r.get("dateien"), f"{stelle}.dateien", fehler))
+        r_zustand.setdefault("hostname", name)
+        rechner_daten[name] = (r_system, r_allgemein, r_zustand)
+
+    def mit_vorsilbe(ausser: str | None) -> set[str]:
+        alle = {f"{hauptrechner}:{k}" for k in eigene} if ausser is not None else set()
+        for n, (_, r_allg, r_z) in rechner_daten.items():
+            if n != ausser:
+                alle |= {f"{n}:{k}" for k in set(r_allg.zustand) | set(r_z)}
+        return alle
+
+    bekannte = eigene | mit_vorsilbe(None)
+    rechner: dict[str, RechnerDef] = {}
+    for name, (r_system, r_allgemein, r_zustand) in rechner_daten.items():
+        r = rechner_roh[name]
+        r_bekannte = set(r_allgemein.zustand) | set(r_zustand) | mit_vorsilbe(name)
+        r_befehle = _lies_befehle(r.get("befehle", []), r_system, r_bekannte, f"rechner[{name}].befehle", fehler)
+        zugang = r.get("zugang")
+        if zugang is None:
+            if "bash" in r_system.shell_ids:
+                nutzer = {**r_allgemein.zustand, **r_zustand}.get("benutzer", "root")
+                zugang = [f"ssh {nutzer}@{name}", f"ssh {name}"]
+            else:
+                zugang = [f"Enter-PSSession -ComputerName {name}", f"Enter-PSSession {name}"]
+        if not isinstance(zugang, list) or not all(isinstance(z, str) and z.strip() for z in zugang):
+            fehler.append(f"rechner[{name}].zugang: Liste von Befehlen, z. B. [\"ssh admin@{name}\"].")
+            zugang = []
+        rechner[name] = RechnerDef(name=name, system=r_system, allgemein=r_allgemein, zustand=r_zustand,
+                                   befehle=r_befehle, zugang=zugang)
+
+    ticket = roh.get("ticket")
+    if ticket is not None:
+        if not isinstance(ticket, dict):
+            fehler.append("„ticket“: Objekt mit nummer, von, dringlichkeit, betreff, text.")
+            ticket = None
+        else:
+            for k in ("nummer", "von", "dringlichkeit", "betreff", "text"):
+                if k not in ticket:
+                    fehler.append(f"„ticket“: es fehlt „{k}“.")
+            if ticket.get("dringlichkeit") not in DRINGLICHKEIT:
+                fehler.append(f"„ticket.dringlichkeit“: {', '.join(DRINGLICHKEIT)}.")
+            text = _text(ticket.get("text"))
+            if text is None:
+                fehler.append("„ticket.text“: Text oder Liste von Zeilen.")
+            ticket = {**ticket, "text": text or ""}
 
     befehle = _lies_befehle(roh.get("befehle", []), system, bekannte, "befehle", fehler)
     if "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids:
@@ -462,7 +562,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         schwierigkeit=schwierigkeit, pruefstatus=roh["pruefstatus"], quelle=quelle,
         datum=datum, ausgangslage=ausgangslage or "", zustand=zustand, befehle=befehle,
         ziel=ziel, hinweise=hinweise, erklaerung=erklaerung or "", begriffe=dict(begriffe),
-        loesung=list(loesung), shell=shell,
+        loesung=list(loesung), shell=shell, rechner=rechner, hauptrechner=hauptrechner, ticket=ticket,
     ), []
 
 

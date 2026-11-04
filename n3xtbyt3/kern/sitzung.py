@@ -50,15 +50,45 @@ def _sim(text: str) -> list[Zeile]:
             for i, z in enumerate(text.split("\n"))]
 
 
+class RechnerLauf:
+    """Laufzeit-Zustand eines simulierten Rechners innerhalb einer Sitzung."""
+
+    def __init__(self, name: str, system, allgemein: Allgemein, zustand: dict, befehle: list[Befehl],
+                 shell: str, zugang: list[str] | None = None, haupt: bool = False):
+        self.name = name
+        self.system = system
+        self.allgemein = allgemein
+        self.befehle = befehle
+        self.haupt = haupt
+        self.vergleicher = Vergleicher(system)
+        werte = {**allgemein.zustand, **zustand}
+        if not haupt and "powershell" in system.shell_ids and "pfad" not in zustand:
+            werte["pfad"] = f"C:\\Users\\{werte.get('benutzer', 'Administrator')}\\Documents"
+        self.zustand = Zustand(werte)
+        self.shell_stapel: list[str] = [shell]
+        self.fs = ds.Dateisystem(self.zustand) if "bash" in system.shell_ids else None
+        self.root_stapel: list[str] = []
+        self.zugang = [self.vergleicher.vorbereiten(z) for z in (zugang or [])]
+        self.zugang_text = list(zugang or [])
+        self.bekannte_namen: dict[str, list[Befehl]] = {}
+        for b in [*befehle, *allgemein.befehle]:
+            for n in b.namen:
+                self.bekannte_namen.setdefault(n, []).append(b)
+
+
 class Sitzung:
     def __init__(self, szenario: Szenario, allgemein: Allgemein,
                  uhr: Callable[[], float] = time.monotonic):
         self.szenario = szenario
-        self.allgemein = allgemein
-        self.system = szenario.system
-        self.vergleicher = Vergleicher(self.system)
-        self.zustand = Zustand({**allgemein.zustand, **szenario.zustand})
-        self.shell_stapel: list[str] = [szenario.shell]
+        haupt = RechnerLauf(szenario.hauptrechner or "start", szenario.system, allgemein, szenario.zustand,
+                            szenario.befehle, szenario.shell, haupt=True)
+        self.rechner: dict[str, RechnerLauf] = {haupt.name: haupt}
+        for name, r in szenario.rechner.items():
+            self.rechner[name] = RechnerLauf(name, r.system, r.allgemein, r.zustand, r.befehle, r.shell, r.zugang)
+        self.haupt = haupt
+        self.rechner_stapel: list[RechnerLauf] = [haupt]
+        self.ticket_geschlossen = False
+        self.ticket_notiz = ""
         self.hinweis_stufe = 0
         self.geloest = False
         self.falsche: list[str] = []
@@ -69,9 +99,71 @@ class Sitzung:
         self._uhr = uhr
         self._start = uhr()
         self._ende: float | None = None
-        self._bekannte_namen = self._sammle_namen()
-        self.fs = ds.Dateisystem(self.zustand) if "bash" in self.system.shell_ids else None
-        self._root_stapel: list[str] = []  # gemerkte Pfade bei „sudo -i“
+
+    # ------------------------------------------------------------------ aktiver Rechner
+
+    @property
+    def aktiv(self) -> RechnerLauf:
+        return self.rechner_stapel[-1]
+
+    @property
+    def system(self):
+        return self.aktiv.system
+
+    @property
+    def allgemein(self) -> Allgemein:
+        return self.aktiv.allgemein
+
+    @property
+    def vergleicher(self) -> Vergleicher:
+        return self.aktiv.vergleicher
+
+    @property
+    def zustand(self) -> Zustand:
+        return self.aktiv.zustand
+
+    @property
+    def shell_stapel(self) -> list[str]:
+        return self.aktiv.shell_stapel
+
+    @property
+    def fs(self):
+        return self.aktiv.fs
+
+    @property
+    def _root_stapel(self) -> list[str]:
+        return self.aktiv.root_stapel
+
+    @property
+    def _bekannte_namen(self) -> dict[str, list[Befehl]]:
+        return self.aktiv.bekannte_namen
+
+    # ------------------------------------------------------------------ Zustand über Rechnergrenzen
+
+    def _verteilen(self, werte: dict | None, standard: RechnerLauf) -> dict[str, tuple[RechnerLauf, dict]]:
+        """Teilt Schlüssel mit „rechner:“-Vorsilbe dem richtigen Rechner zu."""
+        teile: dict[str, tuple[RechnerLauf, dict]] = {}
+        for schluessel, wert in (werte or {}).items():
+            lauf, rest = standard, schluessel
+            if ":" in schluessel:
+                name, rest_kandidat = schluessel.split(":", 1)
+                if name in self.rechner:
+                    lauf, rest = self.rechner[name], rest_kandidat
+            teile.setdefault(lauf.name, (lauf, {}))[1][rest] = wert
+        return teile
+
+    def _erfuellt(self, bedingung: dict | None, standard: RechnerLauf | None = None) -> bool:
+        if not bedingung:
+            return True
+        return all(lauf.zustand.erfuellt(teil)
+                   for lauf, teil in self._verteilen(bedingung, standard or self.aktiv).values())
+
+    def _setze(self, aenderung: dict | None, standard: RechnerLauf | None = None) -> None:
+        for lauf, teil in self._verteilen(aenderung, standard or self.aktiv).values():
+            lauf.zustand.setze(teil)
+
+    def ziel_erreicht(self) -> bool:
+        return any(self._erfuellt(z, self.haupt) for z in self.szenario.ziel)
 
     # ------------------------------------------------------------------ Anzeige
 
@@ -82,6 +174,9 @@ class Sitzung:
     def prompt(self) -> str:
         vorlage = self.allgemein.prompt.get(self.shell, "> ")
         if self.fs is None:
+            if not self.aktiv.haupt and self.shell == "powershell":
+                # PowerShell-Remoting zeigt den Rechnernamen vor dem Prompt
+                return f"[{str(self.zustand.get('hostname', self.aktiv.name)).upper()}]: " + self.zustand.fuelle(vorlage)
             return self.zustand.fuelle(vorlage)
         werte = dict(self.zustand.werte)
         werte["benutzer_anzeige"] = self.fs.benutzer
@@ -118,17 +213,10 @@ class Sitzung:
 
     # ------------------------------------------------------------------ Eingabe
 
-    def _sammle_namen(self) -> dict[str, list[Befehl]]:
-        namen: dict[str, list[Befehl]] = {}
-        for b in [*self.szenario.befehle, *self.allgemein.befehle]:
-            for n in b.namen:
-                namen.setdefault(n, []).append(b)
-        return namen
-
     def _finde(self, abschnitte) -> tuple[Befehl | None, Befehl | None]:
         """(Treffer in der aktuellen Shell, Treffer nur in einer anderen Shell)."""
         andere: Befehl | None = None
-        for b in [*self.szenario.befehle, *self.allgemein.befehle]:
+        for b in [*self.aktiv.befehle, *self.allgemein.befehle]:
             if any(self.vergleicher.passt(v, abschnitte) for v in b.vorbereitet):
                 if self.shell in b.shells:
                     return b, None
@@ -160,6 +248,10 @@ class Sitzung:
             # z. B. nur "|"
             self.unbekannte.append(text)
             return Antwort(_sim("Diese Eingabe ist unvollständig."), "unbekannt")
+
+        wechsel = self._rechnerwechsel(abschnitte)
+        if wechsel is not None:
+            return wechsel
 
         treffer, andere = self._finde(abschnitte)
         if treffer:
@@ -220,12 +312,29 @@ class Sitzung:
         meldung += f"\nWechseln mit: {wechsel}"
         return Antwort(_sim(meldung), "falsch", warum=meldung)
 
+    def _rechnerwechsel(self, abschnitte) -> Antwort | None:
+        """ssh bzw. Enter-PSSession zu einem anderen Rechner des Szenarios."""
+        for lauf in self.rechner.values():
+            if lauf is self.aktiv or not lauf.zugang:
+                continue
+            if not any(self.vergleicher.passt(z, abschnitte) for z in lauf.zugang):
+                continue
+            if lauf in self.rechner_stapel:
+                return Antwort(_sim(f"Du bist schon über {lauf.name} verbunden. Zurück mit exit."), "treffer")
+            ist_ps = "Enter-PSSession" in lauf.zugang_text[0] or "enter-pssession" in lauf.zugang_text[0].lower()
+            if ist_ps and self.shell != "powershell":
+                return Antwort(_sim("Enter-PSSession ist ein PowerShell-Befehl. Wechsle mit „powershell“."), "falsch")
+            self.rechner_stapel.append(lauf)
+            zeilen = _sim(f"Verbunden mit {lauf.name} ({lauf.system.name}). Zurück mit exit.")
+            return self._ziel_pruefen(Antwort(zeilen, "treffer"))
+        return None
+
     def _ausfuehren(self, befehl: Befehl, text: str) -> Antwort:
-        fall = next((f for f in befehl.faelle if self.zustand.erfuellt(f.wenn)), None)
+        fall = next((f for f in befehl.faelle if self._erfuellt(f.wenn)), None)
         if fall is None:
             return Antwort(_sim("Für diesen Befehl ist in diesem Zustand keine Ausgabe hinterlegt."),
                            "treffer")
-        self.zustand.setze(fall.setze)
+        self._setze(fall.setze)
         antwort = Antwort(art="treffer", aktion=fall.aktion)
         if fall.ausgabe and fall.sim:
             antwort.zeilen = _sim(self.zustand.fuelle(fall.ausgabe))
@@ -246,6 +355,12 @@ class Sitzung:
             elif len(self.shell_stapel) > 1:
                 self.shell_stapel.pop()
                 antwort.zeilen += _sim(f"Zurück in: {self.system.shell(self.shell).name}.")
+            elif len(self.rechner_stapel) > 1:
+                verlassen = self.rechner_stapel.pop()
+                if verlassen.fs is not None:
+                    antwort.zeilen += [Zeile("logout", AUSGABE),
+                                       Zeile(f"Connection to {verlassen.name} closed.", AUSGABE)]
+                antwort.zeilen += _sim(f"Zurück auf {self.aktiv.name}.")
             else:
                 antwort.zeilen += _sim("Hier gibt es kein Fenster zu schließen. "
                                        "Zurück zum Menü: Esc.")
@@ -260,15 +375,28 @@ class Sitzung:
         return self._ziel_pruefen(antwort)
 
     def _ziel_pruefen(self, antwort: Antwort) -> Antwort:
-        if not self.geloest and any(self.zustand.erfuellt(z) for z in self.szenario.ziel):
+        if not self.geloest and self.ziel_erreicht():
             self.geloest = True
             self._ende = self._uhr()
             antwort.geloest_jetzt = True
-            antwort.zeilen += [Zeile("", AUSGABE)] + [
-                Zeile(z.text, ERFOLG) for z in _sim(
-                    "Gelöst! Die Erklärung steht rechts. Weiter mit F2.")
-            ]
+            meldung = ("Problem behoben! Schließe jetzt das Ticket mit F3 (kurze Lösungsnotiz)."
+                       if self.szenario.ticket else "Gelöst! Die Erklärung steht rechts. Weiter mit F2.")
+            antwort.zeilen += [Zeile("", AUSGABE)] + [Zeile(z.text, ERFOLG) for z in _sim(meldung)]
         return antwort
+
+    def ticket_schliessen(self, notiz: str) -> tuple[bool, str]:
+        """Schließt das Ticket. Geht erst, wenn das Problem behoben ist."""
+        if not self.szenario.ticket:
+            return False, "Dieses Szenario ist kein Ticket."
+        if self.ticket_geschlossen:
+            return True, "Das Ticket ist schon geschlossen."
+        if not self.geloest:
+            return False, "Das Problem besteht noch – prüfe nach, bevor du das Ticket schließt."
+        if len(notiz.strip()) < 10:
+            return False, "Schreib eine kurze Lösungsnotiz (mindestens ein halber Satz): Was war die Ursache, was hast du getan?"
+        self.ticket_geschlossen = True
+        self.ticket_notiz = notiz.strip()
+        return True, f"Ticket {self.szenario.ticket.get('nummer', '')} geschlossen."
 
     # ------------------------------------------------------------------ Linux
 
@@ -394,6 +522,8 @@ class Sitzung:
             "sekunden": self.sekunden(),
             "falsch": (self.falsche + self.nicht_erkannt)[:20],
             "unbekannt": self.unbekannte[:20],
+            **({"ticket_geschlossen": self.ticket_geschlossen, "ticket_notiz": self.ticket_notiz}
+               if self.szenario.ticket else {}),
         }
 
 

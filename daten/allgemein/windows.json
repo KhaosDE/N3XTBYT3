@@ -123,6 +123,17 @@
     },
     {
       "muster": [
+        "Exit-PSSession"
+      ],
+      "bedeutung": "Remote-Sitzung (Enter-PSSession) verlassen",
+      "faelle": [
+        {
+          "aktion": "exit"
+        }
+      ]
+    },
+    {
+      "muster": [
         "Restart-Computer",
         "Restart-Computer -Force",
         "Stop-Computer",

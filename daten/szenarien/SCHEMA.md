@@ -36,6 +36,42 @@ Felder, die mit `_` beginnen (z. B. `"_notiz"`), sind Kommentare und werden nich
 |---|---|
 | `shell` | Womit das Szenario startet. Windows: `powershell` (Standard) oder `cmd`. Linux: `bash`. |
 | `dateien` | Nur Linux: simulierte Dateien (siehe „Dateien (Linux)“). |
+| `rechner` | Weitere Rechner, die man per `ssh` bzw. `Enter-PSSession` erreicht (siehe „Mehrere Rechner“). |
+| `ticket` | Das Szenario erscheint auch im Ticket-Modus (siehe „Tickets“). |
+
+## Mehrere Rechner
+
+```json
+"rechner": {
+  "srv-web01": {
+    "system": "linux_server",
+    "zustand": {"php_aktiv": false},
+    "dateien": {"/var/log/nginx/error.log": ["…"]},
+    "befehle": [ … wie oben … ],
+    "zugang": ["ssh admin@srv-web01", "ssh srv-web01"]
+  }
+}
+```
+
+* Der Name ist der Rechnername (klein geschrieben). Der Rechner, an dem das Szenario beginnt, heißt
+  wie sein `hostname` (z. B. `pc-buero-07`).
+* `zugang` ist freiwillig. Standard: Linux `ssh <benutzer>@<name>` und `ssh <name>`;
+  Windows `Enter-PSSession -ComputerName <name>` und `Enter-PSSession <name>` (nur in der PowerShell).
+  Zurück geht es mit `exit` (Windows auch `Exit-PSSession`).
+* Jeder Rechner hat seinen eigenen Zustand und die allgemeinen Befehle seines Systems.
+* Auf Werte eines anderen Rechners zeigt man mit Vorsilbe: `"srv-web01:php_aktiv"`. Im `ziel` und in den
+  Befehlen des Startrechners gelten Schlüssel ohne Vorsilbe für den Startrechner, in den Befehlen eines
+  weiteren Rechners für diesen Rechner.
+
+## Tickets
+
+```json
+"ticket": {"nummer": "T-2026-0412", "von": "Herr Neumann (Vertrieb)", "dringlichkeit": "hoch",
+           "betreff": "Webshop kaputt", "text": ["Seit heute Morgen …"]}
+```
+
+`dringlichkeit`: `niedrig`, `mittel`, `hoch` oder `kritisch`. Ist das Ziel erreicht, schließt man das Ticket
+mit F3 und einer kurzen Lösungsnotiz; die Notiz kommt in den Spielstand.
 
 ## Dateien (Linux)
 

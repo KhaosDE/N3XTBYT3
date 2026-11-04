@@ -22,8 +22,11 @@ if TYPE_CHECKING:
 
 
 class Spielansicht(Ansicht):
-    def __init__(self, app: "App", system_id: str, szenario, szenarien, allgemein, stand):
+    def __init__(self, app: "App", system_id: str, szenario, szenarien, allgemein, stand,
+                 ticketmodus: bool = False):
         super().__init__(app)
+        self.ticketmodus = ticketmodus
+        self.notiz_modus = False
         self.system_id = system_id
         self.szenario = szenario
         self.szenarien = szenarien
@@ -66,6 +69,12 @@ class Spielansicht(Ansicht):
 
     def naechstes(self) -> None:
         self._speichern()
+        if self.ticketmodus:
+            from .tickets_ansicht import lade_tickets, starte_ticket, waehle_ticket
+            eintrag = waehle_ticket(lade_tickets(), zuletzt=self.szenario.id)
+            if eintrag:
+                starte_ticket(self.app, eintrag)
+            return
         neu = auswahl.waehle(self.szenarien, self.stand, zuletzt=self.szenario.id)
         if neu is not None:
             self.app.wechsle(Spielansicht(self.app, self.system_id, neu, self.szenarien,
@@ -73,6 +82,10 @@ class Spielansicht(Ansicht):
 
     def zur_liste(self) -> None:
         self._speichern()
+        if self.ticketmodus:
+            from .tickets_ansicht import Ticketliste
+            self.app.wechsle(Ticketliste(self.app))
+            return
         ergebnis, allgemein, stand = lade_alles(self.system_id)
         self.app.wechsle(Szenarioliste(self.app, self.system_id, ergebnis, allgemein, stand))
 
@@ -109,7 +122,28 @@ class Spielansicht(Ansicht):
 
     def _speichern_geloest(self) -> None:
         # Gelöst: sofort speichern, damit nichts verloren geht. Weitere Eingaben zählen nicht mehr.
-        self._speichern()
+        # Bei Tickets erst nach dem Schließen (die Lösungsnotiz gehört dazu).
+        if not self.szenario.ticket:
+            self._speichern()
+
+    def ticket_schliessen_starten(self) -> None:
+        if not self.szenario.ticket or self.sitzung.ticket_geschlossen:
+            return
+        if not self.sitzung.geloest:
+            self.terminal.schreibe("[N3XTBYT3] Das Problem besteht noch – erst beheben und prüfen, dann schließen.", "sim")
+            return
+        self.notiz_modus = True
+        self.terminal.schreibe("[N3XTBYT3] Lösungsnotiz für das Ticket: Was war die Ursache, was hast du getan? "
+                               "(Enter = schließen, Esc = abbrechen)", "sim")
+
+    def _notiz_abschicken(self, text: str) -> None:
+        ok, meldung = self.sitzung.ticket_schliessen(text)
+        self.terminal.schreibe("[N3XTBYT3] " + meldung, "erfolg" if ok else "sim")
+        if ok:
+            self.notiz_modus = False
+            self.terminal.schreibe("[N3XTBYT3] Weiter mit F2 (nächstes Ticket) oder Esc (Ticketliste).", "erfolg")
+            self.panel_scroll = 0
+            self._speichern()
 
     # ------------------------------------------------------------------ Ereignisse
 
@@ -125,9 +159,22 @@ class Spielansicht(Ansicht):
                 self.editor.text_eingabe(e.text)
             self.blink = 0.0
             return
+        if e.type == pygame.KEYDOWN and self.notiz_modus:
+            if e.key == pygame.K_ESCAPE:
+                self.notiz_modus = False
+                self.terminal.schreibe("[N3XTBYT3] Schließen abgebrochen.", "sim")
+                return
+            notiz = self.terminal.taste(e, "Lösungsnotiz> ")
+            if notiz is not None:
+                self._notiz_abschicken(notiz)
+            self.blink = 0.0
+            return
         if e.type == pygame.KEYDOWN:
             if e.key == pygame.K_F1:
                 self.hinweis()
+                return
+            if e.key == pygame.K_F3:
+                self.ticket_schliessen_starten()
                 return
             if e.key == pygame.K_F2:
                 self.naechstes()
@@ -170,7 +217,8 @@ class Spielansicht(Ansicht):
         if self.editor is not None:
             self.editor.zeichnen(f, self.terminal_rect, s, cursor_an)
         else:
-            self.terminal.zeichnen(f, self.terminal_rect, s, self.sitzung.prompt(), cursor_an)
+            prompt = "Lösungsnotiz> " if self.notiz_modus else self.sitzung.prompt()
+            self.terminal.zeichnen(f, self.terminal_rect, s, prompt, cursor_an)
         pygame.draw.line(f, FARBE["linie"], self.panel_rect.topleft, self.panel_rect.bottomleft, 2)
         self._panel(f, self.panel_rect)
         self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h))
@@ -183,7 +231,8 @@ class Spielansicht(Ansicht):
         y = rect.centery - s.mono_fett.get_linesize() // 2
         r = glow_text(f, s.mono_fett, "N3XTBYT3", FARBE["gruen"], (x, y), staerke=1)
         x = r.right + s.zeichen_breite
-        rest = f" // {SYSTEME[self.system_id].name} // {self.sitzung.fenstertitel()}"
+        rechner = f" // {self.sitzung.aktiv.name}" if len(self.sitzung.rechner) > 1 else ""
+        rest = f" // {SYSTEME[self.system_id].name}{rechner} // {self.sitzung.fenstertitel()}"
         f.blit(s.mono.render(rest, True, FARBE["gruen_hell"]), (x, y))
         sek = self.sitzung.sekunden()
         uhr = s.mono.render(f"{sek // 60:02d}:{sek % 60:02d}", True, FARBE["text_schwach"])
@@ -202,7 +251,8 @@ class Spielansicht(Ansicht):
         s = self.app.schriften
         pygame.draw.rect(f, FARBE["kopf"], rect)
         pygame.draw.line(f, FARBE["linie_dunkel"], rect.topleft, rect.topright, 1)
-        text = ("F1 Hinweis  ·  F2 Nächstes Szenario  ·  Esc Szenarioliste  ·  ↑↓ Befehlsverlauf  ·  "
+        text = (("F3 Ticket schließen  ·  " if self.szenario.ticket else "") +
+                "F1 Hinweis  ·  F2 Nächstes Szenario  ·  Esc Liste  ·  ↑↓ Befehlsverlauf  ·  "
                 "Bild ↑↓ blättern  ·  Strg +/− Schrift  ·  F11 Vollbild")
         bild = s.klein.render(text, True, FARBE["text_schwach"])
         f.blit(bild, (s.zeichen_breite, rect.centery - bild.get_height() // 2))
@@ -224,13 +274,29 @@ class Spielansicht(Ansicht):
 
         absatz(sz.titel, s.zwischen, FARBE["gruen_hell"])
         bloecke.append(("info", sz))
+        if sz.ticket:
+            t = sz.ticket
+            ueberschrift(f"TICKET {t.get('nummer', '')} · DRINGLICHKEIT {t.get('dringlichkeit', '').upper()}",
+                         FARBE["warnung"] if t.get("dringlichkeit") in ("hoch", "kritisch") else FARBE["magenta"])
+            absatz(f"Von: {t.get('von', '')}", s.text_fett, FARBE["text"])
+            absatz(f"Betreff: {t.get('betreff', '')}", s.text_fett, FARBE["text"])
+            absatz(t.get("text", ""))
+            if self.sitzung.ticket_geschlossen:
+                absatz(f"Status: geschlossen – {self.sitzung.ticket_notiz}", s.text_fett, FARBE["erfolg"])
+            elif self.sitzung.geloest:
+                absatz("Status: behoben – jetzt mit F3 schließen (kurze Lösungsnotiz).", s.text_fett, FARBE["erfolg"])
+            else:
+                absatz("Status: offen", s.text_fett, FARBE["warnung"])
+            if len(self.sitzung.rechner) > 1:
+                namen = ", ".join(n for n in self.sitzung.rechner if n != self.sitzung.haupt.name)
+                absatz(f"Weitere Rechner: {namen} (ssh bzw. Enter-PSSession)", s.klein, FARBE["sim"])
         if not sz.bestaetigt:
             bloecke.append(("abstand", s.zeilen_hoehe // 3))
             absatz("Ungeprüft: Von Claude geschrieben, von dir noch nicht bestätigt. "
                    "Ausgaben können vom echten System abweichen – im Zweifel die Quelle lesen.",
                    s.klein, FARBE["warnung"])
 
-        if self.sitzung.geloest:
+        if self.sitzung.geloest and (not sz.ticket or self.sitzung.ticket_geschlossen):
             ueberschrift("GELÖST – ERKLÄRUNG", FARBE["erfolg"])
             absatz(sz.erklaerung)
             bloecke.append(("abstand", s.zeilen_hoehe // 3))
@@ -325,12 +391,19 @@ class Spielansicht(Ansicht):
         kb = (inhalt.width - rand) // 2
         ky = rect.bottom - knopf_bereich + rand // 2
         noch_hinweise = self.sitzung.hinweis_stufe < 3
+        unten = pygame.Rect(inhalt.left, ky + knopf_h + rand // 2, inhalt.width, knopf_h)
         self.knoepfe = [
             Knopf(pygame.Rect(inhalt.left, ky, kb, knopf_h), "Hinweis (F1)", self.hinweis, noch_hinweise),
             Knopf(pygame.Rect(inhalt.left + kb + rand, ky, kb, knopf_h), "Nächstes (F2)", self.naechstes),
-            Knopf(pygame.Rect(inhalt.left, ky + knopf_h + rand // 2, inhalt.width, knopf_h),
-                  "Zur Szenarioliste (Esc)", self.zur_liste),
         ]
+        if self.szenario.ticket:
+            self.knoepfe += [
+                Knopf(pygame.Rect(unten.left, unten.top, kb, knopf_h), "Ticket schließen (F3)",
+                      self.ticket_schliessen_starten, self.sitzung.geloest and not self.sitzung.ticket_geschlossen),
+                Knopf(pygame.Rect(unten.left + kb + rand, unten.top, kb, knopf_h), "Liste (Esc)", self.zur_liste),
+            ]
+        else:
+            self.knoepfe.append(Knopf(unten, "Zur Szenarioliste (Esc)", self.zur_liste))
         maus = pygame.mouse.get_pos()
         for k in self.knoepfe:
             zeichne_knopf(f, k, s.text_fett, maus)

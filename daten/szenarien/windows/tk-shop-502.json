@@ -1,0 +1,300 @@
+{
+  "id": "tk-shop-502",
+  "system": "windows",
+  "titel": "Ticket: Webshop zeigt 502 Bad Gateway",
+  "kategorie": "Tickets",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html",
+    "https://www.php.net/manual/en/install.fpm.php",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://curl.se/docs/manpage.html"
+  ],
+  "datum": "2026-11-04",
+  "ticket": {
+    "nummer": "T-2026-0412",
+    "von": "Herr Neumann (Vertrieb)",
+    "dringlichkeit": "hoch",
+    "betreff": "Webshop kaputt – 502 Bad Gateway",
+    "text": [
+      "Seit heute Morgen zeigt shop.firma.internal nur noch „502 Bad Gateway“.",
+      "Kunden können nicht bestellen! Bitte dringend prüfen."
+    ]
+  },
+  "ausgangslage": [
+    "Du sitzt an deinem PC (PC-BUERO-07, PowerShell). Der Webshop läuft auf srv-web01 (Ubuntu Server, nginx + PHP).",
+    "Heute früh um 6 Uhr hat der Server automatisch Updates eingespielt.",
+    "Du kannst dich per SSH als admin auf srv-web01 anmelden: ssh admin@srv-web01",
+    "",
+    "Aufgabe: Finde die Ursache, behebe sie auf dem Server, prüfe vom PC aus nach und schließe das Ticket (F3)."
+  ],
+  "zustand": {
+    "hostname": "PC-BUERO-07"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Test-NetConnection shop.firma.internal -Port 80",
+        "Test-NetConnection -ComputerName shop.firma.internal -Port 80",
+        "tnc shop.firma.internal -Port 80"
+      ],
+      "bedeutung": "Prüfen, ob ein TCP-Port auf einem anderen Rechner erreichbar ist",
+      "frage": "Prüfe, ob Port 80 auf shop.firma.internal erreichbar ist",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "",
+            "ComputerName     : shop.firma.internal",
+            "RemoteAddress    : 192.168.10.40",
+            "RemotePort       : 80",
+            "InterfaceAlias   : Ethernet",
+            "SourceAddress    : 192.168.10.57",
+            "TcpTestSucceeded : True",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "curl.exe -I http://shop.firma.internal"
+      ],
+      "bedeutung": "Nur die Kopfzeilen einer Webseite abrufen (Windows: curl.exe)",
+      "frage": "Rufe auf dem Windows-PC nur die Kopfzeilen von http://shop.firma.internal ab (curl, nicht den PowerShell-Alias)",
+      "faelle": [
+        {
+          "wenn": {
+            "srv-web01:php_aktiv": false
+          },
+          "ausgabe": [
+            "HTTP/1.1 502 Bad Gateway",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html",
+            "Connection: keep-alive"
+          ]
+        },
+        {
+          "ausgabe": [
+            "HTTP/1.1 200 OK",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html; charset=UTF-8",
+            "Connection: keep-alive"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "curl -I http://shop.firma.internal"
+      ],
+      "shell": "powershell",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "In Windows PowerShell ist „curl“ ein Alias für Invoke-WebRequest – das kennt -I nicht. Schreib „curl.exe“."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "srv-web01:php_aktiv": true
+  },
+  "hinweise": [
+    "502 Bad Gateway heißt: Der Webserver (nginx) antwortet, kommt aber an das Programm dahinter nicht heran. Schau auf dem Server ins Fehlerprotokoll von nginx.",
+    "„ssh admin@srv-web01“, dann „tail -n 3 /var/log/nginx/error.log“: nginx erreicht /run/php/php8.3-fpm.sock nicht. Läuft der PHP-Dienst php8.3-fpm?",
+    "„sudo systemctl start php8.3-fpm“, dann „exit“ und vom PC „curl.exe -I http://shop.firma.internal“. Danach F3."
+  ],
+  "erklaerung": [
+    "nginx liefert die Webseiten aus und reicht PHP-Seiten über eine Socket-Datei an den Dienst php8.3-fpm weiter.",
+    "Nach dem Update um 6 Uhr war php8.3-fpm gestoppt und nicht wieder gestartet worden. nginx lief, fand die",
+    "Socket-Datei /run/php/php8.3-fpm.sock nicht und antwortete mit 502 Bad Gateway (Fehler „[crit] connect() … failed“).",
+    "„sudo systemctl start php8.3-fpm“ behebt es. Typisches Vorgehen: vom Arbeitsplatz prüfen (Port erreichbar, HTTP-Status),",
+    "auf dem Server ins Protokoll schauen, gezielt den richtigen Dienst starten, vom Arbeitsplatz nachprüfen, Ticket mit Notiz schließen.",
+    "In Windows PowerShell ist „curl“ ein Alias – für das echte curl schreibt man „curl.exe“."
+  ],
+  "begriffe": {
+    "502 Bad Gateway": "HTTP-Fehler: Ein Vermittler (hier nginx) bekommt keine gültige Antwort vom Programm dahinter.",
+    "PHP-FPM": "Dienst, der PHP-Programme für den Webserver ausführt (FastCGI Process Manager).",
+    "Socket-Datei": "Spezielle Datei, über die zwei Programme auf demselben Rechner Daten austauschen.",
+    "ssh": "Sichere Anmeldung an einem anderen Rechner über das Netzwerk; zurück mit exit.",
+    "Ticket": "Störungsmeldung mit Nummer und Dringlichkeit; wird mit einer kurzen Lösungsnotiz geschlossen."
+  },
+  "loesung": [
+    "Test-NetConnection shop.firma.internal -Port 80",
+    "curl.exe -I http://shop.firma.internal",
+    "ssh admin@srv-web01",
+    "tail -n 3 /var/log/nginx/error.log",
+    "systemctl status php8.3-fpm",
+    "sudo systemctl start php8.3-fpm",
+    "exit",
+    "curl.exe -I http://shop.firma.internal"
+  ],
+  "rechner": {
+    "srv-web01": {
+      "system": "linux_server",
+      "zustand": {
+        "php_aktiv": false
+      },
+      "dateien": {
+        "/var/log/nginx/error.log": {
+          "inhalt": [
+            "2026/11/04 09:20:11 [crit] 1181#1181: *52 connect() to unix:/run/php/php8.3-fpm.sock failed (2: No such file or directory) while connecting to upstream, client: 192.168.10.57, server: shop.firma.internal, request: \"GET / HTTP/1.1\", upstream: \"fastcgi://unix:/run/php/php8.3-fpm.sock:\", host: \"shop.firma.internal\""
+          ],
+          "rechte": "640",
+          "besitzer": "www-data:adm"
+        },
+        "/etc/nginx/conf.d/shop.conf": [
+          "server {",
+          "    listen 80;",
+          "    server_name shop.firma.internal;",
+          "    root /var/www/shop;",
+          "    index index.php;",
+          "    location ~ \\.php$ {",
+          "        include snippets/fastcgi-php.conf;",
+          "        fastcgi_pass unix:/run/php/php8.3-fpm.sock;",
+          "    }",
+          "}"
+        ]
+      },
+      "befehle": [
+        {
+          "muster": [
+            "systemctl status nginx"
+          ],
+          "bedeutung": "Status eines Dienstes anzeigen",
+          "faelle": [
+            {
+              "ausgabe": [
+                "● nginx.service - A high performance web server and a reverse proxy server",
+                "     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)",
+                "     Active: active (running) since Tue 2026-11-03 07:01:12 CET; 1 day 2h ago",
+                "       Docs: man:nginx(8)",
+                "   Main PID: 1180 (nginx)"
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "systemctl status php8.3-fpm",
+            "systemctl status php8.3-fpm.service"
+          ],
+          "bedeutung": "Status des PHP-Dienstes anzeigen",
+          "frage": "Zeige den Status des Dienstes php8.3-fpm",
+          "faelle": [
+            {
+              "wenn": {
+                "php_aktiv": false
+              },
+              "ausgabe": [
+                "○ php8.3-fpm.service - The PHP 8.3 FastCGI Process Manager",
+                "     Loaded: loaded (/usr/lib/systemd/system/php8.3-fpm.service; enabled; preset: enabled)",
+                "     Active: inactive (dead) since Wed 2026-11-04 06:12:40 CET; 3h 8min ago",
+                "       Docs: man:php-fpm8.3(8)"
+              ]
+            },
+            {
+              "ausgabe": [
+                "● php8.3-fpm.service - The PHP 8.3 FastCGI Process Manager",
+                "     Loaded: loaded (/usr/lib/systemd/system/php8.3-fpm.service; enabled; preset: enabled)",
+                "     Active: active (running) since Wed 2026-11-04 09:22:05 CET; 3s ago",
+                "       Docs: man:php-fpm8.3(8)",
+                "   Main PID: 3120 (php-fpm8.3)",
+                "     Status: \"Ready to handle connections\""
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "systemctl start php8.3-fpm",
+            "systemctl restart php8.3-fpm"
+          ],
+          "bedeutung": "Einen Dienst starten",
+          "frage": "Starte den Dienst php8.3-fpm",
+          "faelle": [
+            {
+              "wenn": {
+                "root": false
+              },
+              "sim": true,
+              "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+            },
+            {
+              "setze": {
+                "php_aktiv": true
+              }
+            }
+          ]
+        },
+        {
+          "muster": [
+            "systemctl restart nginx"
+          ],
+          "falsch": true,
+          "warum": "nginx läuft und meldet nur, dass es PHP nicht erreicht. Der Neustart von nginx behebt das nicht.",
+          "faelle": [
+            {
+              "wenn": {
+                "root": false
+              },
+              "sim": true,
+              "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+            },
+            {
+              "sim": true,
+              "ausgabe": "nginx neu gestartet – am 502 ändert das nichts, solange PHP nicht läuft."
+            }
+          ]
+        },
+        {
+          "muster": [
+            "ls -l /run/php",
+            "ls /run/php"
+          ],
+          "faelle": [
+            {
+              "wenn": {
+                "php_aktiv": false
+              },
+              "fehler": true,
+              "ausgabe": "ls: cannot access '/run/php': No such file or directory"
+            },
+            {
+              "ausgabe": [
+                "total 4",
+                "-rw-r--r-- 1 root     root     4 Nov  4 09:22 php8.3-fpm.pid",
+                "srw-rw---- 1 www-data www-data 0 Nov  4 09:22 php8.3-fpm.sock"
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "curl -I http://localhost"
+          ],
+          "faelle": [
+            {
+              "wenn": {
+                "php_aktiv": false
+              },
+              "ausgabe": [
+                "HTTP/1.1 502 Bad Gateway",
+                "Server: nginx/1.24.0 (Ubuntu)"
+              ]
+            },
+            {
+              "ausgabe": [
+                "HTTP/1.1 200 OK",
+                "Server: nginx/1.24.0 (Ubuntu)",
+                "Content-Type: text/html; charset=UTF-8"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

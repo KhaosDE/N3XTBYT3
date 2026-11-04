@@ -1,0 +1,264 @@
+{
+  "id": "tk-dateiserver-voll",
+  "system": "windows",
+  "titel": "Ticket: Speichern auf Z: geht nicht – Platte voll",
+  "kategorie": "Tickets",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/vssadmin-list-shadowstorage",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/vssadmin-resize-shadowstorage",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/enter-pssession"
+  ],
+  "datum": "2026-11-04",
+  "ticket": {
+    "nummer": "T-2026-0415",
+    "von": "Frau Berger (Buchhaltung)",
+    "dringlichkeit": "kritisch",
+    "betreff": "Monatsabschluss kann nicht gespeichert werden",
+    "text": [
+      "Beim Speichern auf Z: (\\\\SRV-DATEI01\\Daten) kommt „There is not enough space on the disk.“",
+      "Heute ist Monatsabschluss – bitte sofort!"
+    ]
+  },
+  "ausgangslage": [
+    "Du sitzt an deinem PC (PC-BUERO-07, PowerShell als Administrator, Domänen-Admin).",
+    "Der Dateiserver SRV-DATEI01 (Windows Server) stellt D:\\Daten als \\\\SRV-DATEI01\\Daten bereit.",
+    "Laut Ablage belegen die Dateien selbst nur etwa 320 GB von 500 GB. Auf dem Server sind Schattenkopien",
+    "(„Vorgängerversionen“) für D: eingeschaltet. Verbinden mit: Enter-PSSession -ComputerName srv-datei01",
+    "",
+    "Aufgabe: Finde heraus, was den Platz belegt, begrenze es auf 50 GB und schließe das Ticket (F3)."
+  ],
+  "zustand": {
+    "hostname": "PC-BUERO-07"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-PSDrive Z",
+        "Get-PSDrive -Name Z"
+      ],
+      "bedeutung": "Belegten und freien Platz eines Laufwerks anzeigen (PowerShell)",
+      "frage": "Zeige belegten und freien Platz von Laufwerk Z: (PowerShell-Laufwerk)",
+      "faelle": [
+        {
+          "wenn": {
+            "srv-datei01:schatten_begrenzt": false
+          },
+          "ausgabe": [
+            "",
+            "Name           Used (GB)     Free (GB) Provider      Root                                               CurrentLocation",
+            "----           ---------     --------- --------      ----                                               ---------------",
+            "Z                 499.75          0.12 FileSystem    \\\\SRV-DATEI01\\Daten",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name           Used (GB)     Free (GB) Provider      Root                                               CurrentLocation",
+            "----           ---------     --------- --------      ----                                               ---------------",
+            "Z                 371.39        128.48 FileSystem    \\\\SRV-DATEI01\\Daten",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "srv-datei01:schatten_begrenzt": true
+  },
+  "hinweise": [
+    "Die Dateien belegen nur 320 von 500 GB – trotzdem ist D: voll. Was speichert Windows sonst noch auf dem Laufwerk?",
+    "Auf dem Server („Enter-PSSession -ComputerName srv-datei01“): „vssadmin list shadowstorage“ zeigt den Platz der Schattenkopien – Maximum UNBOUNDED.",
+    "„vssadmin resize shadowstorage /For=D: /On=D: /MaxSize=50GB“, dann „Exit-PSSession“, „Get-PSDrive Z“ prüfen, F3."
+  ],
+  "erklaerung": [
+    "Schattenkopien (Vorgängerversionen) speichern geänderte Daten, damit Benutzer alte Stände wiederherstellen können.",
+    "Ohne Grenze (Maximum UNBOUNDED) wuchsen sie auf 178 GB und füllten D: zusammen mit den 320 GB Dateien.",
+    "„vssadmin resize shadowstorage /For=D: /On=D: /MaxSize=50GB“ setzt eine Obergrenze; Windows löscht dann die ältesten",
+    "Schattenkopien, bis sie passen. Die Benutzer behalten die jüngsten Vorgängerversionen. Remote auf dem Server gearbeitet",
+    "wurde mit Enter-PSSession (PowerShell-Remoting) – der Prompt zeigt dann [SRV-DATEI01]."
+  ],
+  "begriffe": {
+    "Schattenkopie (VSS)": "Momentaufnahme eines Laufwerks durch den Volume Shadow Copy Service; Grundlage für „Vorgängerversionen“.",
+    "vssadmin": "Befehl zum Verwalten von Schattenkopien und ihrem Speicherplatz.",
+    "Enter-PSSession": "PowerShell-Sitzung auf einem anderen Rechner (Remoting); zurück mit Exit-PSSession.",
+    "UNBOUNDED": "Ohne Obergrenze."
+  },
+  "loesung": [
+    "Get-PSDrive Z",
+    "Enter-PSSession -ComputerName srv-datei01",
+    "Get-Volume -DriveLetter D",
+    "vssadmin list shadowstorage",
+    "vssadmin resize shadowstorage /For=D: /On=D: /MaxSize=50GB",
+    "Exit-PSSession",
+    "Get-PSDrive Z"
+  ],
+  "rechner": {
+    "srv-datei01": {
+      "system": "windows_server",
+      "zustand": {
+        "schatten_begrenzt": false
+      },
+      "befehle": [
+        {
+          "muster": [
+            "Get-Volume -DriveLetter D",
+            "Get-Volume D"
+          ],
+          "bedeutung": "Freien und gesamten Speicherplatz eines Laufwerks anzeigen",
+          "faelle": [
+            {
+              "wenn": {
+                "schatten_begrenzt": false
+              },
+              "ausgabe": [
+                "",
+                "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+                "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+                "D           Daten        NTFS           Fixed     Healthy      OK                     120.4 MB 499.87 GB",
+                ""
+              ]
+            },
+            {
+              "ausgabe": [
+                "",
+                "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+                "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+                "D           Daten        NTFS           Fixed     Healthy      OK                     128.48 GB 499.87 GB",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "Get-ChildItem D:\\Daten -Recurse | Measure-Object -Property Length -Sum",
+            "Get-ChildItem D:\\Daten -Recurse -File | Measure-Object -Property Length -Sum"
+          ],
+          "bedeutung": "Anzahl und Gesamtgröße aller Dateien unter einem Ordner berechnen",
+          "faelle": [
+            {
+              "ausgabe": [
+                "",
+                "Count    : 184211",
+                "Average  :",
+                "Sum      : 343597383680",
+                "Maximum  :",
+                "Minimum  :",
+                "Property : Length",
+                "",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "vssadmin list shadowstorage"
+          ],
+          "bedeutung": "Speicherplatz der Schattenkopien anzeigen",
+          "frage": "Zeige, wie viel Platz die Schattenkopien belegen",
+          "faelle": [
+            {
+              "wenn": {
+                "schatten_begrenzt": false
+              },
+              "ausgabe": [
+                "vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool",
+                "(C) Copyright 2001-2013 Microsoft Corp.",
+                "",
+                "Shadow Copy Storage association",
+                "   For volume: (D:)\\\\?\\Volume{5c1e8a2b-7d3f-4e6a-9b10-2c4d6e8f0a1b}\\",
+                "   Shadow Copy Storage volume: (D:)\\\\?\\Volume{5c1e8a2b-7d3f-4e6a-9b10-2c4d6e8f0a1b}\\",
+                "   Used Shadow Copy Storage space: 178.452 GB (35%)",
+                "   Allocated Shadow Copy Storage space: 180.105 GB (36%)",
+                "   Maximum Shadow Copy Storage space: UNBOUNDED (100%)",
+                ""
+              ]
+            },
+            {
+              "ausgabe": [
+                "vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool",
+                "(C) Copyright 2001-2013 Microsoft Corp.",
+                "",
+                "Shadow Copy Storage association",
+                "   For volume: (D:)\\\\?\\Volume{5c1e8a2b-7d3f-4e6a-9b10-2c4d6e8f0a1b}\\",
+                "   Shadow Copy Storage volume: (D:)\\\\?\\Volume{5c1e8a2b-7d3f-4e6a-9b10-2c4d6e8f0a1b}\\",
+                "   Used Shadow Copy Storage space: 49.871 GB (9%)",
+                "   Allocated Shadow Copy Storage space: 50.002 GB (10%)",
+                "   Maximum Shadow Copy Storage space: 50 GB (10%)",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "vssadmin list shadows /for=D:"
+          ],
+          "bedeutung": "Vorhandene Schattenkopien eines Laufwerks auflisten",
+          "faelle": [
+            {
+              "ausgabe": [
+                "vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool",
+                "(C) Copyright 2001-2013 Microsoft Corp.",
+                "",
+                "(Liste mit 412 Schattenkopien – hier gekürzt)"
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "vssadmin resize shadowstorage /For=D: /On=D: /MaxSize=50GB"
+          ],
+          "bedeutung": "Höchstgröße für Schattenkopien festlegen (älteste werden gelöscht)",
+          "frage": "Begrenze den Speicher für Schattenkopien von D: (auf D:) auf 50 GB",
+          "faelle": [
+            {
+              "setze": {
+                "schatten_begrenzt": true
+              },
+              "ausgabe": [
+                "vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool",
+                "(C) Copyright 2001-2013 Microsoft Corp.",
+                "",
+                "Successfully resized the shadow copy storage association",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "muster": [
+            "vssadmin delete shadows /for=D: /all",
+            "vssadmin delete shadows /for=D: /all /quiet"
+          ],
+          "falsch": true,
+          "warum": "Alle Schattenkopien zu löschen nimmt den Benutzern jede Wiederherstellung. Begrenzen reicht: Dann löscht Windows nur die ältesten.",
+          "faelle": [
+            {
+              "sim": true,
+              "ausgabe": "Stopp: Das würde alle Vorgängerversionen löschen – auch die von gestern. In der Simulation nicht ausgeführt."
+            }
+          ]
+        },
+        {
+          "muster": [
+            "Remove-Item D:\\Daten\\* -Recurse -Force"
+          ],
+          "falsch": true,
+          "warum": "Die Dateien sind nicht das Problem – sie belegen nur 320 GB.",
+          "faelle": [
+            {
+              "sim": true,
+              "ausgabe": "Stopp: Das sind die Daten der Firma. In der Simulation nicht ausgeführt."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

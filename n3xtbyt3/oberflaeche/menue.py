@@ -49,10 +49,14 @@ class Hauptmenue(Ansicht):
         super().__init__(app)
         self.auswahl = 0
         self.daten = {sid: lade_alles(sid) for sid in REIHENFOLGE}
+        self.tickets = sum(1 for sid in REIHENFOLGE for sz in self.daten[sid][0].szenarien if sz.ticket)
+        self.eintraege = list(REIHENFOLGE) + ["tickets"]
         self.rects: list[pygame.Rect] = []
         self.regen: MatrixRegen | None = None
 
     def _spielbar(self, sid: str) -> bool:
+        if sid == "tickets":
+            return self.tickets > 0
         return bool(self.daten[sid][0].szenarien)
 
     def schrift_geaendert(self) -> None:
@@ -61,16 +65,16 @@ class Hauptmenue(Ansicht):
     def ereignis(self, e):
         if e.type == pygame.KEYDOWN:
             if e.key in (pygame.K_UP, pygame.K_w):
-                self.auswahl = (self.auswahl - 1) % len(REIHENFOLGE)
+                self.auswahl = (self.auswahl - 1) % len(self.eintraege)
             elif e.key in (pygame.K_DOWN, pygame.K_s, pygame.K_TAB):
-                self.auswahl = (self.auswahl + 1) % len(REIHENFOLGE)
+                self.auswahl = (self.auswahl + 1) % len(self.eintraege)
             elif e.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                self._oeffnen(REIHENFOLGE[self.auswahl])
+                self._oeffnen(self.eintraege[self.auswahl])
             elif e.key == pygame.K_ESCAPE:
                 self.app.beenden()
-            elif pygame.K_1 <= e.key <= pygame.K_4:
+            elif pygame.K_1 <= e.key <= pygame.K_5:
                 self.auswahl = e.key - pygame.K_1
-                self._oeffnen(REIHENFOLGE[self.auswahl])
+                self._oeffnen(self.eintraege[self.auswahl])
         elif e.type == pygame.MOUSEMOTION:
             for i, r in enumerate(self.rects):
                 if r.collidepoint(e.pos):
@@ -78,9 +82,14 @@ class Hauptmenue(Ansicht):
         elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
             for i, r in enumerate(self.rects):
                 if r.collidepoint(e.pos):
-                    self._oeffnen(REIHENFOLGE[i])
+                    self._oeffnen(self.eintraege[i])
 
     def _oeffnen(self, sid: str) -> None:
+        if sid == "tickets":
+            if self.tickets:
+                from .tickets_ansicht import Ticketliste
+                self.app.wechsle(Ticketliste(self.app))
+            return
         ergebnis, allgemein, stand = self.daten[sid]
         if not ergebnis.szenarien and not ergebnis.fehler:
             return  # kommt noch
@@ -110,10 +119,14 @@ class Hauptmenue(Ansicht):
         y += unter.get_height() + s.zeilen_hoehe * 2
 
         kachel_b = min(int(w * 0.6), 60 * s.zeichen_breite)
-        kachel_h = int(s.zeilen_hoehe * 3.2)
+        kachel_h = int(s.zeilen_hoehe * 3.1)
         x = (w - kachel_b) // 2
         self.rects = []
-        for i, sid in enumerate(REIHENFOLGE):
+        for i, sid in enumerate(self.eintraege):
+            if sid == "tickets":
+                self._ticket_kachel(f, pygame.Rect(x, y, kachel_b, kachel_h), i)
+                y += kachel_h + s.zeilen_hoehe // 2
+                continue
             ergebnis, _allg, stand = self.daten[sid]
             rect = pygame.Rect(x, y, kachel_b, kachel_h)
             self.rects.append(rect)
@@ -147,7 +160,7 @@ class Hauptmenue(Ansicht):
                 f.blit(warn, (rect.right - warn.get_width() - s.zeichen_breite * 2, rect.bottom - warn.get_height() - kachel_h // 6))
             y += kachel_h + s.zeilen_hoehe // 2
 
-        fuss = "Pfeiltasten oder 1–4 + Enter: System wählen  ·  Esc: Beenden  ·  Strg +/−: Schriftgröße  ·  F11: Vollbild"
+        fuss = "Pfeiltasten oder 1–5 + Enter: wählen  ·  Esc: Beenden  ·  Strg +/−: Schriftgröße  ·  F11: Vollbild"
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 1.6)))
         ort = s.klein.render(f"Spielstand und eigene Szenarien: {pfade.datenordner()}", True, FARBE["text_schwach"])
@@ -159,6 +172,27 @@ SONDER = (
     ("training", "»  Befehls-Training: Welcher Befehl …?"),
     ("auswertung", "»  Auswertung ansehen: Stärken, Schwächen, Empfehlung"),
 )
+
+
+def _ticket_kachel_zeichnen(self, f, rect, i):
+    s = self.app.schriften
+    self.rects.append(rect)
+    spielbar = self._spielbar("tickets")
+    gewaehlt = i == self.auswahl
+    hinter = pygame.Surface(rect.size, pygame.SRCALPHA)
+    hinter.fill((60, 20, 50, 230) if gewaehlt else (17, 9, 15, 230))
+    f.blit(hinter, rect.topleft)
+    rand = FARBE["magenta"] if spielbar else FARBE["aus"]
+    pygame.draw.rect(f, rand, rect, width=3 if gewaehlt else 2, border_radius=6)
+    name = f"{i + 1}  Tickets (alle Systeme gemischt)"
+    farbe = FARBE["magenta"] if spielbar else FARBE["aus"]
+    f.blit(s.zwischen.render(name, True, farbe), (rect.left + s.zeichen_breite * 2, rect.top + rect.height // 6))
+    info = f"{self.tickets} Tickets · Störungen mit Dringlichkeit, über mehrere Rechner" if spielbar else "kommt noch"
+    bild = s.text.render(info, True, FARBE["text"] if spielbar else FARBE["aus"])
+    f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.bottom - bild.get_height() - rect.height // 6))
+
+
+Hauptmenue._ticket_kachel = _ticket_kachel_zeichnen
 
 
 class Szenarioliste(Ansicht):

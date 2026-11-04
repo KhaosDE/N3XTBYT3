@@ -110,5 +110,50 @@ class OberflaecheTest(unittest.TestCase):
         self.assertIsInstance(app.ansicht, Szenarioliste)
 
 
+@unittest.skipIf(pygame is None, "pygame-ce nicht installiert")
+class TicketOberflaecheTest(unittest.TestCase):
+    def setUp(self):
+        self._daten = Datenordner()
+        self.ordner = self._daten.__enter__()
+        from n3xtbyt3.oberflaeche.app import App
+        self.app = App(groesse=(1280, 720))
+
+    def tearDown(self):
+        self.app.ansicht.verlassen()
+        pygame.quit()
+        self._daten.__exit__(None, None, None)
+
+    def test_ticket_ueber_zwei_rechner(self):
+        """Abnahme M4: Ein Ticket-Einsatz über zwei Rechner ist spielbar."""
+        from n3xtbyt3.kern.spielstand import Spielstand
+        from n3xtbyt3.oberflaeche.spiel import Spielansicht
+        from n3xtbyt3.oberflaeche.tickets_ansicht import Ticketliste
+
+        app = self.app
+        app.schritt([taste(pygame.K_5)], dt=0.05)  # Kachel „Tickets“
+        self.assertIsInstance(app.ansicht, Ticketliste)
+        liste = app.ansicht
+        index = 1 + next(i for i, e in enumerate(liste.eintraege) if e.szenario.id == "tk-shop-502")
+        liste.auswahl = index
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        spiel = app.ansicht
+        self.assertIsInstance(spiel, Spielansicht)
+        self.assertTrue(spiel.ticketmodus)
+        app.schritt([taste(pygame.K_F3)], dt=0.05)
+        self.assertFalse(spiel.notiz_modus)  # noch nicht behoben
+        for schritt in spiel.szenario.loesung:
+            app.schritt(tippe(schritt), dt=0.05)
+        self.assertTrue(spiel.sitzung.geloest)
+        self.assertEqual(spiel.sitzung.aktiv.name, spiel.sitzung.haupt.name)  # wieder am PC
+        app.schritt([taste(pygame.K_F3)], dt=0.05)
+        self.assertTrue(spiel.notiz_modus)
+        app.schritt(tippe("php8.3-fpm auf srv-web01 gestartet"), dt=0.05)
+        self.assertTrue(spiel.sitzung.ticket_geschlossen)
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Ticketliste)
+        verlauf = Spielstand.lade("windows").eintrag("tk-shop-502")["verlauf"]
+        self.assertTrue(verlauf[-1]["ticket_geschlossen"])
+
+
 if __name__ == "__main__":
     unittest.main()
