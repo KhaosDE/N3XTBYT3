@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from ..kern import auswahl
+from ..kern import auswahl, auswertung
 from ..kern.sitzung import Sitzung
 from ..kern.systeme import SYSTEME
 from .basis import Ansicht, Knopf, knopf_klick, zeichne_knopf
@@ -57,6 +57,7 @@ class Spielansicht(Ansicht):
         if self.stand.versuch_eintragen(self.szenario.id, self.sitzung.ergebnis()):
             try:
                 self.stand.speichere()
+                auswertung.schreibe(self.system_id, self.szenarien, self.stand)
             except OSError as e:
                 print(f"Spielstand konnte nicht gespeichert werden: {e}")
 

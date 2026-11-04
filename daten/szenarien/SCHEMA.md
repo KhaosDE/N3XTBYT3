@@ -67,6 +67,7 @@ In Ausgaben wird `{schluessel}` durch den aktuellen Wert ersetzt, z. B. `{hostna
 | `muster` | Eine oder mehrere Schreibweisen des Befehls (siehe „Wie Eingaben verglichen werden“). |
 | `faelle` | Liste möglicher Ergebnisse. Der **erste** Fall, dessen `wenn` passt, gilt. Ein Fall ohne `wenn` passt immer – also ans Ende. |
 | `bedeutung` | Freiwillig. Was der Befehl tut, in einfachen Worten. Wird für das Befehls-Training genutzt. |
+| `frage` | Freiwillig, nur mit `bedeutung`. Genaue Aufgabe für das Befehls-Training, wenn die Parameter wichtig sind, z. B. „Zeige den Status des Dienstes Spooler“. Ohne `frage` wird `bedeutung` gefragt. |
 | `shell` | Freiwillig. In welcher Shell der Befehl geht: `powershell`, `cmd`, `bash` oder eine Liste. Ohne Angabe: Befehle der Form Verb-Nomen (`Get-Service`) nur in der PowerShell, alle anderen in jeder Shell des Systems. Aliase wie `gsv` bitte mit `"shell": "powershell"` kennzeichnen. |
 | `falsch` | Freiwillig. `true`, wenn der Befehl zwar echt ist, aber hier die falsche Wahl (z. B. Neustart als Holzhammer). Dann **muss** `warum` dabei sein. Zählt als falscher Befehl. |
 | `warum` | Erklärung, warum der Befehl hier falsch ist. Erscheint rechts im Hinweisbereich. |

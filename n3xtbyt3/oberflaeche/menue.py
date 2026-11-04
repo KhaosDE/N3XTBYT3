@@ -154,8 +154,15 @@ class Hauptmenue(Ansicht):
         f.blit(ort, ort.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 0.5)))
 
 
+SONDER = (
+    ("zufall", "»  Zufälliges Szenario (empfohlen: Fälliges und Schwaches zuerst)"),
+    ("training", "»  Befehls-Training: Welcher Befehl …?"),
+    ("auswertung", "»  Auswertung ansehen: Stärken, Schwächen, Empfehlung"),
+)
+
+
 class Szenarioliste(Ansicht):
-    """Alle Szenarien eines Systems. Oben: zufällige Auswahl (empfohlen)."""
+    """Alle Szenarien eines Systems. Oben: Zufall, Befehls-Training, Auswertung."""
 
     def __init__(self, app: "App", system_id: str, ergebnis: Ladeergebnis, allgemein, stand: Spielstand):
         super().__init__(app)
@@ -169,7 +176,7 @@ class Szenarioliste(Ansicht):
         self.rects: list[tuple[pygame.Rect, int]] = []
 
     def _anzahl(self) -> int:
-        return len(self.szenarien) + 1  # +1 für „Zufällig“
+        return len(self.szenarien) + len(SONDER)
 
     def ereignis(self, e):
         if e.type == pygame.KEYDOWN:
@@ -199,10 +206,21 @@ class Szenarioliste(Ansicht):
     def _starten(self, index: int) -> None:
         if not self.szenarien or self.allgemein is None:
             return
-        if index == 0:
+        if index < len(SONDER):
+            art = SONDER[index][0]
+            if art == "training":
+                from .training_ansicht import Trainingsansicht
+                self.app.wechsle(Trainingsansicht(self.app, self.system_id, self.ergebnis,
+                                                  self.allgemein, self.stand))
+                return
+            if art == "auswertung":
+                from .auswertung_ansicht import Auswertungsansicht
+                self.app.wechsle(Auswertungsansicht(self.app, self.system_id, self.ergebnis,
+                                                    self.allgemein, self.stand))
+                return
             szenario = auswahl.waehle(self.szenarien, self.stand)
         else:
-            szenario = self.szenarien[index - 1]
+            szenario = self.szenarien[index - len(SONDER)]
         from .spiel import Spielansicht
         self.app.wechsle(Spielansicht(self.app, self.system_id, szenario, self.szenarien,
                                       self.allgemein, self.stand))
@@ -258,11 +276,10 @@ class Szenarioliste(Ansicht):
                 pygame.draw.rect(f, FARBE["linie"], rect, width=2, border_radius=4)
             ty = rect.top + (rect.height - s.text.get_linesize()) // 2
             x = rect.left + s.zeichen_breite
-            if i == 0:
-                text = "»  Zufälliges Szenario (empfohlen: Ungelöstes und Schwaches kommt öfter)"
-                f.blit(s.text_fett.render(text, True, FARBE["gruen_hell"]), (x, ty))
+            if i < len(SONDER):
+                f.blit(s.text_fett.render(SONDER[i][1], True, FARBE["gruen_hell"]), (x, ty))
             else:
-                sz = self.szenarien[i - 1]
+                sz = self.szenarien[i - len(SONDER)]
                 e = self.stand.eintrag(sz.id)
                 if e["geloest"]:
                     punkt = FARBE["gruen"]
@@ -290,11 +307,17 @@ class Szenarioliste(Ansicht):
                     rx -= eigen.get_width() + s.zeichen_breite
                     f.blit(eigen, (rx, rect.centery - eigen.get_height() // 2))
                 if e["versuche"]:
-                    v = s.klein.render(f"{e['versuche']} Versuch(e)", True, FARBE["text_schwach"])
-                    rx -= v.get_width() + s.zeichen_breite
+                    karte = self.stand.kartei.szenario(sz.id)
+                    faellig = self.stand.kartei.ist_faellig(karte)
+                    text = f"Fach {karte['fach']}" + (" · fällig" if faellig else "")
+                    fach = s.klein.render(text, True, FARBE["sim"] if faellig else FARBE["text_schwach"])
+                    rx -= fach.get_width() + s.zeichen_breite
+                    f.blit(fach, (rx, rect.centery - fach.get_height() // 2))
+                    v = s.klein.render(f"{e['versuche']} Versuch(e) ·", True, FARBE["text_schwach"])
+                    rx -= v.get_width() + s.zeichen_breite // 2
                     f.blit(v, (rx, rect.centery - v.get_height() // 2))
             y += zeile_h
 
-        fuss = "Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  grün = gelöst, orange = versucht, grau = neu"
+        fuss = "Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  grün = gelöst, orange = versucht, grau = neu  ·  Fach 1–5 = Lernkartei"
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))

@@ -24,11 +24,19 @@
   },
   "befehle": [
     {
-      "muster": ["Get-Volume", "Get-Volume C", "Get-Volume -DriveLetter C"],
+      "muster": [
+        "Get-Volume",
+        "Get-Volume C",
+        "Get-Volume -DriveLetter C"
+      ],
       "bedeutung": "Laufwerke mit freiem und gesamtem Speicherplatz anzeigen",
+      "frage": "Zeige alle Laufwerke mit freiem und gesamtem Speicherplatz (PowerShell)",
       "faelle": [
         {
-          "wenn": {"papierkorb_voll": true, "temp_voll": true},
+          "wenn": {
+            "papierkorb_voll": true,
+            "temp_voll": true
+          },
           "ausgabe": [
             "",
             "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
@@ -38,7 +46,10 @@
           ]
         },
         {
-          "wenn": {"papierkorb_voll": true, "temp_voll": false},
+          "wenn": {
+            "papierkorb_voll": true,
+            "temp_voll": false
+          },
           "ausgabe": [
             "",
             "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
@@ -48,7 +59,10 @@
           ]
         },
         {
-          "wenn": {"papierkorb_voll": false, "temp_voll": true},
+          "wenn": {
+            "papierkorb_voll": false,
+            "temp_voll": true
+          },
           "ausgabe": [
             "",
             "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
@@ -69,24 +83,45 @@
       ]
     },
     {
-      "muster": ["Clear-RecycleBin -Force", "Clear-RecycleBin -DriveLetter C -Force"],
+      "muster": [
+        "Clear-RecycleBin -Force",
+        "Clear-RecycleBin -DriveLetter C -Force"
+      ],
       "bedeutung": "Papierkorb leeren (ohne Rückfrage)",
-      "faelle": [{"setze": {"papierkorb_voll": false}}]
-    },
-    {
-      "muster": ["Clear-RecycleBin", "Clear-RecycleBin -DriveLetter C"],
-      "faelle": [{
-        "sim": true,
-        "ausgabe": "Ohne -Force fragt PowerShell erst nach einer Bestätigung (Ja/Nein). Rückfragen sind hier nicht nachgebaut – hänge -Force an."
-      }]
-    },
-    {
-      "muster": ["Get-ChildItem $env:TEMP", "dir $env:TEMP", "ls $env:TEMP"],
-      "shell": "powershell",
-      "bedeutung": "Inhalt des Temp-Ordners anzeigen",
       "faelle": [
         {
-          "wenn": {"temp_voll": true},
+          "setze": {
+            "papierkorb_voll": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Clear-RecycleBin",
+        "Clear-RecycleBin -DriveLetter C"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Ohne -Force fragt PowerShell erst nach einer Bestätigung (Ja/Nein). Rückfragen sind hier nicht nachgebaut – hänge -Force an."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ChildItem $env:TEMP",
+        "dir $env:TEMP",
+        "ls $env:TEMP"
+      ],
+      "shell": "powershell",
+      "bedeutung": "Inhalt des Temp-Ordners anzeigen",
+      "frage": "Zeige den Inhalt des Temp-Ordners des Benutzers (PowerShell, Umgebungsvariable)",
+      "faelle": [
+        {
+          "wenn": {
+            "temp_voll": true
+          },
           "ausgabe": [
             "",
             "",
@@ -102,7 +137,9 @@
             ""
           ]
         },
-        {"ausgabe": ""}
+        {
+          "ausgabe": ""
+        }
       ]
     },
     {
@@ -113,14 +150,25 @@
         "Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue"
       ],
       "bedeutung": "Alle Dateien und Unterordner im Temp-Ordner löschen",
-      "faelle": [{"setze": {"temp_voll": false}}]
+      "frage": "Lösche alles im Temp-Ordner des Benutzers, auch Unterordner, ohne Rückfrage (PowerShell)",
+      "faelle": [
+        {
+          "setze": {
+            "temp_voll": false
+          }
+        }
+      ]
     },
     {
-      "muster": ["cleanmgr"],
-      "faelle": [{
-        "sim": true,
-        "ausgabe": "Die Datenträgerbereinigung öffnet ein eigenes Fenster – das ist in der Simulation nicht nachgebaut. Nutze die PowerShell-Befehle."
-      }]
+      "muster": [
+        "cleanmgr"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Die Datenträgerbereinigung öffnet ein eigenes Fenster – das ist in der Simulation nicht nachgebaut. Nutze die PowerShell-Befehle."
+        }
+      ]
     },
     {
       "muster": [
@@ -130,13 +178,17 @@
       ],
       "falsch": true,
       "warum": "Das sind Frau Bergers eigene Dateien. Die löscht man nie einfach – erst Papierkorb und Temp-Dateien, und bei eigenen Dateien vorher fragen.",
-      "faelle": [{
-        "sim": true,
-        "ausgabe": "Stopp: In der Simulation wird das nicht ausgeführt. Persönliche Dateien löscht man nicht ohne Rücksprache."
-      }]
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: In der Simulation wird das nicht ausgeführt. Persönliche Dateien löscht man nicht ohne Rücksprache."
+        }
+      ]
     }
   ],
-  "ziel": {"papierkorb_voll": false},
+  "ziel": {
+    "papierkorb_voll": false
+  },
   "hinweise": [
     "Erst messen: Wie viel ist auf C: frei? Und wohin sind „gelöschte“ Dateien eigentlich gegangen?",
     "„Get-Volume -DriveLetter C“ zeigt den freien Platz. Gelöschte Dateien landen im Papierkorb – und belegen dort weiter Platz.",

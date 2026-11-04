@@ -21,11 +21,15 @@
   },
   "befehle": [
     {
-      "muster": ["ipconfig"],
+      "muster": [
+        "ipconfig"
+      ],
       "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
       "faelle": [
         {
-          "wenn": {"freigegeben": true},
+          "wenn": {
+            "freigegeben": true
+          },
           "ausgabe": [
             "",
             "Windows IP Configuration",
@@ -38,7 +42,9 @@
           ]
         },
         {
-          "wenn": {"ip_apipa": true},
+          "wenn": {
+            "ip_apipa": true
+          },
           "ausgabe": [
             "",
             "Windows IP Configuration",
@@ -69,11 +75,17 @@
       ]
     },
     {
-      "muster": ["ping 192.168.1.1"],
+      "muster": [
+        "ping 192.168.1.1"
+      ],
       "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe, ob der Router 192.168.1.1 antwortet",
       "faelle": [
         {
-          "wenn": {"ip_apipa": false, "freigegeben": false},
+          "wenn": {
+            "ip_apipa": false,
+            "freigegeben": false
+          },
           "ausgabe": [
             "",
             "Pinging 192.168.1.1 with 32 bytes of data:",
@@ -95,49 +107,74 @@
       ]
     },
     {
-      "muster": ["ipconfig /release"],
+      "muster": [
+        "ipconfig /release"
+      ],
       "bedeutung": "Die per DHCP bezogene IP-Adresse zurückgeben",
-      "faelle": [{
-        "setze": {"freigegeben": true},
-        "ausgabe": [
-          "",
-          "Windows IP Configuration",
-          "",
-          "",
-          "Ethernet adapter Ethernet:",
-          "",
-          "   Connection-specific DNS Suffix  . :",
-          "   Default Gateway . . . . . . . . . :"
-        ]
-      }]
+      "faelle": [
+        {
+          "setze": {
+            "freigegeben": true
+          },
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . :",
+            "   Default Gateway . . . . . . . . . :"
+          ]
+        }
+      ]
     },
     {
-      "muster": ["ipconfig /renew"],
+      "muster": [
+        "ipconfig /renew"
+      ],
       "bedeutung": "Beim DHCP-Server eine neue IP-Adresse anfordern",
-      "faelle": [{
-        "setze": {"ip_apipa": false, "freigegeben": false},
-        "ausgabe": [
-          "",
-          "Windows IP Configuration",
-          "",
-          "",
-          "Ethernet adapter Ethernet:",
-          "",
-          "   Connection-specific DNS Suffix  . :",
-          "   IPv4 Address. . . . . . . . . . . : 192.168.1.34",
-          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
-          "   Default Gateway . . . . . . . . . : 192.168.1.1"
-        ]
-      }]
+      "faelle": [
+        {
+          "setze": {
+            "ip_apipa": false,
+            "freigegeben": false
+          },
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . :",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.1.34",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.1.1"
+          ]
+        }
+      ]
     },
     {
-      "muster": ["ipconfig /flushdns"],
-      "faelle": [{
-        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
-      }]
+      "muster": [
+        "ipconfig /flushdns"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "Successfully flushed the DNS Resolver Cache."
+          ]
+        }
+      ]
     }
   ],
-  "ziel": {"ip_apipa": false, "freigegeben": false},
+  "ziel": {
+    "ip_apipa": false,
+    "freigegeben": false
+  },
   "hinweise": [
     "Schau dir zuerst die IP-Adresse des PCs an. Passt sie zum Netz der anderen Geräte (192.168.1.x)?",
     "Eine Adresse 169.254.x.x vergibt Windows sich selbst, wenn kein DHCP-Server geantwortet hat. Mit „ipconfig“ kannst du eine neue Adresse anfordern.",
@@ -155,5 +192,10 @@
     "Gateway (Standardgateway)": "Der Router, über den der PC alles erreicht, was nicht im eigenen Netz liegt.",
     "Subnetzmaske": "Legt fest, welche Adressen zum eigenen Netz gehören (255.255.255.0 = die ersten drei Zahlen sind gleich)."
   },
-  "loesung": ["ipconfig", "ipconfig /release", "ipconfig /renew", "ping 192.168.1.1"]
+  "loesung": [
+    "ipconfig",
+    "ipconfig /release",
+    "ipconfig /renew",
+    "ping 192.168.1.1"
+  ]
 }

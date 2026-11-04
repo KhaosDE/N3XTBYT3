@@ -23,11 +23,17 @@
   },
   "befehle": [
     {
-      "muster": ["Get-Service Spooler", "Get-Service -Name Spooler"],
+      "muster": [
+        "Get-Service Spooler",
+        "Get-Service -Name Spooler"
+      ],
       "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes Spooler (Druckwarteschlange)",
       "faelle": [
         {
-          "wenn": {"dienst_spooler": "Running"},
+          "wenn": {
+            "dienst_spooler": "Running"
+          },
           "ausgabe": [
             "",
             "Status   Name               DisplayName",
@@ -56,9 +62,12 @@
       ],
       "shell": "powershell",
       "bedeutung": "Dateien in einem Ordner anzeigen",
+      "frage": "Zeige die Dateien im Spool-Ordner C:\\Windows\\System32\\spool\\PRINTERS (PowerShell)",
       "faelle": [
         {
-          "wenn": {"spool_dateien": true},
+          "wenn": {
+            "spool_dateien": true
+          },
           "ausgabe": [
             "",
             "",
@@ -72,15 +81,22 @@
             ""
           ]
         },
-        {"ausgabe": ""}
+        {
+          "ausgabe": ""
+        }
       ]
     },
     {
-      "muster": ["Get-PrintJob -PrinterName Drucker-Buero"],
+      "muster": [
+        "Get-PrintJob -PrinterName Drucker-Buero"
+      ],
       "bedeutung": "Druckaufträge eines Druckers anzeigen",
+      "frage": "Zeige die Druckaufträge des Druckers „Drucker-Buero“",
       "faelle": [
         {
-          "wenn": {"spool_dateien": true},
+          "wenn": {
+            "spool_dateien": true
+          },
           "sim": true,
           "ausgabe": "Der Auftrag „Rechnung_2026-117.pdf“ steht weiter in der Warteschlange von „Drucker-Buero“ und hängt mit einem Fehler. (Tabelle hier vereinfacht.)"
         },
@@ -91,47 +107,112 @@
       ]
     },
     {
-      "muster": ["Stop-Service Spooler", "Stop-Service -Name Spooler", "Stop-Service -Name Spooler -Force", "Stop-Service Spooler -Force"],
+      "muster": [
+        "Stop-Service Spooler",
+        "Stop-Service -Name Spooler",
+        "Stop-Service -Name Spooler -Force",
+        "Stop-Service Spooler -Force"
+      ],
       "bedeutung": "Einen Dienst anhalten",
-      "faelle": [{"setze": {"dienst_spooler": "Stopped"}}]
+      "frage": "Halte den Dienst Spooler an (PowerShell)",
+      "faelle": [
+        {
+          "setze": {
+            "dienst_spooler": "Stopped"
+          }
+        }
+      ]
     },
     {
-      "muster": ["net stop spooler"],
+      "muster": [
+        "net stop spooler"
+      ],
       "bedeutung": "Einen Dienst anhalten (cmd)",
+      "frage": "Halte den Dienst Spooler an (cmd)",
       "faelle": [
         {
-          "wenn": {"dienst_spooler": "Running"},
-          "setze": {"dienst_spooler": "Stopped"},
-          "ausgabe": ["The Print Spooler service is stopping.", "The Print Spooler service was stopped successfully.", ""]
+          "wenn": {
+            "dienst_spooler": "Running"
+          },
+          "setze": {
+            "dienst_spooler": "Stopped"
+          },
+          "ausgabe": [
+            "The Print Spooler service is stopping.",
+            "The Print Spooler service was stopped successfully.",
+            ""
+          ]
         },
         {
-          "ausgabe": ["The Print Spooler service is not started.", "", "More help is available by typing NET HELPMSG 3521.", ""]
+          "ausgabe": [
+            "The Print Spooler service is not started.",
+            "",
+            "More help is available by typing NET HELPMSG 3521.",
+            ""
+          ]
         }
       ]
     },
     {
-      "muster": ["Start-Service Spooler", "Start-Service -Name Spooler"],
+      "muster": [
+        "Start-Service Spooler",
+        "Start-Service -Name Spooler"
+      ],
       "bedeutung": "Einen Dienst starten",
-      "faelle": [{"setze": {"dienst_spooler": "Running"}}]
-    },
-    {
-      "muster": ["net start spooler"],
-      "bedeutung": "Einen Dienst starten (cmd)",
+      "frage": "Starte den Dienst Spooler (PowerShell)",
       "faelle": [
         {
-          "wenn": {"dienst_spooler": "Stopped"},
-          "setze": {"dienst_spooler": "Running"},
-          "ausgabe": ["The Print Spooler service is starting.", "The Print Spooler service was started successfully.", ""]
-        },
-        {
-          "ausgabe": ["The requested service has already been started.", "", "More help is available by typing NET HELPMSG 2182.", ""]
+          "setze": {
+            "dienst_spooler": "Running"
+          }
         }
       ]
     },
     {
-      "muster": ["Restart-Service Spooler", "Restart-Service -Name Spooler", "Restart-Service -Name Spooler -Force"],
+      "muster": [
+        "net start spooler"
+      ],
+      "bedeutung": "Einen Dienst starten (cmd)",
+      "frage": "Starte den Dienst Spooler (cmd)",
+      "faelle": [
+        {
+          "wenn": {
+            "dienst_spooler": "Stopped"
+          },
+          "setze": {
+            "dienst_spooler": "Running"
+          },
+          "ausgabe": [
+            "The Print Spooler service is starting.",
+            "The Print Spooler service was started successfully.",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "The requested service has already been started.",
+            "",
+            "More help is available by typing NET HELPMSG 2182.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Restart-Service Spooler",
+        "Restart-Service -Name Spooler",
+        "Restart-Service -Name Spooler -Force"
+      ],
       "bedeutung": "Einen Dienst neu starten",
-      "faelle": [{"setze": {"dienst_spooler": "Running"}}]
+      "frage": "Starte den Dienst Spooler neu (PowerShell)",
+      "faelle": [
+        {
+          "setze": {
+            "dienst_spooler": "Running"
+          }
+        }
+      ]
     },
     {
       "muster": [
@@ -144,13 +225,21 @@
       ],
       "shell": "powershell",
       "bedeutung": "Dateien löschen",
+      "frage": "Lösche alle Dateien im Spool-Ordner C:\\Windows\\System32\\spool\\PRINTERS (PowerShell)",
       "faelle": [
         {
-          "wenn": {"dienst_spooler": "Running", "spool_dateien": true},
+          "wenn": {
+            "dienst_spooler": "Running",
+            "spool_dateien": true
+          },
           "fehler": true,
           "ausgabe": "Remove-Item : Cannot remove item C:\\Windows\\System32\\spool\\PRINTERS\\00017.SPL: The process cannot access the file 'C:\\Windows\\System32\\spool\\PRINTERS\\00017.SPL' because it is being used by another process."
         },
-        {"setze": {"spool_dateien": false}}
+        {
+          "setze": {
+            "spool_dateien": false
+          }
+        }
       ]
     },
     {
@@ -162,17 +251,28 @@
       ],
       "shell": "cmd",
       "bedeutung": "Dateien löschen (cmd, /Q = ohne Rückfrage)",
+      "frage": "Lösche ohne Rückfrage alle Dateien im Spool-Ordner C:\\Windows\\System32\\spool\\PRINTERS (cmd)",
       "faelle": [
         {
-          "wenn": {"dienst_spooler": "Running", "spool_dateien": true},
+          "wenn": {
+            "dienst_spooler": "Running",
+            "spool_dateien": true
+          },
           "sim": true,
           "ausgabe": "Die Dateien sind gesperrt, weil der Druckdienst sie gerade benutzt. Erst den Dienst anhalten."
         },
-        {"setze": {"spool_dateien": false}}
+        {
+          "setze": {
+            "spool_dateien": false
+          }
+        }
       ]
     }
   ],
-  "ziel": {"dienst_spooler": "Running", "spool_dateien": false},
+  "ziel": {
+    "dienst_spooler": "Running",
+    "spool_dateien": false
+  },
   "hinweise": [
     "Druckaufträge verwaltet ein Windows-Dienst, die Druckwarteschlange (Spooler). Die Aufträge liegen als Dateien auf der Festplatte.",
     "Schau dir den Dienst „Spooler“ an (Get-Service) und den Ordner C:\\Windows\\System32\\spool\\PRINTERS. Gelöscht werden können die Dateien nur, wenn der Dienst steht.",

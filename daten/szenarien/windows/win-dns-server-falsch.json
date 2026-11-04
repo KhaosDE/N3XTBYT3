@@ -24,11 +24,16 @@
   },
   "befehle": [
     {
-      "muster": ["ping intranet.firma.internal"],
+      "muster": [
+        "ping intranet.firma.internal"
+      ],
       "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe, ob intranet.firma.internal antwortet",
       "faelle": [
         {
-          "wenn": {"dns_falsch": true},
+          "wenn": {
+            "dns_falsch": true
+          },
           "ausgabe": "Ping request could not find host intranet.firma.internal. Please check the name and try again."
         },
         {
@@ -49,29 +54,39 @@
       ]
     },
     {
-      "muster": ["ping 192.168.10.25"],
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Pinging 192.168.10.25 with 32 bytes of data:",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "",
-          "Ping statistics for 192.168.10.25:",
-          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
-          "Approximate round trip times in milli-seconds:",
-          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
-        ]
-      }]
-    },
-    {
-      "muster": ["Resolve-DnsName intranet.firma.internal", "Resolve-DnsName -Name intranet.firma.internal"],
-      "bedeutung": "Einen Namen über DNS auflösen (PowerShell)",
+      "muster": [
+        "ping 192.168.10.25"
+      ],
       "faelle": [
         {
-          "wenn": {"dns_falsch": true},
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.25 with 32 bytes of data:",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "",
+            "Ping statistics for 192.168.10.25:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Resolve-DnsName intranet.firma.internal",
+        "Resolve-DnsName -Name intranet.firma.internal"
+      ],
+      "bedeutung": "Einen Namen über DNS auflösen (PowerShell)",
+      "frage": "Löse intranet.firma.internal über DNS auf (PowerShell)",
+      "faelle": [
+        {
+          "wenn": {
+            "dns_falsch": true
+          },
           "fehler": true,
           "ausgabe": "Resolve-DnsName : intranet.firma.internal : This operation returned because the timeout period expired"
         },
@@ -87,11 +102,16 @@
       ]
     },
     {
-      "muster": ["nslookup intranet.firma.internal"],
+      "muster": [
+        "nslookup intranet.firma.internal"
+      ],
       "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
+      "frage": "Frage den DNS-Server direkt nach intranet.firma.internal",
       "faelle": [
         {
-          "wenn": {"dns_falsch": true},
+          "wenn": {
+            "dns_falsch": true
+          },
           "ausgabe": [
             "DNS request timed out.",
             "    timeout was 2 seconds.",
@@ -114,11 +134,15 @@
       ]
     },
     {
-      "muster": ["Get-DnsClientServerAddress"],
+      "muster": [
+        "Get-DnsClientServerAddress"
+      ],
       "bedeutung": "Eingestellte DNS-Server je Netzwerkadapter anzeigen",
       "faelle": [
         {
-          "wenn": {"dns_falsch": true},
+          "wenn": {
+            "dns_falsch": true
+          },
           "ausgabe": [
             "",
             "InterfaceAlias               Interface Address ServerAddresses",
@@ -149,7 +173,9 @@
       ],
       "faelle": [
         {
-          "wenn": {"dns_falsch": true},
+          "wenn": {
+            "dns_falsch": true
+          },
           "ausgabe": [
             "",
             "InterfaceAlias               Interface Address ServerAddresses",
@@ -172,9 +198,18 @@
       ]
     },
     {
-      "muster": ["Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses"],
+      "muster": [
+        "Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses"
+      ],
       "bedeutung": "DNS-Server wieder automatisch (per DHCP) beziehen",
-      "faelle": [{"setze": {"dns_falsch": false}}]
+      "frage": "Stelle beim Adapter „Ethernet“ die DNS-Server wieder auf automatisch (DHCP)",
+      "faelle": [
+        {
+          "setze": {
+            "dns_falsch": false
+          }
+        }
+      ]
     },
     {
       "muster": [
@@ -182,20 +217,44 @@
         "Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses (192.168.10.5)"
       ],
       "bedeutung": "DNS-Server fest eintragen",
-      "faelle": [{"setze": {"dns_falsch": false}}]
+      "frage": "Trage beim Adapter „Ethernet“ fest den DNS-Server 192.168.10.5 ein",
+      "faelle": [
+        {
+          "setze": {
+            "dns_falsch": false
+          }
+        }
+      ]
     },
     {
-      "muster": ["ipconfig /flushdns"],
-      "faelle": [{
-        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
-      }]
+      "muster": [
+        "ipconfig /flushdns"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "Successfully flushed the DNS Resolver Cache."
+          ]
+        }
+      ]
     },
     {
-      "muster": ["Clear-DnsClientCache"],
-      "faelle": [{"ausgabe": ""}]
+      "muster": [
+        "Clear-DnsClientCache"
+      ],
+      "faelle": [
+        {
+          "ausgabe": ""
+        }
+      ]
     }
   ],
-  "ziel": {"dns_falsch": false},
+  "ziel": {
+    "dns_falsch": false
+  },
   "hinweise": [
     "Wenn IP-Adressen gehen, Namen aber nicht, liegt das Problem bei der Namensauflösung (DNS). Welcher DNS-Server ist eingestellt?",
     "„Get-DnsClientServerAddress“ zeigt, welchen DNS-Server der Adapter „Ethernet“ benutzt. Vergleiche mit dem Firmen-DNS-Server 192.168.10.5.",

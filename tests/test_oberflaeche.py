@@ -83,6 +83,32 @@ class OberflaecheTest(unittest.TestCase):
         app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
         self.assertEqual(Spielstand.lade("windows").daten["szenarien"], {})
 
+    def test_training_und_auswertung(self):
+        from n3xtbyt3.kern.spielstand import Spielstand
+        from n3xtbyt3.oberflaeche.auswertung_ansicht import Auswertungsansicht
+        from n3xtbyt3.oberflaeche.menue import Szenarioliste
+        from n3xtbyt3.oberflaeche.training_ansicht import Trainingsansicht
+
+        app = self.app
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Trainingsansicht)
+        training = app.ansicht
+        karte = training.karte
+        app.schritt(tippe(karte.beispiel), dt=0.05)
+        self.assertEqual(training.zaehler["richtig"], 1)
+        app.schritt([taste(pygame.K_F1)], dt=0.05)
+        self.assertEqual(training.zaehler["falsch"], 1)
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Szenarioliste)
+        self.assertTrue(Spielstand.lade("windows").kartei.befehle)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Auswertungsansicht)
+        app.schritt([taste(pygame.K_PAGEDOWN)], dt=0.05)
+        self.assertTrue(os.path.exists(os.path.join(self.ordner, "auswertung_windows.md")))
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Szenarioliste)
+
 
 if __name__ == "__main__":
     unittest.main()

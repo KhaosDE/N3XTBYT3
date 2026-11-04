@@ -24,60 +24,73 @@
   },
   "befehle": [
     {
-      "muster": ["ipconfig"],
+      "muster": [
+        "ipconfig"
+      ],
       "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Windows IP Configuration",
-          "",
-          "",
-          "Ethernet adapter Ethernet:",
-          "",
-          "   Connection-specific DNS Suffix  . : firma.internal",
-          "   IPv4 Address. . . . . . . . . . . : 192.168.10.57",
-          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
-          "   Default Gateway . . . . . . . . . : 192.168.10.1"
-        ]
-      }]
-    },
-    {
-      "muster": ["ipconfig /all"],
-      "bedeutung": "Vollständige Netzwerkeinstellungen anzeigen (auch DNS-Server)",
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Windows IP Configuration",
-          "",
-          "   Host Name . . . . . . . . . . . . : {hostname}",
-          "   Primary Dns Suffix  . . . . . . . :",
-          "   Node Type . . . . . . . . . . . . : Hybrid",
-          "   IP Routing Enabled. . . . . . . . : No",
-          "   WINS Proxy Enabled. . . . . . . . : No",
-          "   DNS Suffix Search List. . . . . . : firma.internal",
-          "",
-          "Ethernet adapter Ethernet:",
-          "",
-          "   Connection-specific DNS Suffix  . : firma.internal",
-          "   Description . . . . . . . . . . . : Intel(R) Ethernet Connection I219-V",
-          "   Physical Address. . . . . . . . . : 00-1A-2B-3C-4D-5E",
-          "   DHCP Enabled. . . . . . . . . . . : Yes",
-          "   Autoconfiguration Enabled . . . . : Yes",
-          "   IPv4 Address. . . . . . . . . . . : 192.168.10.57(Preferred)",
-          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
-          "   Default Gateway . . . . . . . . . : 192.168.10.1",
-          "   DHCP Server . . . . . . . . . . . : 192.168.10.5",
-          "   DNS Servers . . . . . . . . . . . : 192.168.10.5",
-          "   NetBIOS over Tcpip. . . . . . . . : Enabled"
-        ]
-      }]
-    },
-    {
-      "muster": ["ping intranet.firma.internal"],
-      "bedeutung": "Prüfen, ob ein Rechner antwortet",
       "faelle": [
         {
-          "wenn": {"dns_cache_alt": true},
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . : firma.internal",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.10.57",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.10.1"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ipconfig /all"
+      ],
+      "bedeutung": "Vollständige Netzwerkeinstellungen anzeigen (auch DNS-Server)",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "   Host Name . . . . . . . . . . . . : {hostname}",
+            "   Primary Dns Suffix  . . . . . . . :",
+            "   Node Type . . . . . . . . . . . . : Hybrid",
+            "   IP Routing Enabled. . . . . . . . : No",
+            "   WINS Proxy Enabled. . . . . . . . : No",
+            "   DNS Suffix Search List. . . . . . : firma.internal",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . : firma.internal",
+            "   Description . . . . . . . . . . . : Intel(R) Ethernet Connection I219-V",
+            "   Physical Address. . . . . . . . . : 00-1A-2B-3C-4D-5E",
+            "   DHCP Enabled. . . . . . . . . . . : Yes",
+            "   Autoconfiguration Enabled . . . . : Yes",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.10.57(Preferred)",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.10.1",
+            "   DHCP Server . . . . . . . . . . . : 192.168.10.5",
+            "   DNS Servers . . . . . . . . . . . : 192.168.10.5",
+            "   NetBIOS over Tcpip. . . . . . . . : Enabled"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping intranet.firma.internal"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe, ob intranet.firma.internal antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "dns_cache_alt": true
+          },
           "ausgabe": [
             "",
             "Pinging intranet.firma.internal [192.168.10.20] with 32 bytes of data:",
@@ -108,59 +121,76 @@
       ]
     },
     {
-      "muster": ["ping 192.168.10.25"],
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Pinging 192.168.10.25 with 32 bytes of data:",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
-          "",
-          "Ping statistics for 192.168.10.25:",
-          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
-          "Approximate round trip times in milli-seconds:",
-          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
-        ]
-      }]
+      "muster": [
+        "ping 192.168.10.25"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.25 with 32 bytes of data:",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "",
+            "Ping statistics for 192.168.10.25:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
     },
     {
-      "muster": ["ping 192.168.10.20"],
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Pinging 192.168.10.20 with 32 bytes of data:",
-          "Request timed out.",
-          "Request timed out.",
-          "Request timed out.",
-          "Request timed out.",
-          "",
-          "Ping statistics for 192.168.10.20:",
-          "    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),"
-        ]
-      }]
+      "muster": [
+        "ping 192.168.10.20"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.20 with 32 bytes of data:",
+            "Request timed out.",
+            "Request timed out.",
+            "Request timed out.",
+            "Request timed out.",
+            "",
+            "Ping statistics for 192.168.10.20:",
+            "    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),"
+          ]
+        }
+      ]
     },
     {
-      "muster": ["nslookup intranet.firma.internal"],
+      "muster": [
+        "nslookup intranet.firma.internal"
+      ],
       "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
-      "faelle": [{
-        "ausgabe": [
-          "Server:  dc01.firma.internal",
-          "Address:  192.168.10.5",
-          "",
-          "Name:    intranet.firma.internal",
-          "Address:  192.168.10.25",
-          ""
-        ]
-      }]
+      "frage": "Frage den DNS-Server direkt nach intranet.firma.internal",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Server:  dc01.firma.internal",
+            "Address:  192.168.10.5",
+            "",
+            "Name:    intranet.firma.internal",
+            "Address:  192.168.10.25",
+            ""
+          ]
+        }
+      ]
     },
     {
-      "muster": ["ipconfig /displaydns"],
+      "muster": [
+        "ipconfig /displaydns"
+      ],
       "bedeutung": "Inhalt des DNS-Zwischenspeichers (Cache) anzeigen",
       "faelle": [
         {
-          "wenn": {"dns_cache_alt": true},
+          "wenn": {
+            "dns_cache_alt": true
+          },
           "ausgabe": [
             "",
             "Windows IP Configuration",
@@ -177,25 +207,50 @@
           ]
         },
         {
-          "ausgabe": ["", "Windows IP Configuration", ""]
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            ""
+          ]
         }
       ]
     },
     {
-      "muster": ["ipconfig /flushdns"],
+      "muster": [
+        "ipconfig /flushdns"
+      ],
       "bedeutung": "DNS-Zwischenspeicher (Cache) leeren",
-      "faelle": [{
-        "setze": {"dns_cache_alt": false},
-        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
-      }]
+      "faelle": [
+        {
+          "setze": {
+            "dns_cache_alt": false
+          },
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "Successfully flushed the DNS Resolver Cache."
+          ]
+        }
+      ]
     },
     {
-      "muster": ["Clear-DnsClientCache"],
+      "muster": [
+        "Clear-DnsClientCache"
+      ],
       "bedeutung": "DNS-Zwischenspeicher (Cache) leeren (PowerShell)",
-      "faelle": [{"setze": {"dns_cache_alt": false}}]
+      "faelle": [
+        {
+          "setze": {
+            "dns_cache_alt": false
+          }
+        }
+      ]
     }
   ],
-  "ziel": {"dns_cache_alt": false},
+  "ziel": {
+    "dns_cache_alt": false
+  },
   "hinweise": [
     "Der Server hat eine neue Adresse. Woher „weiß“ der PC, welche Adresse zum Namen gehört – und könnte er sich die alte gemerkt haben?",
     "Vergleiche: Welche Adresse nennt „ping“ für den Namen, welche „nslookup“? Den Zwischenspeicher zeigt „ipconfig /displaydns“.",

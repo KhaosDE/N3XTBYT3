@@ -59,6 +59,7 @@ class Befehl:
     falsch: bool = False
     warum: str | None = None
     bedeutung: str | None = None
+    frage: str | None = None
     vorbereitet: list = field(default_factory=list, repr=False)
 
 
@@ -152,7 +153,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
         if not isinstance(eintrag, dict):
             fehler.append(f"{stelle}: muss ein Objekt sein.")
             continue
-        erlaubt = {"muster", "faelle", "shell", "falsch", "warum", "bedeutung"}
+        erlaubt = {"muster", "faelle", "shell", "falsch", "warum", "bedeutung", "frage"}
         for k in eintrag:
             if k not in erlaubt and not k.startswith("_"):
                 fehler.append(f"{stelle}: unbekanntes Feld „{k}“.")
@@ -192,6 +193,12 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
         if bedeutung is not None and (not isinstance(bedeutung, str) or not bedeutung.strip()):
             fehler.append(f"{stelle}.bedeutung: muss Text sein.")
             bedeutung = None
+        frage = eintrag.get("frage")
+        if frage is not None and (not isinstance(frage, str) or not frage.strip()):
+            fehler.append(f"{stelle}.frage: muss Text sein.")
+            frage = None
+        if frage and not bedeutung:
+            fehler.append(f"{stelle}: „frage“ nur zusammen mit „bedeutung“.")
         faelle_roh = eintrag.get("faelle")
         if not isinstance(faelle_roh, list) or not faelle_roh:
             fehler.append(f"{stelle}.faelle: braucht mindestens einen Fall.")
@@ -240,7 +247,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
         namen = frozenset(v[0].name for v in vorbereitet if v)
         befehle.append(Befehl(
             muster=muster, faelle=faelle, shells=shells_t, namen=namen, falsch=falsch,
-            warum=warum, bedeutung=bedeutung, vorbereitet=vorbereitet,
+            warum=warum, bedeutung=bedeutung, frage=frage, vorbereitet=vorbereitet,
         ))
     return befehle
 

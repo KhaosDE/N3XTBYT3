@@ -23,11 +23,16 @@
   },
   "befehle": [
     {
-      "muster": ["tasklist /FI \"STATUS eq NOT RESPONDING\""],
+      "muster": [
+        "tasklist /FI \"STATUS eq NOT RESPONDING\""
+      ],
       "bedeutung": "Prozesse anzeigen, die nicht reagieren",
+      "frage": "Zeige alle Prozesse, die nicht reagieren (cmd, Filter)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
+          "wenn": {
+            "excel_laeuft": true
+          },
           "ausgabe": [
             "",
             "Image Name                     PID Session Name        Session#    Mem Usage",
@@ -35,15 +40,22 @@
             "EXCEL.EXE                     6420 Console                    1    412,388 K"
           ]
         },
-        {"ausgabe": "INFO: No tasks are running which match the specified criteria."}
+        {
+          "ausgabe": "INFO: No tasks are running which match the specified criteria."
+        }
       ]
     },
     {
-      "muster": ["tasklist /FI \"IMAGENAME eq EXCEL.EXE\""],
+      "muster": [
+        "tasklist /FI \"IMAGENAME eq EXCEL.EXE\""
+      ],
       "bedeutung": "Prozesse eines Programms anzeigen",
+      "frage": "Zeige die Prozesse von EXCEL.EXE (cmd, Filter)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
+          "wenn": {
+            "excel_laeuft": true
+          },
           "ausgabe": [
             "",
             "Image Name                     PID Session Name        Session#    Mem Usage",
@@ -51,60 +63,100 @@
             "EXCEL.EXE                     6420 Console                    1    412,388 K"
           ]
         },
-        {"ausgabe": "INFO: No tasks are running which match the specified criteria."}
+        {
+          "ausgabe": "INFO: No tasks are running which match the specified criteria."
+        }
       ]
     },
     {
-      "muster": ["taskkill /IM EXCEL.EXE"],
+      "muster": [
+        "taskkill /IM EXCEL.EXE"
+      ],
       "bedeutung": "Ein Programm bitten, sich zu beenden",
+      "frage": "Bitte EXCEL.EXE, sich zu beenden (ohne Zwang, cmd)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
+          "wenn": {
+            "excel_laeuft": true
+          },
           "ausgabe": "SUCCESS: Sent termination signal to the process \"EXCEL.EXE\" with PID 6420."
         },
-        {"ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."}
+        {
+          "ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."
+        }
       ]
     },
     {
-      "muster": ["taskkill /IM EXCEL.EXE /F", "taskkill /F /IM EXCEL.EXE"],
+      "muster": [
+        "taskkill /IM EXCEL.EXE /F",
+        "taskkill /F /IM EXCEL.EXE"
+      ],
       "bedeutung": "Ein Programm erzwungen beenden (nach Name)",
+      "frage": "Beende EXCEL.EXE erzwungen (nach Programmname, cmd)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
-          "setze": {"excel_laeuft": false},
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "setze": {
+            "excel_laeuft": false
+          },
           "ausgabe": "SUCCESS: The process \"EXCEL.EXE\" with PID 6420 has been terminated."
         },
-        {"ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."}
+        {
+          "ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."
+        }
       ]
     },
     {
-      "muster": ["taskkill /PID 6420 /F"],
+      "muster": [
+        "taskkill /PID 6420 /F"
+      ],
       "bedeutung": "Ein Programm erzwungen beenden (nach Prozess-ID)",
+      "frage": "Beende den Prozess mit der PID 6420 erzwungen (cmd)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
-          "setze": {"excel_laeuft": false},
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "setze": {
+            "excel_laeuft": false
+          },
           "ausgabe": "SUCCESS: The process with PID 6420 has been terminated."
         },
-        {"ausgabe": "ERROR: The process \"6420\" not found."}
+        {
+          "ausgabe": "ERROR: The process \"6420\" not found."
+        }
       ]
     },
     {
-      "muster": ["taskkill /PID 6420"],
+      "muster": [
+        "taskkill /PID 6420"
+      ],
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
+          "wenn": {
+            "excel_laeuft": true
+          },
           "ausgabe": "SUCCESS: Sent termination signal to the process with PID 6420."
         },
-        {"ausgabe": "ERROR: The process \"6420\" not found."}
+        {
+          "ausgabe": "ERROR: The process \"6420\" not found."
+        }
       ]
     },
     {
-      "muster": ["Get-Process EXCEL", "Get-Process -Name EXCEL"],
+      "muster": [
+        "Get-Process EXCEL",
+        "Get-Process -Name EXCEL"
+      ],
       "bedeutung": "Prozesse eines Programms anzeigen (PowerShell)",
+      "frage": "Zeige die Prozesse von Excel (PowerShell)",
       "faelle": [
         {
-          "wenn": {"excel_laeuft": true},
+          "wenn": {
+            "excel_laeuft": true
+          },
           "ausgabe": [
             "",
             "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
@@ -120,18 +172,40 @@
       ]
     },
     {
-      "muster": ["Stop-Process -Name EXCEL -Force", "Stop-Process -Id 6420 -Force"],
+      "muster": [
+        "Stop-Process -Name EXCEL -Force",
+        "Stop-Process -Id 6420 -Force"
+      ],
       "bedeutung": "Einen Prozess erzwungen beenden (PowerShell)",
-      "faelle": [{"setze": {"excel_laeuft": false}}]
+      "frage": "Beende Excel erzwungen (PowerShell, nach Name)",
+      "faelle": [
+        {
+          "setze": {
+            "excel_laeuft": false
+          }
+        }
+      ]
     },
     {
-      "muster": ["taskkill /IM OUTLOOK.EXE /F", "taskkill /IM WINWORD.EXE /F", "Stop-Process -Name OUTLOOK -Force", "Stop-Process -Name WINWORD -Force"],
+      "muster": [
+        "taskkill /IM OUTLOOK.EXE /F",
+        "taskkill /IM WINWORD.EXE /F",
+        "Stop-Process -Name OUTLOOK -Force",
+        "Stop-Process -Name WINWORD -Force"
+      ],
       "falsch": true,
       "warum": "Outlook und Word laufen normal und haben ungespeicherte Arbeit. Beende nur den Prozess, der hängt.",
-      "faelle": [{"sim": true, "ausgabe": "Stopp: Das würde ein funktionierendes Programm mit ungespeicherter Arbeit beenden. In der Simulation nicht ausgeführt."}]
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das würde ein funktionierendes Programm mit ungespeicherter Arbeit beenden. In der Simulation nicht ausgeführt."
+        }
+      ]
     }
   ],
-  "ziel": {"excel_laeuft": false},
+  "ziel": {
+    "excel_laeuft": false
+  },
   "hinweise": [
     "Ein Programm, das nicht reagiert, ist ein Prozess, der hängt. Finde ihn in der Prozessliste.",
     "„tasklist“ zeigt Prozesse an; mit dem Filter /FI \"STATUS eq NOT RESPONDING\" nur die, die nicht reagieren. Beenden geht mit „taskkill“.",

@@ -21,12 +21,20 @@
   },
   "befehle": [
     {
-      "muster": ["ipconfig"],
+      "muster": [
+        "ipconfig"
+      ],
       "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
       "faelle": [
         {
-          "wenn": {"adapter_aktiv": false},
-          "ausgabe": ["", "Windows IP Configuration", ""]
+          "wenn": {
+            "adapter_aktiv": false
+          },
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            ""
+          ]
         },
         {
           "ausgabe": [
@@ -45,11 +53,15 @@
       ]
     },
     {
-      "muster": ["Get-NetAdapter"],
+      "muster": [
+        "Get-NetAdapter"
+      ],
       "bedeutung": "Netzwerkadapter und ihren Zustand anzeigen",
       "faelle": [
         {
-          "wenn": {"adapter_aktiv": false},
+          "wenn": {
+            "adapter_aktiv": false
+          },
           "ausgabe": [
             "",
             "Name                      InterfaceDescription                    ifIndex Status       MacAddress             LinkSpeed",
@@ -70,16 +82,31 @@
       ]
     },
     {
-      "muster": ["Enable-NetAdapter -Name Ethernet", "Enable-NetAdapter Ethernet"],
+      "muster": [
+        "Enable-NetAdapter -Name Ethernet",
+        "Enable-NetAdapter Ethernet"
+      ],
       "bedeutung": "Einen deaktivierten Netzwerkadapter einschalten",
-      "faelle": [{"setze": {"adapter_aktiv": true}}]
-    },
-    {
-      "muster": ["ping 192.168.10.1"],
-      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Schalte den Netzwerkadapter „Ethernet“ ein",
       "faelle": [
         {
-          "wenn": {"adapter_aktiv": false},
+          "setze": {
+            "adapter_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping 192.168.10.1"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe, ob das Gateway 192.168.10.1 antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "adapter_aktiv": false
+          },
           "ausgabe": [
             "",
             "Pinging 192.168.10.1 with 32 bytes of data:",
@@ -110,10 +137,14 @@
       ]
     },
     {
-      "muster": ["ipconfig /renew"],
+      "muster": [
+        "ipconfig /renew"
+      ],
       "faelle": [
         {
-          "wenn": {"adapter_aktiv": false},
+          "wenn": {
+            "adapter_aktiv": false
+          },
           "sim": true,
           "ausgabe": "Ohne aktiven Adapter gibt es nichts zu erneuern – ipconfig findet keinen Adapter, der eine Adresse holen könnte."
         },
@@ -134,7 +165,9 @@
       ]
     }
   ],
-  "ziel": {"adapter_aktiv": true},
+  "ziel": {
+    "adapter_aktiv": true
+  },
   "hinweise": [
     "„ipconfig“ zeigt gar keinen Adapter an. Ist der Netzwerkadapter überhaupt eingeschaltet?",
     "„Get-NetAdapter“ listet alle Netzwerkadapter mit ihrem Status auf.",
@@ -152,5 +185,10 @@
     "Status Disabled / Up": "Disabled = in Windows ausgeschaltet. Up = eingeschaltet und verbunden. Disconnected = an, aber kein Kabel/Signal.",
     "LinkSpeed": "Geschwindigkeit der Verbindung zum Switch, z. B. 1 Gbps."
   },
-  "loesung": ["ipconfig", "Get-NetAdapter", "Enable-NetAdapter -Name Ethernet", "ping 192.168.10.1"]
+  "loesung": [
+    "ipconfig",
+    "Get-NetAdapter",
+    "Enable-NetAdapter -Name Ethernet",
+    "ping 192.168.10.1"
+  ]
 }

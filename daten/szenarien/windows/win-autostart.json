@@ -30,9 +30,13 @@
         "reg query HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
       ],
       "bedeutung": "Werte eines Registrierungsschlüssels anzeigen",
+      "frage": "Zeige die Autostart-Einträge des angemeldeten Benutzers (Run-Schlüssel unter HKCU) in cmd",
       "faelle": [
         {
-          "wenn": {"autostart_toolbar": true, "autostart_onedrive": true},
+          "wenn": {
+            "autostart_toolbar": true,
+            "autostart_onedrive": true
+          },
           "ausgabe": [
             "",
             "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -42,7 +46,9 @@
           ]
         },
         {
-          "wenn": {"autostart_toolbar": true},
+          "wenn": {
+            "autostart_toolbar": true
+          },
           "ausgabe": [
             "",
             "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -51,7 +57,9 @@
           ]
         },
         {
-          "wenn": {"autostart_onedrive": true},
+          "wenn": {
+            "autostart_onedrive": true
+          },
           "ausgabe": [
             "",
             "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -60,7 +68,11 @@
           ]
         },
         {
-          "ausgabe": ["", "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", ""]
+          "ausgabe": [
+            "",
+            "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            ""
+          ]
         }
       ]
     },
@@ -69,14 +81,16 @@
         "reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
         "reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
       ],
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
-          "    SecurityHealth    REG_EXPAND_SZ    %windir%\\system32\\SecurityHealthSystray.exe",
-          ""
-        ]
-      }]
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "    SecurityHealth    REG_EXPAND_SZ    %windir%\\system32\\SecurityHealthSystray.exe",
+            ""
+          ]
+        }
+      ]
     },
     {
       "muster": [
@@ -84,15 +98,26 @@
         "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater /f"
       ],
       "bedeutung": "Einen Wert aus der Registrierung löschen (/f = ohne Rückfrage)",
+      "frage": "Lösche ohne Rückfrage den Wert „SuperToolbarUpdater“ aus HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (cmd)",
       "faelle": [
         {
-          "wenn": {"autostart_toolbar": true},
-          "setze": {"autostart_toolbar": false},
-          "ausgabe": ["The operation completed successfully.", ""]
+          "wenn": {
+            "autostart_toolbar": true
+          },
+          "setze": {
+            "autostart_toolbar": false
+          },
+          "ausgabe": [
+            "The operation completed successfully.",
+            ""
+          ]
         },
         {
           "fehler": true,
-          "ausgabe": ["ERROR: The system was unable to find the specified registry key or value.", ""]
+          "ausgabe": [
+            "ERROR: The system was unable to find the specified registry key or value.",
+            ""
+          ]
         }
       ]
     },
@@ -101,10 +126,12 @@
         "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater",
         "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater"
       ],
-      "faelle": [{
-        "sim": true,
-        "ausgabe": "Ohne /f fragt reg nach, ob der Wert wirklich gelöscht werden soll (Yes/No). Rückfragen sind hier nicht nachgebaut – hänge /f an."
-      }]
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Ohne /f fragt reg nach, ob der Wert wirklich gelöscht werden soll (Yes/No). Rückfragen sind hier nicht nachgebaut – hänge /f an."
+        }
+      ]
     },
     {
       "muster": [
@@ -113,7 +140,17 @@
       ],
       "falsch": true,
       "warum": "OneDrive ist ein normaler, gewollter Autostart-Eintrag (Synchronisierung der Dateien). Entferne nur den unbekannten Toolbar-Eintrag.",
-      "faelle": [{"setze": {"autostart_onedrive": false}, "ausgabe": ["The operation completed successfully.", ""]}]
+      "faelle": [
+        {
+          "setze": {
+            "autostart_onedrive": false
+          },
+          "ausgabe": [
+            "The operation completed successfully.",
+            ""
+          ]
+        }
+      ]
     },
     {
       "muster": [
@@ -122,7 +159,12 @@
       ],
       "falsch": true,
       "warum": "Ohne /v löscht reg den ganzen Schlüssel „Run“ mit allen Einträgen. Immer nur den einen Wert mit /v <Name> löschen.",
-      "faelle": [{"sim": true, "ausgabe": "Stopp: Das würde den ganzen Run-Schlüssel löschen. In der Simulation nicht ausgeführt."}]
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das würde den ganzen Run-Schlüssel löschen. In der Simulation nicht ausgeführt."
+        }
+      ]
     },
     {
       "muster": [
@@ -130,9 +172,12 @@
         "Get-ItemProperty -Path HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
       ],
       "bedeutung": "Werte eines Registrierungsschlüssels anzeigen (PowerShell)",
+      "frage": "Zeige die Werte im Run-Schlüssel unter HKCU (PowerShell)",
       "faelle": [
         {
-          "wenn": {"autostart_toolbar": true},
+          "wenn": {
+            "autostart_toolbar": true
+          },
           "ausgabe": [
             "",
             "OneDrive            : \"C:\\Users\\mberger\\AppData\\Local\\Microsoft\\OneDrive\\OneDrive.exe\" /background",
@@ -167,10 +212,19 @@
         "Remove-ItemProperty HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -Name SuperToolbarUpdater"
       ],
       "bedeutung": "Einen Wert aus der Registrierung löschen (PowerShell)",
-      "faelle": [{"setze": {"autostart_toolbar": false}}]
+      "frage": "Lösche den Wert „SuperToolbarUpdater“ aus HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (PowerShell)",
+      "faelle": [
+        {
+          "setze": {
+            "autostart_toolbar": false
+          }
+        }
+      ]
     }
   ],
-  "ziel": {"autostart_toolbar": false},
+  "ziel": {
+    "autostart_toolbar": false
+  },
   "hinweise": [
     "Programme, die bei der Anmeldung starten, stehen oft in der Registrierung im Schlüssel „Run“ des Benutzers.",
     "Der Schlüssel heißt HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run. Anzeigen mit „reg query“, löschen mit „reg delete … /v <Name> /f“.",

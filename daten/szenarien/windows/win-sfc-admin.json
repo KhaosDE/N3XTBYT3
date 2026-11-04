@@ -26,15 +26,26 @@
   },
   "befehle": [
     {
-      "muster": ["sfc /scannow"],
+      "muster": [
+        "sfc /scannow"
+      ],
       "bedeutung": "Windows-Systemdateien prüfen und reparieren (braucht Adminrechte)",
       "faelle": [
         {
-          "wenn": {"admin": false},
-          "ausgabe": ["", "You must be an administrator running a console session in order to", "use the sfc utility.", ""]
+          "wenn": {
+            "admin": false
+          },
+          "ausgabe": [
+            "",
+            "You must be an administrator running a console session in order to",
+            "use the sfc utility.",
+            ""
+          ]
         },
         {
-          "setze": {"systemdateien_ok": true},
+          "setze": {
+            "systemdateien_ok": true
+          },
           "ausgabe": [
             "",
             "Beginning system scan.  This process will take some time.",
@@ -59,10 +70,16 @@
         "Start-Process -FilePath powershell.exe -Verb RunAs"
       ],
       "bedeutung": "PowerShell als Administrator starten",
+      "frage": "Starte eine PowerShell mit Administratorrechten",
       "faelle": [
         {
-          "wenn": {"admin": false},
-          "setze": {"admin": true, "pfad": "C:\\Windows\\system32"},
+          "wenn": {
+            "admin": false
+          },
+          "setze": {
+            "admin": true,
+            "pfad": "C:\\Windows\\system32"
+          },
           "sim": true,
           "ausgabe": [
             "Die Benutzerkontensteuerung fragt nach, Herr Neumann bestätigt mit „Ja“.",
@@ -76,12 +93,22 @@
       ]
     },
     {
-      "muster": ["Start-Process cmd -Verb RunAs", "Start-Process cmd.exe -Verb RunAs", "Start-Process -FilePath cmd -Verb RunAs"],
+      "muster": [
+        "Start-Process cmd -Verb RunAs",
+        "Start-Process cmd.exe -Verb RunAs",
+        "Start-Process -FilePath cmd -Verb RunAs"
+      ],
       "bedeutung": "Eingabeaufforderung als Administrator starten",
+      "frage": "Starte eine Eingabeaufforderung (cmd) mit Administratorrechten (aus der PowerShell)",
       "faelle": [
         {
-          "wenn": {"admin": false},
-          "setze": {"admin": true, "pfad": "C:\\Windows\\system32"},
+          "wenn": {
+            "admin": false
+          },
+          "setze": {
+            "admin": true,
+            "pfad": "C:\\Windows\\system32"
+          },
           "aktion": "wechsel:cmd",
           "sim": true,
           "ausgabe": [
@@ -95,18 +122,26 @@
       ]
     },
     {
-      "muster": ["whoami /groups"],
-      "faelle": [{
-        "sim": true,
-        "ausgabe": "Die lange Gruppenliste ist hier nicht nachgebaut. Merke: In einer Konsole ohne Erhöhung ist die Administratoren-Gruppe zwar da, aber „Group used for deny only“ – die Rechte sind nicht aktiv."
-      }]
+      "muster": [
+        "whoami /groups"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Die lange Gruppenliste ist hier nicht nachgebaut. Merke: In einer Konsole ohne Erhöhung ist die Administratoren-Gruppe zwar da, aber „Group used for deny only“ – die Rechte sind nicht aktiv."
+        }
+      ]
     },
     {
-      "muster": ["DISM /Online /Cleanup-Image /RestoreHealth"],
+      "muster": [
+        "DISM /Online /Cleanup-Image /RestoreHealth"
+      ],
       "bedeutung": "Den Komponentenspeicher reparieren, aus dem sfc Ersatzdateien holt",
       "faelle": [
         {
-          "wenn": {"admin": false},
+          "wenn": {
+            "admin": false
+          },
           "sim": true,
           "ausgabe": "Auch DISM braucht Administratorrechte. Die genaue Fehlermeldung ist hier nicht nachgebaut."
         },
@@ -117,7 +152,9 @@
       ]
     }
   ],
-  "ziel": {"systemdateien_ok": true},
+  "ziel": {
+    "systemdateien_ok": true
+  },
   "hinweise": [
     "Die Systemdateiprüfung heißt „sfc“. Lies die Meldung genau, wenn sie nicht startet: Was fehlt dir in diesem Fenster?",
     "„sfc /scannow“ braucht eine Konsole mit Administratorrechten. Die startest du aus der PowerShell mit „Start-Process … -Verb RunAs“.",
@@ -137,5 +174,9 @@
     "-Verb RunAs": "Parameter von Start-Process, der ein Programm mit Administratorrechten startet (UAC-Rückfrage).",
     "CBS.log": "Protokolldatei, in die sfc schreibt, was es gefunden und repariert hat."
   },
-  "loesung": ["sfc /scannow", "Start-Process powershell -Verb RunAs", "sfc /scannow"]
+  "loesung": [
+    "sfc /scannow",
+    "Start-Process powershell -Verb RunAs",
+    "sfc /scannow"
+  ]
 }

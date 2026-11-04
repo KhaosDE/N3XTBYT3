@@ -24,11 +24,15 @@
   },
   "befehle": [
     {
-      "muster": ["Get-LocalUser"],
+      "muster": [
+        "Get-LocalUser"
+      ],
       "bedeutung": "Lokale Benutzerkonten anzeigen",
       "faelle": [
         {
-          "wenn": {"konto_aktiv": false},
+          "wenn": {
+            "konto_aktiv": false
+          },
           "ausgabe": [
             "",
             "Name               Enabled Description",
@@ -57,33 +61,78 @@
       ]
     },
     {
-      "muster": ["Get-LocalUser -Name jschulz", "Get-LocalUser jschulz"],
+      "muster": [
+        "Get-LocalUser -Name jschulz",
+        "Get-LocalUser jschulz"
+      ],
       "faelle": [
         {
-          "wenn": {"konto_aktiv": false},
-          "ausgabe": ["", "Name    Enabled Description", "----    ------- -----------", "jschulz False", ""]
+          "wenn": {
+            "konto_aktiv": false
+          },
+          "ausgabe": [
+            "",
+            "Name    Enabled Description",
+            "----    ------- -----------",
+            "jschulz False",
+            ""
+          ]
         },
         {
-          "ausgabe": ["", "Name    Enabled Description", "----    ------- -----------", "jschulz True", ""]
+          "ausgabe": [
+            "",
+            "Name    Enabled Description",
+            "----    ------- -----------",
+            "jschulz True",
+            ""
+          ]
         }
       ]
     },
     {
-      "muster": ["Enable-LocalUser -Name jschulz", "Enable-LocalUser jschulz"],
+      "muster": [
+        "Enable-LocalUser -Name jschulz",
+        "Enable-LocalUser jschulz"
+      ],
       "bedeutung": "Ein lokales Benutzerkonto aktivieren",
-      "faelle": [{"setze": {"konto_aktiv": true}}]
-    },
-    {
-      "muster": ["net user jschulz /active:yes"],
-      "bedeutung": "Ein Benutzerkonto aktivieren (cmd)",
-      "faelle": [{"setze": {"konto_aktiv": true}, "ausgabe": ["The command completed successfully.", ""]}]
-    },
-    {
-      "muster": ["net user jschulz"],
-      "bedeutung": "Details zu einem Benutzerkonto anzeigen (cmd)",
+      "frage": "Aktiviere das lokale Konto jschulz (PowerShell)",
       "faelle": [
         {
-          "wenn": {"konto_aktiv": false},
+          "setze": {
+            "konto_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net user jschulz /active:yes"
+      ],
+      "bedeutung": "Ein Benutzerkonto aktivieren (cmd)",
+      "frage": "Aktiviere das Konto jschulz (cmd)",
+      "faelle": [
+        {
+          "setze": {
+            "konto_aktiv": true
+          },
+          "ausgabe": [
+            "The command completed successfully.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net user jschulz"
+      ],
+      "bedeutung": "Details zu einem Benutzerkonto anzeigen (cmd)",
+      "frage": "Zeige die Details des Kontos jschulz (cmd)",
+      "faelle": [
+        {
+          "wenn": {
+            "konto_aktiv": false
+          },
           "ausgabe": [
             "User name                    jschulz",
             "Full Name                    Jana Schulz",
@@ -118,13 +167,22 @@
       ]
     },
     {
-      "muster": ["net user jschulz *"],
+      "muster": [
+        "net user jschulz *"
+      ],
       "falsch": true,
       "warum": "Das Passwort ist nicht das Problem – das Konto ist deaktiviert. Ein neues Passwort ändert daran nichts.",
-      "faelle": [{"sim": true, "ausgabe": "Die Passwortabfrage ist hier nicht nachgebaut – und das Passwort ist auch nicht das Problem."}]
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Die Passwortabfrage ist hier nicht nachgebaut – und das Passwort ist auch nicht das Problem."
+        }
+      ]
     }
   ],
-  "ziel": {"konto_aktiv": true},
+  "ziel": {
+    "konto_aktiv": true
+  },
   "hinweise": [
     "Die Meldung sagt es schon: Das Konto ist deaktiviert, nicht das Passwort falsch. Schau dir die lokalen Benutzerkonten an.",
     "„Get-LocalUser“ zeigt alle lokalen Konten und ob sie aktiviert sind (Spalte Enabled). Zum Einschalten gibt es ein passendes Cmdlet mit dem Verb „Enable“.",
@@ -142,5 +200,9 @@
     "Deaktiviert / gesperrt": "Deaktiviert: absichtlich ausgeschaltet. Gesperrt: automatisch blockiert nach zu vielen Fehlversuchen.",
     "Cmdlet": "Ein PowerShell-Befehl der Form Verb-Nomen, z. B. Get-LocalUser oder Enable-LocalUser."
   },
-  "loesung": ["Get-LocalUser", "Enable-LocalUser -Name jschulz", "Get-LocalUser -Name jschulz"]
+  "loesung": [
+    "Get-LocalUser",
+    "Enable-LocalUser -Name jschulz",
+    "Get-LocalUser -Name jschulz"
+  ]
 }

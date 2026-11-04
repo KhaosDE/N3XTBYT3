@@ -4,7 +4,8 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-**M1 ist fertig** (bis auf deinen Abnahmetest, siehe unten). M2 läuft: Lernkartei begonnen.
+**M1 ist fertig** (bis auf deinen Abnahmetest, siehe unten). M2 läuft: Lernkartei, Befehls-Training
+und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
 
 **Nächster Schritt:** M2 — Windows-Server-Szenarien, Lernkartei, Befehls-Training, Auswertung.
 
@@ -40,6 +41,17 @@ Stand: 04.11.2026.
 - [x] Tests: Laden, Lösbarkeit, Sicherheitstest; `.exe` per GitHub Actions
 - [ ] **Tobi:** `.exe` starten, Windows wählen, mindestens drei Szenarien mit Hinweisen lösen,
       beenden, neu starten – Fortschritt ist noch da
+
+### M2 (in Arbeit)
+
+- Lernkartei: Szenarien und Befehle in Fächern 1–5 (Wiederholung nach 0/1/3/7/14 Tagen).
+  Falsch oder nicht gelöst → zurück in Fach 1. Die Zufallsauswahl nimmt Fälliges zuerst.
+  Die Szenarioliste zeigt Fach und „fällig“.
+- Befehls-Training (Eintrag in der Szenarioliste): Fragen „Welcher Befehl …?“ aus den Befehlen der
+  Szenarien; richtig / halb (richtiger Befehl, andere Parameter) / falsch. Neues Feld `frage` für
+  genaue Aufgaben.
+- Auswertung je System: `auswertung_<system>.json` und `.md` im Datenordner, auch als Ansicht im
+  Programm. Stärken, Schwächen nach Kategorie und Befehl, häufige Fehler, Empfehlung.
 
 ## Offene Punkte
 

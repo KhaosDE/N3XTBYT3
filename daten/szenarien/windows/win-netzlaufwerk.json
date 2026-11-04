@@ -26,11 +26,15 @@
   },
   "befehle": [
     {
-      "muster": ["net use"],
+      "muster": [
+        "net use"
+      ],
       "bedeutung": "Verbundene Netzlaufwerke anzeigen",
       "faelle": [
         {
-          "wenn": {"laufwerk_z": "alt"},
+          "wenn": {
+            "laufwerk_z": "alt"
+          },
           "ausgabe": [
             "New connections will be remembered.",
             "",
@@ -44,8 +48,15 @@
           ]
         },
         {
-          "wenn": {"laufwerk_z": "leer"},
-          "ausgabe": ["New connections will be remembered.", "", "There are no entries in the list.", ""]
+          "wenn": {
+            "laufwerk_z": "leer"
+          },
+          "ausgabe": [
+            "New connections will be remembered.",
+            "",
+            "There are no entries in the list.",
+            ""
+          ]
         },
         {
           "ausgabe": [
@@ -63,39 +74,66 @@
       ]
     },
     {
-      "muster": ["ping SRV-ALT"],
+      "muster": [
+        "ping SRV-ALT"
+      ],
       "bedeutung": "Prüfen, ob ein Rechner antwortet",
-      "faelle": [{"ausgabe": "Ping request could not find host SRV-ALT. Please check the name and try again."}]
-    },
-    {
-      "muster": ["ping SRV-DATEI01"],
-      "faelle": [{
-        "ausgabe": [
-          "",
-          "Pinging SRV-DATEI01.firma.internal [192.168.10.12] with 32 bytes of data:",
-          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
-          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
-          "",
-          "Ping statistics for 192.168.10.12:",
-          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
-          "Approximate round trip times in milli-seconds:",
-          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
-        ]
-      }]
-    },
-    {
-      "muster": ["net use Z: /delete", "net use Z: /d"],
-      "bedeutung": "Eine Netzlaufwerk-Verbindung trennen",
+      "frage": "Prüfe, ob der Server SRV-ALT antwortet",
       "faelle": [
         {
-          "wenn": {"laufwerk_z": "leer"},
-          "ausgabe": ["The network connection could not be found.", "", "More help is available by typing NET HELPMSG 2250.", ""]
+          "ausgabe": "Ping request could not find host SRV-ALT. Please check the name and try again."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping SRV-DATEI01"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Pinging SRV-DATEI01.firma.internal [192.168.10.12] with 32 bytes of data:",
+            "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+            "",
+            "Ping statistics for 192.168.10.12:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net use Z: /delete",
+        "net use Z: /d"
+      ],
+      "bedeutung": "Eine Netzlaufwerk-Verbindung trennen",
+      "frage": "Trenne die Netzlaufwerk-Verbindung Z:",
+      "faelle": [
+        {
+          "wenn": {
+            "laufwerk_z": "leer"
+          },
+          "ausgabe": [
+            "The network connection could not be found.",
+            "",
+            "More help is available by typing NET HELPMSG 2250.",
+            ""
+          ]
         },
         {
-          "setze": {"laufwerk_z": "leer"},
-          "ausgabe": ["Z: was deleted successfully.", ""]
+          "setze": {
+            "laufwerk_z": "leer"
+          },
+          "ausgabe": [
+            "Z: was deleted successfully.",
+            ""
+          ]
         }
       ]
     },
@@ -106,23 +144,50 @@
         "net use Z: \\\\SRV-DATEI01\\Daten"
       ],
       "bedeutung": "Ein Netzlaufwerk verbinden (/persistent:yes = nach Neustart wieder da)",
+      "frage": "Verbinde Z: dauerhaft mit der Freigabe Daten auf SRV-DATEI01",
       "faelle": [
         {
-          "wenn": {"laufwerk_z": {"nicht": "leer"}},
-          "ausgabe": ["System error 85 has occurred.", "", "The local device name is already in use.", ""]
+          "wenn": {
+            "laufwerk_z": {
+              "nicht": "leer"
+            }
+          },
+          "ausgabe": [
+            "System error 85 has occurred.",
+            "",
+            "The local device name is already in use.",
+            ""
+          ]
         },
         {
-          "setze": {"laufwerk_z": "neu"},
-          "ausgabe": ["The command completed successfully.", ""]
+          "setze": {
+            "laufwerk_z": "neu"
+          },
+          "ausgabe": [
+            "The command completed successfully.",
+            ""
+          ]
         }
       ]
     },
     {
-      "muster": ["net use Z: \\\\SRV-ALT\\Daten", "net use Z: \\\\SRV-ALT\\Daten /persistent:yes"],
+      "muster": [
+        "net use Z: \\\\SRV-ALT\\Daten",
+        "net use Z: \\\\SRV-ALT\\Daten /persistent:yes"
+      ],
       "faelle": [
         {
-          "wenn": {"laufwerk_z": {"nicht": "leer"}},
-          "ausgabe": ["System error 85 has occurred.", "", "The local device name is already in use.", ""]
+          "wenn": {
+            "laufwerk_z": {
+              "nicht": "leer"
+            }
+          },
+          "ausgabe": [
+            "System error 85 has occurred.",
+            "",
+            "The local device name is already in use.",
+            ""
+          ]
         },
         {
           "sim": true,
@@ -131,7 +196,9 @@
       ]
     }
   ],
-  "ziel": {"laufwerk_z": "neu"},
+  "ziel": {
+    "laufwerk_z": "neu"
+  },
   "hinweise": [
     "Welche Netzlaufwerke kennt Windows, und wohin zeigt Z: noch? Erst schauen, dann ändern.",
     "„net use“ zeigt alle Verbindungen. Ein Laufwerksbuchstabe kann nur einmal belegt sein – die alte Verbindung muss erst weg („/delete“).",
