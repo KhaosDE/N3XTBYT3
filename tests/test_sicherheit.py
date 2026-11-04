@@ -1,6 +1,6 @@
 """Sicherheitstest: N3XTBYT3 ist eine reine Simulation.
 
-Im Paket n3xtbyt3 dürfen keine Werkzeuge vorkommen, mit denen echte Befehle
+In den Paketen n3xtbyt3 und n3xtbyt3_mcp dürfen keine Werkzeuge vorkommen, mit denen echte Befehle
 ausgeführt oder Netzwerkverbindungen aufgebaut werden.
 """
 
@@ -8,7 +8,9 @@ import re
 import unittest
 from pathlib import Path
 
-PAKET = Path(__file__).resolve().parents[1] / "n3xtbyt3"
+WURZEL = Path(__file__).resolve().parents[1]
+PAKET = WURZEL / "n3xtbyt3"
+PAKETE = [PAKET, WURZEL / "n3xtbyt3_mcp"]
 
 VERBOTEN = [
     r"\bsubprocess\b",
@@ -27,7 +29,7 @@ VERBOTEN = [
 
 class SicherheitTest(unittest.TestCase):
     def test_keine_systemaufrufe_und_kein_netzwerk(self):
-        dateien = sorted(PAKET.rglob("*.py"))
+        dateien = sorted(d for paket in PAKETE for d in paket.rglob("*.py"))
         self.assertTrue(dateien, "Keine Python-Dateien gefunden.")
         funde = []
         for datei in dateien:
@@ -35,7 +37,7 @@ class SicherheitTest(unittest.TestCase):
             for muster in VERBOTEN:
                 for treffer in re.finditer(muster, text):
                     zeile = text.count("\n", 0, treffer.start()) + 1
-                    funde.append(f"{datei.relative_to(PAKET.parent)}:{zeile}: {treffer.group(0)}")
+                    funde.append(f"{datei.relative_to(WURZEL)}:{zeile}: {treffer.group(0)}")
         self.assertEqual(funde, [], "Verbotene Aufrufe gefunden:\n" + "\n".join(funde))
 
 

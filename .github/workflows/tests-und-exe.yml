@@ -63,3 +63,24 @@ jobs:
           name: N3XTBYT3-Windows
           path: dist/N3XTBYT3.exe
           retention-days: 30
+      - name: MCP-Server als .exe bauen (Konsole, für Claude Desktop)
+        run: >
+          pyinstaller --noconfirm --onefile --console --name N3XTBYT3-MCP
+          --add-data "daten;daten"
+          --add-data "vorlagen;vorlagen"
+          start_mcp.py
+      - name: Selbsttest des MCP-Servers
+        shell: pwsh
+        run: |
+          $antwort = '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | .\dist\N3XTBYT3-MCP.exe
+          Write-Host $antwort
+          if ($antwort -notmatch 'auswertung_lesen') { throw "MCP-Server antwortet nicht wie erwartet" }
+          $auswertung = '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"auswertung_lesen","arguments":{"system":"windows"}}}' | .\dist\N3XTBYT3-MCP.exe
+          if ($auswertung -notmatch 'Auswertung Windows') { throw "Auswertung kommt nicht an" }
+          Write-Host "MCP-Selbsttest bestanden."
+      - name: MCP-.exe zum Herunterladen bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: N3XTBYT3-MCP-Windows
+          path: dist/N3XTBYT3-MCP.exe
+          retention-days: 30

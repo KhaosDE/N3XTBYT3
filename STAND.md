@@ -4,9 +4,11 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-**M1, M2 und M3 sind fertig** (bis auf deine Abnahmetests, siehe unten). Alle vier Systeme sind spielbar.
+**M1 bis M4 sind fertig** (bis auf deine Abnahmetests, siehe unten). Alle vier Systeme sind spielbar,
+dazu Tickets über mehrere Rechner und der MCP-Server für Claude Desktop.
 
-**Nächster Schritt:** M4 — Tickets, mehrere Rechner (ssh), MCP-Server für Claude Desktop.
+**Nächster Schritt:** Deine Tests und Rückmeldungen. Danach laufend: deine echten Fehler als Szenarien
+aufnehmen (PLAN.md, „Laufend“) und Ausgaben, die vom echten System abweichen, korrigieren.
 
 ## Fertig
 
@@ -56,6 +58,26 @@ Stand: 04.11.2026.
   DNS-Weiterleitung, DHCP-Bereich voll, Freigaberechte, NTFS-Rechte (icacls), Feature fehlt,
   Ereignisanzeige (wer hat neu gestartet), alte Logs löschen, RDP-Gruppe, Firewall-Port,
   Vertrauensstellung reparieren.
+
+### M4
+
+- Mehrere Rechner pro Szenario (Feld `rechner`): Wechsel per `ssh` (Linux) oder `Enter-PSSession`
+  (Windows), zurück mit `exit`/`Exit-PSSession`. Jeder Rechner hat eigenen Zustand und eigene Dateien;
+  Bedingungen können über Rechnergrenzen gehen (`srv-web01:php_aktiv`).
+- Ticket-Modus (Kachel 5 im Hauptmenü): Tickets mit Nummer, Absender, Dringlichkeit; Ticket schließen mit F3
+  und Lösungsnotiz (kommt in den Spielstand). Zwei Tickets über zwei Rechner:
+  „Webshop zeigt 502 Bad Gateway“ (PC → Linux-Webserver) und „Speichern auf Z: geht nicht“
+  (PC → Windows-Dateiserver, Schattenkopien).
+- MCP-Server `n3xtbyt3_mcp` (ohne Zusatzbibliotheken, nur stdin/stdout): Übersicht, Auswertung, Spielstand,
+  Szenarien lesen; Szenario-Entwurf anlegen (immer ungeprüft, prüft Format und Lösungsweg, überschreibt nichts).
+  GitHub Actions baut zusätzlich `N3XTBYT3-MCP.exe` und testet sie. Anleitung: `docs/mcp.md`.
+
+### Abnahme M4 (PLAN.md)
+
+- [x] Ein Ticket-Einsatz über zwei Rechner ist spielbar (automatischer Oberflächentest: Ticket öffnen,
+      per ssh auf den Server, Dienst starten, zurück, nachprüfen, mit Notiz schließen, Spielstand gespeichert)
+- [x] Der MCP-Server liefert die Auswertung eines Systems (automatischer Test und Selbsttest der MCP-.exe im CI)
+- [ ] **Tobi:** in Claude Desktop einrichten (`docs/mcp.md`) und fragen: „Wie ist meine Auswertung für Windows?“
 
 ### M3
 
@@ -148,6 +170,15 @@ Stand: 04.11.2026.
 - 04.11.2026: Lösungswege dürfen unter Linux Speicherschritte enthalten (`{"speichern": pfad, "inhalt": …}`),
   damit der automatische Test auch Szenarien mit Editor durchspielen kann.
 - 04.11.2026: Erklärungen als Liste von Zeilen werden zu Fließtext verbunden (leere Zeile = neuer Absatz).
+- 04.11.2026: Der MCP-Server ist ohne das offizielle MCP-Python-Paket gebaut (eigenes, kleines JSON-RPC über
+  stdin/stdout). Grund: keine zusätzliche Abhängigkeit, leicht zu prüfen, keine Netzwerkbibliotheken.
+  Er liegt als eigenes Paket `n3xtbyt3_mcp` neben `n3xtbyt3`; der Sicherheitstest prüft beide.
+- 04.11.2026: Szenario-Entwürfe über MCP landen direkt im Datenordner (`szenarien/<system>/`), damit Tobi sie
+  sofort sieht – immer „ungeprüft“, nur nach erfolgreicher Prüfung, nie überschreibend.
+- 04.11.2026: Tickets sind normale Szenarien mit Feld `ticket` (im Ordner ihres Startsystems). Grund: kein
+  zweites Format; dieselben Tests, Lernkartei und Auswertung gelten auch für Tickets.
+- 04.11.2026: Bei Tickets wird der Versuch erst beim Schließen (oder Verlassen) gespeichert, damit die
+  Lösungsnotiz dabei ist.
 - 04.11.2026: Zweig: Die Sitzung gibt den Arbeitszweig `claude/busy-turing-1n3hmy` vor. Ich pushe
   dorthin **und** nach `main` (laut `CLAUDE.md`), beide Stände bleiben gleich.
 
@@ -164,6 +195,9 @@ Stand: 04.11.2026.
 6. Linux und Linux Server: z. B. „Webserver startet nicht nach Änderung“ – Fehler mit `sudo nginx -t`
    finden, mit `sudo nano …` beheben (Strg+O, Strg+X), `sudo systemctl restart nginx`. Ist der Editor
    gut bedienbar? Stimmen die Ausgaben mit deinem Ubuntu überein?
-7. Befehls-Training ausprobieren: Sind die Fragen verständlich? Ist die Bewertung fair?
-8. Auf Abweichungen zum echten System achten (Ausgaben, Fehlermeldungen) und mir sagen,
+7. Tickets: Kachel 5 im Hauptmenü, „Webshop zeigt 502 Bad Gateway“ spielen (vom PC per
+   `ssh admin@srv-web01` auf den Server, zurück mit `exit`), am Ende F3 und eine kurze Notiz.
+8. Claude Desktop: MCP-Server nach `docs/mcp.md` einrichten und nach deiner Auswertung fragen.
+9. Befehls-Training ausprobieren: Sind die Fragen verständlich? Ist die Bewertung fair?
+10. Auf Abweichungen zum echten System achten (Ausgaben, Fehlermeldungen) und mir sagen,
    welches Szenario. Wenn alles stimmt: in der Datei `"pruefstatus": "bestaetigt"` setzen.

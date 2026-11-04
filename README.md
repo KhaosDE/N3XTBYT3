@@ -13,6 +13,7 @@ Fortschritt: `STAND.md` · Plan: `PLAN.md` · Regeln: `CLAUDE.md`
 1. Auf GitHub im Repository oben auf **Actions** klicken.
 2. Den neuesten grünen Lauf „Tests und Windows-Programm“ öffnen.
 3. Unten bei **Artifacts** auf **N3XTBYT3-Windows** klicken. Es kommt eine ZIP-Datei.
+   (Das zweite Artefakt **N3XTBYT3-MCP-Windows** brauchst du nur für Claude Desktop.)
 4. ZIP entpacken, `N3XTBYT3.exe` doppelklicken.
 5. Windows warnt beim ersten Start („Der Computer wurde durch Windows geschützt“), weil die
    Datei nicht signiert ist: **Weitere Informationen** → **Trotzdem ausführen**.
@@ -58,6 +59,12 @@ Außerdem in der Liste:
   Nächstes üben solltest. Sie liegt auch als Datei im Datenordner (`auswertung_<system>.md`),
   damit Claude sie lesen kann.
 
+**Tickets:** Die fünfte Kachel im Hauptmenü mischt Störungsmeldungen aus allen Systemen – mit
+Ticketnummer, Absender und Dringlichkeit. Manche gehen über mehrere Rechner: vom PC aus per
+`ssh admin@srv-web01` (Linux) oder `Enter-PSSession -ComputerName srv-datei01` (Windows) auf den
+Server, dort beheben, mit `exit` zurück, vom PC aus nachprüfen. Ist das Problem behoben, schließt
+**F3** das Ticket mit einer kurzen Lösungsnotiz.
+
 **Lernkartei:** Jedes Szenario und jeder Befehl liegt in einem Fach (1–5). Fach 1 kommt sofort
 wieder, Fach 2 nach einem Tag, Fach 3 nach drei, Fach 4 nach sieben, Fach 5 nach 14 Tagen.
 Ohne Hinweis gelöst → ein Fach weiter; nicht gelöst → zurück in Fach 1.
@@ -91,6 +98,11 @@ Echte Fehler, die du gelöst hast, werden zu neuen Übungen – ohne neue Progra
 Anleitung: [`docs/eigenes_szenario.md`](docs/eigenes_szenario.md).
 Vorlage: [`vorlagen/szenario_vorlage.json`](vorlagen/szenario_vorlage.json).
 Alle Felder: [`daten/szenarien/SCHEMA.md`](daten/szenarien/SCHEMA.md).
+
+## Mit Claude Desktop verbinden
+
+Ein kleiner MCP-Server lässt Claude Desktop deine Auswertung lesen und Szenario-Entwürfe anlegen
+(immer „ungeprüft“). Er läuft nur lokal, ohne Netzwerk. Anleitung: [`docs/mcp.md`](docs/mcp.md).
 
 ## Prüfen
 
