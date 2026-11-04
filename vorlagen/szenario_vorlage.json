@@ -1,0 +1,95 @@
+{
+  "_anleitung": "Vorlage für ein eigenes Szenario. Anleitung: docs/eigenes_szenario.md. Felder mit _ am Anfang sind Notizen und werden ignoriert – du kannst sie stehen lassen oder löschen.",
+
+  "id": "win-mein-fehler",
+  "_id": "Kurzname: nur Kleinbuchstaben, Ziffern, Bindestriche. Die Datei muss genauso heißen: win-mein-fehler.json",
+
+  "system": "windows",
+  "_system": "windows, windows_server, linux oder linux_server – und die Datei in den passenden Ordner legen",
+
+  "titel": "Kurzer Titel wie ein Ticket-Betreff",
+  "kategorie": "Netzwerk",
+  "_kategorie": "z. B. Netzwerk, Dienste, Drucker, Speicher, Benutzer, Prozesse, System",
+  "schwierigkeit": 1,
+  "_schwierigkeit": "1 leicht, 2 mittel, 3 schwer",
+
+  "pruefstatus": "bestaetigt",
+  "_pruefstatus": "bestaetigt = du hast den Fehler wirklich so gelöst. ungeprueft = noch nicht geprüft (Claude setzt immer ungeprueft).",
+  "quelle": "https://learn.microsoft.com/",
+  "_quelle": "Adresse der offiziellen Doku zum wichtigsten Befehl (Microsoft Learn, man-Page). Auch eine Liste geht.",
+  "datum": "2026-11-04",
+
+  "shell": "powershell",
+  "_shell": "Womit das Szenario startet: powershell oder cmd (Linux: bash)",
+
+  "ausgangslage": [
+    "Was hat der Nutzer gemeldet? Was stand auf dem Bildschirm?",
+    "Echte Fehlermeldungen wörtlich abschreiben. Namen und IP-Adressen ausdenken (192.168.x.x).",
+    "",
+    "Aufgabe: Was soll Tobi herausfinden und beheben?"
+  ],
+
+  "zustand": {
+    "dienst_beispiel": "Stopped"
+  },
+  "_zustand": "Startwerte. Für jeden Teil des Problems ein Schlüssel. Werte: Text, Zahl, true/false.",
+
+  "befehle": [
+    {
+      "muster": ["Get-Service Beispiel", "Get-Service -Name Beispiel"],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_beispiel": "Stopped"},
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Stopped  Beispiel           Beispieldienst",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  Beispiel           Beispieldienst",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Start-Service Beispiel", "Start-Service -Name Beispiel"],
+      "bedeutung": "Einen Dienst starten",
+      "faelle": [
+        {"setze": {"dienst_beispiel": "Running"}}
+      ],
+      "_faelle": "Ausgabe weglassen, wenn der echte Befehl nichts ausgibt."
+    }
+  ],
+  "_befehle": "Jeder Befehl, der im Szenario Sinn ergibt: zum Nachschauen UND zum Beheben. Ausgaben wörtlich vom echten System übernehmen (Screenshot/Kopie).",
+
+  "ziel": {"dienst_beispiel": "Running"},
+  "_ziel": "Wann ist das Problem gelöst? Schlüssel und Wert aus dem Zustand.",
+
+  "hinweise": [
+    "Stufe 1 – Richtung: Wo könnte das Problem liegen?",
+    "Stufe 2 – Werkzeug: Welcher Befehl hilft beim Nachschauen?",
+    "Stufe 3 – fast die Lösung: Welcher Befehl behebt es?"
+  ],
+
+  "erklaerung": [
+    "Was war die Ursache, warum hat die Lösung funktioniert?",
+    "Was merkt man sich für das nächste Mal?"
+  ],
+
+  "begriffe": {
+    "Dienst": "Ein Programm, das im Hintergrund läuft."
+  },
+  "_begriffe": "Fachbegriffe, die im Szenario vorkommen, mit einem Satz erklärt.",
+
+  "loesung": ["Get-Service Beispiel", "Start-Service Beispiel"],
+  "_loesung": "Die Befehle, mit denen du das Problem gelöst hast – genau wie in muster. Ein Test spielt sie durch."
+}

@@ -1,0 +1,156 @@
+{
+  "id": "win-netzwerkadapter-aus",
+  "system": "windows",
+  "titel": "Netzwerksymbol mit rotem Kreuz",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/netadapter/get-netadapter",
+    "https://learn.microsoft.com/powershell/module/netadapter/enable-netadapter"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Herr Neumann meldet: „Unten rechts ist beim Netzwerk ein rotes Kreuz. Gar nichts geht.“",
+    "Er hat gestern „ein paar Einstellungen aufgeräumt“. Das Kabel steckt fest, am Switch leuchtet der Anschluss.",
+    "",
+    "Aufgabe: Finde heraus, warum Windows keine Verbindung hat, und behebe es."
+  ],
+  "zustand": {
+    "adapter_aktiv": false
+  },
+  "befehle": [
+    {
+      "muster": ["ipconfig"],
+      "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
+      "faelle": [
+        {
+          "wenn": {"adapter_aktiv": false},
+          "ausgabe": ["", "Windows IP Configuration", ""]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . : firma.internal",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.10.61",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.10.1"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Get-NetAdapter"],
+      "bedeutung": "Netzwerkadapter und ihren Zustand anzeigen",
+      "faelle": [
+        {
+          "wenn": {"adapter_aktiv": false},
+          "ausgabe": [
+            "",
+            "Name                      InterfaceDescription                    ifIndex Status       MacAddress             LinkSpeed",
+            "----                      --------------------                    ------- ------       ----------             ---------",
+            "Ethernet                  Intel(R) Ethernet Connection I219-V          12 Disabled     00-1A-2B-3C-4D-61          0 bps",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                      InterfaceDescription                    ifIndex Status       MacAddress             LinkSpeed",
+            "----                      --------------------                    ------- ------       ----------             ---------",
+            "Ethernet                  Intel(R) Ethernet Connection I219-V          12 Up           00-1A-2B-3C-4D-61        1 Gbps",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Enable-NetAdapter -Name Ethernet", "Enable-NetAdapter Ethernet"],
+      "bedeutung": "Einen deaktivierten Netzwerkadapter einschalten",
+      "faelle": [{"setze": {"adapter_aktiv": true}}]
+    },
+    {
+      "muster": ["ping 192.168.10.1"],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [
+        {
+          "wenn": {"adapter_aktiv": false},
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.1 with 32 bytes of data:",
+            "PING: transmit failed. General failure.",
+            "PING: transmit failed. General failure.",
+            "PING: transmit failed. General failure.",
+            "PING: transmit failed. General failure.",
+            "",
+            "Ping statistics for 192.168.10.1:",
+            "    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),"
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.1 with 32 bytes of data:",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "",
+            "Ping statistics for 192.168.10.1:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["ipconfig /renew"],
+      "faelle": [
+        {
+          "wenn": {"adapter_aktiv": false},
+          "sim": true,
+          "ausgabe": "Ohne aktiven Adapter gibt es nichts zu erneuern – ipconfig findet keinen Adapter, der eine Adresse holen könnte."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . : firma.internal",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.10.61",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.10.1"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {"adapter_aktiv": true},
+  "hinweise": [
+    "„ipconfig“ zeigt gar keinen Adapter an. Ist der Netzwerkadapter überhaupt eingeschaltet?",
+    "„Get-NetAdapter“ listet alle Netzwerkadapter mit ihrem Status auf.",
+    "Der Adapter „Ethernet“ ist deaktiviert. Schalte ihn ein: „Enable-NetAdapter -Name Ethernet“."
+  ],
+  "erklaerung": [
+    "Der Netzwerkadapter war in Windows deaktiviert (Status „Disabled“). Ein deaktivierter Adapter",
+    "taucht in „ipconfig“ gar nicht auf – das ist ein guter Hinweis. „Get-NetAdapter“ zeigt ihn trotzdem.",
+    "„Enable-NetAdapter -Name Ethernet“ schaltet ihn wieder ein; danach holt er sich per DHCP eine Adresse",
+    "und der Status ist „Up“. „PING: transmit failed. General failure.“ bedeutet: Windows konnte das Paket",
+    "gar nicht erst losschicken."
+  ],
+  "begriffe": {
+    "Netzwerkadapter": "Die Netzwerkkarte (oder WLAN-Karte) im PC. In Windows kann man sie ein- und ausschalten.",
+    "Status Disabled / Up": "Disabled = in Windows ausgeschaltet. Up = eingeschaltet und verbunden. Disconnected = an, aber kein Kabel/Signal.",
+    "LinkSpeed": "Geschwindigkeit der Verbindung zum Switch, z. B. 1 Gbps."
+  },
+  "loesung": ["ipconfig", "Get-NetAdapter", "Enable-NetAdapter -Name Ethernet", "ping 192.168.10.1"]
+}

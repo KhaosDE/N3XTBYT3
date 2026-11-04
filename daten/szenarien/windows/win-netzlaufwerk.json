@@ -1,0 +1,161 @@
+{
+  "id": "win-netzlaufwerk",
+  "system": "windows",
+  "titel": "Netzlaufwerk Z: fehlt",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/troubleshoot/windows-client/networking/system-error-85-net-use-command",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/new-psdrive"
+  ],
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Herr Krüger: „Mein Laufwerk Z: mit den Projektdaten ist weg! Da ist nur noch ein rotes Kreuz.“",
+    "Am Wochenende hat die IT den alten Dateiserver SRV-ALT ersetzt. Der neue heißt SRV-DATEI01,",
+    "die Freigabe heißt wie vorher „Daten“.",
+    "Du arbeitest in einer normalen Eingabeaufforderung als Herr Krüger (ohne Administratorrechte) – mit Absicht.",
+    "",
+    "Aufgabe: Verbinde Z: wieder mit der Freigabe – diesmal auf dem neuen Server, und so, dass es nach einem Neustart bleibt."
+  ],
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger",
+    "laufwerk_z": "alt"
+  },
+  "befehle": [
+    {
+      "muster": ["net use"],
+      "bedeutung": "Verbundene Netzlaufwerke anzeigen",
+      "faelle": [
+        {
+          "wenn": {"laufwerk_z": "alt"},
+          "ausgabe": [
+            "New connections will be remembered.",
+            "",
+            "",
+            "Status       Local     Remote                    Network",
+            "",
+            "-------------------------------------------------------------------------------",
+            "Unavailable  Z:        \\\\SRV-ALT\\Daten            Microsoft Windows Network",
+            "The command completed successfully.",
+            ""
+          ]
+        },
+        {
+          "wenn": {"laufwerk_z": "leer"},
+          "ausgabe": ["New connections will be remembered.", "", "There are no entries in the list.", ""]
+        },
+        {
+          "ausgabe": [
+            "New connections will be remembered.",
+            "",
+            "",
+            "Status       Local     Remote                    Network",
+            "",
+            "-------------------------------------------------------------------------------",
+            "OK           Z:        \\\\SRV-DATEI01\\Daten        Microsoft Windows Network",
+            "The command completed successfully.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["ping SRV-ALT"],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [{"ausgabe": "Ping request could not find host SRV-ALT. Please check the name and try again."}]
+    },
+    {
+      "muster": ["ping SRV-DATEI01"],
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Pinging SRV-DATEI01.firma.internal [192.168.10.12] with 32 bytes of data:",
+          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.12: bytes=32 time<1ms TTL=128",
+          "",
+          "Ping statistics for 192.168.10.12:",
+          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+          "Approximate round trip times in milli-seconds:",
+          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+        ]
+      }]
+    },
+    {
+      "muster": ["net use Z: /delete", "net use Z: /d"],
+      "bedeutung": "Eine Netzlaufwerk-Verbindung trennen",
+      "faelle": [
+        {
+          "wenn": {"laufwerk_z": "leer"},
+          "ausgabe": ["The network connection could not be found.", "", "More help is available by typing NET HELPMSG 2250.", ""]
+        },
+        {
+          "setze": {"laufwerk_z": "leer"},
+          "ausgabe": ["Z: was deleted successfully.", ""]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net use Z: \\\\SRV-DATEI01\\Daten /persistent:yes",
+        "net use Z: \\\\SRV-DATEI01\\Daten /p:yes",
+        "net use Z: \\\\SRV-DATEI01\\Daten"
+      ],
+      "bedeutung": "Ein Netzlaufwerk verbinden (/persistent:yes = nach Neustart wieder da)",
+      "faelle": [
+        {
+          "wenn": {"laufwerk_z": {"nicht": "leer"}},
+          "ausgabe": ["System error 85 has occurred.", "", "The local device name is already in use.", ""]
+        },
+        {
+          "setze": {"laufwerk_z": "neu"},
+          "ausgabe": ["The command completed successfully.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["net use Z: \\\\SRV-ALT\\Daten", "net use Z: \\\\SRV-ALT\\Daten /persistent:yes"],
+      "faelle": [
+        {
+          "wenn": {"laufwerk_z": {"nicht": "leer"}},
+          "ausgabe": ["System error 85 has occurred.", "", "The local device name is already in use.", ""]
+        },
+        {
+          "sim": true,
+          "ausgabe": "Den Server SRV-ALT gibt es nicht mehr – die Verbindung schlägt fehl. (Fehlertext hier nicht nachgebaut.)"
+        }
+      ]
+    }
+  ],
+  "ziel": {"laufwerk_z": "neu"},
+  "hinweise": [
+    "Welche Netzlaufwerke kennt Windows, und wohin zeigt Z: noch? Erst schauen, dann ändern.",
+    "„net use“ zeigt alle Verbindungen. Ein Laufwerksbuchstabe kann nur einmal belegt sein – die alte Verbindung muss erst weg („/delete“).",
+    "„net use Z: /delete“, danach „net use Z: \\\\SRV-DATEI01\\Daten /persistent:yes“."
+  ],
+  "erklaerung": [
+    "Z: zeigte noch auf den alten Server \\\\SRV-ALT\\Daten, den es nicht mehr gibt (Status „Unavailable“).",
+    "Solange diese Verbindung gespeichert ist, ist der Buchstabe Z: belegt – darum Systemfehler 85",
+    "(„The local device name is already in use“). Erst „net use Z: /delete“, dann neu verbinden mit",
+    "„/persistent:yes“, damit Windows es sich über den Neustart merkt.",
+    "Wichtig: Netzlaufwerke gehören zum Benutzer und zur Sitzung. Verbindest du sie in einer Konsole „Als Administrator“,",
+    "sieht der Benutzer sie im Explorer nicht. Darum hier bewusst ohne Administratorrechte."
+  ],
+  "begriffe": {
+    "Netzlaufwerk": "Ein Laufwerksbuchstabe (z. B. Z:), der auf einen freigegebenen Ordner auf einem anderen Rechner zeigt.",
+    "UNC-Pfad": "Schreibweise für Netzwerkpfade: \\\\Server\\Freigabe, z. B. \\\\SRV-DATEI01\\Daten.",
+    "Freigabe": "Ein Ordner auf einem Server, der für andere im Netzwerk freigegeben ist.",
+    "/persistent:yes": "Die Verbindung wird gespeichert und nach der nächsten Anmeldung wiederhergestellt."
+  },
+  "loesung": [
+    "net use",
+    "net use Z: \\\\SRV-DATEI01\\Daten /persistent:yes",
+    "net use Z: /delete",
+    "net use Z: \\\\SRV-DATEI01\\Daten /persistent:yes",
+    "net use"
+  ]
+}

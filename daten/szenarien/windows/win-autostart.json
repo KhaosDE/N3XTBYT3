@@ -1,0 +1,197 @@
+{
+  "id": "win-autostart",
+  "system": "windows",
+  "titel": "PC startet langsam – unbekanntes Programm im Autostart",
+  "kategorie": "System",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/reg-query",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/reg-delete",
+    "https://learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys"
+  ],
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Frau Berger: „Seit ich letzte Woche ein PDF-Programm aus dem Internet installiert habe, dauert das Hochfahren ewig.",
+    "Und nach dem Anmelden poppt jedes Mal eine ‚SuperToolbar‘ auf.“",
+    "Das PDF-Programm ist schon deinstalliert, aber der Starteintrag für die Toolbar ist geblieben.",
+    "",
+    "Aufgabe: Finde den Autostart-Eintrag der Toolbar in der Registrierung und entferne nur ihn."
+  ],
+  "zustand": {
+    "autostart_toolbar": true,
+    "autostart_onedrive": true
+  },
+  "befehle": [
+    {
+      "muster": [
+        "reg query HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "reg query HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+      ],
+      "bedeutung": "Werte eines Registrierungsschlüssels anzeigen",
+      "faelle": [
+        {
+          "wenn": {"autostart_toolbar": true, "autostart_onedrive": true},
+          "ausgabe": [
+            "",
+            "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "    OneDrive    REG_SZ    \"C:\\Users\\mberger\\AppData\\Local\\Microsoft\\OneDrive\\OneDrive.exe\" /background",
+            "    SuperToolbarUpdater    REG_SZ    C:\\Users\\mberger\\AppData\\Roaming\\SuperToolbar\\updater.exe /silent",
+            ""
+          ]
+        },
+        {
+          "wenn": {"autostart_toolbar": true},
+          "ausgabe": [
+            "",
+            "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "    SuperToolbarUpdater    REG_SZ    C:\\Users\\mberger\\AppData\\Roaming\\SuperToolbar\\updater.exe /silent",
+            ""
+          ]
+        },
+        {
+          "wenn": {"autostart_onedrive": true},
+          "ausgabe": [
+            "",
+            "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "    OneDrive    REG_SZ    \"C:\\Users\\mberger\\AppData\\Local\\Microsoft\\OneDrive\\OneDrive.exe\" /background",
+            ""
+          ]
+        },
+        {
+          "ausgabe": ["", "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", ""]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+      ],
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+          "    SecurityHealth    REG_EXPAND_SZ    %windir%\\system32\\SecurityHealthSystray.exe",
+          ""
+        ]
+      }]
+    },
+    {
+      "muster": [
+        "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater /f",
+        "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater /f"
+      ],
+      "bedeutung": "Einen Wert aus der Registrierung löschen (/f = ohne Rückfrage)",
+      "faelle": [
+        {
+          "wenn": {"autostart_toolbar": true},
+          "setze": {"autostart_toolbar": false},
+          "ausgabe": ["The operation completed successfully.", ""]
+        },
+        {
+          "fehler": true,
+          "ausgabe": ["ERROR: The system was unable to find the specified registry key or value.", ""]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater",
+        "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater"
+      ],
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Ohne /f fragt reg nach, ob der Wert wirklich gelöscht werden soll (Yes/No). Rückfragen sind hier nicht nachgebaut – hänge /f an."
+      }]
+    },
+    {
+      "muster": [
+        "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v OneDrive /f",
+        "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v OneDrive /f"
+      ],
+      "falsch": true,
+      "warum": "OneDrive ist ein normaler, gewollter Autostart-Eintrag (Synchronisierung der Dateien). Entferne nur den unbekannten Toolbar-Eintrag.",
+      "faelle": [{"setze": {"autostart_onedrive": false}, "ausgabe": ["The operation completed successfully.", ""]}]
+    },
+    {
+      "muster": [
+        "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /f",
+        "reg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /f"
+      ],
+      "falsch": true,
+      "warum": "Ohne /v löscht reg den ganzen Schlüssel „Run“ mit allen Einträgen. Immer nur den einen Wert mit /v <Name> löschen.",
+      "faelle": [{"sim": true, "ausgabe": "Stopp: Das würde den ganzen Run-Schlüssel löschen. In der Simulation nicht ausgeführt."}]
+    },
+    {
+      "muster": [
+        "Get-ItemProperty HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "Get-ItemProperty -Path HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+      ],
+      "bedeutung": "Werte eines Registrierungsschlüssels anzeigen (PowerShell)",
+      "faelle": [
+        {
+          "wenn": {"autostart_toolbar": true},
+          "ausgabe": [
+            "",
+            "OneDrive            : \"C:\\Users\\mberger\\AppData\\Local\\Microsoft\\OneDrive\\OneDrive.exe\" /background",
+            "SuperToolbarUpdater : C:\\Users\\mberger\\AppData\\Roaming\\SuperToolbar\\updater.exe /silent",
+            "PSPath              : Microsoft.PowerShell.Core\\Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "PSParentPath        : Microsoft.PowerShell.Core\\Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion",
+            "PSChildName         : Run",
+            "PSDrive             : HKCU",
+            "PSProvider          : Microsoft.PowerShell.Core\\Registry",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "OneDrive     : \"C:\\Users\\mberger\\AppData\\Local\\Microsoft\\OneDrive\\OneDrive.exe\" /background",
+            "PSPath       : Microsoft.PowerShell.Core\\Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "PSParentPath : Microsoft.PowerShell.Core\\Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion",
+            "PSChildName  : Run",
+            "PSDrive      : HKCU",
+            "PSProvider   : Microsoft.PowerShell.Core\\Registry",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Remove-ItemProperty -Path HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -Name SuperToolbarUpdater",
+        "Remove-ItemProperty HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -Name SuperToolbarUpdater"
+      ],
+      "bedeutung": "Einen Wert aus der Registrierung löschen (PowerShell)",
+      "faelle": [{"setze": {"autostart_toolbar": false}}]
+    }
+  ],
+  "ziel": {"autostart_toolbar": false},
+  "hinweise": [
+    "Programme, die bei der Anmeldung starten, stehen oft in der Registrierung im Schlüssel „Run“ des Benutzers.",
+    "Der Schlüssel heißt HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run. Anzeigen mit „reg query“, löschen mit „reg delete … /v <Name> /f“.",
+    "„reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater /f“."
+  ],
+  "erklaerung": [
+    "Windows startet bei der Anmeldung alles, was im Run-Schlüssel steht: für alle Benutzer unter HKLM,",
+    "für den angemeldeten Benutzer unter HKCU. Die Toolbar hatte sich in HKCU\\…\\Run eingetragen.",
+    "„reg query“ zeigt die Einträge, „reg delete … /v SuperToolbarUpdater /f“ löscht genau diesen einen Wert.",
+    "Vorsicht: Ohne „/v“ würde der ganze Schlüssel gelöscht. OneDrive und SecurityHealth sind normale Einträge und bleiben.",
+    "Im Alltag geht dasselbe auch im Task-Manager unter „Autostart“."
+  ],
+  "begriffe": {
+    "Registrierung (Registry)": "Die zentrale Einstellungsdatenbank von Windows, aufgebaut aus Schlüsseln (wie Ordner) und Werten.",
+    "HKCU / HKLM": "HKEY_CURRENT_USER (Einstellungen des angemeldeten Benutzers) / HKEY_LOCAL_MACHINE (Einstellungen für den ganzen PC).",
+    "Run-Schlüssel": "Registrierungsschlüssel, dessen Einträge Windows bei jeder Anmeldung startet.",
+    "REG_SZ": "Ein Registrierungswert vom Typ Text."
+  },
+  "loesung": [
+    "reg query HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+    "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SuperToolbarUpdater /f",
+    "reg query HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+  ]
+}

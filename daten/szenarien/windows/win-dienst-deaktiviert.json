@@ -1,0 +1,162 @@
+{
+  "id": "win-dienst-deaktiviert",
+  "system": "windows",
+  "titel": "Kein Ton – Audiodienst startet nicht",
+  "kategorie": "Dienste",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/set-service",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/start-service",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/sc-config",
+    "https://learn.microsoft.com/windows/win32/debug/system-error-codes--1000-1299-"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Herr Krüger hat ein „Tuning-Programm“ laufen lassen, damit der PC schneller wird.",
+    "Seitdem: kein Ton mehr. Unten rechts am Lautsprecher-Symbol steht ein rotes Kreuz:",
+    "„Der Audiodienst wird nicht ausgeführt.“",
+    "Der Dienst heißt „Windows Audio“, sein Kurzname ist Audiosrv.",
+    "",
+    "Aufgabe: Bring den Audiodienst zum Laufen – und zwar so, dass er auch nach dem nächsten Neustart wieder startet."
+  ],
+  "zustand": {
+    "dienst_audio": "Stopped",
+    "starttyp_audio": "Disabled"
+  },
+  "befehle": [
+    {
+      "muster": ["Get-Service Audiosrv", "Get-Service -Name Audiosrv"],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_audio": "Running"},
+          "ausgabe": ["", "Status   Name               DisplayName", "------   ----               -----------", "Running  Audiosrv           Windows Audio", ""]
+        },
+        {
+          "ausgabe": ["", "Status   Name               DisplayName", "------   ----               -----------", "Stopped  Audiosrv           Windows Audio", ""]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Service Audiosrv | Select-Object Name, Status, StartType",
+        "Get-Service Audiosrv | Select-Object Name,Status,StartType",
+        "Get-Service -Name Audiosrv | Select-Object Name, Status, StartType",
+        "Get-Service -Name Audiosrv | Select-Object Name,Status,StartType",
+        "Get-Service Audiosrv | Select-Object *",
+        "Get-Service Audiosrv | Format-List *"
+      ],
+      "bedeutung": "Status und Starttyp eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_audio": "Stopped", "starttyp_audio": "Disabled"},
+          "ausgabe": ["", "Name      Status StartType", "----      ------ ---------", "Audiosrv Stopped  Disabled", ""]
+        },
+        {
+          "wenn": {"dienst_audio": "Stopped", "starttyp_audio": "Manual"},
+          "ausgabe": ["", "Name      Status StartType", "----      ------ ---------", "Audiosrv Stopped    Manual", ""]
+        },
+        {
+          "wenn": {"dienst_audio": "Stopped"},
+          "ausgabe": ["", "Name      Status StartType", "----      ------ ---------", "Audiosrv Stopped Automatic", ""]
+        },
+        {
+          "wenn": {"starttyp_audio": "Manual"},
+          "ausgabe": ["", "Name      Status StartType", "----      ------ ---------", "Audiosrv Running    Manual", ""]
+        },
+        {
+          "ausgabe": ["", "Name      Status StartType", "----      ------ ---------", "Audiosrv Running Automatic", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Start-Service Audiosrv", "Start-Service -Name Audiosrv"],
+      "bedeutung": "Einen Dienst starten",
+      "faelle": [
+        {
+          "wenn": {"starttyp_audio": "Disabled"},
+          "fehler": true,
+          "ausgabe": "Start-Service : Service 'Windows Audio (Audiosrv)' cannot be started due to the following error: Cannot start service Audiosrv on computer '.'."
+        },
+        {"setze": {"dienst_audio": "Running"}}
+      ]
+    },
+    {
+      "muster": ["net start audiosrv"],
+      "bedeutung": "Einen Dienst starten (cmd)",
+      "faelle": [
+        {
+          "wenn": {"starttyp_audio": "Disabled"},
+          "ausgabe": [
+            "System error 1058 has occurred.",
+            "",
+            "The service cannot be started, either because it is disabled or because it has no enabled devices associated with it.",
+            ""
+          ]
+        },
+        {
+          "wenn": {"dienst_audio": "Running"},
+          "ausgabe": ["The requested service has already been started.", "", "More help is available by typing NET HELPMSG 2182.", ""]
+        },
+        {
+          "setze": {"dienst_audio": "Running"},
+          "ausgabe": ["The Windows Audio service is starting.", "The Windows Audio service was started successfully.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Set-Service -Name Audiosrv -StartupType Automatic", "Set-Service Audiosrv -StartupType Automatic"],
+      "bedeutung": "Starttyp eines Dienstes ändern",
+      "faelle": [{"setze": {"starttyp_audio": "Automatic"}}]
+    },
+    {
+      "muster": ["Set-Service -Name Audiosrv -StartupType Manual", "Set-Service Audiosrv -StartupType Manual"],
+      "faelle": [{"setze": {"starttyp_audio": "Manual"}}]
+    },
+    {
+      "muster": ["sc config audiosrv start= auto"],
+      "shell": "cmd",
+      "bedeutung": "Starttyp eines Dienstes ändern (cmd, Leerzeichen nach start=)",
+      "faelle": [{"setze": {"starttyp_audio": "Automatic"}, "ausgabe": "[SC] ChangeServiceConfig SUCCESS"}]
+    },
+    {
+      "muster": ["sc.exe config audiosrv start= auto"],
+      "bedeutung": "Starttyp eines Dienstes ändern (sc.exe, Leerzeichen nach start=)",
+      "faelle": [{"setze": {"starttyp_audio": "Automatic"}, "ausgabe": "[SC] ChangeServiceConfig SUCCESS"}]
+    },
+    {
+      "muster": ["sc config audiosrv start=auto", "sc.exe config audiosrv start=auto"],
+      "falsch": true,
+      "warum": "Bei sc gehört nach dem Gleichheitszeichen ein Leerzeichen: „start= auto“. Ohne Leerzeichen schlägt der Befehl fehl (steht so in der Microsoft-Doku zu sc.exe config).",
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Fehlgeschlagen: Bei sc steht nach „start=“ ein Leerzeichen. Richtig: start= auto"
+      }]
+    }
+  ],
+  "ziel": {"dienst_audio": "Running", "starttyp_audio": "Automatic"},
+  "hinweise": [
+    "Prüfe den Dienst Audiosrv: Läuft er? Und wie ist eingestellt, wann er starten darf (Starttyp)?",
+    "„Get-Service Audiosrv | Select-Object Name, Status, StartType“ zeigt auch den Starttyp. Ein Dienst mit Starttyp „Disabled“ lässt sich nicht starten. Den Starttyp ändert „Set-Service“.",
+    "Erst „Set-Service -Name Audiosrv -StartupType Automatic“, dann „Start-Service Audiosrv“."
+  ],
+  "erklaerung": [
+    "Das Tuning-Programm hat den Dienst „Windows Audio“ auf den Starttyp „Disabled“ (deaktiviert) gesetzt.",
+    "Ein deaktivierter Dienst lässt sich nicht starten – darum der Fehler bei Start-Service bzw. Systemfehler 1058 bei net start.",
+    "Lösung in zwei Schritten: Starttyp zurück auf „Automatic“ (startet mit Windows), dann den Dienst jetzt starten.",
+    "In cmd geht der erste Schritt mit „sc config audiosrv start= auto“ – mit Leerzeichen nach dem „=“."
+  ],
+  "begriffe": {
+    "Starttyp": "Legt fest, wann ein Dienst startet: Automatic (mit Windows), Manual (bei Bedarf), Disabled (nie).",
+    "Status": "Ob ein Dienst gerade läuft (Running) oder nicht (Stopped).",
+    "Systemfehler 1058": "„The service cannot be started, either because it is disabled …“ – der Dienst ist deaktiviert.",
+    "Pipe ( | )": "Gibt das Ergebnis eines Befehls an den nächsten weiter, z. B. an Select-Object zum Auswählen von Spalten."
+  },
+  "loesung": [
+    "Get-Service Audiosrv | Select-Object Name, Status, StartType",
+    "Start-Service Audiosrv",
+    "Set-Service -Name Audiosrv -StartupType Automatic",
+    "Start-Service Audiosrv"
+  ]
+}

@@ -47,6 +47,7 @@ class Fall:
     setze: dict[str, Any] | None = None
     fehler: bool = False
     aktion: str | None = None
+    sim: bool = False  # Ausgabe ist eine Meldung der Simulation, kein echter Systemtext
 
 
 @dataclass
@@ -202,7 +203,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
                 fehler.append(f"{fstelle}: muss ein Objekt sein.")
                 continue
             for k in f:
-                if k not in {"wenn", "ausgabe", "setze", "fehler", "aktion"} and not k.startswith("_"):
+                if k not in {"wenn", "ausgabe", "setze", "fehler", "aktion", "sim"} and not k.startswith("_"):
                     fehler.append(f"{fstelle}: unbekanntes Feld „{k}“.")
             ausgabe = _text(f.get("ausgabe", ""))
             if ausgabe is None:
@@ -218,6 +219,10 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
             if not isinstance(ist_fehler, bool):
                 fehler.append(f"{fstelle}.fehler: muss true oder false sein.")
                 ist_fehler = False
+            ist_sim = f.get("sim", False)
+            if not isinstance(ist_sim, bool):
+                fehler.append(f"{fstelle}.sim: muss true oder false sein.")
+                ist_sim = False
             aktion = f.get("aktion")
             if aktion is not None:
                 gueltig = isinstance(aktion, str) and (
@@ -229,7 +234,8 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
                         f"{fstelle}.aktion: erlaubt sind leeren, exit, hilfe, wechsel:<shell>."
                     )
                     aktion = None
-            faelle.append(Fall(ausgabe=ausgabe, wenn=wenn, setze=setze, fehler=ist_fehler, aktion=aktion))
+            faelle.append(Fall(ausgabe=ausgabe, wenn=wenn, setze=setze, fehler=ist_fehler,
+                               aktion=aktion, sim=ist_sim))
         vorbereitet = [vergleicher.vorbereiten(m) for m in muster]
         namen = frozenset(v[0].name for v in vorbereitet if v)
         befehle.append(Befehl(

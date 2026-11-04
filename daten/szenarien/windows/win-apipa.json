@@ -1,0 +1,159 @@
+{
+  "id": "win-apipa",
+  "system": "windows",
+  "titel": "Kein Netzwerk nach Router-Neustart",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Im Büro wurde heute früh der Router neu gestartet.",
+    "Seitdem hat der PC von Herrn Krüger kein Netzwerk: kein Internet, kein Drucker, keine Netzlaufwerke.",
+    "Die anderen PCs gehen wieder. Kabel steckt, die Lampe am Netzwerkanschluss leuchtet.",
+    "",
+    "Aufgabe: Finde heraus, was mit der Netzwerkeinstellung los ist, und hol den PC zurück ins Netz."
+  ],
+  "zustand": {
+    "ip_apipa": true,
+    "freigegeben": false
+  },
+  "befehle": [
+    {
+      "muster": ["ipconfig"],
+      "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
+      "faelle": [
+        {
+          "wenn": {"freigegeben": true},
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . :",
+            "   Default Gateway . . . . . . . . . :"
+          ]
+        },
+        {
+          "wenn": {"ip_apipa": true},
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . :",
+            "   Autoconfiguration IPv4 Address. . : 169.254.38.112",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.0.0",
+            "   Default Gateway . . . . . . . . . :"
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "",
+            "Ethernet adapter Ethernet:",
+            "",
+            "   Connection-specific DNS Suffix  . :",
+            "   IPv4 Address. . . . . . . . . . . : 192.168.1.34",
+            "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+            "   Default Gateway . . . . . . . . . : 192.168.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["ping 192.168.1.1"],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [
+        {
+          "wenn": {"ip_apipa": false, "freigegeben": false},
+          "ausgabe": [
+            "",
+            "Pinging 192.168.1.1 with 32 bytes of data:",
+            "Reply from 192.168.1.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.1.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.1.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.1.1: bytes=32 time<1ms TTL=64",
+            "",
+            "Ping statistics for 192.168.1.1:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        },
+        {
+          "sim": true,
+          "ausgabe": "Der Router antwortet nicht – der PC hat keine Adresse aus dem Netz 192.168.1.x und kein Gateway. (Den genauen Fehlertext zeigt die Simulation hier nicht.)"
+        }
+      ]
+    },
+    {
+      "muster": ["ipconfig /release"],
+      "bedeutung": "Die per DHCP bezogene IP-Adresse zurückgeben",
+      "faelle": [{
+        "setze": {"freigegeben": true},
+        "ausgabe": [
+          "",
+          "Windows IP Configuration",
+          "",
+          "",
+          "Ethernet adapter Ethernet:",
+          "",
+          "   Connection-specific DNS Suffix  . :",
+          "   Default Gateway . . . . . . . . . :"
+        ]
+      }]
+    },
+    {
+      "muster": ["ipconfig /renew"],
+      "bedeutung": "Beim DHCP-Server eine neue IP-Adresse anfordern",
+      "faelle": [{
+        "setze": {"ip_apipa": false, "freigegeben": false},
+        "ausgabe": [
+          "",
+          "Windows IP Configuration",
+          "",
+          "",
+          "Ethernet adapter Ethernet:",
+          "",
+          "   Connection-specific DNS Suffix  . :",
+          "   IPv4 Address. . . . . . . . . . . : 192.168.1.34",
+          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+          "   Default Gateway . . . . . . . . . : 192.168.1.1"
+        ]
+      }]
+    },
+    {
+      "muster": ["ipconfig /flushdns"],
+      "faelle": [{
+        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
+      }]
+    }
+  ],
+  "ziel": {"ip_apipa": false, "freigegeben": false},
+  "hinweise": [
+    "Schau dir zuerst die IP-Adresse des PCs an. Passt sie zum Netz der anderen Geräte (192.168.1.x)?",
+    "Eine Adresse 169.254.x.x vergibt Windows sich selbst, wenn kein DHCP-Server geantwortet hat. Mit „ipconfig“ kannst du eine neue Adresse anfordern.",
+    "Fordere die Adresse neu an: „ipconfig /renew“ (vorher geht auch „ipconfig /release“)."
+  ],
+  "erklaerung": [
+    "Als der Router neu startete, war sein DHCP-Server kurz nicht erreichbar. Der PC bekam keine Adresse",
+    "und gab sich selbst eine aus dem Bereich 169.254.x.x (APIPA). Damit erreicht er niemanden im Netz.",
+    "„ipconfig /renew“ fragt den DHCP-Server erneut. Jetzt antwortet er, und der PC bekommt 192.168.1.34",
+    "mit Gateway 192.168.1.1. Merke: 169.254.x.x heißt fast immer „DHCP hat nicht geklappt“."
+  ],
+  "begriffe": {
+    "DHCP": "Dienst (meist im Router oder Server), der Geräten automatisch IP-Adresse, Gateway und DNS-Server gibt.",
+    "APIPA": "Automatic Private IP Addressing: Windows gibt sich selbst eine 169.254.x.x-Adresse, wenn kein DHCP-Server antwortet.",
+    "Gateway (Standardgateway)": "Der Router, über den der PC alles erreicht, was nicht im eigenen Netz liegt.",
+    "Subnetzmaske": "Legt fest, welche Adressen zum eigenen Netz gehören (255.255.255.0 = die ersten drei Zahlen sind gleich)."
+  },
+  "loesung": ["ipconfig", "ipconfig /release", "ipconfig /renew", "ping 192.168.1.1"]
+}

@@ -1,0 +1,159 @@
+{
+  "id": "win-programm-haengt",
+  "system": "windows",
+  "titel": "Excel reagiert nicht mehr",
+  "kategorie": "Prozesse",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/tasklist",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/taskkill",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/stop-process"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Bei Herrn Neumann ist Excel eingefroren: „Keine Rückmeldung“ im Fenstertitel, seit zehn Minuten.",
+    "Schließen über das X geht nicht. Seine anderen Programme (Outlook, Word) laufen normal und",
+    "haben ungespeicherte Arbeit – die sollen offen bleiben.",
+    "",
+    "Aufgabe: Finde den hängenden Prozess und beende gezielt nur ihn."
+  ],
+  "zustand": {
+    "excel_laeuft": true
+  },
+  "befehle": [
+    {
+      "muster": ["tasklist /FI \"STATUS eq NOT RESPONDING\""],
+      "bedeutung": "Prozesse anzeigen, die nicht reagieren",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K"
+          ]
+        },
+        {"ausgabe": "INFO: No tasks are running which match the specified criteria."}
+      ]
+    },
+    {
+      "muster": ["tasklist /FI \"IMAGENAME eq EXCEL.EXE\""],
+      "bedeutung": "Prozesse eines Programms anzeigen",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K"
+          ]
+        },
+        {"ausgabe": "INFO: No tasks are running which match the specified criteria."}
+      ]
+    },
+    {
+      "muster": ["taskkill /IM EXCEL.EXE"],
+      "bedeutung": "Ein Programm bitten, sich zu beenden",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "ausgabe": "SUCCESS: Sent termination signal to the process \"EXCEL.EXE\" with PID 6420."
+        },
+        {"ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."}
+      ]
+    },
+    {
+      "muster": ["taskkill /IM EXCEL.EXE /F", "taskkill /F /IM EXCEL.EXE"],
+      "bedeutung": "Ein Programm erzwungen beenden (nach Name)",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "setze": {"excel_laeuft": false},
+          "ausgabe": "SUCCESS: The process \"EXCEL.EXE\" with PID 6420 has been terminated."
+        },
+        {"ausgabe": "ERROR: The process \"EXCEL.EXE\" not found."}
+      ]
+    },
+    {
+      "muster": ["taskkill /PID 6420 /F"],
+      "bedeutung": "Ein Programm erzwungen beenden (nach Prozess-ID)",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "setze": {"excel_laeuft": false},
+          "ausgabe": "SUCCESS: The process with PID 6420 has been terminated."
+        },
+        {"ausgabe": "ERROR: The process \"6420\" not found."}
+      ]
+    },
+    {
+      "muster": ["taskkill /PID 6420"],
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "ausgabe": "SUCCESS: Sent termination signal to the process with PID 6420."
+        },
+        {"ausgabe": "ERROR: The process \"6420\" not found."}
+      ]
+    },
+    {
+      "muster": ["Get-Process EXCEL", "Get-Process -Name EXCEL"],
+      "bedeutung": "Prozesse eines Programms anzeigen (PowerShell)",
+      "faelle": [
+        {
+          "wenn": {"excel_laeuft": true},
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            ""
+          ]
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Get-Process : Cannot find a process with the name \"EXCEL\". Verify the process name and call the cmdlet again."
+        }
+      ]
+    },
+    {
+      "muster": ["Stop-Process -Name EXCEL -Force", "Stop-Process -Id 6420 -Force"],
+      "bedeutung": "Einen Prozess erzwungen beenden (PowerShell)",
+      "faelle": [{"setze": {"excel_laeuft": false}}]
+    },
+    {
+      "muster": ["taskkill /IM OUTLOOK.EXE /F", "taskkill /IM WINWORD.EXE /F", "Stop-Process -Name OUTLOOK -Force", "Stop-Process -Name WINWORD -Force"],
+      "falsch": true,
+      "warum": "Outlook und Word laufen normal und haben ungespeicherte Arbeit. Beende nur den Prozess, der hängt.",
+      "faelle": [{"sim": true, "ausgabe": "Stopp: Das würde ein funktionierendes Programm mit ungespeicherter Arbeit beenden. In der Simulation nicht ausgeführt."}]
+    }
+  ],
+  "ziel": {"excel_laeuft": false},
+  "hinweise": [
+    "Ein Programm, das nicht reagiert, ist ein Prozess, der hängt. Finde ihn in der Prozessliste.",
+    "„tasklist“ zeigt Prozesse an; mit dem Filter /FI \"STATUS eq NOT RESPONDING\" nur die, die nicht reagieren. Beenden geht mit „taskkill“.",
+    "„taskkill /IM EXCEL.EXE /F“ – das /F erzwingt das Beenden. Ohne /F wird Excel nur höflich gebeten, und ein hängendes Programm reagiert darauf nicht."
+  ],
+  "erklaerung": [
+    "Jedes laufende Programm ist ein Prozess mit Namen (EXCEL.EXE) und Nummer (PID).",
+    "„tasklist /FI \"STATUS eq NOT RESPONDING\"“ findet die hängenden. „taskkill /IM EXCEL.EXE“ ohne /F schickt nur",
+    "eine Bitte zum Beenden – ein hängendes Programm beantwortet sie nicht. Mit /F wird der Prozess erzwungen beendet.",
+    "Ungespeicherte Daten in Excel sind dabei weg; Outlook und Word bleiben unberührt. In PowerShell: Stop-Process -Name EXCEL -Force."
+  ],
+  "begriffe": {
+    "Prozess": "Ein laufendes Programm. Ein Programm kann auch mehrere Prozesse haben.",
+    "PID": "Process ID: die Nummer, unter der Windows einen Prozess führt.",
+    "Image Name": "Der Dateiname des Programms, z. B. EXCEL.EXE.",
+    "/F (force)": "Erzwingt das Beenden, ohne auf das Programm zu warten."
+  },
+  "loesung": [
+    "tasklist /FI \"STATUS eq NOT RESPONDING\"",
+    "taskkill /IM EXCEL.EXE",
+    "taskkill /IM EXCEL.EXE /F",
+    "tasklist /FI \"IMAGENAME eq EXCEL.EXE\""
+  ],
+  "shell": "cmd"
+}

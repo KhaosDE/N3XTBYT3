@@ -14,54 +14,146 @@
   },
   "befehle": [
     {
-      "muster": ["help", "hilfe"],
+      "muster": [
+        "help",
+        "hilfe"
+      ],
       "bedeutung": "Hilfe der Simulation anzeigen",
-      "faelle": [{"aktion": "hilfe"}]
+      "faelle": [
+        {
+          "aktion": "hilfe"
+        }
+      ]
     },
     {
-      "muster": ["cls"],
+      "muster": [
+        "cls"
+      ],
       "bedeutung": "Bildschirm leeren",
-      "faelle": [{"aktion": "leeren"}]
+      "faelle": [
+        {
+          "aktion": "leeren"
+        }
+      ]
     },
     {
-      "muster": ["Clear-Host", "clear"],
+      "muster": [
+        "Clear-Host",
+        "clear"
+      ],
       "shell": "powershell",
       "bedeutung": "Bildschirm leeren (PowerShell)",
-      "faelle": [{"aktion": "leeren"}]
+      "faelle": [
+        {
+          "aktion": "leeren"
+        }
+      ]
     },
     {
-      "muster": ["hostname"],
+      "muster": [
+        "hostname"
+      ],
       "bedeutung": "Namen des Computers anzeigen",
-      "faelle": [{"ausgabe": "{hostname}"}]
+      "faelle": [
+        {
+          "ausgabe": "{hostname}"
+        }
+      ]
     },
     {
-      "muster": ["$env:COMPUTERNAME"],
+      "muster": [
+        "$env:COMPUTERNAME"
+      ],
       "shell": "powershell",
       "bedeutung": "Namen des Computers anzeigen (PowerShell-Variable)",
-      "faelle": [{"ausgabe": "{hostname}"}]
+      "faelle": [
+        {
+          "ausgabe": "{hostname}"
+        }
+      ]
     },
     {
-      "muster": ["whoami"],
+      "muster": [
+        "whoami"
+      ],
       "bedeutung": "Angemeldeten Benutzer anzeigen (Computer\\Benutzer)",
-      "faelle": [{"ausgabe": "{whoami}"}]
+      "faelle": [
+        {
+          "ausgabe": "{whoami}"
+        }
+      ]
     },
     {
-      "muster": ["powershell"],
+      "muster": [
+        "powershell"
+      ],
       "bedeutung": "PowerShell starten",
-      "faelle": [{
-        "ausgabe": ["Windows PowerShell", "Copyright (C) Microsoft Corporation. All rights reserved.", ""],
-        "aktion": "wechsel:powershell"
-      }]
+      "faelle": [
+        {
+          "ausgabe": [
+            "Windows PowerShell",
+            "Copyright (C) Microsoft Corporation. All rights reserved.",
+            ""
+          ],
+          "aktion": "wechsel:powershell"
+        }
+      ]
     },
     {
-      "muster": ["cmd"],
+      "muster": [
+        "cmd"
+      ],
       "bedeutung": "Eingabeaufforderung (cmd) starten",
-      "faelle": [{"aktion": "wechsel:cmd"}]
+      "faelle": [
+        {
+          "aktion": "wechsel:cmd"
+        }
+      ]
     },
     {
-      "muster": ["exit"],
+      "muster": [
+        "exit"
+      ],
       "bedeutung": "Aktuelle Befehlszeile verlassen",
-      "faelle": [{"aktion": "exit"}]
+      "faelle": [
+        {
+          "aktion": "exit"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Restart-Computer",
+        "Restart-Computer -Force",
+        "Stop-Computer",
+        "Stop-Computer -Force"
+      ],
+      "falsch": true,
+      "warum": "Neustarten ist hier nicht die Lösung: Alle verlieren ungespeicherte Arbeit, und die Ursache ist danach oft noch da. Finde heraus, was genau kaputt ist, und behebe das gezielt.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart und Herunterfahren werden in der Simulation nicht ausgeführt."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "shutdown /r",
+        "shutdown /r /t 0",
+        "shutdown /r /f /t 0",
+        "shutdown /s",
+        "shutdown /s /t 0",
+        "shutdown /s /f /t 0"
+      ],
+      "falsch": true,
+      "warum": "Neustarten ist hier nicht die Lösung: Alle verlieren ungespeicherte Arbeit, und die Ursache ist danach oft noch da. Finde heraus, was genau kaputt ist, und behebe das gezielt.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart und Herunterfahren werden in der Simulation nicht ausgeführt."
+        }
+      ]
     }
   ],
   "shell_fallen": [

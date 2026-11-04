@@ -78,6 +78,7 @@ In Ausgaben wird `{schluessel}` durch den aktuellen Wert ersetzt, z. B. `{hostna
 | `wenn` | Bedingung (siehe unten). Ohne Angabe passt der Fall immer. |
 | `ausgabe` | Was das System ausgibt. Text oder Liste von Zeilen. Leer lassen, wenn der echte Befehl nichts ausgibt (viele PowerShell-Befehle). |
 | `fehler` | `true`, wenn die Ausgabe eine Fehlermeldung ist (wird rot angezeigt). |
+| `sim` | `true`, wenn die Ausgabe eine Meldung der Simulation ist und kein echter Systemtext (blau, mit `[N3XTBYT3]`). Für Fälle, in denen die echte Ausgabe nicht sicher bekannt ist, ein Fenster aufgehen würde oder eine Rückfrage nicht nachgebaut ist. |
 | `setze` | Änderungen am Zustand, z. B. `{"dienst_spooler": "Stopped"}`. Mit `{"+": 1}` oder `{"-": 1}` wird gerechnet. Die Änderung gilt schon für `{…}`-Platzhalter in der Ausgabe dieses Falls. |
 | `aktion` | Nur für allgemeine Befehle: `leeren` (Bildschirm), `hilfe`, `exit`, `wechsel:<shell>`. |
 

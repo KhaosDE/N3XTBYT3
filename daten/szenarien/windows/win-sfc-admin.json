@@ -1,0 +1,141 @@
+{
+  "id": "win-sfc-admin",
+  "system": "windows",
+  "titel": "Systemdateien prüfen – aber ohne Adminrechte?",
+  "kategorie": "System",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/sfc",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/start-process"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Nach einem Stromausfall stürzt bei Herrn Neumann die Windows-Suche ständig ab, und manche",
+    "Systemprogramme öffnen sich nicht. Die Kollegin aus der IT sagt am Telefon: „Lass mal die",
+    "Systemdateiprüfung laufen.“",
+    "Du sitzt an einer normalen PowerShell (ohne Administratorrechte). Herr Neumann ist lokaler Administrator",
+    "und kann die Rückfrage der Benutzerkontensteuerung bestätigen.",
+    "",
+    "Aufgabe: Lass die Systemdateien prüfen und reparieren."
+  ],
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger",
+    "systemdateien_ok": false
+  },
+  "befehle": [
+    {
+      "muster": ["sfc /scannow"],
+      "bedeutung": "Windows-Systemdateien prüfen und reparieren (braucht Adminrechte)",
+      "faelle": [
+        {
+          "wenn": {"admin": false},
+          "ausgabe": ["", "You must be an administrator running a console session in order to", "use the sfc utility.", ""]
+        },
+        {
+          "setze": {"systemdateien_ok": true},
+          "ausgabe": [
+            "",
+            "Beginning system scan.  This process will take some time.",
+            "",
+            "Beginning verification phase of system scan.",
+            "Verification 100% complete.",
+            "",
+            "Windows Resource Protection found corrupt files and successfully repaired them.",
+            "For online repairs, details are included in the CBS log file located at",
+            "windir\\Logs\\CBS\\CBS.log. For example C:\\Windows\\Logs\\CBS\\CBS.log. For offline",
+            "repairs, details are included in the log file provided by the /OFFLOGFILE flag.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Start-Process powershell -Verb RunAs",
+        "Start-Process powershell.exe -Verb RunAs",
+        "Start-Process -FilePath powershell -Verb RunAs",
+        "Start-Process -FilePath powershell.exe -Verb RunAs"
+      ],
+      "bedeutung": "PowerShell als Administrator starten",
+      "faelle": [
+        {
+          "wenn": {"admin": false},
+          "setze": {"admin": true, "pfad": "C:\\Windows\\system32"},
+          "sim": true,
+          "ausgabe": [
+            "Die Benutzerkontensteuerung fragt nach, Herr Neumann bestätigt mit „Ja“.",
+            "Ein neues Fenster „Administrator: Windows PowerShell“ öffnet sich – in der Simulation geht es hier weiter."
+          ]
+        },
+        {
+          "sim": true,
+          "ausgabe": "Du bist schon in einer PowerShell mit Administratorrechten."
+        }
+      ]
+    },
+    {
+      "muster": ["Start-Process cmd -Verb RunAs", "Start-Process cmd.exe -Verb RunAs", "Start-Process -FilePath cmd -Verb RunAs"],
+      "bedeutung": "Eingabeaufforderung als Administrator starten",
+      "faelle": [
+        {
+          "wenn": {"admin": false},
+          "setze": {"admin": true, "pfad": "C:\\Windows\\system32"},
+          "aktion": "wechsel:cmd",
+          "sim": true,
+          "ausgabe": [
+            "Die Benutzerkontensteuerung fragt nach, Herr Neumann bestätigt mit „Ja“.",
+            "Ein neues Fenster „Administrator: Eingabeaufforderung“ öffnet sich – in der Simulation geht es hier weiter."
+          ]
+        },
+        {
+          "aktion": "wechsel:cmd"
+        }
+      ]
+    },
+    {
+      "muster": ["whoami /groups"],
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Die lange Gruppenliste ist hier nicht nachgebaut. Merke: In einer Konsole ohne Erhöhung ist die Administratoren-Gruppe zwar da, aber „Group used for deny only“ – die Rechte sind nicht aktiv."
+      }]
+    },
+    {
+      "muster": ["DISM /Online /Cleanup-Image /RestoreHealth"],
+      "bedeutung": "Den Komponentenspeicher reparieren, aus dem sfc Ersatzdateien holt",
+      "faelle": [
+        {
+          "wenn": {"admin": false},
+          "sim": true,
+          "ausgabe": "Auch DISM braucht Administratorrechte. Die genaue Fehlermeldung ist hier nicht nachgebaut."
+        },
+        {
+          "sim": true,
+          "ausgabe": "DISM läuft und repariert den Komponentenspeicher (Fortschrittsanzeige hier nicht nachgebaut). Danach „sfc /scannow“ ausführen."
+        }
+      ]
+    }
+  ],
+  "ziel": {"systemdateien_ok": true},
+  "hinweise": [
+    "Die Systemdateiprüfung heißt „sfc“. Lies die Meldung genau, wenn sie nicht startet: Was fehlt dir in diesem Fenster?",
+    "„sfc /scannow“ braucht eine Konsole mit Administratorrechten. Die startest du aus der PowerShell mit „Start-Process … -Verb RunAs“.",
+    "„Start-Process powershell -Verb RunAs“ und dann im neuen Fenster „sfc /scannow“."
+  ],
+  "erklaerung": [
+    "„sfc /scannow“ prüft alle geschützten Windows-Systemdateien und ersetzt beschädigte durch saubere Kopien.",
+    "Dafür braucht es Administratorrechte. Auch wer Administrator ist, arbeitet wegen der Benutzerkontensteuerung (UAC)",
+    "normalerweise ohne diese Rechte – erst „Als Administrator ausführen“ (in PowerShell: Start-Process … -Verb RunAs)",
+    "schaltet sie für das neue Fenster frei. Am Fenstertitel „Administrator: …“ erkennst du das.",
+    "Findet sfc Fehler, die es nicht reparieren kann, hilft vorher „DISM /Online /Cleanup-Image /RestoreHealth“."
+  ],
+  "begriffe": {
+    "sfc": "System File Checker: prüft und repariert geschützte Windows-Systemdateien.",
+    "UAC (Benutzerkontensteuerung)": "Schutz in Windows: Programme laufen ohne Adminrechte, bis man ausdrücklich zustimmt.",
+    "Erhöhte Rechte": "Ein Fenster „Als Administrator“: Die Administratorrechte sind dort wirklich aktiv.",
+    "-Verb RunAs": "Parameter von Start-Process, der ein Programm mit Administratorrechten startet (UAC-Rückfrage).",
+    "CBS.log": "Protokolldatei, in die sfc schreibt, was es gefunden und repariert hat."
+  },
+  "loesung": ["sfc /scannow", "Start-Process powershell -Verb RunAs", "sfc /scannow"]
+}

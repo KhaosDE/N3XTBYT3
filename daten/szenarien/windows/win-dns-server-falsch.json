@@ -1,0 +1,224 @@
+{
+  "id": "win-dns-server-falsch",
+  "system": "windows",
+  "titel": "Namen gehen nicht, Adressen schon",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dnsclient/set-dnsclientserveraddress",
+    "https://learn.microsoft.com/powershell/module/dnsclient/get-dnsclientserveraddress",
+    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Ein Kollege hat am Laptop von Frau Öztürk „etwas am Netzwerk ausprobiert“.",
+    "Jetzt öffnet kein Programm mehr Seiten wie intranet.firma.internal.",
+    "Der Router 192.168.10.1 und der Server 192.168.10.25 sind per IP-Adresse aber erreichbar.",
+    "Der richtige DNS-Server der Firma ist dc01 (192.168.10.5); normalerweise kommt er automatisch per DHCP.",
+    "",
+    "Aufgabe: Finde die falsche Einstellung und stelle sie richtig."
+  ],
+  "zustand": {
+    "dns_falsch": true
+  },
+  "befehle": [
+    {
+      "muster": ["ping intranet.firma.internal"],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [
+        {
+          "wenn": {"dns_falsch": true},
+          "ausgabe": "Ping request could not find host intranet.firma.internal. Please check the name and try again."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Pinging intranet.firma.internal [192.168.10.25] with 32 bytes of data:",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "",
+            "Ping statistics for 192.168.10.25:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["ping 192.168.10.25"],
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Pinging 192.168.10.25 with 32 bytes of data:",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "",
+          "Ping statistics for 192.168.10.25:",
+          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+          "Approximate round trip times in milli-seconds:",
+          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+        ]
+      }]
+    },
+    {
+      "muster": ["Resolve-DnsName intranet.firma.internal", "Resolve-DnsName -Name intranet.firma.internal"],
+      "bedeutung": "Einen Namen über DNS auflösen (PowerShell)",
+      "faelle": [
+        {
+          "wenn": {"dns_falsch": true},
+          "fehler": true,
+          "ausgabe": "Resolve-DnsName : intranet.firma.internal : This operation returned because the timeout period expired"
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "intranet.firma.internal                        A      3600  Answer     192.168.10.25",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["nslookup intranet.firma.internal"],
+      "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
+      "faelle": [
+        {
+          "wenn": {"dns_falsch": true},
+          "ausgabe": [
+            "DNS request timed out.",
+            "    timeout was 2 seconds.",
+            "Server:  UnKnown",
+            "Address:  192.168.10.250",
+            "",
+            "*** Request to UnKnown timed-out"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Server:  dc01.firma.internal",
+            "Address:  192.168.10.5",
+            "",
+            "Name:    intranet.firma.internal",
+            "Address:  192.168.10.25",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Get-DnsClientServerAddress"],
+      "bedeutung": "Eingestellte DNS-Server je Netzwerkadapter anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dns_falsch": true},
+          "ausgabe": [
+            "",
+            "InterfaceAlias               Interface Address ServerAddresses",
+            "                             Index     Family",
+            "--------------               --------- ------- ---------------",
+            "Ethernet                            12 IPv4    {192.168.10.250}",
+            "Ethernet                            12 IPv6    {}",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "InterfaceAlias               Interface Address ServerAddresses",
+            "                             Index     Family",
+            "--------------               --------- ------- ---------------",
+            "Ethernet                            12 IPv4    {192.168.10.5}",
+            "Ethernet                            12 IPv6    {}",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DnsClientServerAddress -InterfaceAlias Ethernet",
+        "Get-DnsClientServerAddress -InterfaceAlias Ethernet -AddressFamily IPv4"
+      ],
+      "faelle": [
+        {
+          "wenn": {"dns_falsch": true},
+          "ausgabe": [
+            "",
+            "InterfaceAlias               Interface Address ServerAddresses",
+            "                             Index     Family",
+            "--------------               --------- ------- ---------------",
+            "Ethernet                            12 IPv4    {192.168.10.250}",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "InterfaceAlias               Interface Address ServerAddresses",
+            "                             Index     Family",
+            "--------------               --------- ------- ---------------",
+            "Ethernet                            12 IPv4    {192.168.10.5}",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses"],
+      "bedeutung": "DNS-Server wieder automatisch (per DHCP) beziehen",
+      "faelle": [{"setze": {"dns_falsch": false}}]
+    },
+    {
+      "muster": [
+        "Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 192.168.10.5",
+        "Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses (192.168.10.5)"
+      ],
+      "bedeutung": "DNS-Server fest eintragen",
+      "faelle": [{"setze": {"dns_falsch": false}}]
+    },
+    {
+      "muster": ["ipconfig /flushdns"],
+      "faelle": [{
+        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
+      }]
+    },
+    {
+      "muster": ["Clear-DnsClientCache"],
+      "faelle": [{"ausgabe": ""}]
+    }
+  ],
+  "ziel": {"dns_falsch": false},
+  "hinweise": [
+    "Wenn IP-Adressen gehen, Namen aber nicht, liegt das Problem bei der Namensauflösung (DNS). Welcher DNS-Server ist eingestellt?",
+    "„Get-DnsClientServerAddress“ zeigt, welchen DNS-Server der Adapter „Ethernet“ benutzt. Vergleiche mit dem Firmen-DNS-Server 192.168.10.5.",
+    "Stell den Adapter zurück auf automatisch: „Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses“."
+  ],
+  "erklaerung": [
+    "Auf dem Laptop war fest der DNS-Server 192.168.10.250 eingetragen – den gibt es nicht.",
+    "Darum lief jede Namensanfrage ins Leere (Timeout), während Verbindungen per IP-Adresse funktionierten.",
+    "„Set-DnsClientServerAddress … -ResetServerAddresses“ löscht den festen Eintrag; der Adapter nimmt wieder",
+    "den DNS-Server, den DHCP liefert (dc01, 192.168.10.5). Ein Leeren des DNS-Cache hilft hier nicht,",
+    "weil der Fehler nicht im Zwischenspeicher, sondern in der Einstellung steckt."
+  ],
+  "begriffe": {
+    "DNS-Server": "Rechner, der Namen in IP-Adressen übersetzt. In Firmennetzen meist der Domänencontroller.",
+    "Namensauflösung": "Das Übersetzen eines Namens (intranet.firma.internal) in eine IP-Adresse.",
+    "Timeout": "Die Wartezeit ist abgelaufen, ohne dass eine Antwort kam.",
+    "InterfaceAlias": "Der Name des Netzwerkadapters in Windows, z. B. „Ethernet“ oder „WLAN“."
+  },
+  "loesung": [
+    "ping intranet.firma.internal",
+    "ping 192.168.10.25",
+    "Get-DnsClientServerAddress",
+    "Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses",
+    "ping intranet.firma.internal"
+  ]
+}

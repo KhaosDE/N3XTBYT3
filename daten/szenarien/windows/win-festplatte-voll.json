@@ -1,0 +1,163 @@
+{
+  "id": "win-festplatte-voll",
+  "system": "windows",
+  "titel": "Festplatte C: ist voll",
+  "kategorie": "Speicher",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/storage/get-volume",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/clear-recyclebin",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/remove-item"
+  ],
+  "datum": "2026-11-04",
+  "_notiz": "Get-Volume: Das Beispiel in der Microsoft-Doku zeigt ein älteres Spaltenformat (FileSystemLabel, FileSystem). Hier steht das Format, das Windows 10/11 zeigt (FriendlyName, FileSystemType, DriveType, OperationalStatus). Bitte am echten PC prüfen.",
+  "ausgangslage": [
+    "Windows meldet bei Frau Berger „Wenig Speicherplatz“. Updates lassen sich nicht installieren.",
+    "Sie erzählt: „Ich habe letzte Woche die alten Schulungsvideos gelöscht, aber es ist nicht mehr Platz geworden.“",
+    "",
+    "Aufgabe: Prüfe, wie viel Platz auf C: frei ist, und schaffe wieder ordentlich Platz – ohne ihre Dateien anzufassen."
+  ],
+  "zustand": {
+    "papierkorb_voll": true,
+    "temp_voll": true
+  },
+  "befehle": [
+    {
+      "muster": ["Get-Volume", "Get-Volume C", "Get-Volume -DriveLetter C"],
+      "bedeutung": "Laufwerke mit freiem und gesamtem Speicherplatz anzeigen",
+      "faelle": [
+        {
+          "wenn": {"papierkorb_voll": true, "temp_voll": true},
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+            "C           Windows      NTFS           Fixed     Healthy      OK                     812.5 MB 237.86 GB",
+            ""
+          ]
+        },
+        {
+          "wenn": {"papierkorb_voll": true, "temp_voll": false},
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+            "C           Windows      NTFS           Fixed     Healthy      OK                      3.42 GB 237.86 GB",
+            ""
+          ]
+        },
+        {
+          "wenn": {"papierkorb_voll": false, "temp_voll": true},
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+            "C           Windows      NTFS           Fixed     Healthy      OK                     19.21 GB 237.86 GB",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining      Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------      ----",
+            "C           Windows      NTFS           Fixed     Healthy      OK                     21.83 GB 237.86 GB",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["Clear-RecycleBin -Force", "Clear-RecycleBin -DriveLetter C -Force"],
+      "bedeutung": "Papierkorb leeren (ohne Rückfrage)",
+      "faelle": [{"setze": {"papierkorb_voll": false}}]
+    },
+    {
+      "muster": ["Clear-RecycleBin", "Clear-RecycleBin -DriveLetter C"],
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Ohne -Force fragt PowerShell erst nach einer Bestätigung (Ja/Nein). Rückfragen sind hier nicht nachgebaut – hänge -Force an."
+      }]
+    },
+    {
+      "muster": ["Get-ChildItem $env:TEMP", "dir $env:TEMP", "ls $env:TEMP"],
+      "shell": "powershell",
+      "bedeutung": "Inhalt des Temp-Ordners anzeigen",
+      "faelle": [
+        {
+          "wenn": {"temp_voll": true},
+          "ausgabe": [
+            "",
+            "",
+            "    Directory: C:\\Users\\mberger\\AppData\\Local\\Temp",
+            "",
+            "",
+            "Mode                 LastWriteTime         Length Name",
+            "----                 -------------         ------ ----",
+            "d-----        9/12/2026   2:03 PM                OfficeSetup_8F21",
+            "d-----       10/28/2026  11:40 AM                VideoKonverter_Cache",
+            "-a----       10/28/2026  11:52 AM     1932735283 export_tmp_0042.mp4",
+            "-a----        11/3/2026   4:15 PM         524288 wct3A7F.tmp",
+            ""
+          ]
+        },
+        {"ausgabe": ""}
+      ]
+    },
+    {
+      "muster": [
+        "Remove-Item $env:TEMP\\* -Recurse -Force",
+        "Remove-Item -Path $env:TEMP\\* -Recurse -Force",
+        "Remove-Item $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue",
+        "Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue"
+      ],
+      "bedeutung": "Alle Dateien und Unterordner im Temp-Ordner löschen",
+      "faelle": [{"setze": {"temp_voll": false}}]
+    },
+    {
+      "muster": ["cleanmgr"],
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Die Datenträgerbereinigung öffnet ein eigenes Fenster – das ist in der Simulation nicht nachgebaut. Nutze die PowerShell-Befehle."
+      }]
+    },
+    {
+      "muster": [
+        "Remove-Item C:\\Users\\mberger\\Documents\\* -Recurse -Force",
+        "Remove-Item C:\\Users\\mberger\\Desktop\\* -Recurse -Force",
+        "Remove-Item C:\\Users\\mberger\\Downloads\\* -Recurse -Force"
+      ],
+      "falsch": true,
+      "warum": "Das sind Frau Bergers eigene Dateien. Die löscht man nie einfach – erst Papierkorb und Temp-Dateien, und bei eigenen Dateien vorher fragen.",
+      "faelle": [{
+        "sim": true,
+        "ausgabe": "Stopp: In der Simulation wird das nicht ausgeführt. Persönliche Dateien löscht man nicht ohne Rücksprache."
+      }]
+    }
+  ],
+  "ziel": {"papierkorb_voll": false},
+  "hinweise": [
+    "Erst messen: Wie viel ist auf C: frei? Und wohin sind „gelöschte“ Dateien eigentlich gegangen?",
+    "„Get-Volume -DriveLetter C“ zeigt den freien Platz. Gelöschte Dateien landen im Papierkorb – und belegen dort weiter Platz.",
+    "Leere den Papierkorb: „Clear-RecycleBin -Force“. Zusätzlich kannst du den Temp-Ordner leeren: „Remove-Item $env:TEMP\\* -Recurse -Force“."
+  ],
+  "erklaerung": [
+    "Gelöschte Dateien liegen erst einmal im Papierkorb und belegen weiter Platz – hier rund 18 GB Videos.",
+    "„Clear-RecycleBin -Force“ leert ihn ohne Rückfrage. Dazu kommen Reste im Temp-Ordner (%TEMP%,",
+    "in PowerShell $env:TEMP), die Programme liegen lassen. Die darf man löschen; was gerade benutzt wird,",
+    "bleibt einfach liegen. Immer zuerst mit „Get-Volume“ messen, dann aufräumen, dann noch einmal messen."
+  ],
+  "begriffe": {
+    "Papierkorb": "Zwischenlager für gelöschte Dateien. Sie belegen weiter Speicherplatz, bis er geleert wird.",
+    "Temp-Ordner": "Ordner für vorübergehende Dateien von Programmen. Liegt unter C:\\Users\\<Name>\\AppData\\Local\\Temp.",
+    "$env:TEMP": "PowerShell-Schreibweise für die Umgebungsvariable TEMP (in cmd: %TEMP%).",
+    "-Force": "Parameter, der Rückfragen überspringt bzw. auch versteckte und schreibgeschützte Dateien einschließt."
+  },
+  "loesung": [
+    "Get-Volume -DriveLetter C",
+    "Clear-RecycleBin -Force",
+    "Remove-Item $env:TEMP\\* -Recurse -Force",
+    "Get-Volume -DriveLetter C"
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "id": "win-uhrzeit",
+  "system": "windows",
+  "titel": "Die Uhr am PC geht falsch",
+  "kategorie": "System",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/networking/windows-time-service/windows-time-service-tools-and-settings",
+    "https://learn.microsoft.com/troubleshoot/windows-server/active-directory/time-synchronization-not-succeed-non-ntp"
+  ],
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Am Empfangs-PC geht die Uhr sieben Minuten nach. Manche Webseiten melden Zertifikatsfehler,",
+    "und die Zeiterfassung bucht falsche Zeiten. Die Zeitzone stimmt.",
+    "Normalerweise stellt Windows die Uhr selbst über das Netzwerk.",
+    "",
+    "Aufgabe: Finde heraus, warum die Uhr nicht mehr gestellt wird, und lass sie neu synchronisieren."
+  ],
+  "zustand": {
+    "dienst_zeit": "Stopped",
+    "zeit_sync": false
+  },
+  "befehle": [
+    {
+      "muster": ["w32tm /query /status"],
+      "bedeutung": "Status der Zeitsynchronisierung anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_zeit": "Stopped"},
+          "ausgabe": "The following error occurred: The service has not been started. (0x80070426)"
+        },
+        {
+          "wenn": {"zeit_sync": false},
+          "sim": true,
+          "ausgabe": "Der Zeitdienst läuft, hat die Uhr aber noch nicht neu gestellt. (Die ausführliche Statusliste ist hier nicht nachgebaut.)"
+        },
+        {
+          "sim": true,
+          "ausgabe": "Der Zeitdienst läuft und hat gerade synchronisiert. (Die ausführliche Statusliste ist hier nicht nachgebaut.)"
+        }
+      ]
+    },
+    {
+      "muster": ["w32tm /resync"],
+      "bedeutung": "Uhr sofort neu mit der Zeitquelle abgleichen",
+      "faelle": [
+        {
+          "wenn": {"dienst_zeit": "Stopped"},
+          "ausgabe": "The following error occurred: The service has not been started. (0x80070426)"
+        },
+        {
+          "setze": {"zeit_sync": true},
+          "ausgabe": ["Sending resync command to local computer", "The command completed successfully."]
+        }
+      ]
+    },
+    {
+      "muster": ["net start w32time"],
+      "bedeutung": "Den Windows-Zeitdienst starten (cmd)",
+      "faelle": [
+        {
+          "wenn": {"dienst_zeit": "Stopped"},
+          "setze": {"dienst_zeit": "Running"},
+          "ausgabe": ["The Windows Time service is starting.", "The Windows Time service was started successfully.", ""]
+        },
+        {
+          "ausgabe": ["The requested service has already been started.", "", "More help is available by typing NET HELPMSG 2182.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["net stop w32time"],
+      "faelle": [
+        {
+          "wenn": {"dienst_zeit": "Running"},
+          "setze": {"dienst_zeit": "Stopped"},
+          "ausgabe": ["The Windows Time service is stopping.", "The Windows Time service was stopped successfully.", ""]
+        },
+        {
+          "ausgabe": ["The Windows Time service is not started.", "", "More help is available by typing NET HELPMSG 3521.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Get-Service W32Time", "Get-Service -Name W32Time"],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_zeit": "Stopped"},
+          "ausgabe": ["", "Status   Name               DisplayName", "------   ----               -----------", "Stopped  W32Time            Windows Time", ""]
+        },
+        {
+          "ausgabe": ["", "Status   Name               DisplayName", "------   ----               -----------", "Running  W32Time            Windows Time", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Start-Service W32Time", "Start-Service -Name W32Time"],
+      "bedeutung": "Einen Dienst starten",
+      "faelle": [{"setze": {"dienst_zeit": "Running"}}]
+    },
+    {
+      "muster": ["time"],
+      "falsch": true,
+      "warum": "Die Uhr von Hand zu stellen behebt nicht die Ursache: Sie läuft wieder weg, wenn der Zeitdienst nicht synchronisiert.",
+      "faelle": [{"sim": true, "ausgabe": "Die Uhr von Hand stellen ist hier nicht nachgebaut – und löst die Ursache nicht."}]
+    }
+  ],
+  "ziel": {"zeit_sync": true},
+  "hinweise": [
+    "Für das automatische Stellen der Uhr ist ein Windows-Dienst zuständig, der Windows-Zeitdienst (W32Time). Läuft er?",
+    "Das Werkzeug für die Zeitsynchronisierung heißt „w32tm“. „w32tm /query /status“ zeigt den Zustand – achte auf die Fehlermeldung. Dienste startest du in cmd mit „net start“.",
+    "„net start w32time“ und danach „w32tm /resync“."
+  ],
+  "erklaerung": [
+    "Der Windows-Zeitdienst (W32Time) lief nicht. Ohne ihn gleicht Windows die Uhr nicht mit der Zeitquelle ab,",
+    "und sie läuft langsam weg. Die Meldung „The service has not been started. (0x80070426)“ sagt genau das.",
+    "„net start w32time“ startet den Dienst, „w32tm /resync“ stellt die Uhr sofort neu.",
+    "Falsche Uhrzeit führt oft zu Folgefehlern: Zertifikatsfehler im Browser, Anmeldeprobleme in der Domäne (Kerberos)."
+  ],
+  "begriffe": {
+    "W32Time": "Der Windows-Zeitdienst. Gleicht die Uhr mit einem Zeitserver (oder in der Domäne mit dem Domänencontroller) ab.",
+    "w32tm": "Befehlszeilenwerkzeug für den Zeitdienst: Status abfragen, Einstellungen ändern, neu synchronisieren.",
+    "NTP": "Network Time Protocol: Verfahren, mit dem Rechner die Uhrzeit über das Netzwerk abgleichen.",
+    "Zertifikatsfehler": "Der Browser prüft, ob ein Zertifikat gerade gültig ist – mit einer falschen Uhr geht das schief."
+  },
+  "loesung": ["w32tm /query /status", "net start w32time", "w32tm /resync"]
+}

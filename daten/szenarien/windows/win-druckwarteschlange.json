@@ -1,0 +1,200 @@
+{
+  "id": "win-druckwarteschlange",
+  "system": "windows",
+  "titel": "Druckauftrag hängt und lässt sich nicht löschen",
+  "kategorie": "Drucker",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/troubleshoot/windows-server/printing/printer-not-responding",
+    "https://learn.microsoft.com/troubleshoot/windows-server/printing/print-spooler-service-not-running"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Frau Berger: „Meine Rechnung hängt im Drucker fest. Da steht ‚Fehler – Wird gedruckt‘.",
+    "Löschen geht nicht, und alles, was ich danach drucke, bleibt dahinter stecken.“",
+    "Der Drucker heißt in Windows „Drucker-Buero“. Er ist an, hat Papier und zeigt keinen Fehler.",
+    "",
+    "Aufgabe: Bring die Druckwarteschlange wieder in Ordnung. Der Druckdienst muss danach wieder laufen."
+  ],
+  "zustand": {
+    "dienst_spooler": "Running",
+    "spool_dateien": true
+  },
+  "befehle": [
+    {
+      "muster": ["Get-Service Spooler", "Get-Service -Name Spooler"],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dienst_spooler": "Running"},
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  Spooler            Print Spooler",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Stopped  Spooler            Print Spooler",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ChildItem C:\\Windows\\System32\\spool\\PRINTERS",
+        "Get-ChildItem -Path C:\\Windows\\System32\\spool\\PRINTERS",
+        "dir C:\\Windows\\System32\\spool\\PRINTERS",
+        "ls C:\\Windows\\System32\\spool\\PRINTERS"
+      ],
+      "shell": "powershell",
+      "bedeutung": "Dateien in einem Ordner anzeigen",
+      "faelle": [
+        {
+          "wenn": {"spool_dateien": true},
+          "ausgabe": [
+            "",
+            "",
+            "    Directory: C:\\Windows\\System32\\spool\\PRINTERS",
+            "",
+            "",
+            "Mode                 LastWriteTime         Length Name",
+            "----                 -------------         ------ ----",
+            "-a----        11/4/2026   8:47 AM          12288 00017.SHD",
+            "-a----        11/4/2026   8:47 AM        2097152 00017.SPL",
+            ""
+          ]
+        },
+        {"ausgabe": ""}
+      ]
+    },
+    {
+      "muster": ["Get-PrintJob -PrinterName Drucker-Buero"],
+      "bedeutung": "Druckaufträge eines Druckers anzeigen",
+      "faelle": [
+        {
+          "wenn": {"spool_dateien": true},
+          "sim": true,
+          "ausgabe": "Der Auftrag „Rechnung_2026-117.pdf“ steht weiter in der Warteschlange von „Drucker-Buero“ und hängt mit einem Fehler. (Tabelle hier vereinfacht.)"
+        },
+        {
+          "sim": true,
+          "ausgabe": "Die Warteschlange von „Drucker-Buero“ ist leer."
+        }
+      ]
+    },
+    {
+      "muster": ["Stop-Service Spooler", "Stop-Service -Name Spooler", "Stop-Service -Name Spooler -Force", "Stop-Service Spooler -Force"],
+      "bedeutung": "Einen Dienst anhalten",
+      "faelle": [{"setze": {"dienst_spooler": "Stopped"}}]
+    },
+    {
+      "muster": ["net stop spooler"],
+      "bedeutung": "Einen Dienst anhalten (cmd)",
+      "faelle": [
+        {
+          "wenn": {"dienst_spooler": "Running"},
+          "setze": {"dienst_spooler": "Stopped"},
+          "ausgabe": ["The Print Spooler service is stopping.", "The Print Spooler service was stopped successfully.", ""]
+        },
+        {
+          "ausgabe": ["The Print Spooler service is not started.", "", "More help is available by typing NET HELPMSG 3521.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Start-Service Spooler", "Start-Service -Name Spooler"],
+      "bedeutung": "Einen Dienst starten",
+      "faelle": [{"setze": {"dienst_spooler": "Running"}}]
+    },
+    {
+      "muster": ["net start spooler"],
+      "bedeutung": "Einen Dienst starten (cmd)",
+      "faelle": [
+        {
+          "wenn": {"dienst_spooler": "Stopped"},
+          "setze": {"dienst_spooler": "Running"},
+          "ausgabe": ["The Print Spooler service is starting.", "The Print Spooler service was started successfully.", ""]
+        },
+        {
+          "ausgabe": ["The requested service has already been started.", "", "More help is available by typing NET HELPMSG 2182.", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["Restart-Service Spooler", "Restart-Service -Name Spooler", "Restart-Service -Name Spooler -Force"],
+      "bedeutung": "Einen Dienst neu starten",
+      "faelle": [{"setze": {"dienst_spooler": "Running"}}]
+    },
+    {
+      "muster": [
+        "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\* -Force",
+        "Remove-Item -Path C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "Remove-Item -Path C:\\Windows\\System32\\spool\\PRINTERS\\* -Force",
+        "del C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "rm C:\\Windows\\System32\\spool\\PRINTERS\\*"
+      ],
+      "shell": "powershell",
+      "bedeutung": "Dateien löschen",
+      "faelle": [
+        {
+          "wenn": {"dienst_spooler": "Running", "spool_dateien": true},
+          "fehler": true,
+          "ausgabe": "Remove-Item : Cannot remove item C:\\Windows\\System32\\spool\\PRINTERS\\00017.SPL: The process cannot access the file 'C:\\Windows\\System32\\spool\\PRINTERS\\00017.SPL' because it is being used by another process."
+        },
+        {"setze": {"spool_dateien": false}}
+      ]
+    },
+    {
+      "muster": [
+        "del /Q C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "del /F /Q C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "del /Q C:\\Windows\\System32\\spool\\PRINTERS\\*.*",
+        "del /F /Q C:\\Windows\\System32\\spool\\PRINTERS\\*.*"
+      ],
+      "shell": "cmd",
+      "bedeutung": "Dateien löschen (cmd, /Q = ohne Rückfrage)",
+      "faelle": [
+        {
+          "wenn": {"dienst_spooler": "Running", "spool_dateien": true},
+          "sim": true,
+          "ausgabe": "Die Dateien sind gesperrt, weil der Druckdienst sie gerade benutzt. Erst den Dienst anhalten."
+        },
+        {"setze": {"spool_dateien": false}}
+      ]
+    }
+  ],
+  "ziel": {"dienst_spooler": "Running", "spool_dateien": false},
+  "hinweise": [
+    "Druckaufträge verwaltet ein Windows-Dienst, die Druckwarteschlange (Spooler). Die Aufträge liegen als Dateien auf der Festplatte.",
+    "Schau dir den Dienst „Spooler“ an (Get-Service) und den Ordner C:\\Windows\\System32\\spool\\PRINTERS. Gelöscht werden können die Dateien nur, wenn der Dienst steht.",
+    "Reihenfolge: „Stop-Service Spooler“ → „Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*“ → „Start-Service Spooler“."
+  ],
+  "erklaerung": [
+    "Jeder Druckauftrag liegt als Datei im Spool-Ordner (C:\\Windows\\System32\\spool\\PRINTERS): eine .SHD- und eine .SPL-Datei.",
+    "Ist eine davon kaputt, hängt die ganze Warteschlange. Ein reiner Neustart des Dienstes hilft dann oft nicht,",
+    "weil er die kaputte Datei beim Start wieder einliest. Darum: Dienst anhalten, Dateien löschen, Dienst starten.",
+    "Solange der Dienst läuft, sind die Dateien gesperrt – deshalb kam beim Löschen vorher eine Fehlermeldung."
+  ],
+  "begriffe": {
+    "Druckwarteschlange (Spooler)": "Windows-Dienst „Spooler“, der Druckaufträge annimmt, zwischenspeichert und an den Drucker schickt.",
+    "Dienst": "Programm, das im Hintergrund läuft, auch ohne angemeldeten Benutzer. Hat einen Status (Running/Stopped).",
+    ".SHD/.SPL": "Die zwei Dateien eines Druckauftrags im Spool-Ordner: Auftragsdaten (SHD) und der eigentliche Druckinhalt (SPL).",
+    "Gesperrte Datei": "Eine Datei, die ein Programm gerade offen hat. Sie lässt sich erst löschen, wenn das Programm sie freigibt."
+  },
+  "loesung": [
+    "Get-Service Spooler",
+    "Get-ChildItem C:\\Windows\\System32\\spool\\PRINTERS",
+    "Stop-Service Spooler",
+    "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*",
+    "Start-Service Spooler"
+  ]
+}

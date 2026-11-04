@@ -205,7 +205,9 @@ class Sitzung:
                            "treffer")
         self.zustand.setze(fall.setze)
         antwort = Antwort(art="treffer", aktion=fall.aktion)
-        if fall.ausgabe:
+        if fall.ausgabe and fall.sim:
+            antwort.zeilen = _sim(self.zustand.fuelle(fall.ausgabe))
+        elif fall.ausgabe:
             art = FEHLER if fall.fehler else AUSGABE
             antwort.zeilen = [Zeile(z, art) for z in self.zustand.fuelle(fall.ausgabe).split("\n")]
 
