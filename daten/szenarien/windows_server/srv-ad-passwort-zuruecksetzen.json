@@ -1,0 +1,140 @@
+{
+  "id": "srv-ad-passwort-zuruecksetzen",
+  "system": "windows_server",
+  "titel": "Passwort vergessen",
+  "kategorie": "Active Directory",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountpassword",
+    "https://learn.microsoft.com/powershell/module/activedirectory/set-aduser"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Lisa Hoffmann (Buchhaltung, lhoffmann) hat ihr Passwort vergessen und steht vor dem gesperrten Bildschirm.",
+    "Du hast ihre Identität am Telefon geprüft (Rückruf über die Nummer aus dem Telefonbuch).",
+    "",
+    "Aufgabe: Setze ein vorläufiges Passwort und sorge dafür, dass sie es bei der nächsten Anmeldung selbst ändern muss."
+  ],
+  "zustand": {
+    "pw_neu": false,
+    "pw_aendern": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-ADUser lhoffmann",
+        "Get-ADUser -Identity lhoffmann"
+      ],
+      "bedeutung": "Ein Benutzerkonto im Active Directory anzeigen",
+      "frage": "Zeige das AD-Konto lhoffmann an",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Lisa Hoffmann,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Lisa",
+            "Name              : Lisa Hoffmann",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1187-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : lhoffmann",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1187",
+            "Surname           : Hoffmann",
+            "UserPrincipalName : lhoffmann@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADAccountPassword -Identity lhoffmann -Reset",
+        "Set-ADAccountPassword lhoffmann -Reset"
+      ],
+      "bedeutung": "Das Passwort eines AD-Kontos zurücksetzen (Abfrage verdeckt)",
+      "frage": "Setze das Passwort von lhoffmann zurück – das neue Passwort soll verdeckt abgefragt werden",
+      "faelle": [
+        {
+          "setze": {
+            "pw_neu": true
+          },
+          "sim": true,
+          "ausgabe": [
+            "PowerShell fragt jetzt zweimal verdeckt nach dem neuen Passwort (Password / Repeat Password).",
+            "In der Simulation gilt es als eingegeben."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADAccountPassword -Identity lhoffmann -Reset -NewPassword (ConvertTo-SecureString -AsPlainText * -Force)",
+        "Set-ADAccountPassword lhoffmann -Reset -NewPassword (ConvertTo-SecureString -AsPlainText * -Force)",
+        "Set-ADAccountPassword -Identity lhoffmann -Reset -NewPassword (ConvertTo-SecureString * -AsPlainText -Force)"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "pw_neu": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADUser -Identity lhoffmann -ChangePasswordAtLogon $true",
+        "Set-ADUser lhoffmann -ChangePasswordAtLogon $true"
+      ],
+      "bedeutung": "Festlegen, dass ein Benutzer sein Passwort bei der nächsten Anmeldung ändern muss",
+      "frage": "Lege fest, dass lhoffmann ihr Passwort bei der nächsten Anmeldung ändern muss",
+      "faelle": [
+        {
+          "setze": {
+            "pw_aendern": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Unlock-ADAccount lhoffmann",
+        "Unlock-ADAccount -Identity lhoffmann"
+      ],
+      "falsch": true,
+      "warum": "Das Konto ist nicht gesperrt – das Passwort ist vergessen. Entsperren ändert daran nichts.",
+      "faelle": [
+        {
+          "ausgabe": ""
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "pw_neu": true,
+    "pw_aendern": true
+  },
+  "hinweise": [
+    "Zwei Dinge sind zu tun: ein neues Passwort setzen und eine Eigenschaft des Kontos ändern.",
+    "Das Passwort setzt „Set-ADAccountPassword“ mit „-Reset“. Eigenschaften des Kontos ändert „Set-ADUser“ – suche den Parameter mit „ChangePassword…“.",
+    "„Set-ADAccountPassword -Identity lhoffmann -Reset“, danach „Set-ADUser -Identity lhoffmann -ChangePasswordAtLogon $true“."
+  ],
+  "erklaerung": [
+    "„Set-ADAccountPassword -Reset“ setzt ein neues Passwort, ohne das alte zu kennen (dafür braucht man Admin-Rechte).",
+    "Ohne -NewPassword fragt PowerShell das Passwort verdeckt ab – so steht es nicht im Befehlsverlauf.",
+    "„Set-ADUser -ChangePasswordAtLogon $true“ zwingt Lisa, bei der nächsten Anmeldung ein eigenes Passwort zu wählen.",
+    "So kennt am Ende nur sie ihr Passwort. Vor jedem Zurücksetzen die Identität prüfen (z. B. Rückruf)."
+  ],
+  "begriffe": {
+    "-Reset": "Setzt das Passwort neu, ohne das alte anzugeben (Admin-Funktion).",
+    "ChangePasswordAtLogon": "Kontoeinstellung: Benutzer muss das Passwort bei der nächsten Anmeldung ändern.",
+    "SecureString": "Verschlüsselt gespeicherter Text in PowerShell, z. B. für Passwörter.",
+    "$true": "Der Wahrheitswert „wahr“ in PowerShell."
+  },
+  "loesung": [
+    "Get-ADUser lhoffmann",
+    "Set-ADAccountPassword -Identity lhoffmann -Reset",
+    "Set-ADUser -Identity lhoffmann -ChangePasswordAtLogon $true"
+  ]
+}

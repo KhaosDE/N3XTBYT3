@@ -1,0 +1,129 @@
+{
+  "id": "srv-vertrauensstellung",
+  "system": "windows_server",
+  "titel": "„The trust relationship … failed“",
+  "kategorie": "Active Directory",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/test-computersecurechannel",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/reset-computermachinepassword"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "PC-BUERO-12 wurde aus einem alten Image wiederhergestellt. Seitdem kann sich kein Domänenbenutzer mehr anmelden:",
+    "„The trust relationship between this workstation and the primary domain failed.“",
+    "Du bist am PC mit dem lokalen Administratorkonto angemeldet (PowerShell als Administrator).",
+    "Für die Reparatur darfst du das Domänen-Administratorkonto FIRMA\\Administrator verwenden.",
+    "",
+    "Aufgabe: Prüfe die Verbindung des PCs zur Domäne und repariere sie, ohne den PC neu in die Domäne aufzunehmen."
+  ],
+  "zustand": {
+    "hostname": "PC-BUERO-12",
+    "whoami": "pc-buero-12\\administrator",
+    "kanal_ok": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Test-ComputerSecureChannel"
+      ],
+      "bedeutung": "Prüfen, ob der sichere Kanal zwischen PC und Domäne funktioniert",
+      "faelle": [
+        {
+          "wenn": {
+            "kanal_ok": false
+          },
+          "ausgabe": "False"
+        },
+        {
+          "ausgabe": "True"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Test-ComputerSecureChannel -Repair -Credential FIRMA\\Administrator",
+        "Test-ComputerSecureChannel -Credential FIRMA\\Administrator -Repair"
+      ],
+      "bedeutung": "Den sicheren Kanal zur Domäne reparieren",
+      "frage": "Repariere den sicheren Kanal zur Domäne mit den Anmeldedaten von FIRMA\\Administrator",
+      "faelle": [
+        {
+          "setze": {
+            "kanal_ok": true
+          },
+          "sim": true,
+          "ausgabe": [
+            "Es öffnet sich eine Abfrage für das Passwort von FIRMA\\Administrator – in der Simulation gilt es als eingegeben."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Test-ComputerSecureChannel -Repair"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Ohne Anmeldedaten eines Domänenkontos klappt die Reparatur hier nicht – du bist nur lokal angemeldet. (Fehlertext hier nicht nachgebaut.)"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Reset-ComputerMachinePassword -Credential FIRMA\\Administrator"
+      ],
+      "bedeutung": "Das Computerkonto-Passwort in der Domäne zurücksetzen",
+      "faelle": [
+        {
+          "setze": {
+            "kanal_ok": true
+          },
+          "sim": true,
+          "ausgabe": "Es öffnet sich eine Abfrage für das Passwort von FIRMA\\Administrator – in der Simulation gilt es als eingegeben."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Remove-Computer -UnjoinDomaincredential FIRMA\\Administrator -Restart",
+        "Remove-Computer -Restart"
+      ],
+      "falsch": true,
+      "warum": "Die Vertrauensstellung lässt sich ohne Austritt aus der Domäne reparieren (Test-ComputerSecureChannel -Repair).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Nicht nötig: Austreten und neu Beitreten kostet Neustarts und kann Profile und Rechte durcheinanderbringen."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "kanal_ok": true
+  },
+  "hinweise": [
+    "Jeder Domänen-PC hat ein eigenes Computerkonto mit Passwort. Nach einem alten Image passt das Passwort auf dem PC nicht mehr zu dem im AD.",
+    "„Test-ComputerSecureChannel“ prüft die Verbindung (True/False). Mit „-Repair“ und Anmeldedaten eines Domänen-Admins wird sie repariert.",
+    "„Test-ComputerSecureChannel -Repair -Credential FIRMA\\Administrator“."
+  ],
+  "erklaerung": [
+    "Der PC und das AD teilen sich ein Computerkonto-Passwort, das Windows regelmäßig (alle 30 Tage) automatisch ändert.",
+    "Das alte Image enthielt ein veraltetes Passwort – der „sichere Kanal“ zur Domäne war kaputt (Test-ComputerSecureChannel: False).",
+    "„Test-ComputerSecureChannel -Repair -Credential …“ setzt das Passwort auf beiden Seiten neu. Danach klappt die Anmeldung",
+    "wieder, ohne Austritt und Neubeitritt. Weil du lokal angemeldet bist, brauchst du dafür die Anmeldedaten eines Domänen-Admins."
+  ],
+  "begriffe": {
+    "Vertrauensstellung (Trust)": "Die Beziehung zwischen PC und Domäne; der PC weist sich mit seinem Computerkonto aus.",
+    "Sicherer Kanal (Secure Channel)": "Gesicherte Verbindung zwischen PC und Domänencontroller.",
+    "Computerkonto": "Konto des PCs im AD (z. B. PC-BUERO-12$) mit eigenem, automatisch wechselndem Passwort.",
+    "-Credential": "Parameter, um einen Befehl mit einem anderen Konto auszuführen (Passwortabfrage)."
+  },
+  "loesung": [
+    "Test-ComputerSecureChannel",
+    "Test-ComputerSecureChannel -Repair -Credential FIRMA\\Administrator",
+    "Test-ComputerSecureChannel"
+  ]
+}

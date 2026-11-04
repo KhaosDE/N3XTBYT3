@@ -1,0 +1,125 @@
+{
+  "id": "srv-feature-fehlt",
+  "system": "windows_server",
+  "titel": "Datensicherung: wbadmin gibt es nicht",
+  "kategorie": "Rollen und Features",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/servermanager/install-windowsfeature",
+    "https://learn.microsoft.com/powershell/module/servermanager/get-windowsfeature",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/wbadmin"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Auf SRV-DATEI01 soll eine nächtliche Sicherung eingerichtet werden. Die Anleitung beginnt mit „wbadmin“.",
+    "Die PowerShell meldet aber, dass es diesen Befehl nicht gibt.",
+    "",
+    "Aufgabe: Finde heraus, was fehlt, und installiere es."
+  ],
+  "zustand": {
+    "hostname": "SRV-DATEI01",
+    "installiert": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "wbadmin"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "installiert": false
+          },
+          "fehler": true,
+          "ausgabe": "wbadmin : The term 'wbadmin' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again."
+        },
+        {
+          "sim": true,
+          "ausgabe": "wbadmin ist jetzt vorhanden. (Seine Ausgabe ist hier nicht nachgebaut.)"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-WindowsFeature Windows-Server-Backup",
+        "Get-WindowsFeature -Name Windows-Server-Backup",
+        "Get-WindowsFeature *Backup*",
+        "Get-WindowsFeature -Name *Backup*"
+      ],
+      "bedeutung": "Zeigen, ob eine Rolle oder ein Feature installiert ist",
+      "frage": "Zeige, ob das Feature Windows-Server-Backup installiert ist",
+      "faelle": [
+        {
+          "wenn": {
+            "installiert": false
+          },
+          "ausgabe": [
+            "",
+            "Display Name                                            Name                       Install State",
+            "------------                                            ----                       -------------",
+            "[ ] Windows Server Backup                               Windows-Server-Backup          Available",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Display Name                                            Name                       Install State",
+            "------------                                            ----                       -------------",
+            "[X] Windows Server Backup                               Windows-Server-Backup          Installed",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Install-WindowsFeature Windows-Server-Backup",
+        "Install-WindowsFeature -Name Windows-Server-Backup",
+        "Install-WindowsFeature Windows-Server-Backup -IncludeManagementTools",
+        "Install-WindowsFeature -Name Windows-Server-Backup -IncludeManagementTools",
+        "Add-WindowsFeature Windows-Server-Backup"
+      ],
+      "bedeutung": "Eine Rolle oder ein Feature installieren",
+      "frage": "Installiere das Feature Windows-Server-Backup",
+      "faelle": [
+        {
+          "setze": {
+            "installiert": true
+          },
+          "ausgabe": [
+            "",
+            "Success Restart Needed Exit Code      Feature Result",
+            "------- -------------- ---------      --------------",
+            "True    No             Success        {Windows Server Backup}",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "installiert": true
+  },
+  "hinweise": [
+    "Viele Werkzeuge gehören zu einer Rolle oder einem Feature, das erst installiert werden muss.",
+    "„Get-WindowsFeature *Backup*“ zeigt, ob das Feature „Windows-Server-Backup“ installiert ist. Installieren geht mit „Install-WindowsFeature“.",
+    "„Install-WindowsFeature Windows-Server-Backup“."
+  ],
+  "erklaerung": [
+    "wbadmin gehört zum Feature „Windows Server-Sicherung“ (Windows-Server-Backup). Ohne das Feature gibt es den Befehl nicht.",
+    "„Get-WindowsFeature“ zeigt alle Rollen und Features mit [X] = installiert und [ ] = verfügbar.",
+    "„Install-WindowsFeature“ installiert sie; die Spalte „Restart Needed“ sagt, ob ein Neustart nötig ist."
+  ],
+  "begriffe": {
+    "Rolle": "Hauptaufgabe eines Servers, z. B. DNS-Server, DHCP-Server, Dateiserver.",
+    "Feature": "Zusatzfunktion, z. B. Windows Server-Sicherung oder Telnet-Client.",
+    "Install State": "Available = verfügbar, nicht installiert. Installed = installiert."
+  },
+  "loesung": [
+    "wbadmin",
+    "Get-WindowsFeature *Backup*",
+    "Install-WindowsFeature Windows-Server-Backup"
+  ]
+}

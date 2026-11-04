@@ -1,0 +1,155 @@
+{
+  "id": "srv-ereignisanzeige-neustart",
+  "system": "windows_server",
+  "titel": "Wer hat den Server neu gestartet?",
+  "kategorie": "Ereignisanzeige",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.diagnostics/get-winevent",
+    "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "DC01 war gestern Abend gegen 22:42 Uhr kurz weg – alle Verbindungen sind abgebrochen.",
+    "Die Chefin fragt: War das ein Absturz, oder hat jemand den Server neu gestartet? Und wer?",
+    "",
+    "Aufgabe: Finde im Systemprotokoll den Eintrag, der zeigt, wer den Neustart ausgelöst hat (Ereignis-ID 1074)."
+  ],
+  "zustand": {
+    "gefunden": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-WinEvent -LogName System -MaxEvents 3",
+        "Get-WinEvent -LogName System -MaxEvents 5",
+        "Get-WinEvent -LogName System -MaxEvents 10"
+      ],
+      "bedeutung": "Die neuesten Einträge eines Ereignisprotokolls anzeigen",
+      "frage": "Zeige die 5 neuesten Einträge des Protokolls System",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "",
+            "   ProviderName: EventLog",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:44:05 PM         6005 Information      The Event log service was started.",
+            "11/3/2026 10:42:31 PM         6006 Information      The Event log service was stopped.",
+            "",
+            "",
+            "   ProviderName: User32",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:42:17 PM         1074 Information      The process C:\\Windows\\system32\\shutdown.exe (DC01) has initiated the restart of compute...",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=1074} -MaxEvents 1 | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=1074} | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | fl",
+        "Get-WinEvent -LogName System | Where-Object Id -eq 1074 | Format-List",
+        "Get-WinEvent -LogName System | Where-Object {$_.Id -eq 1074} | Format-List"
+      ],
+      "bedeutung": "Ereignisse mit einer bestimmten ID ausführlich anzeigen",
+      "frage": "Zeige das Ereignis mit der ID 1074 aus dem Protokoll System ausführlich (als Liste)",
+      "faelle": [
+        {
+          "setze": {
+            "gefunden": true
+          },
+          "ausgabe": [
+            "",
+            "",
+            "TimeCreated  : 11/3/2026 10:42:17 PM",
+            "ProviderName : User32",
+            "Id           : 1074",
+            "Message      : The process C:\\Windows\\system32\\shutdown.exe (DC01) has initiated the restart of computer DC01 on behalf of user FIRMA\\azubi01 for the following reason: No title for this reason could be found",
+            "               Reason Code: 0x800000ff",
+            "               Shutdown Type: restart",
+            "               Comment:",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=1074} -MaxEvents 1",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074}",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=1074}",
+        "Get-WinEvent -LogName System | Where-Object Id -eq 1074"
+      ],
+      "bedeutung": "Ereignisse mit einer bestimmten ID suchen",
+      "frage": "Suche im Protokoll System das Ereignis mit der ID 1074 (Filter-Hashtable)",
+      "faelle": [
+        {
+          "ausgabe": [
+            "   ProviderName: User32",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:42:17 PM         1074 Information      The process C:\\Windows\\system32\\shutdown.exe (DC01) has initiated the restart of compute...",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-EventLog -LogName System -Source User32 -Newest 1"
+      ],
+      "bedeutung": "Ereignisse einer Quelle mit dem älteren Get-EventLog anzeigen",
+      "faelle": [
+        {
+          "setze": {
+            "gefunden": true
+          },
+          "ausgabe": [
+            "",
+            "   Index Time          EntryType   Source                 InstanceID Message",
+            "   ----- ----          ---------   ------                 ---------- -------",
+            "    4711 Nov 03 22:42  Information User32                 2147484722 The process C:\\Windows\\system32\\shutdown.exe (DC01) has initiated the restart of computer DC01 on behalf of user FIRMA\\azubi01 for the following reason: No title for this reason could be found...",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "gefunden": true
+  },
+  "hinweise": [
+    "Windows schreibt Neustarts ins Systemprotokoll. Die Ereignis-ID 1074 sagt, wer oder welches Programm neu gestartet hat.",
+    "„Get-WinEvent -LogName System -MaxEvents 5“ zeigt die neuesten Einträge – die Meldung ist aber abgeschnitten. Filtere nach der ID und lass dir das Ergebnis als Liste zeigen (Format-List).",
+    "„Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List“."
+  ],
+  "erklaerung": [
+    "Ereignis 1074 (Quelle User32) protokolliert jeden geplanten Neustart: welches Programm, für welchen Benutzer, welcher Grund.",
+    "Hier hat FIRMA\\azubi01 mit shutdown.exe neu gestartet – kein Absturz. Die Ereignisse 6006 (Ereignisprotokoll beendet)",
+    "und 6005 (gestartet) zeigen ein sauberes Herunterfahren. Bei einem Absturz oder Stromausfall gäbe es stattdessen",
+    "6008 (unerwartetes Herunterfahren) und 41 (Kernel-Power). Die Tabelle schneidet lange Meldungen ab – „| Format-List“ zeigt alles."
+  ],
+  "begriffe": {
+    "Ereignisanzeige": "Windows-Protokolle (System, Anwendung, Sicherheit). In PowerShell: Get-WinEvent.",
+    "Ereignis-ID": "Nummer für die Art des Ereignisses, z. B. 1074 = Neustart ausgelöst, 6008 = unerwartet heruntergefahren.",
+    "FilterHashtable": "Filter für Get-WinEvent in der Form @{LogName='System'; Id=1074} – schnell, weil der Server filtert.",
+    "Format-List": "Zeigt jedes Ergebnis als Liste mit allen Werten in voller Länge."
+  },
+  "loesung": [
+    "Get-WinEvent -LogName System -MaxEvents 5",
+    "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
+  ]
+}

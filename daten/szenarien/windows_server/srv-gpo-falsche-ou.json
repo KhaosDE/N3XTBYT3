@@ -1,0 +1,196 @@
+{
+  "id": "srv-gpo-falsche-ou",
+  "system": "windows_server",
+  "titel": "Gruppenrichtlinie greift bei einem Benutzer nicht",
+  "kategorie": "Gruppenrichtlinien",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/grouppolicy/get-gpinheritance",
+    "https://learn.microsoft.com/powershell/module/activedirectory/move-adobject",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/gpupdate",
+    "https://learn.microsoft.com/troubleshoot/windows-server/group-policy/applying-group-policy-troubleshooting-guidance"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Alle im Vertrieb bekommen über die Gruppenrichtlinie „Vertrieb-Laufwerke“ automatisch das Laufwerk V:.",
+    "Nur Jonas Klein (jklein) nicht – auch nicht nach Neustart und „gpupdate /force“ an seinem PC.",
+    "Die Richtlinie ist mit der Organisationseinheit (OU) „Vertrieb“ verknüpft.",
+    "",
+    "Aufgabe: Finde am DC01 heraus, warum die Richtlinie bei Jonas nicht ankommt, und behebe es."
+  ],
+  "zustand": {
+    "in_ou": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-ADUser jklein",
+        "Get-ADUser -Identity jklein"
+      ],
+      "bedeutung": "Ein Benutzerkonto im Active Directory anzeigen",
+      "frage": "Zeige das AD-Konto jklein an",
+      "faelle": [
+        {
+          "wenn": {
+            "in_ou": false
+          },
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Jonas Klein,CN=Users,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Jonas",
+            "Name              : Jonas Klein",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1151-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : jklein",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1151",
+            "Surname           : Klein",
+            "UserPrincipalName : jklein@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Jonas Klein,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Jonas",
+            "Name              : Jonas Klein",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1151-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : jklein",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1151",
+            "Surname           : Klein",
+            "UserPrincipalName : jklein@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-GPInheritance -Target \"OU=Vertrieb,DC=firma,DC=internal\"",
+        "Get-GPInheritance \"OU=Vertrieb,DC=firma,DC=internal\""
+      ],
+      "bedeutung": "Zeigen, welche Gruppenrichtlinien mit einer OU verknüpft sind",
+      "frage": "Zeige, welche Gruppenrichtlinien mit der OU Vertrieb (OU=Vertrieb,DC=firma,DC=internal) verknüpft sind",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Name                  : vertrieb",
+            "ContainerType         : OU",
+            "Path                  : ou=vertrieb,dc=firma,dc=internal",
+            "GpoInheritanceBlocked : No",
+            "GpoLinks              : {Vertrieb-Laufwerke}",
+            "InheritedGpoLinks     : {Vertrieb-Laufwerke, Default Domain Policy}",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-GPO -Name Vertrieb-Laufwerke",
+        "Get-GPO Vertrieb-Laufwerke"
+      ],
+      "bedeutung": "Eine Gruppenrichtlinie (GPO) anzeigen",
+      "frage": "Zeige die Gruppenrichtlinie Vertrieb-Laufwerke an",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "DisplayName      : Vertrieb-Laufwerke",
+            "DomainName       : firma.internal",
+            "Owner            : FIRMA\\Domain Admins",
+            "Id               : 6f0e9c1a-2b3d-4e5f-8a9b-0c1d2e3f4a5b",
+            "GpoStatus        : AllSettingsEnabled",
+            "Description      :",
+            "CreationTime     : 9/1/2026 10:12:44 AM",
+            "ModificationTime : 9/1/2026 10:20:03 AM",
+            "UserVersion      : AD Version: 2, SysVol Version: 2",
+            "ComputerVersion  : AD Version: 0, SysVol Version: 0",
+            "WmiFilter        :",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Move-ADObject -Identity \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\"",
+        "Move-ADObject \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\"",
+        "Get-ADUser jklein | Move-ADObject -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\""
+      ],
+      "bedeutung": "Ein AD-Objekt in eine andere OU verschieben",
+      "frage": "Verschiebe Jonas Klein (CN=Jonas Klein,CN=Users,DC=firma,DC=internal) in die OU Vertrieb",
+      "faelle": [
+        {
+          "setze": {
+            "in_ou": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "gpupdate /force"
+      ],
+      "bedeutung": "Gruppenrichtlinien sofort neu anwenden",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Updating policy...",
+            "",
+            "Computer Policy update has completed successfully.",
+            "User Policy update has completed successfully.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "New-GPLink -Name Vertrieb-Laufwerke -Target \"CN=Users,DC=firma,DC=internal\""
+      ],
+      "falsch": true,
+      "warum": "Mit dem Standard-Container „Users“ kann man keine Gruppenrichtlinie verknüpfen. Der Benutzer gehört in die richtige OU.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Das geht nicht: „CN=Users“ ist ein Container, keine OU – Gruppenrichtlinien lassen sich dort nicht verknüpfen."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "in_ou": true
+  },
+  "hinweise": [
+    "Eine Gruppenrichtlinie wirkt nur auf Benutzer in der OU, mit der sie verknüpft ist (und darunter). Wo liegt Jonas’ Konto?",
+    "„Get-ADUser jklein“ zeigt im DistinguishedName, wo das Konto liegt. Vergleiche mit „Get-GPInheritance -Target \"OU=Vertrieb,DC=firma,DC=internal\"“. Verschieben geht mit „Move-ADObject“.",
+    "„Move-ADObject -Identity \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\"“."
+  ],
+  "erklaerung": [
+    "Jonas’ Konto lag im Standard-Container „CN=Users“ statt in der OU „Vertrieb“. Neue Konten landen dort,",
+    "wenn man beim Anlegen keine OU angibt. „Users“ ist keine OU – Gruppenrichtlinien lassen sich damit nicht verknüpfen.",
+    "Nach dem Verschieben mit „Move-ADObject“ gilt die Richtlinie „Vertrieb-Laufwerke“ auch für Jonas.",
+    "Am PC muss er sich neu anmelden (oder „gpupdate /force“ und neu anmelden), damit das Laufwerk V: kommt."
+  ],
+  "begriffe": {
+    "Gruppenrichtlinie (GPO)": "Sammlung von Einstellungen, die das AD automatisch auf Benutzer oder Computer anwendet.",
+    "OU (Organisationseinheit)": "Ordner im AD für Benutzer, Gruppen, Computer. Mit OUs kann man GPOs verknüpfen.",
+    "Container „Users“": "Standardablage für neue Konten. Kein OU – keine GPO-Verknüpfung möglich.",
+    "DistinguishedName": "Vollständiger Pfad eines Objekts im AD, z. B. CN=Jonas Klein,OU=Vertrieb,DC=firma,DC=internal."
+  },
+  "loesung": [
+    "Get-ADUser jklein",
+    "Get-GPInheritance -Target \"OU=Vertrieb,DC=firma,DC=internal\"",
+    "Move-ADObject -Identity \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\""
+  ]
+}

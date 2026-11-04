@@ -1,0 +1,168 @@
+{
+  "id": "srv-firewall-port",
+  "system": "windows_server",
+  "titel": "Warenwirtschaft läuft, aber niemand kommt dran",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/netsecurity/new-netfirewallrule",
+    "https://learn.microsoft.com/powershell/module/netsecurity/get-netfirewallrule",
+    "https://learn.microsoft.com/powershell/module/nettcpip/get-nettcpconnection"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Die neue Warenwirtschaft auf SRV-APP01 (192.168.10.30) läuft und lauscht auf TCP-Port 8080.",
+    "Auf dem Server selbst geht sie, von den Arbeitsplätzen aus nicht: Zeitüberschreitung.",
+    "Die Windows-Firewall auf SRV-APP01 ist eingeschaltet (das soll so bleiben).",
+    "",
+    "Aufgabe: Prüfe, ob die Anwendung lauscht und ob die Firewall den Port erlaubt, und gib nur diesen Port eingehend frei."
+  ],
+  "zustand": {
+    "hostname": "SRV-APP01",
+    "regel": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-NetTCPConnection -LocalPort 8080",
+        "Get-NetTCPConnection -LocalPort 8080 -State Listen"
+      ],
+      "bedeutung": "Zeigen, ob ein Programm auf einem TCP-Port lauscht",
+      "frage": "Zeige, ob auf dem lokalen TCP-Port 8080 etwas lauscht",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "LocalAddress                        LocalPort RemoteAddress                       RemotePort State       AppliedSetting OwningProcess",
+            "------------                        --------- -------------                       ---------- -----       -------------- -------------",
+            "0.0.0.0                             8080      0.0.0.0                             0          Listen                     3120",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-NetFirewallRule -DisplayName Warenwirtschaft*",
+        "Get-NetFirewallRule -DisplayName \"Warenwirtschaft*\""
+      ],
+      "bedeutung": "Firewallregeln nach Anzeigename suchen",
+      "frage": "Suche Firewallregeln, deren Anzeigename mit Warenwirtschaft beginnt",
+      "faelle": [
+        {
+          "wenn": {
+            "regel": false
+          },
+          "fehler": true,
+          "ausgabe": "Get-NetFirewallRule : No MSFT_NetFirewallRule objects found with property 'DisplayName' equal to 'Warenwirtschaft*'.  Verify the value of the property and retry."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                  : {3f1b2c7a-5d4e-4c1b-9a6f-2e8d7c6b5a41}",
+            "DisplayName           : Warenwirtschaft 8080",
+            "Description           :",
+            "DisplayGroup          :",
+            "Group                 :",
+            "Enabled               : True",
+            "Profile               : Any",
+            "Platform              : {}",
+            "Direction             : Inbound",
+            "Action                : Allow",
+            "EdgeTraversalPolicy   : Block",
+            "LooseSourceMapping    : False",
+            "LocalOnlyMapping      : False",
+            "Owner                 :",
+            "PrimaryStatus         : OK",
+            "Status                : The rule was parsed successfully from the store. (65536)",
+            "EnforcementStatus     : NotApplicable",
+            "PolicyStoreSource     : PersistentStore",
+            "PolicyStoreSourceType : Local",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow",
+        "New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -LocalPort 8080 -Protocol TCP -Action Allow"
+      ],
+      "bedeutung": "Eine Firewallregel anlegen",
+      "frage": "Lege die Firewallregel „Warenwirtschaft 8080“ an: eingehend, TCP, Port 8080, erlauben",
+      "faelle": [
+        {
+          "setze": {
+            "regel": true
+          },
+          "ausgabe": [
+            "",
+            "Name                  : {3f1b2c7a-5d4e-4c1b-9a6f-2e8d7c6b5a41}",
+            "DisplayName           : Warenwirtschaft 8080",
+            "Description           :",
+            "DisplayGroup          :",
+            "Group                 :",
+            "Enabled               : True",
+            "Profile               : Any",
+            "Platform              : {}",
+            "Direction             : Inbound",
+            "Action                : Allow",
+            "EdgeTraversalPolicy   : Block",
+            "LooseSourceMapping    : False",
+            "LocalOnlyMapping      : False",
+            "Owner                 :",
+            "PrimaryStatus         : OK",
+            "Status                : The rule was parsed successfully from the store. (65536)",
+            "EnforcementStatus     : NotApplicable",
+            "PolicyStoreSource     : PersistentStore",
+            "PolicyStoreSourceType : Local",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-NetFirewallProfile -Enabled False",
+        "Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False",
+        "netsh advfirewall set allprofiles state off"
+      ],
+      "falsch": true,
+      "warum": "Die Firewall soll an bleiben. Gib nur den einen Port frei, den die Anwendung braucht.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Die Firewall ganz auszuschalten öffnet alle Ports. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "regel": true
+  },
+  "hinweise": [
+    "Zwei Fragen: Lauscht die Anwendung wirklich auf 8080? Und lässt die Firewall eingehende Verbindungen auf 8080 durch?",
+    "„Get-NetTCPConnection -LocalPort 8080“ zeigt den lauschenden Port. „Get-NetFirewallRule“ zeigt Regeln, „New-NetFirewallRule“ legt eine an.",
+    "„New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow“."
+  ],
+  "erklaerung": [
+    "Die Anwendung lauschte auf Port 8080 (State Listen), aber die Windows-Firewall blockiert eingehende Verbindungen,",
+    "für die keine Regel existiert. Auf dem Server selbst merkt man das nicht – nur von außen.",
+    "„New-NetFirewallRule … -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow“ öffnet genau diesen Port.",
+    "Gute Regeln haben einen sprechenden Namen und sind so eng wie möglich (nur nötiger Port, ggf. nur interne Adressen)."
+  ],
+  "begriffe": {
+    "Port": "Nummer, über die ein Dienst auf einem Rechner erreichbar ist, z. B. 8080 für die Warenwirtschaft.",
+    "Listen": "Zustand eines Ports, auf dem ein Programm auf Verbindungen wartet.",
+    "Inbound / Outbound": "Eingehende bzw. ausgehende Verbindungen aus Sicht des Rechners.",
+    "Firewallregel": "Erlaubt oder blockiert Verbindungen nach Richtung, Protokoll und Port."
+  },
+  "loesung": [
+    "Get-NetTCPConnection -LocalPort 8080",
+    "Get-NetFirewallRule -DisplayName Warenwirtschaft*",
+    "New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow"
+  ]
+}

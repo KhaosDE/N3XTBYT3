@@ -1,0 +1,207 @@
+{
+  "id": "srv-ad-konto-abgelaufen",
+  "system": "windows_server",
+  "titel": "Praktikant: Konto abgelaufen",
+  "kategorie": "Active Directory",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountexpiration",
+    "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount",
+    "https://learn.microsoft.com/powershell/module/activedirectory/clear-adaccountexpiration"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der Praktikant Tom Richter (trichter) bleibt länger – sein Vertrag geht jetzt bis zum 28.02.2027.",
+    "Heute früh kommt bei der Anmeldung: „Your account has expired. Please see your system administrator.“",
+    "",
+    "Aufgabe: Prüfe das Ablaufdatum des Kontos und verlängere es bis zum Vertragsende."
+  ],
+  "zustand": {
+    "ablauf": "abgelaufen"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-ADUser trichter -Properties AccountExpirationDate",
+        "Get-ADUser -Identity trichter -Properties AccountExpirationDate"
+      ],
+      "bedeutung": "Das Ablaufdatum eines AD-Kontos anzeigen",
+      "frage": "Zeige das AD-Konto trichter mit der Eigenschaft AccountExpirationDate an",
+      "faelle": [
+        {
+          "wenn": {
+            "ablauf": "abgelaufen"
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate : 11/1/2026 12:00:00 AM",
+            "DistinguishedName     : CN=Tom Richter,OU=Praktikanten,DC=firma,DC=internal",
+            "Enabled               : True",
+            "GivenName             : Tom",
+            "Name                  : Tom Richter",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1219-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName        : trichter",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1219",
+            "Surname               : Richter",
+            "UserPrincipalName     : trichter@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "ablauf": "verlaengert"
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate : 3/1/2027 12:00:00 AM",
+            "DistinguishedName     : CN=Tom Richter,OU=Praktikanten,DC=firma,DC=internal",
+            "Enabled               : True",
+            "GivenName             : Tom",
+            "Name                  : Tom Richter",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1219-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName        : trichter",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1219",
+            "Surname               : Richter",
+            "UserPrincipalName     : trichter@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Tom Richter,OU=Praktikanten,DC=firma,DC=internal",
+            "Enabled               : True",
+            "GivenName             : Tom",
+            "Name                  : Tom Richter",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1219-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName        : trichter",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1219",
+            "Surname               : Richter",
+            "UserPrincipalName     : trichter@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Search-ADAccount -AccountExpired",
+        "Search-ADAccount -AccountExpired -UsersOnly"
+      ],
+      "bedeutung": "Abgelaufene Konten im Active Directory suchen",
+      "frage": "Suche alle abgelaufenen Konten im Active Directory",
+      "faelle": [
+        {
+          "wenn": {
+            "ablauf": "abgelaufen"
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate : 11/1/2026 12:00:00 AM",
+            "DistinguishedName     : CN=Tom Richter,OU=Praktikanten,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 10/31/2026 3:58:40 PM",
+            "LockedOut             : False",
+            "Name                  : Tom Richter",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1219-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : trichter",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1219",
+            "UserPrincipalName     : trichter@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01",
+        "Set-ADAccountExpiration trichter -DateTime 2027-03-01",
+        "Set-ADAccountExpiration -Identity trichter -DateTime 03/01/2027",
+        "Set-ADAccountExpiration trichter -DateTime 03/01/2027",
+        "Set-ADUser -Identity trichter -AccountExpirationDate 2027-03-01",
+        "Set-ADUser trichter -AccountExpirationDate 2027-03-01"
+      ],
+      "bedeutung": "Das Ablaufdatum eines AD-Kontos setzen",
+      "frage": "Setze das Ablaufdatum von trichter so, dass das Konto am 28.02.2027 noch gilt (Datum 2027-03-01)",
+      "faelle": [
+        {
+          "setze": {
+            "ablauf": "verlaengert"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADAccountExpiration -Identity trichter -DateTime 2027-02-28",
+        "Set-ADAccountExpiration trichter -DateTime 2027-02-28",
+        "Set-ADUser -Identity trichter -AccountExpirationDate 2027-02-28",
+        "Set-ADUser trichter -AccountExpirationDate 2027-02-28"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": [
+            "Gesetzt – aber Vorsicht: Das Konto läuft zu Beginn dieses Tages ab (2/28/2027 0:00 Uhr).",
+            "Tom könnte sich an seinem letzten Tag nicht mehr anmelden. Nimm den Tag danach."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Clear-ADAccountExpiration trichter",
+        "Clear-ADAccountExpiration -Identity trichter"
+      ],
+      "falsch": true,
+      "warum": "Damit läuft das Konto nie mehr ab. Praktikantenkonten sollen aber automatisch enden – sonst bleiben vergessene Konten offen.",
+      "faelle": [
+        {
+          "setze": {
+            "ablauf": "nie"
+          }
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "ablauf": "verlaengert"
+  },
+  "hinweise": [
+    "Die Meldung sagt „expired“ – das Konto hat ein Ablaufdatum. Schau es dir an.",
+    "„Get-ADUser trichter -Properties AccountExpirationDate“ zeigt es. Ändern geht mit „Set-ADAccountExpiration“. Achtung: Das Konto läuft zu Beginn des eingetragenen Tages ab.",
+    "„Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01“ – dann gilt es bis einschließlich 28.02.2027."
+  ],
+  "erklaerung": [
+    "Das Konto hatte als Ablaufdatum den 1.11.2026, 0:00 Uhr – also das Ende des 31.10.",
+    "„Set-ADAccountExpiration“ setzt ein neues Datum. Das Konto läuft zu Beginn des angegebenen Tages ab;",
+    "darum 2027-03-01, damit Tom am 28.02. noch arbeiten kann (in der AD-Konsole steht dann „Ende des 28.02.2027“).",
+    "Das Datum im ISO-Format JJJJ-MM-TT versteht PowerShell unabhängig von der Spracheinstellung.",
+    "„Clear-ADAccountExpiration“ entfernt das Datum ganz – für befristete Konten ist das ein Sicherheitsrisiko."
+  ],
+  "begriffe": {
+    "AccountExpirationDate": "Zeitpunkt, ab dem sich ein Konto nicht mehr anmelden kann.",
+    "Ablauf vs. Passwortablauf": "Das Konto läuft ab (Anmeldung unmöglich) – oder nur das Passwort (muss geändert werden).",
+    "ISO-Datum": "Schreibweise JJJJ-MM-TT, z. B. 2027-03-01; überall eindeutig."
+  },
+  "loesung": [
+    "Get-ADUser trichter -Properties AccountExpirationDate",
+    "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01",
+    "Get-ADUser trichter -Properties AccountExpirationDate"
+  ]
+}

@@ -47,7 +47,8 @@ class InhaltTest(unittest.TestCase):
 
     def test_keine_echten_mailadressen(self):
         mail = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
-        funde = [f"{d.name}: {m}" for d in SZENARIEN for m in mail.findall(d.read_text(encoding="utf-8"))]
+        funde = [f"{d.name}: {m}" for d in SZENARIEN for m in mail.findall(d.read_text(encoding="utf-8"))
+                 if not m.endswith(".internal")]  # erfundene Domäne firma.internal ist erlaubt
         self.assertEqual(funde, [])
 
     def test_vorlage_ist_gueltig(self):

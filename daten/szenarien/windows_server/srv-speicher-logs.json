@@ -1,0 +1,182 @@
+{
+  "id": "srv-speicher-logs",
+  "system": "windows_server",
+  "titel": "Laufwerk D: auf dem Anwendungsserver voll",
+  "kategorie": "Speicher",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/measure-object",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/remove-item",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/where-object"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Die Warenwirtschaft auf SRV-APP01 meldet „Nicht genügend Speicherplatz“. Sie schreibt jeden Tag viele Logdateien",
+    "nach D:\\App\\Logs – seit drei Jahren wurde nichts gelöscht.",
+    "Vorgabe der Firma: Logs der letzten 30 Tage bleiben (für Fehlersuche), ältere dürfen weg.",
+    "",
+    "Aufgabe: Prüfe den Platz auf D:, schau, wie viel die Logs belegen, und lösche nur die Logs, die älter als 30 Tage sind."
+  ],
+  "zustand": {
+    "hostname": "SRV-APP01",
+    "alte_logs": true,
+    "probelauf": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Volume -DriveLetter D",
+        "Get-Volume D"
+      ],
+      "bedeutung": "Freien und gesamten Speicherplatz eines Laufwerks anzeigen",
+      "frage": "Zeige den freien Speicherplatz von Laufwerk D:",
+      "faelle": [
+        {
+          "wenn": {
+            "alte_logs": true
+          },
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining   Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------   ----",
+            "D           Daten        NTFS           Fixed     Healthy      OK                       1.2 GB 200 GB",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "DriveLetter FriendlyName FileSystemType DriveType HealthStatus OperationalStatus SizeRemaining   Size",
+            "----------- ------------ -------------- --------- ------------ ----------------- -------------   ----",
+            "D           Daten        NTFS           Fixed     Healthy      OK                     91.73 GB 200 GB",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ChildItem D:\\App\\Logs | Measure-Object -Property Length -Sum",
+        "Get-ChildItem -Path D:\\App\\Logs | Measure-Object -Property Length -Sum",
+        "Get-ChildItem D:\\App\\Logs -File | Measure-Object -Property Length -Sum"
+      ],
+      "bedeutung": "Anzahl und Gesamtgröße der Dateien eines Ordners berechnen",
+      "frage": "Berechne Anzahl und Gesamtgröße (Summe von Length) der Dateien in D:\\App\\Logs",
+      "faelle": [
+        {
+          "wenn": {
+            "alte_logs": true
+          },
+          "ausgabe": [
+            "",
+            "Count    : 18734",
+            "Average  :",
+            "Sum      : 96211345408",
+            "Maximum  :",
+            "Minimum  :",
+            "Property : Length",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Count    : 30",
+            "Average  :",
+            "Sum      : 141557760",
+            "Maximum  :",
+            "Minimum  :",
+            "Property : Length",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item -WhatIf",
+        "Get-ChildItem D:\\App\\Logs | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item -WhatIf",
+        "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-30)} | Remove-Item -WhatIf",
+        "Get-ChildItem D:\\App\\Logs | Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-30)} | Remove-Item -WhatIf"
+      ],
+      "bedeutung": "Erst zeigen, was gelöscht würde (Probelauf mit -WhatIf)",
+      "frage": "Zeige mit einem Probelauf, welche .log-Dateien in D:\\App\\Logs älter als 30 Tage sind und gelöscht würden",
+      "faelle": [
+        {
+          "setze": {
+            "probelauf": true
+          },
+          "ausgabe": [
+            "What if: Performing the operation \"Remove File\" on target \"D:\\App\\Logs\\app_2023-11-02.log\".",
+            "What if: Performing the operation \"Remove File\" on target \"D:\\App\\Logs\\app_2023-11-03.log\".",
+            "What if: Performing the operation \"Remove File\" on target \"D:\\App\\Logs\\app_2023-11-04.log\".",
+            "(… insgesamt 18704 Zeilen, hier gekürzt)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item",
+        "Get-ChildItem D:\\App\\Logs | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item",
+        "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-30)} | Remove-Item",
+        "Get-ChildItem D:\\App\\Logs | Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-30)} | Remove-Item"
+      ],
+      "bedeutung": "Dateien löschen, die älter als 30 Tage sind",
+      "frage": "Lösche alle .log-Dateien in D:\\App\\Logs, die älter als 30 Tage sind",
+      "faelle": [
+        {
+          "setze": {
+            "alte_logs": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Remove-Item D:\\App\\Logs\\*",
+        "Remove-Item D:\\App\\Logs\\* -Force",
+        "Remove-Item D:\\App\\Logs\\*.log"
+      ],
+      "falsch": true,
+      "warum": "Die Vorgabe sagt: Logs der letzten 30 Tage bleiben. Filtere nach dem Datum (LastWriteTime).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das würde auch die Logs der letzten 30 Tage löschen. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "alte_logs": false
+  },
+  "hinweise": [
+    "Erst messen: Wie voll ist D:, und wie viel davon sind Logs? Dann nur die alten löschen – am besten erst mit einem Probelauf.",
+    "„Get-ChildItem D:\\App\\Logs | Measure-Object -Property Length -Sum“ misst. Alte Dateien findest du mit „Where-Object LastWriteTime -lt (Get-Date).AddDays(-30)“. „-WhatIf“ zeigt nur, was passieren würde.",
+    "„Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item“ (vorher einmal mit -WhatIf am Ende)."
+  ],
+  "erklaerung": [
+    "18 734 Logdateien belegten rund 90 GB. Die Pipeline sucht alle .log-Dateien (Get-ChildItem), behält nur die,",
+    "deren letzte Änderung (LastWriteTime) älter als heute minus 30 Tage ist (Where-Object), und löscht sie (Remove-Item).",
+    "„-WhatIf“ macht einen Probelauf: Er zeigt nur, was gelöscht würde. Vor jedem Löschen mit Platzhaltern eine gute Idee.",
+    "Dauerhaft hilft eine geplante Aufgabe, die das regelmäßig erledigt – oder eine Einstellung der Software selbst."
+  ],
+  "begriffe": {
+    "Pipeline ( | )": "Reicht die Ergebnisse eines Befehls an den nächsten weiter.",
+    "Where-Object": "Filtert Objekte nach einer Bedingung, z. B. LastWriteTime -lt (älter als).",
+    "(Get-Date).AddDays(-30)": "Das Datum von heute minus 30 Tage.",
+    "-WhatIf": "Probelauf: zeigt, was ein Befehl tun würde, ohne es zu tun.",
+    "Measure-Object": "Zählt Objekte und rechnet Summe, Durchschnitt, Minimum, Maximum."
+  },
+  "loesung": [
+    "Get-Volume -DriveLetter D",
+    "Get-ChildItem D:\\App\\Logs | Measure-Object -Property Length -Sum",
+    "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item -WhatIf",
+    "Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item",
+    "Get-Volume -DriveLetter D"
+  ]
+}

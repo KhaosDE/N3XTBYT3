@@ -1,0 +1,160 @@
+{
+  "id": "srv-rdp-gruppe",
+  "system": "windows_server",
+  "titel": "Buchhaltung darf sich nicht am Terminalserver anmelden",
+  "kategorie": "Benutzer und Gruppen",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.localaccounts/add-localgroupmember",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.localaccounts/get-localgroupmember"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Die Buchhaltung soll ab heute per Remotedesktop auf dem Terminalserver SRV-TS01 arbeiten.",
+    "Bei der Anmeldung erscheint: „To sign in remotely, you need the right to sign in through Remote Desktop Services.“",
+    "Alle Buchhalter sind in der AD-Gruppe GG-Buchhaltung.",
+    "",
+    "Aufgabe: Du bist auf SRV-TS01. Gib der Gruppe GG-Buchhaltung das Recht, sich per Remotedesktop anzumelden."
+  ],
+  "zustand": {
+    "hostname": "SRV-TS01",
+    "rdp_ok": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-LocalGroupMember -Group \"Remote Desktop Users\"",
+        "Get-LocalGroupMember \"Remote Desktop Users\""
+      ],
+      "bedeutung": "Die Mitglieder einer lokalen Gruppe anzeigen",
+      "frage": "Zeige die Mitglieder der lokalen Gruppe Remote Desktop Users (PowerShell)",
+      "faelle": [
+        {
+          "wenn": {
+            "rdp_ok": false
+          },
+          "ausgabe": [
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ObjectClass Name                 PrincipalSource",
+            "----------- ----                 ---------------",
+            "Group       FIRMA\\GG-Buchhaltung ActiveDirectory",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung",
+        "Add-LocalGroupMember \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung"
+      ],
+      "bedeutung": "Ein Konto oder eine Gruppe in eine lokale Gruppe aufnehmen",
+      "frage": "Nimm FIRMA\\GG-Buchhaltung in die lokale Gruppe Remote Desktop Users auf (PowerShell)",
+      "faelle": [
+        {
+          "setze": {
+            "rdp_ok": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net localgroup \"Remote Desktop Users\""
+      ],
+      "bedeutung": "Die Mitglieder einer lokalen Gruppe anzeigen (cmd)",
+      "faelle": [
+        {
+          "wenn": {
+            "rdp_ok": false
+          },
+          "ausgabe": [
+            "Alias name     Remote Desktop Users",
+            "Comment        Members in this group are granted the right to logon remotely",
+            "",
+            "Members",
+            "",
+            "-------------------------------------------------------------------------------",
+            "The command completed successfully.",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "Alias name     Remote Desktop Users",
+            "Comment        Members in this group are granted the right to logon remotely",
+            "",
+            "Members",
+            "",
+            "-------------------------------------------------------------------------------",
+            "FIRMA\\GG-Buchhaltung",
+            "The command completed successfully.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "net localgroup \"Remote Desktop Users\" FIRMA\\GG-Buchhaltung /add"
+      ],
+      "bedeutung": "Ein Konto in eine lokale Gruppe aufnehmen (cmd)",
+      "frage": "Nimm FIRMA\\GG-Buchhaltung in die lokale Gruppe Remote Desktop Users auf (cmd)",
+      "faelle": [
+        {
+          "setze": {
+            "rdp_ok": true
+          },
+          "ausgabe": [
+            "The command completed successfully.",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-LocalGroupMember -Group Administrators -Member FIRMA\\GG-Buchhaltung",
+        "net localgroup Administrators FIRMA\\GG-Buchhaltung /add"
+      ],
+      "falsch": true,
+      "warum": "Administratoren dürfen sich zwar per RDP anmelden, aber auch alles am Server ändern. Die passende Gruppe ist „Remote Desktop Users“.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Dann wäre die Buchhaltung Administrator auf dem Terminalserver. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "rdp_ok": true
+  },
+  "hinweise": [
+    "Wer sich per Remotedesktop anmelden darf, regelt auf dem Server eine lokale Gruppe.",
+    "Die Gruppe heißt „Remote Desktop Users“. „Get-LocalGroupMember“ zeigt ihre Mitglieder, „Add-LocalGroupMember“ nimmt jemanden auf.",
+    "„Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung“."
+  ],
+  "erklaerung": [
+    "Das Recht „Anmelden über Remotedesktopdienste“ haben standardmäßig die Administratoren und die lokale Gruppe",
+    "„Remote Desktop Users“. Nimmt man die AD-Gruppe GG-Buchhaltung dort auf, dürfen alle Buchhalter per RDP auf SRV-TS01.",
+    "Gruppennamen mit Leerzeichen stehen in Anführungszeichen. Auf einem deutschen Server heißt die Gruppe „Remotedesktopbenutzer“."
+  ],
+  "begriffe": {
+    "Remotedesktop (RDP)": "Fernzugriff auf einen Windows-Rechner mit Bildschirm, Tastatur und Maus übers Netzwerk.",
+    "Terminalserver": "Server, auf dem viele Benutzer gleichzeitig per Remotedesktop arbeiten.",
+    "Lokale Gruppe": "Gruppe, die nur auf diesem einen Rechner gilt (im Gegensatz zu AD-Gruppen).",
+    "PrincipalSource": "Woher ein Mitglied stammt: Local (lokal) oder ActiveDirectory."
+  },
+  "loesung": [
+    "Get-LocalGroupMember -Group \"Remote Desktop Users\"",
+    "Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung",
+    "Get-LocalGroupMember -Group \"Remote Desktop Users\""
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "id": "srv-ad-gruppe-fehlt",
+  "system": "windows_server",
+  "titel": "Neue Mitarbeiterin kommt nicht in den Vertriebsordner",
+  "kategorie": "Active Directory",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/add-adgroupmember",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-adgroupmember",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-adprincipalgroupmembership"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Nina Becker (nbecker) ist neu im Vertrieb. Beim Öffnen von \\\\SRV-DATEI01\\Vertrieb kommt: „Access is denied.“",
+    "Ihre Kollegen kommen hinein. Die Rechte auf den Ordner sind über die Gruppe GG-Vertrieb vergeben.",
+    "",
+    "Aufgabe: Finde heraus, warum Nina nicht hineinkommt, und behebe es im Active Directory."
+  ],
+  "zustand": {
+    "in_gruppe": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-ADPrincipalGroupMembership nbecker",
+        "Get-ADPrincipalGroupMembership -Identity nbecker"
+      ],
+      "bedeutung": "Zeigen, in welchen AD-Gruppen ein Benutzer Mitglied ist",
+      "frage": "Zeige, in welchen AD-Gruppen nbecker Mitglied ist",
+      "faelle": [
+        {
+          "wenn": {
+            "in_gruppe": false
+          },
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Domain Users,CN=Users,DC=firma,DC=internal",
+            "GroupCategory     : Security",
+            "GroupScope        : Global",
+            "name              : Domain Users",
+            "objectClass       : group",
+            "objectGUID        : 4b7c9d1e-0513-4f2a-8b3c-5d6e7f8a9b0c",
+            "SamAccountName    : Domain Users",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-513",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Domain Users,CN=Users,DC=firma,DC=internal",
+            "GroupCategory     : Security",
+            "GroupScope        : Global",
+            "name              : Domain Users",
+            "objectClass       : group",
+            "objectGUID        : 4b7c9d1e-0513-4f2a-8b3c-5d6e7f8a9b0c",
+            "SamAccountName    : Domain Users",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-513",
+            "",
+            "distinguishedName : CN=GG-Vertrieb,OU=Gruppen,DC=firma,DC=internal",
+            "GroupCategory     : Security",
+            "GroupScope        : Global",
+            "name              : GG-Vertrieb",
+            "objectClass       : group",
+            "objectGUID        : 4b7c9d1e-1105-4f2a-8b3c-5d6e7f8a9b0c",
+            "SamAccountName    : GG-Vertrieb",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1105",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ADGroupMember GG-Vertrieb",
+        "Get-ADGroupMember -Identity GG-Vertrieb"
+      ],
+      "bedeutung": "Die Mitglieder einer AD-Gruppe anzeigen",
+      "frage": "Zeige die Mitglieder der Gruppe GG-Vertrieb",
+      "faelle": [
+        {
+          "wenn": {
+            "in_gruppe": false
+          },
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "name              : Kai Wagner",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : kwagner",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "",
+            "distinguishedName : CN=Jonas Klein,OU=Vertrieb,DC=firma,DC=internal",
+            "name              : Jonas Klein",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1151-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : jklein",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1151",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "name              : Kai Wagner",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : kwagner",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "",
+            "distinguishedName : CN=Jonas Klein,OU=Vertrieb,DC=firma,DC=internal",
+            "name              : Jonas Klein",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1151-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : jklein",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1151",
+            "",
+            "distinguishedName : CN=Nina Becker,OU=Vertrieb,DC=firma,DC=internal",
+            "name              : Nina Becker",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1203-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : nbecker",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1203",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker",
+        "Add-ADGroupMember GG-Vertrieb nbecker",
+        "Add-ADGroupMember GG-Vertrieb -Members nbecker"
+      ],
+      "bedeutung": "Einen Benutzer in eine AD-Gruppe aufnehmen",
+      "frage": "Nimm nbecker in die Gruppe GG-Vertrieb auf",
+      "faelle": [
+        {
+          "setze": {
+            "in_gruppe": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-ADPrincipalGroupMembership -Identity nbecker -MemberOf GG-Vertrieb",
+        "Add-ADPrincipalGroupMembership nbecker -MemberOf GG-Vertrieb"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "in_gruppe": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-ADGroupMember -Identity \"Domain Admins\" -Members nbecker",
+        "Add-ADGroupMember \"Domain Admins\" nbecker"
+      ],
+      "falsch": true,
+      "warum": "Domain Admins dürfen alles in der ganzen Domäne. Gib nur die Rechte, die gebraucht werden (Prinzip der minimalen Rechte).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das würde Nina zur Domänen-Administratorin machen. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "in_gruppe": true
+  },
+  "hinweise": [
+    "Die Rechte hängen an einer Gruppe. Ist Nina überhaupt in dieser Gruppe?",
+    "„Get-ADPrincipalGroupMembership nbecker“ zeigt Ninas Gruppen, „Get-ADGroupMember GG-Vertrieb“ die Mitglieder der Gruppe. Aufnehmen geht mit „Add-ADGroupMember“.",
+    "„Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker“ – danach muss Nina sich einmal ab- und wieder anmelden."
+  ],
+  "erklaerung": [
+    "Die Ordnerrechte gehören der Gruppe GG-Vertrieb, und Nina war noch nicht Mitglied. „Add-ADGroupMember“ nimmt sie auf.",
+    "Wichtig: Gruppenmitgliedschaften stehen im Anmeldeticket (Kerberos-Ticket). Nina muss sich ab- und wieder anmelden,",
+    "erst dann gilt die neue Gruppe. Rechte über Gruppen statt an einzelne Personen zu vergeben, spart Arbeit",
+    "und hält die Rechte übersichtlich."
+  ],
+  "begriffe": {
+    "Sicherheitsgruppe": "AD-Gruppe, der man Rechte geben kann. Alle Mitglieder erhalten diese Rechte.",
+    "GG-": "Häufige Namensregel für globale Gruppen (Global Group), z. B. GG-Vertrieb.",
+    "Kerberos-Ticket": "Anmeldenachweis in der Domäne; enthält die Gruppen, in denen man bei der Anmeldung war.",
+    "Minimale Rechte": "Jeder bekommt nur die Rechte, die er für seine Arbeit braucht."
+  },
+  "loesung": [
+    "Get-ADPrincipalGroupMembership nbecker",
+    "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker",
+    "Get-ADGroupMember GG-Vertrieb"
+  ]
+}

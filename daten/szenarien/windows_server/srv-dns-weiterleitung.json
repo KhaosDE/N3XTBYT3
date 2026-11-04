@@ -1,0 +1,151 @@
+{
+  "id": "srv-dns-weiterleitung",
+  "system": "windows_server",
+  "titel": "Intern geht alles, Internetseiten nicht",
+  "kategorie": "DNS",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dnsserver/add-dnsserverforwarder",
+    "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverforwarder"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Seit DC01 neu aufgesetzt wurde, öffnen die PCs keine Internetseiten mehr. Interne Namen (intranet.firma.internal) gehen.",
+    "Alle PCs fragen DC01 als DNS-Server. Die Firewall erlaubt DNS-Anfragen ins Internet nur über den Router 192.168.10.1.",
+    "Auf dem alten Server war eingestellt, dass DC01 unbekannte Namen an den Router weiterreicht.",
+    "",
+    "Aufgabe: Stelle am DNS-Server DC01 die Weiterleitung für Internetnamen wieder her."
+  ],
+  "zustand": {
+    "weiterleitung": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Resolve-DnsName www.example.com",
+        "Resolve-DnsName -Name www.example.com"
+      ],
+      "bedeutung": "Einen Namen über DNS auflösen (PowerShell)",
+      "frage": "Löse www.example.com über DNS auf",
+      "faelle": [
+        {
+          "wenn": {
+            "weiterleitung": false
+          },
+          "fehler": true,
+          "ausgabe": "Resolve-DnsName : www.example.com : This operation returned because the timeout period expired"
+        },
+        {
+          "sim": true,
+          "ausgabe": "Der Name wird jetzt aufgelöst (die öffentliche Adresse zeigt die Simulation nicht)."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Resolve-DnsName intranet.firma.internal"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "intranet.firma.internal                        A      3600  Answer     192.168.10.25",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DnsServerForwarder"
+      ],
+      "bedeutung": "Die Weiterleitungen (Forwarder) des DNS-Servers anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "weiterleitung": false
+          },
+          "ausgabe": [
+            "",
+            "UseRootHint        : True",
+            "Timeout(s)         : 3",
+            "EnableReordering   : True",
+            "IPAddress          :",
+            "ReorderedIPAddress :",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "UseRootHint        : True",
+            "Timeout(s)         : 3",
+            "EnableReordering   : True",
+            "IPAddress          : 192.168.10.1",
+            "ReorderedIPAddress : 192.168.10.1",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-DnsServerForwarder -IPAddress 192.168.10.1",
+        "Add-DnsServerForwarder 192.168.10.1",
+        "Add-DnsServerForwarder -IPAddress 192.168.10.1 -PassThru",
+        "Set-DnsServerForwarder -IPAddress 192.168.10.1"
+      ],
+      "bedeutung": "Eine DNS-Weiterleitung (Forwarder) eintragen",
+      "frage": "Trage den Router 192.168.10.1 als DNS-Weiterleitung ein",
+      "faelle": [
+        {
+          "setze": {
+            "weiterleitung": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Clear-DnsServerCache",
+        "Clear-DnsServerCache -Force"
+      ],
+      "bedeutung": "Den Zwischenspeicher des DNS-Servers leeren",
+      "faelle": [
+        {
+          "ausgabe": ""
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "weiterleitung": true
+  },
+  "hinweise": [
+    "Interne Namen kennt DC01 selbst. Für alle anderen muss er jemanden fragen dürfen. Wie ist das eingestellt?",
+    "„Get-DnsServerForwarder“ zeigt die Weiterleitungen. Die Liste der IP-Adressen ist leer. Hinzufügen geht mit „Add-DnsServerForwarder“.",
+    "„Add-DnsServerForwarder -IPAddress 192.168.10.1“."
+  ],
+  "erklaerung": [
+    "Ein DNS-Server beantwortet Namen aus seinen eigenen Zonen selbst (firma.internal). Für alle anderen Namen",
+    "fragt er entweder die Root-Server im Internet (Root Hints) oder leitet an einen anderen DNS-Server weiter (Forwarder).",
+    "Hier blockiert die Firewall direkte Anfragen ins Internet; nur der Router darf. Nach der Neuinstallation fehlte",
+    "die Weiterleitung – „Add-DnsServerForwarder -IPAddress 192.168.10.1“ stellt sie wieder her."
+  ],
+  "begriffe": {
+    "Forwarder (Weiterleitung)": "DNS-Server, an den Anfragen weitergereicht werden, die der eigene Server nicht selbst kennt.",
+    "Root Hints": "Liste der Root-Server im Internet, die ein DNS-Server ohne Forwarder fragt.",
+    "Timeout": "Die Wartezeit ist abgelaufen, ohne dass eine Antwort kam."
+  },
+  "loesung": [
+    "Resolve-DnsName www.example.com",
+    "Get-DnsServerForwarder",
+    "Add-DnsServerForwarder -IPAddress 192.168.10.1",
+    "Resolve-DnsName www.example.com"
+  ]
+}

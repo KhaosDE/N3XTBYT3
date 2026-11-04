@@ -1,0 +1,152 @@
+{
+  "id": "srv-dhcp-bereich-voll",
+  "system": "windows_server",
+  "titel": "Schulungslaptops bekommen keine Adresse",
+  "kategorie": "DHCP",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scopestatistics",
+    "https://learn.microsoft.com/powershell/module/dhcpserver/set-dhcpserverv4scope",
+    "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scope"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Heute ist Schulung: 30 Gäste-Laptops im Besprechungsraum. Fast alle zeigen eine Adresse 169.254.x.x und kein Netzwerk.",
+    "Die Büro-PCs laufen normal. DHCP-Server ist DC01, Bereich 192.168.10.0.",
+    "Laut Netzplan sind die Adressen 192.168.10.151 bis 192.168.10.200 frei (keine festen Geräte).",
+    "",
+    "Aufgabe: Finde heraus, warum es keine Adressen mehr gibt, und vergrößere den Bereich auf .200."
+  ],
+  "zustand": {
+    "bereich_gross": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-DhcpServerv4Scope"
+      ],
+      "bedeutung": "Die DHCP-Bereiche (Scopes) anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "bereich_gross": false
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.150  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.200  8.00:00:00",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DhcpServerv4ScopeStatistics",
+        "Get-DhcpServerv4ScopeStatistics -ScopeId 192.168.10.0"
+      ],
+      "bedeutung": "Auslastung der DHCP-Bereiche anzeigen (frei, belegt, Prozent)",
+      "faelle": [
+        {
+          "wenn": {
+            "bereich_gross": false
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    0          51         100               0          0",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    50         51         50.4950495049505  0          0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200"
+      ],
+      "bedeutung": "Einen DHCP-Bereich ändern (z. B. Ende des Adressbereichs)",
+      "frage": "Setze das Ende des DHCP-Bereichs 192.168.10.0 auf 192.168.10.200",
+      "faelle": [
+        {
+          "setze": {
+            "bereich_gross": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -LeaseDuration 1.00:00:00"
+      ],
+      "bedeutung": "Die Lease-Dauer eines DHCP-Bereichs ändern",
+      "frage": "Setze die Lease-Dauer des DHCP-Bereichs 192.168.10.0 auf einen Tag",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Gesetzt. Kürzere Leases helfen künftig – aber die jetzt vergebenen Adressen bleiben noch bis zu 8 Tage belegt."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DhcpServerv4Lease -ScopeId 192.168.10.0"
+      ],
+      "bedeutung": "Die vergebenen Adressen (Leases) eines DHCP-Bereichs anzeigen",
+      "frage": "Zeige alle vergebenen Adressen im DHCP-Bereich 192.168.10.0",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "51 Leases, alle aktiv (Liste hier gekürzt). Darunter viele Geräte, die gar nicht mehr im Büro sind – die Lease läuft 8 Tage."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "bereich_gross": true
+  },
+  "hinweise": [
+    "169.254.x.x heißt: kein DHCP-Server hat geantwortet bzw. keine Adresse vergeben. Wie voll ist der Bereich?",
+    "„Get-DhcpServerv4ScopeStatistics“ zeigt freie und belegte Adressen, „Get-DhcpServerv4Scope“ Start und Ende. Ändern geht mit „Set-DhcpServerv4Scope“.",
+    "„Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200“."
+  ],
+  "erklaerung": [
+    "Der Bereich hatte nur 51 Adressen (.100 bis .150), alle vergeben (PercentageInUse 100, Free 0).",
+    "Neue Geräte bekamen keine Adresse und gaben sich selbst eine 169.254.x.x (APIPA).",
+    "Mit „Set-DhcpServerv4Scope -EndRange 192.168.10.200“ kommen 50 Adressen dazu. Vorher prüfen, dass im neuen Bereich",
+    "keine Geräte mit fester Adresse stehen. Langfristig hilft auch eine kürzere Lease-Dauer, wenn oft Gäste kommen."
+  ],
+  "begriffe": {
+    "DHCP-Bereich (Scope)": "Adressbereich, aus dem der DHCP-Server Adressen vergibt.",
+    "Lease": "Eine vergebene Adresse mit Ablaufzeit. Erst danach ist sie wieder frei.",
+    "LeaseDuration": "Wie lange eine Adresse vergeben bleibt, Format Tage.Stunden:Minuten:Sekunden (8.00:00:00 = 8 Tage).",
+    "APIPA": "169.254.x.x – Selbstvergabe von Windows, wenn kein DHCP-Server eine Adresse liefert."
+  },
+  "loesung": [
+    "Get-DhcpServerv4ScopeStatistics",
+    "Get-DhcpServerv4Scope",
+    "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
+    "Get-DhcpServerv4ScopeStatistics"
+  ]
+}

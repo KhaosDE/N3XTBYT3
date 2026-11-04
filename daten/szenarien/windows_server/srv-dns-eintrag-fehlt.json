@@ -1,0 +1,168 @@
+{
+  "id": "srv-dns-eintrag-fehlt",
+  "system": "windows_server",
+  "titel": "Neuer Drucker nur per IP erreichbar",
+  "kategorie": "DNS",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dnsserver/add-dnsserverresourcerecorda",
+    "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverresourcerecord",
+    "https://learn.microsoft.com/powershell/module/dnsclient/resolve-dnsname"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der neue Netzwerkdrucker im Lager hat die feste IP-Adresse 192.168.10.42 und soll drucker02.firma.internal heißen.",
+    "Per IP-Adresse kann man drucken, über den Namen nicht. Weil er eine feste Adresse hat, trägt er sich nicht selbst im DNS ein.",
+    "",
+    "Aufgabe: Sorge am DNS-Server DC01 dafür, dass drucker02.firma.internal auf 192.168.10.42 zeigt."
+  ],
+  "zustand": {
+    "eintrag": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Resolve-DnsName drucker02.firma.internal",
+        "Resolve-DnsName -Name drucker02.firma.internal"
+      ],
+      "bedeutung": "Einen Namen über DNS auflösen (PowerShell)",
+      "frage": "Löse drucker02.firma.internal über DNS auf",
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag": false
+          },
+          "fehler": true,
+          "ausgabe": "Resolve-DnsName : drucker02.firma.internal : DNS name does not exist"
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "drucker02.firma.internal                       A      3600  Answer     192.168.10.42",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
+        "Get-DnsServerResourceRecord -ZoneName firma.internal"
+      ],
+      "bedeutung": "Die Einträge einer DNS-Zone anzeigen",
+      "frage": "Zeige alle A-Einträge der DNS-Zone firma.internal",
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag": false
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DnsServerResourceRecord -ZoneName firma.internal -Name drucker02"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag": false
+          },
+          "sim": true,
+          "ausgabe": "Kein Eintrag „drucker02“ in der Zone firma.internal gefunden. (Fehlermeldung hier vereinfacht.)"
+        },
+        {
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42",
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42 -CreatePtr"
+      ],
+      "bedeutung": "Einen A-Eintrag (Name → IPv4-Adresse) im DNS-Server anlegen",
+      "frage": "Lege in der Zone firma.internal den A-Eintrag drucker02 mit 192.168.10.42 an",
+      "faelle": [
+        {
+          "setze": {
+            "eintrag": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ipconfig /registerdns"
+      ],
+      "falsch": true,
+      "warum": "ipconfig /registerdns trägt nur den Rechner ein, auf dem du es ausführst (hier DC01), nicht den Drucker.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Dieser Befehl registriert den eigenen PC im DNS – hier geht es aber um den Drucker."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "eintrag": true
+  },
+  "hinweise": [
+    "Der Name lässt sich nicht auflösen, weil im DNS kein Eintrag dafür existiert. Prüfe die Zone firma.internal.",
+    "„Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A“ zeigt die Einträge. Neue A-Einträge legt „Add-DnsServerResourceRecordA“ an.",
+    "„Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42“."
+  ],
+  "erklaerung": [
+    "Geräte mit DHCP tragen sich meist selbst im DNS ein. Geräte mit fester IP-Adresse (Drucker, Server) nicht –",
+    "für sie legt man den Eintrag von Hand an. Ein A-Eintrag verbindet einen Namen mit einer IPv4-Adresse.",
+    "Mit -CreatePtr entsteht zusätzlich der Rückwärts-Eintrag (Adresse → Name), falls eine Reverse-Zone existiert.",
+    "„DNS name does not exist“ heißt: Der DNS-Server kennt den Namen nicht – nicht, dass das Gerät aus ist."
+  ],
+  "begriffe": {
+    "A-Eintrag": "DNS-Eintrag, der einem Namen eine IPv4-Adresse zuordnet.",
+    "Zone": "Bereich im DNS, für den ein Server zuständig ist, z. B. firma.internal.",
+    "PTR-Eintrag": "Rückwärts-Eintrag: zu einer IP-Adresse den Namen finden.",
+    "Feste IP-Adresse": "Von Hand eingestellt statt per DHCP – das Gerät meldet sich dann nicht selbst im DNS an."
+  },
+  "loesung": [
+    "Resolve-DnsName drucker02.firma.internal",
+    "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
+    "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42",
+    "Resolve-DnsName drucker02.firma.internal"
+  ]
+}

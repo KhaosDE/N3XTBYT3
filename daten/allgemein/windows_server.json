@@ -1,0 +1,171 @@
+{
+  "_info": "Befehle und Startwerte, die in jedem Windows-Server-Szenario gelten. Szenarien können Startwerte überschreiben (z. B. hostname für einen anderen Server).",
+  "system": "windows_server",
+  "zustand": {
+    "hostname": "DC01",
+    "benutzer": "Administrator",
+    "whoami": "firma\\administrator",
+    "admin": true,
+    "pfad": "C:\\Users\\Administrator"
+  },
+  "prompt": {
+    "powershell": "PS {pfad}> ",
+    "cmd": "{pfad}>"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "help",
+        "hilfe"
+      ],
+      "bedeutung": "Hilfe der Simulation anzeigen",
+      "faelle": [
+        {
+          "aktion": "hilfe"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "cls"
+      ],
+      "bedeutung": "Bildschirm leeren",
+      "faelle": [
+        {
+          "aktion": "leeren"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Clear-Host",
+        "clear"
+      ],
+      "shell": "powershell",
+      "bedeutung": "Bildschirm leeren (PowerShell)",
+      "faelle": [
+        {
+          "aktion": "leeren"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "hostname"
+      ],
+      "bedeutung": "Namen des Computers anzeigen",
+      "faelle": [
+        {
+          "ausgabe": "{hostname}"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "$env:COMPUTERNAME"
+      ],
+      "shell": "powershell",
+      "bedeutung": "Namen des Computers anzeigen (PowerShell-Variable)",
+      "faelle": [
+        {
+          "ausgabe": "{hostname}"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "whoami"
+      ],
+      "bedeutung": "Angemeldeten Benutzer anzeigen (Computer\\Benutzer)",
+      "faelle": [
+        {
+          "ausgabe": "{whoami}"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "powershell"
+      ],
+      "bedeutung": "PowerShell starten",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Windows PowerShell",
+            "Copyright (C) Microsoft Corporation. All rights reserved.",
+            ""
+          ],
+          "aktion": "wechsel:powershell"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "cmd"
+      ],
+      "bedeutung": "Eingabeaufforderung (cmd) starten",
+      "faelle": [
+        {
+          "aktion": "wechsel:cmd"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "exit"
+      ],
+      "bedeutung": "Aktuelle Befehlszeile verlassen",
+      "faelle": [
+        {
+          "aktion": "exit"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Restart-Computer",
+        "Restart-Computer -Force",
+        "Stop-Computer",
+        "Stop-Computer -Force"
+      ],
+      "falsch": true,
+      "warum": "Einen Server startet man nicht einfach neu: Alle Benutzer verlieren ihre Verbindung, Dienste fallen aus, und die Ursache ist danach oft noch da. Finde den Fehler und behebe ihn gezielt.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart und Herunterfahren werden in der Simulation nicht ausgeführt."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "shutdown /r",
+        "shutdown /r /t 0",
+        "shutdown /r /f /t 0",
+        "shutdown /s",
+        "shutdown /s /t 0",
+        "shutdown /s /f /t 0"
+      ],
+      "falsch": true,
+      "warum": "Einen Server startet man nicht einfach neu: Alle Benutzer verlieren ihre Verbindung, Dienste fallen aus, und die Ursache ist danach oft noch da. Finde den Fehler und behebe ihn gezielt.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart und Herunterfahren werden in der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "shell_fallen": [
+    {
+      "_quelle": "Get-Alias sc zeigt in Windows PowerShell 5.1: sc -> Set-Content. Microsoft schreibt in der Doku deshalb sc.exe: https://learn.microsoft.com/windows-server/administration/windows-commands/sc-config",
+      "shell": "powershell",
+      "name": "sc",
+      "meldung": [
+        "Vorsicht: In Windows PowerShell ist „sc“ ein Alias (Kurzname) für Set-Content.",
+        "Damit würdest du in eine Datei schreiben und keinen Dienst steuern.",
+        "Schreib „sc.exe“ oder wechsle mit „cmd“ in die Eingabeaufforderung."
+      ]
+    }
+  ]
+}

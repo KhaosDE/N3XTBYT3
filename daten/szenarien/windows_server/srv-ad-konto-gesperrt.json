@@ -1,0 +1,206 @@
+{
+  "id": "srv-ad-konto-gesperrt",
+  "system": "windows_server",
+  "titel": "Konto nach Urlaub gesperrt",
+  "kategorie": "Active Directory",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount",
+    "https://learn.microsoft.com/powershell/module/activedirectory/unlock-adaccount",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Kai Wagner (Vertrieb, Anmeldename kwagner) kommt aus dem Urlaub und hat mehrmals das alte Passwort versucht.",
+    "Jetzt erscheint bei der Anmeldung:",
+    "„The referenced account is currently locked out and may not be logged on to.“",
+    "Das richtige Passwort kennt er wieder.",
+    "",
+    "Aufgabe: Du sitzt am Domänencontroller DC01. Finde das gesperrte Konto und gib es wieder frei."
+  ],
+  "zustand": {
+    "gesperrt": true
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Search-ADAccount -LockedOut",
+        "Search-ADAccount -LockedOut -UsersOnly"
+      ],
+      "bedeutung": "Gesperrte Konten im Active Directory suchen",
+      "frage": "Suche alle gesperrten Konten im Active Directory",
+      "faelle": [
+        {
+          "wenn": {
+            "gesperrt": true
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 10/17/2026 4:51:12 PM",
+            "LockedOut             : True",
+            "Name                  : Kai Wagner",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : kwagner",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "UserPrincipalName     : kwagner@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ADUser kwagner",
+        "Get-ADUser -Identity kwagner"
+      ],
+      "bedeutung": "Ein Benutzerkonto im Active Directory anzeigen",
+      "frage": "Zeige das AD-Konto kwagner an",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Kai",
+            "Name              : Kai Wagner",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : kwagner",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "Surname           : Wagner",
+            "UserPrincipalName : kwagner@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ADUser kwagner -Properties LockedOut",
+        "Get-ADUser -Identity kwagner -Properties LockedOut"
+      ],
+      "bedeutung": "Ein AD-Konto mit zusätzlicher Eigenschaft anzeigen",
+      "frage": "Zeige das AD-Konto kwagner mit der Eigenschaft LockedOut an",
+      "faelle": [
+        {
+          "wenn": {
+            "gesperrt": true
+          },
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Kai",
+            "LockedOut         : True",
+            "Name              : Kai Wagner",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : kwagner",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "Surname           : Wagner",
+            "UserPrincipalName : kwagner@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Kai",
+            "LockedOut         : False",
+            "Name              : Kai Wagner",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : kwagner",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "Surname           : Wagner",
+            "UserPrincipalName : kwagner@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Unlock-ADAccount kwagner",
+        "Unlock-ADAccount -Identity kwagner"
+      ],
+      "bedeutung": "Ein gesperrtes AD-Konto entsperren",
+      "frage": "Entsperre das AD-Konto kwagner",
+      "faelle": [
+        {
+          "setze": {
+            "gesperrt": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Enable-ADAccount kwagner",
+        "Enable-ADAccount -Identity kwagner"
+      ],
+      "falsch": true,
+      "warum": "Enable-ADAccount schaltet ein deaktiviertes Konto ein. Das Konto ist aber nicht deaktiviert, sondern gesperrt – dafür gibt es Unlock-ADAccount.",
+      "faelle": [
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-ADAccountPassword kwagner -Reset",
+        "Set-ADAccountPassword -Identity kwagner -Reset"
+      ],
+      "falsch": true,
+      "warum": "Kai kennt sein Passwort wieder. Ein neues Passwort entsperrt das Konto nicht und macht nur Arbeit.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Die Passwortabfrage ist hier nicht nachgebaut – und ein neues Passwort ist auch nicht nötig."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "gesperrt": false
+  },
+  "hinweise": [
+    "Nach zu vielen falschen Passwörtern sperrt das Active Directory ein Konto. Finde zuerst heraus, welches Konto gesperrt ist.",
+    "„Search-ADAccount -LockedOut“ listet gesperrte Konten. Zum Freigeben gibt es ein Cmdlet mit dem Verb „Unlock“.",
+    "„Unlock-ADAccount -Identity kwagner“."
+  ],
+  "erklaerung": [
+    "Die Kontosperrrichtlinie der Domäne sperrt ein Konto nach mehreren falschen Passwörtern (Schutz gegen Ausprobieren).",
+    "„Search-ADAccount -LockedOut“ findet gesperrte Konten, „Unlock-ADAccount“ hebt die Sperre auf.",
+    "Das Passwort bleibt dabei gleich. Merke den Unterschied: gesperrt (automatisch, Unlock-ADAccount) –",
+    "deaktiviert (von Hand, Enable-ADAccount)."
+  ],
+  "begriffe": {
+    "Active Directory (AD)": "Verzeichnisdienst von Windows Server: Benutzer, Gruppen und Computer einer Firma zentral verwaltet.",
+    "Domänencontroller (DC)": "Server, auf dem das Active Directory läuft und der Anmeldungen prüft.",
+    "Kontosperre": "Automatische Sperre nach zu vielen falschen Passwörtern; hebt sich je nach Richtlinie auch nach Zeit auf.",
+    "SamAccountName": "Der kurze Anmeldename eines Kontos, z. B. kwagner."
+  },
+  "loesung": [
+    "Search-ADAccount -LockedOut",
+    "Unlock-ADAccount -Identity kwagner",
+    "Get-ADUser kwagner -Properties LockedOut"
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "id": "srv-freigabe-rechte",
+  "system": "windows_server",
+  "titel": "Dateien öffnen ja, speichern nein",
+  "kategorie": "Freigaben und Rechte",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/smbshare/get-smbshareaccess",
+    "https://learn.microsoft.com/powershell/module/smbshare/grant-smbshareaccess",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/icacls"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der Vertrieb kann in \\\\SRV-DATEI01\\Vertrieb Dateien öffnen, aber nicht speichern:",
+    "„You need permission to perform this action.“",
+    "Die NTFS-Rechte des Ordners D:\\Daten\\Vertrieb geben der Gruppe GG-Vertrieb „Ändern“ (Modify).",
+    "Die Freigabe wurde gestern neu angelegt.",
+    "",
+    "Aufgabe: Du bist auf SRV-DATEI01. Finde die Ursache und gib GG-Vertrieb über die Freigabe Schreibrechte (Change)."
+  ],
+  "zustand": {
+    "hostname": "SRV-DATEI01",
+    "freigabe_change": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-SmbShare -Name Vertrieb",
+        "Get-SmbShare Vertrieb"
+      ],
+      "bedeutung": "Eine SMB-Freigabe anzeigen",
+      "frage": "Zeige die Freigabe Vertrieb an",
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Name     ScopeName Path              Description",
+            "----     --------- ----              -----------",
+            "Vertrieb *         D:\\Daten\\Vertrieb",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-SmbShareAccess -Name Vertrieb",
+        "Get-SmbShareAccess Vertrieb"
+      ],
+      "bedeutung": "Die Freigabeberechtigungen einer SMB-Freigabe anzeigen",
+      "frage": "Zeige die Freigabeberechtigungen der Freigabe Vertrieb",
+      "faelle": [
+        {
+          "wenn": {
+            "freigabe_change": false
+          },
+          "ausgabe": [
+            "",
+            "Name     ScopeName AccountName AccessControlType AccessRight",
+            "----     --------- ----------- ----------------- -----------",
+            "Vertrieb *         Everyone    Allow             Read",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name     ScopeName AccountName       AccessControlType AccessRight",
+            "----     --------- -----------       ----------------- -----------",
+            "Vertrieb *         Everyone          Allow             Read",
+            "Vertrieb *         FIRMA\\GG-Vertrieb Allow             Change",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "icacls D:\\Daten\\Vertrieb"
+      ],
+      "bedeutung": "Die NTFS-Berechtigungen eines Ordners anzeigen",
+      "frage": "Zeige die NTFS-Berechtigungen von D:\\Daten\\Vertrieb",
+      "faelle": [
+        {
+          "ausgabe": [
+            "D:\\Daten\\Vertrieb FIRMA\\GG-Vertrieb:(OI)(CI)(M)",
+            "                  BUILTIN\\Administrators:(OI)(CI)(F)",
+            "                  NT AUTHORITY\\SYSTEM:(OI)(CI)(F)",
+            "                  CREATOR OWNER:(OI)(CI)(IO)(F)",
+            "",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force",
+        "Grant-SmbShareAccess Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force"
+      ],
+      "bedeutung": "Einem Konto Rechte auf eine SMB-Freigabe geben",
+      "frage": "Gib der Gruppe FIRMA\\GG-Vertrieb auf der Freigabe Vertrieb das Recht Change (ohne Rückfrage)",
+      "faelle": [
+        {
+          "setze": {
+            "freigabe_change": true
+          },
+          "ausgabe": [
+            "",
+            "Name     ScopeName AccountName       AccessControlType AccessRight",
+            "----     --------- -----------       ----------------- -----------",
+            "Vertrieb *         Everyone          Allow             Read",
+            "Vertrieb *         FIRMA\\GG-Vertrieb Allow             Change",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change",
+        "Grant-SmbShareAccess Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "PowerShell fragt jetzt „Are you sure you want to perform this action?“. Rückfragen sind hier nicht nachgebaut – hänge -Force an."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Grant-SmbShareAccess -Name Vertrieb -AccountName Everyone -AccessRight Full -Force",
+        "Grant-SmbShareAccess Vertrieb -AccountName Everyone -AccessRight Full -Force"
+      ],
+      "falsch": true,
+      "warum": "„Everyone – Full“ würde jedem im Netz Vollzugriff auf die Freigabe geben. Gib nur der Gruppe, die es braucht, nur das Recht, das sie braucht.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Vollzugriff für alle ist hier nicht gewollt. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "freigabe_change": true
+  },
+  "hinweise": [
+    "Bei einer Freigabe gelten zwei Rechte-Ebenen: die Freigabeberechtigung und die NTFS-Berechtigung. Es zählt die strengere.",
+    "„Get-SmbShareAccess -Name Vertrieb“ zeigt die Freigabeberechtigungen. Ergänzen geht mit „Grant-SmbShareAccess“.",
+    "„Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force“."
+  ],
+  "erklaerung": [
+    "Beim Zugriff übers Netzwerk gelten Freigabe- UND NTFS-Rechte; wirksam ist die jeweils strengere Ebene.",
+    "NTFS erlaubte „Ändern“, die Freigabe aber nur „Read“ für Everyone – also nur Lesen.",
+    "„Grant-SmbShareAccess … -AccessRight Change“ gibt GG-Vertrieb auf Freigabe-Ebene Schreibrechte.",
+    "Viele Admins setzen die Freigabe großzügig (z. B. Authentifizierte Benutzer – Change) und steuern alles über NTFS."
+  ],
+  "begriffe": {
+    "Freigabe (SMB-Share)": "Ordner, der über das Netzwerk erreichbar ist (\\\\Server\\Freigabe).",
+    "Freigabeberechtigung": "Rechte für den Zugriff über das Netzwerk: Read, Change, Full.",
+    "NTFS-Berechtigung": "Rechte direkt am Ordner auf der Festplatte; gelten auch lokal.",
+    "Effektive Rechte": "Übers Netzwerk gilt die strengere der beiden Ebenen."
+  },
+  "loesung": [
+    "Get-SmbShareAccess -Name Vertrieb",
+    "icacls D:\\Daten\\Vertrieb",
+    "Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force"
+  ]
+}

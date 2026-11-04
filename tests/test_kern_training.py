@@ -94,5 +94,40 @@ class AuswertungTest(unittest.TestCase):
         auswertung.als_markdown(daten)
 
 
+class AbnahmeM2Test(unittest.TestCase):
+    """Abnahme M2 (PLAN.md), soweit automatisch prüfbar."""
+
+    def test_windows_server_durchlauf(self):
+        from n3xtbyt3.kern import auswahl
+        from n3xtbyt3.kern.sitzung import Sitzung
+        from n3xtbyt3.kern.szenario import lade_allgemein
+
+        with Datenordner():
+            allgemein = lade_allgemein("windows_server")
+            szenarien = lade_system("windows_server", allgemein=allgemein).szenarien
+            self.assertGreaterEqual(len(szenarien), 15)
+            stand = Spielstand.lade("windows_server")
+            schwach = szenarien[0]
+            # Mehrere Durchläufe: alle anderen sauber gelöst, eines zweimal nicht gelöst
+            for sz in szenarien[1:]:
+                s = Sitzung(sz, allgemein)
+                for schritt in sz.loesung:
+                    s.eingabe(schritt)
+                stand.versuch_eintragen(sz.id, s.ergebnis())
+            for _ in range(2):
+                s = Sitzung(schwach, allgemein)
+                s.eingabe("Get-Process")
+                s.naechster_hinweis()
+                stand.versuch_eintragen(schwach.id, s.ergebnis())
+            daten = auswertung.erstelle("windows_server", szenarien, stand)
+            self.assertTrue(any(schwach.titel in t for t in daten["schwaechen"]), daten["schwaechen"])
+            self.assertTrue(any(schwach.kategorie in t for t in daten["schwaechen"]))
+            self.assertTrue(any(schwach.titel in e for e in daten["empfehlung"]))
+            # Das nicht gelöste Szenario kommt sichtbar öfter wieder
+            rng = random.Random(5)
+            zaehler = Counter(auswahl.waehle(szenarien, stand, rng=rng).id for _ in range(200))
+            self.assertEqual(zaehler.most_common(1)[0][0], schwach.id)
+
+
 if __name__ == "__main__":
     unittest.main()

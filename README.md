@@ -50,6 +50,18 @@ python -m n3xtbyt3
 | F11 | Vollbild |
 | Strg+V | Text einfügen |
 
+Außerdem in der Liste:
+
+- **Befehls-Training:** kurze Fragen „Welcher Befehl …?“ aus den Befehlen der Szenarien.
+  Richtig → die Karte wandert ein Fach weiter; falsch → zurück in Fach 1, sie kommt bald wieder.
+- **Auswertung:** Stärken, Schwächen nach Kategorie und Befehl, häufige Fehler und was du als
+  Nächstes üben solltest. Sie liegt auch als Datei im Datenordner (`auswertung_<system>.md`),
+  damit Claude sie lesen kann.
+
+**Lernkartei:** Jedes Szenario und jeder Befehl liegt in einem Fach (1–5). Fach 1 kommt sofort
+wieder, Fach 2 nach einem Tag, Fach 3 nach drei, Fach 4 nach sieben, Fach 5 nach 14 Tagen.
+Ohne Hinweis gelöst → ein Fach weiter; nicht gelöst → zurück in Fach 1.
+
 Gut zu wissen:
 
 - Unter Windows gibt es zwei Befehlszeilen: **PowerShell** und **cmd**. Wechseln mit `cmd`,

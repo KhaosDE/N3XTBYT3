@@ -1,0 +1,159 @@
+{
+  "id": "srv-ntfs-rechte",
+  "system": "windows_server",
+  "titel": "Buchhaltung kommt nicht in ihren Ordner",
+  "kategorie": "Freigaben und Rechte",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/icacls"
+  ],
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Der neue Ordner D:\\Daten\\Buchhaltung auf SRV-DATEI01 ist über die Freigabe \\\\SRV-DATEI01\\Buchhaltung erreichbar.",
+    "Die Freigabe erlaubt „Authenticated Users – Change“. Trotzdem kommt die Buchhaltung nicht hinein: „Access is denied.“",
+    "Die Gruppe GG-Buchhaltung soll im Ordner und allen Unterordnern lesen, schreiben und löschen dürfen (Ändern).",
+    "",
+    "Aufgabe: Prüfe die NTFS-Rechte und gib GG-Buchhaltung „Ändern“ – vererbt auf alle Dateien und Unterordner."
+  ],
+  "zustand": {
+    "hostname": "SRV-DATEI01",
+    "ntfs": "fehlt"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "icacls D:\\Daten\\Buchhaltung"
+      ],
+      "bedeutung": "Die NTFS-Berechtigungen eines Ordners anzeigen",
+      "frage": "Zeige die NTFS-Berechtigungen von D:\\Daten\\Buchhaltung",
+      "faelle": [
+        {
+          "wenn": {
+            "ntfs": "fehlt"
+          },
+          "ausgabe": [
+            "D:\\Daten\\Buchhaltung BUILTIN\\Administrators:(OI)(CI)(F)",
+            "                     NT AUTHORITY\\SYSTEM:(OI)(CI)(F)",
+            "                     CREATOR OWNER:(OI)(CI)(IO)(F)",
+            "",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        },
+        {
+          "wenn": {
+            "ntfs": "nur_ordner"
+          },
+          "ausgabe": [
+            "D:\\Daten\\Buchhaltung FIRMA\\GG-Buchhaltung:(M)",
+            "                     BUILTIN\\Administrators:(OI)(CI)(F)",
+            "                     NT AUTHORITY\\SYSTEM:(OI)(CI)(F)",
+            "                     CREATOR OWNER:(OI)(CI)(IO)(F)",
+            "",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        },
+        {
+          "ausgabe": [
+            "D:\\Daten\\Buchhaltung FIRMA\\GG-Buchhaltung:(OI)(CI)(M)",
+            "                     BUILTIN\\Administrators:(OI)(CI)(F)",
+            "                     NT AUTHORITY\\SYSTEM:(OI)(CI)(F)",
+            "                     CREATOR OWNER:(OI)(CI)(IO)(F)",
+            "",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M"
+      ],
+      "bedeutung": "NTFS-Recht vergeben (mit Vererbung auf Dateien und Unterordner)",
+      "frage": "Gib FIRMA\\GG-Buchhaltung auf D:\\Daten\\Buchhaltung das Recht Ändern, vererbt auf Dateien (OI) und Unterordner (CI)",
+      "shell": "cmd",
+      "faelle": [
+        {
+          "setze": {
+            "ntfs": "ok"
+          },
+          "ausgabe": [
+            "processed file: D:\\Daten\\Buchhaltung",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:M"
+      ],
+      "shell": "cmd",
+      "faelle": [
+        {
+          "setze": {
+            "ntfs": "nur_ordner"
+          },
+          "ausgabe": [
+            "processed file: D:\\Daten\\Buchhaltung",
+            "Successfully processed 1 files; Failed processing 0 files"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)F"
+      ],
+      "shell": "cmd",
+      "falsch": true,
+      "warum": "Vollzugriff (F) erlaubt auch, Rechte zu ändern und Besitz zu übernehmen. Für die Arbeit reicht Ändern (M).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Vollzugriff ist mehr als nötig. In der Simulation nicht ausgeführt."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "icacls D:\\Daten\\Buchhaltung /grant Everyone:(OI)(CI)M"
+      ],
+      "shell": "cmd",
+      "falsch": true,
+      "warum": "Nur die Buchhaltung soll an die Daten. „Everyone“ wären alle Benutzer im Netz.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Dann dürften alle Benutzer die Buchhaltungsdaten ändern. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "ntfs": "ok"
+  },
+  "hinweise": [
+    "Die Freigabe erlaubt den Zugriff – also bremst die zweite Ebene, die NTFS-Berechtigung am Ordner.",
+    "„icacls D:\\Daten\\Buchhaltung“ zeigt die NTFS-Rechte. Mit „/grant Konto:Rechte“ vergibst du welche. (OI) und (CI) sorgen für die Vererbung.",
+    "„icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M“."
+  ],
+  "erklaerung": [
+    "Im Ordner fehlte die Gruppe GG-Buchhaltung ganz. „icacls … /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M“ gibt „Ändern“ (M).",
+    "(OI) = Objekte erben (Dateien), (CI) = Container erben (Unterordner). Ohne die beiden gilt das Recht nur für den",
+    "Ordner selbst – nicht für die Dateien darin. Vorsicht in der PowerShell: Dort müssen die Klammern in",
+    "Anführungszeichen stehen: icacls D:\\Daten\\Buchhaltung /grant \"FIRMA\\GG-Buchhaltung:(OI)(CI)M\"."
+  ],
+  "begriffe": {
+    "icacls": "Befehl zum Anzeigen und Ändern von NTFS-Berechtigungen.",
+    "(OI) / (CI)": "Object Inherit / Container Inherit: Vererbung auf Dateien bzw. Unterordner.",
+    "(IO)": "Inherit Only: gilt nicht für den Ordner selbst, nur für das, was darin entsteht.",
+    "M / F / RX": "Rechte: Ändern (Modify), Vollzugriff (Full), Lesen und Ausführen (Read & Execute)."
+  },
+  "loesung": [
+    "icacls D:\\Daten\\Buchhaltung",
+    "icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M",
+    "icacls D:\\Daten\\Buchhaltung"
+  ]
+}

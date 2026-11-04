@@ -4,10 +4,9 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-**M1 ist fertig** (bis auf deinen Abnahmetest, siehe unten). M2 läuft: Lernkartei, Befehls-Training
-und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
+**M1 und M2 sind fertig** (bis auf deine Abnahmetests, siehe unten).
 
-**Nächster Schritt:** M2 — Windows-Server-Szenarien, Lernkartei, Befehls-Training, Auswertung.
+**Nächster Schritt:** M3 — Linux und Linux Server (simuliertes Dateisystem, Editor, Szenarien).
 
 ## Fertig
 
@@ -42,7 +41,7 @@ und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
 - [ ] **Tobi:** `.exe` starten, Windows wählen, mindestens drei Szenarien mit Hinweisen lösen,
       beenden, neu starten – Fortschritt ist noch da
 
-### M2 (in Arbeit)
+### M2
 
 - Lernkartei: Szenarien und Befehle in Fächern 1–5 (Wiederholung nach 0/1/3/7/14 Tagen).
   Falsch oder nicht gelöst → zurück in Fach 1. Die Zufallsauswahl nimmt Fälliges zuerst.
@@ -52,6 +51,19 @@ und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
   genaue Aufgaben.
 - Auswertung je System: `auswertung_<system>.json` und `.md` im Datenordner, auch als Ansicht im
   Programm. Stärken, Schwächen nach Kategorie und Befehl, häufige Fehler, Empfehlung.
+- 16 Windows-Server-Szenarien (alle „ungeprüft“, Quellen geprüft): AD-Konto gesperrt, Passwort
+  zurücksetzen, Gruppe fehlt, Konto abgelaufen, GPO greift nicht (falsche OU), DNS-Eintrag fehlt,
+  DNS-Weiterleitung, DHCP-Bereich voll, Freigaberechte, NTFS-Rechte (icacls), Feature fehlt,
+  Ereignisanzeige (wer hat neu gestartet), alte Logs löschen, RDP-Gruppe, Firewall-Port,
+  Vertrauensstellung reparieren.
+
+### Abnahme M2 (PLAN.md)
+
+- [x] Windows Server spielbar (16 Szenarien, alle mit Lösungsweg getestet)
+- [x] Auswertung zeigt nach mehreren Durchläufen plausible Schwächen (automatischer Test)
+- [x] Falsch gelöste Szenarien kommen sichtbar öfter wieder (Lernkartei, automatischer Test)
+- [ ] **Tobi:** einige Windows-Server-Szenarien spielen, eines absichtlich nicht lösen,
+      danach Auswertung ansehen und prüfen, ob die Empfehlung passt
 
 ## Offene Punkte
 
@@ -97,6 +109,16 @@ und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
   ein „falscher Befehl“ mit Erklärung. Grund: Tobi soll die Ursache finden statt neu zu starten.
 - 04.11.2026: Netzlaufwerk-Szenario läuft bewusst ohne Adminrechte: Laufwerke aus einer
   Administrator-Konsole sieht der Benutzer im Explorer nicht (Microsoft-Doku zu New-PSDrive).
+- 04.11.2026: Lernkartei-Regeln: ohne Hinweis und mit höchstens 2 falschen Befehlen gelöst → Fach +1;
+  mit 1 Hinweis → Fach bleibt; mit 2–3 Hinweisen → Fach −1; nicht gelöst → Fach 1.
+  Grund: Wer Hilfe brauchte, soll es bald wieder üben, aber nicht ganz von vorn anfangen.
+- 04.11.2026: Befehls-Training bewertet „halb“, wenn der Befehlsname stimmt, aber die Parameter
+  abweichen (Fach bleibt). Grund: Den Befehl zu kennen ist schon viel wert; die Musterlösung wird gezeigt.
+- 04.11.2026: Auswertung als `auswertung_<system>.json/.md` im Datenordner (statt eines Unterordners),
+  passend zu `spielstand_<system>.json`. Neu geschrieben nach jedem Versuch und nach dem Training.
+- 04.11.2026: Windows-Server-Szenarien spielen in einer erfundenen Domäne `firma.internal` (NetBIOS FIRMA)
+  mit DC01 (192.168.10.5), SRV-DATEI01, SRV-APP01, SRV-TS01. Anmeldenamen wie kwagner@firma.internal
+  sind erfunden; der Inhaltstest lässt `.internal`-Adressen zu.
 - 04.11.2026: Zweig: Die Sitzung gibt den Arbeitszweig `claude/busy-turing-1n3hmy` vor. Ich pushe
   dorthin **und** nach `main` (laut `CLAUDE.md`), beide Stände bleiben gleich.
 
@@ -107,5 +129,9 @@ und Auswertung sind fertig; die Windows-Server-Szenarien fehlen noch.
 2. Windows wählen, „Zufälliges Szenario“, mindestens drei Szenarien lösen. Dabei auch mal F1 drücken.
 3. Programm schließen, wieder öffnen: In der Liste müssen die gelösten Szenarien grün sein.
 4. Schrift mit Strg + / Strg − anpassen, F11 für Vollbild. Ist alles gut lesbar?
-5. Auf Abweichungen zum echten Windows achten (Ausgaben, Fehlermeldungen) und mir sagen,
+5. Windows Server: ein paar Szenarien spielen, eines mit Esc abbrechen. Dann „Auswertung ansehen“:
+   Steht das abgebrochene Szenario bei den Schwächen und in der Empfehlung? Kommt es bei
+   „Zufälliges Szenario“ öfter dran?
+6. Befehls-Training ausprobieren: Sind die Fragen verständlich? Ist die Bewertung fair?
+7. Auf Abweichungen zum echten Windows achten (Ausgaben, Fehlermeldungen) und mir sagen,
    welches Szenario. Wenn alles stimmt: in der Datei `"pruefstatus": "bestaetigt"` setzen.
