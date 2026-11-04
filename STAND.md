@@ -4,9 +4,9 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-M1 läuft. M1.1 bis M1.4 sind fertig.
+**M1 ist fertig** (bis auf deinen Abnahmetest, siehe unten). M2 läuft: Lernkartei begonnen.
 
-**Nächster Schritt:** M1.5 — Tests unter Windows, `.exe` per GitHub Actions, README.
+**Nächster Schritt:** M2 — Windows-Server-Szenarien, Lernkartei, Befehls-Training, Auswertung.
 
 ## Fertig
 
@@ -26,6 +26,20 @@ M1 läuft. M1.1 bis M1.4 sind fertig.
   Programm hängt, Uhrzeit/Zeitdienst, Konto deaktiviert, Netzlaufwerk, Autostart, sfc mit Adminrechten.
   Vorlage `vorlagen/szenario_vorlage.json`, Anleitung `docs/eigenes_szenario.md`.
   Inhaltstest: nur private IP-Adressen, keine Mailadressen, Vorlage gültig.
+- M1.5: GitHub Actions testet bei jedem Push nach `main` unter Windows und Linux, baut die `.exe`
+  (PyInstaller), prüft sie mit `--selbsttest` und stellt sie als Artefakt „N3XTBYT3-Windows“ bereit.
+  Erster Lauf am 04.11.2026 komplett grün. README in einfachen Worten.
+
+### Abnahme M1 (PLAN.md)
+
+- [x] Hauptmenü mit vier Systemen, nicht gefüllte als „kommt noch“
+- [x] Terminal mit Verlauf, Scrollen, Kopf mit Systemname; Seitenbereich mit Aufgabe, Hinweisen,
+      Begriffen, Erklärung, Prüfstatus
+- [x] Spielstand je System als lesbares JSON im Datenordner
+- [x] 13 Windows-Szenarien mit Quelle und „ungeprüft“; Vorlage und Anleitung für eigene Szenarien
+- [x] Tests: Laden, Lösbarkeit, Sicherheitstest; `.exe` per GitHub Actions
+- [ ] **Tobi:** `.exe` starten, Windows wählen, mindestens drei Szenarien mit Hinweisen lösen,
+      beenden, neu starten – Fortschritt ist noch da
 
 ## Offene Punkte
 
@@ -76,4 +90,10 @@ M1 läuft. M1.1 bis M1.4 sind fertig.
 
 ## Für Tobi zum Testen
 
-- noch nichts (erst ab M1.2 gibt es etwas zu sehen)
+1. `.exe` holen: GitHub → Actions → neuester grüner Lauf → unten „N3XTBYT3-Windows“ → entpacken.
+   Windows warnt beim ersten Start (nicht signiert): „Weitere Informationen“ → „Trotzdem ausführen“.
+2. Windows wählen, „Zufälliges Szenario“, mindestens drei Szenarien lösen. Dabei auch mal F1 drücken.
+3. Programm schließen, wieder öffnen: In der Liste müssen die gelösten Szenarien grün sein.
+4. Schrift mit Strg + / Strg − anpassen, F11 für Vollbild. Ist alles gut lesbar?
+5. Auf Abweichungen zum echten Windows achten (Ausgaben, Fehlermeldungen) und mir sagen,
+   welches Szenario. Wenn alles stimmt: in der Datei `"pruefstatus": "bestaetigt"` setzen.
