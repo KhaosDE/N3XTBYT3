@@ -125,6 +125,10 @@ class App:
 
 
 def main() -> None:
+    import sys
+    if "--selbsttest" in sys.argv[1:]:
+        from ..kern import selbsttest
+        raise SystemExit(selbsttest.main())
     App().lauf()
 
 

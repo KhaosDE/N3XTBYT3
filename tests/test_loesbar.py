@@ -33,5 +33,14 @@ class LoesbarTest(unittest.TestCase):
             self.assertGreaterEqual(len(lade_system("windows").szenarien), 1)
 
 
+class SelbsttestTest(unittest.TestCase):
+    def test_selbsttest_ohne_fehler(self):
+        from n3xtbyt3.kern import selbsttest
+        with Datenordner():
+            anzahl, fehler = selbsttest.pruefe_alle()
+        self.assertEqual(fehler, [])
+        self.assertGreaterEqual(anzahl, 10)
+
+
 if __name__ == "__main__":
     unittest.main()

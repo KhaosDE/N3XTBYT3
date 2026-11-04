@@ -1,0 +1,65 @@
+name: Tests und Windows-Programm
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    env:
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Tests
+        run: python -m unittest -v
+
+  exe:
+    name: Windows-Programm (.exe)
+    needs: tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+      - name: .exe bauen
+        run: >
+          pyinstaller --noconfirm --clean --onefile --windowed --name N3XTBYT3
+          --add-data "daten;daten"
+          --add-data "n3xtbyt3/oberflaeche/schriften;n3xtbyt3/oberflaeche/schriften"
+          start_n3xtbyt3.py
+      - name: Selbsttest der .exe (alle Szenarien laden und lösen)
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist\N3XTBYT3.exe" -ArgumentList "--selbsttest" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Selbsttest fehlgeschlagen (Exit-Code $($p.ExitCode))" }
+          Write-Host "Selbsttest bestanden."
+      - name: .exe zum Herunterladen bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: N3XTBYT3-Windows
+          path: dist/N3XTBYT3.exe
+          retention-days: 30
