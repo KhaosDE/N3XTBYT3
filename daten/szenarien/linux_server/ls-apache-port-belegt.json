@@ -1,0 +1,249 @@
+{
+  "id": "ls-apache-port-belegt",
+  "system": "linux_server",
+  "titel": "Apache startet nicht: Address already in use",
+  "kategorie": "Webserver",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://httpd.apache.org/docs/2.4/bind.html",
+    "https://man7.org/linux/man-pages/man8/ss.8.html",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Die neue Intranet-Anwendung braucht Apache. Er ist installiert, startet aber nicht.",
+    "Auf dem Server lief früher nginx für eine Testseite, die nicht mehr gebraucht wird.",
+    "",
+    "Aufgabe: Finde heraus, warum Apache nicht starten kann, und bring ihn zum Laufen. nginx soll dauerhaft aus bleiben."
+  ],
+  "zustand": {
+    "nginx_aktiv": true,
+    "nginx_enabled": true,
+    "apache_aktiv": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl status apache2"
+      ],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes apache2",
+      "faelle": [
+        {
+          "wenn": {
+            "apache_aktiv": false
+          },
+          "ausgabe": [
+            "× apache2.service - The Apache HTTP Server",
+            "     Loaded: loaded (/usr/lib/systemd/system/apache2.service; enabled; preset: enabled)",
+            "     Active: failed (Result: exit-code) since Wed 2026-11-04 08:58:12 CET; 9min ago",
+            "       Docs: https://httpd.apache.org/docs/2.4/"
+          ]
+        },
+        {
+          "ausgabe": [
+            "● apache2.service - The Apache HTTP Server",
+            "     Loaded: loaded (/usr/lib/systemd/system/apache2.service; enabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:14:20 CET; 3s ago",
+            "   Main PID: 2630 (apache2)",
+            "       Docs: https://httpd.apache.org/docs/2.4/"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "journalctl -u apache2",
+        "journalctl -xeu apache2.service",
+        "journalctl -u apache2 -n 20"
+      ],
+      "bedeutung": "Protokoll eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Nov 04 09:02:11 srv-web01 apachectl[2210]: (98)Address already in use: AH00072: make_sock: could not bind to address [::]:80",
+            "Nov 04 09:02:11 srv-web01 apachectl[2210]: (98)Address already in use: AH00072: make_sock: could not bind to address 0.0.0.0:80",
+            "Nov 04 09:02:11 srv-web01 apachectl[2210]: no listening sockets available, shutting down",
+            "Nov 04 09:02:11 srv-web01 apachectl[2210]: AH00015: Unable to open logs",
+            "Nov 04 09:02:11 srv-web01 systemd[1]: apache2.service: Failed with result 'exit-code'."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ss -tlnp",
+        "ss -ltnp"
+      ],
+      "bedeutung": "Lauschende TCP-Ports samt Programm anzeigen",
+      "frage": "Zeige alle lauschenden TCP-Ports mit dem Programm dahinter",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "nginx_aktiv": true
+          },
+          "ausgabe": [
+            "State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess",
+            "LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*    users:((\"sshd\",pid=1034,fd=3))",
+            "LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:((\"nginx\",pid=1181,fd=6),(\"nginx\",pid=1180,fd=6))"
+          ]
+        },
+        {
+          "wenn": {
+            "apache_aktiv": true
+          },
+          "ausgabe": [
+            "State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess",
+            "LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*    users:((\"sshd\",pid=1034,fd=3))",
+            "LISTEN 0      511                *:80              *:*    users:((\"apache2\",pid=2632,fd=4),(\"apache2\",pid=2631,fd=4),(\"apache2\",pid=2630,fd=4))"
+          ]
+        },
+        {
+          "ausgabe": [
+            "State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess",
+            "LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*    users:((\"sshd\",pid=1034,fd=3))"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl disable --now nginx"
+      ],
+      "bedeutung": "Einen Dienst stoppen und den Autostart abschalten",
+      "frage": "Stoppe nginx und schalte seinen Autostart ab (ein Befehl)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "nginx_aktiv": false,
+            "nginx_enabled": false
+          },
+          "ausgabe": [
+            "Synchronizing state of nginx.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install disable nginx",
+            "Removed \"/etc/systemd/system/multi-user.target.wants/nginx.service\"."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl stop nginx"
+      ],
+      "bedeutung": "Einen Dienst stoppen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "nginx_aktiv": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl disable nginx"
+      ],
+      "bedeutung": "Den Autostart eines Dienstes abschalten",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "nginx_enabled": false
+          },
+          "ausgabe": [
+            "Synchronizing state of nginx.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install disable nginx",
+            "Removed \"/etc/systemd/system/multi-user.target.wants/nginx.service\"."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl start apache2",
+        "systemctl restart apache2"
+      ],
+      "bedeutung": "Einen Dienst (neu) starten",
+      "frage": "Starte den Dienst apache2",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "wenn": {
+            "nginx_aktiv": true
+          },
+          "fehler": true,
+          "ausgabe": [
+            "Job for apache2.service failed because the control process exited with error code.",
+            "See \"systemctl status apache2.service\" and \"journalctl -xeu apache2.service\" for details."
+          ]
+        },
+        {
+          "setze": {
+            "apache_aktiv": true
+          }
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "apache_aktiv": true,
+    "nginx_enabled": false
+  },
+  "hinweise": [
+    "Das Protokoll von Apache sagt, warum er nicht starten kann. Danach: Wer hat den Port schon belegt?",
+    "„journalctl -u apache2“ meldet „Address already in use … :80“. „sudo ss -tlnp“ zeigt, welches Programm Port 80 hält.",
+    "„sudo systemctl disable --now nginx“, dann „sudo systemctl start apache2“."
+  ],
+  "erklaerung": [
+    "Ein Port kann nur von einem Programm belegt werden. nginx lief noch auf Port 80 – Apache bekam",
+    "„(98) Address already in use“. „sudo ss -tlnp“ zeigt zu jedem lauschenden Port das Programm (-p, braucht root).",
+    "„sudo systemctl disable --now nginx“ stoppt nginx und verhindert den Start beim nächsten Booten.",
+    "Danach kann Apache Port 80 belegen."
+  ],
+  "begriffe": {
+    "Address already in use": "Der Port ist schon von einem anderen Programm belegt (Fehler 98).",
+    "ss -tlnp": "Lauschende TCP-Ports mit Prozess anzeigen (-p braucht Root-Rechte).",
+    "disable --now": "Autostart abschalten und den Dienst sofort stoppen."
+  },
+  "loesung": [
+    "systemctl status apache2",
+    "journalctl -u apache2",
+    "sudo ss -tlnp",
+    "sudo systemctl disable --now nginx",
+    "sudo systemctl start apache2"
+  ]
+}

@@ -187,6 +187,19 @@ class DateisystemTest(unittest.TestCase):
         self.assertIn("Meintest du „ls“", "\n".join(text(a)))
 
 
+class CrontabTest(unittest.TestCase):
+    def test_crontab(self):
+        s = sitzung(dateien={"/var/spool/cron/crontabs/anna": {"inhalt": "0 2 * * * /x.sh", "rechte": "600",
+                                                                "besitzer": "anna:crontab"}})
+        self.assertEqual(text(s.eingabe("crontab -l")), ["0 2 * * * /x.sh"])
+        self.assertEqual(text(s.eingabe("sudo crontab -l")), ["[sudo] password for anna: ",
+                                                                "[N3XTBYT3] Passwort gilt als eingegeben (sudo merkt es sich einige Minuten).",
+                                                                "no crontab for root"])
+        a = s.eingabe("crontab -e")
+        self.assertEqual(a.editor["pfad"], "/var/spool/cron/crontabs/anna")
+        self.assertFalse(a.editor["nur_lesen"])
+
+
 class EditorTest(unittest.TestCase):
     def test_bearbeiten(self):
         p = EditorPuffer("/x", "ab\ncd")

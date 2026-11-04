@@ -66,7 +66,12 @@ Gut zu wissen:
 
 - Unter Windows gibt es zwei Befehlszeilen: **PowerShell** und **cmd**. Wechseln mit `cmd`,
   `powershell`, zurück mit `exit`. Befehle wie `Get-Service` gehen nur in der PowerShell.
-- `help` zeigt die Hilfe der Simulation (nicht die echte Windows-Hilfe).
+- Unter Linux zählt Groß-/Kleinschreibung. Root-Rechte bekommst du mit `sudo` vor dem Befehl
+  (oder `sudo -i` für eine root-Shell, zurück mit `exit`). Dateibefehle wie `ls -l`, `cd`, `cat`,
+  `grep`, `tail -n`, `chmod`, `chown` und Pipes (`… | grep fehler`) funktionieren in jedem Szenario.
+- Dateien bearbeitest du unter Linux mit `nano <datei>` (bzw. `sudo nano …`): **Strg+O** speichert,
+  **Strg+X** beendet, **Strg+K** schneidet eine Zeile aus. Es ist ein vereinfachter Ersatz für nano.
+- `help` zeigt die Hilfe der Simulation (nicht die echte Hilfe des Systems).
 - Blaue Zeilen mit `[N3XTBYT3]` sind Meldungen der Simulation, keine echten Systemtexte.
 - **UNGEPRÜFT** (orange) heißt: Das Szenario hat Claude geschrieben, du hast es noch nicht mit
   dem echten System verglichen. Die Quelle steht rechts unten.

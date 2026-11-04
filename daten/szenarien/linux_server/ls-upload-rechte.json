@@ -1,0 +1,71 @@
+{
+  "id": "ls-upload-rechte",
+  "system": "linux_server",
+  "titel": "Bilder-Upload im Shop schlägt fehl",
+  "kategorie": "Dateirechte",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/chown.1.html",
+    "https://man7.org/linux/man-pages/man1/tail.1.html",
+    "https://nginx.org/en/docs/ngx_core_module.html#error_log"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Im Webshop kommt beim Hochladen von Produktbildern nur „Upload fehlgeschlagen“.",
+    "Der Ordner /var/www/shop/uploads wurde gestern aus einer Sicherung zurückgespielt.",
+    "PHP läuft auf diesem Server als Benutzer www-data.",
+    "",
+    "Aufgabe: Finde den Fehler im Protokoll und sorge dafür, dass der Webserver in den Upload-Ordner schreiben darf."
+  ],
+  "zustand": {},
+  "dateien": {
+    "/var/www/shop/uploads/": {
+      "rechte": "755",
+      "besitzer": "root:root"
+    },
+    "/var/www/shop/index.php": {
+      "inhalt": "<?php // Shop",
+      "besitzer": "www-data:www-data"
+    },
+    "/var/log/nginx/error.log": {
+      "inhalt": [
+        "2026/11/04 08:30:11 [error] 1181#1181: *412 FastCGI sent in stderr: \"PHP message: PHP Warning:  move_uploaded_file(/var/www/shop/uploads/artikel-4711.jpg): Failed to open stream: Permission denied in /var/www/shop/upload.php on line 23\" while reading response header from upstream, client: 192.168.10.61, server: shop.firma.internal, request: \"POST /upload.php HTTP/1.1\"",
+        "2026/11/04 08:31:02 [error] 1181#1181: *415 FastCGI sent in stderr: \"PHP message: PHP Warning:  move_uploaded_file(/var/www/shop/uploads/artikel-4712.jpg): Failed to open stream: Permission denied in /var/www/shop/upload.php on line 23\" while reading response header from upstream, client: 192.168.10.61, server: shop.firma.internal, request: \"POST /upload.php HTTP/1.1\""
+      ],
+      "rechte": "640",
+      "besitzer": "www-data:adm"
+    }
+  },
+  "befehle": [],
+  "ziel": {
+    "besitzer:/var/www/shop/uploads": {
+      "in": [
+        "www-data:www-data",
+        "www-data:root"
+      ]
+    }
+  },
+  "hinweise": [
+    "Der Webserver protokolliert Fehler in /var/log/nginx/error.log. Lies die letzten Zeilen.",
+    "„tail -n 5 /var/log/nginx/error.log“ zeigt „Permission denied“ beim Schreiben nach /var/www/shop/uploads. „ls -l /var/www/shop“ zeigt den Besitzer.",
+    "„sudo chown -R www-data:www-data /var/www/shop/uploads“."
+  ],
+  "erklaerung": [
+    "Beim Zurückspielen gehörte der Ordner uploads wieder root (rwxr-xr-x): Nur root durfte hineinschreiben.",
+    "PHP läuft als www-data und bekam „Permission denied“. „sudo chown -R www-data:www-data …/uploads“",
+    "gibt den Ordner dem Webserver. Nicht chmod 777 – dann dürfte jeder Benutzer und jeder Prozess hineinschreiben.",
+    "Das error.log gehört www-data und der Gruppe adm (rw-r-----); lesen dürfen root und Mitglieder von adm."
+  ],
+  "begriffe": {
+    "error.log": "Fehlerprotokoll von nginx; hier landen auch Fehlermeldungen von PHP.",
+    "tail -n": "Zeigt die letzten n Zeilen einer Datei – ideal für Protokolle.",
+    "www-data": "Benutzer, unter dem Webserver und PHP laufen."
+  },
+  "loesung": [
+    "tail -n 5 /var/log/nginx/error.log",
+    "ls -l /var/www/shop",
+    "sudo chown -R www-data:www-data /var/www/shop/uploads",
+    "ls -l /var/www/shop"
+  ]
+}

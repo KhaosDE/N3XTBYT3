@@ -1,0 +1,236 @@
+{
+  "id": "ls-nginx-konfig",
+  "system": "linux_server",
+  "titel": "Webserver startet nicht nach Änderung",
+  "kategorie": "Webserver",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://nginx.org/en/docs/switches.html",
+    "https://nginx.org/en/docs/beginners_guide.html",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Nach einer Änderung am Webshop (shop.firma.internal) ist die Seite weg. Ein Kollege hat gestern die",
+    "Datei /etc/nginx/conf.d/shop.conf bearbeitet und nginx neu gestartet – seitdem läuft nginx nicht mehr.",
+    "",
+    "Aufgabe: Finde den Fehler in der Konfiguration, behebe ihn und starte nginx wieder."
+  ],
+  "zustand": {
+    "nginx_aktiv": false
+  },
+  "dateien": {
+    "/etc/nginx/conf.d/shop.conf": {
+      "inhalt": [
+        "server {",
+        "    listen 80;",
+        "    server_name shop.firma.internal;",
+        "    root /var/www/shop",
+        "    index index.html;",
+        "}"
+      ],
+      "rechte": "644"
+    },
+    "/etc/nginx/nginx.conf": [
+      "user www-data;",
+      "worker_processes auto;",
+      "include /etc/nginx/modules-enabled/*.conf;",
+      "events {",
+      "    worker_connections 768;",
+      "}",
+      "http {",
+      "    include /etc/nginx/mime.types;",
+      "    include /etc/nginx/conf.d/*.conf;",
+      "    include /etc/nginx/sites-enabled/*;",
+      "}"
+    ],
+    "/var/www/shop/index.html": "<h1>Shop</h1>"
+  },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl status nginx",
+        "systemctl status nginx.service"
+      ],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes nginx",
+      "faelle": [
+        {
+          "wenn": {
+            "nginx_aktiv": false
+          },
+          "ausgabe": [
+            "× nginx.service - A high performance web server and a reverse proxy server",
+            "     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)",
+            "     Active: failed (Result: exit-code) since Wed 2026-11-04 08:58:12 CET; 9min ago",
+            "       Docs: man:nginx(8)",
+            "    Process: 1180 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=1/FAILURE)"
+          ]
+        },
+        {
+          "ausgabe": [
+            "● nginx.service - A high performance web server and a reverse proxy server",
+            "     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:10:02 CET; 3s ago",
+            "   Main PID: 1502 (nginx)",
+            "       Docs: man:nginx(8)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "nginx -t"
+      ],
+      "bedeutung": "Die nginx-Konfiguration auf Fehler prüfen",
+      "frage": "Prüfe die Konfiguration von nginx auf Fehler",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "datei:/etc/nginx/conf.d/shop.conf": {
+              "keine_zeile_enthaelt": "root /var/www/shop;"
+            }
+          },
+          "fehler": true,
+          "ausgabe": [
+            "nginx: [emerg] invalid number of arguments in \"root\" directive in /etc/nginx/conf.d/shop.conf:5",
+            "nginx: configuration file /etc/nginx/nginx.conf test failed"
+          ]
+        },
+        {
+          "ausgabe": [
+            "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok",
+            "nginx: configuration file /etc/nginx/nginx.conf test is successful"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "journalctl -u nginx",
+        "journalctl -u nginx -n 20",
+        "journalctl -xeu nginx.service",
+        "journalctl -u nginx.service"
+      ],
+      "bedeutung": "Protokoll eines Dienstes anzeigen",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Nov 04 08:58:12 srv-web01 nginx[1180]: 2026/11/04 08:58:12 [emerg] 1180#1180: invalid number of arguments in \"root\" directive in /etc/nginx/conf.d/shop.conf:5",
+            "Nov 04 08:58:12 srv-web01 nginx[1180]: nginx: configuration file /etc/nginx/nginx.conf test failed",
+            "Nov 04 08:58:12 srv-web01 systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE",
+            "Nov 04 08:58:12 srv-web01 systemd[1]: nginx.service: Failed with result 'exit-code'.",
+            "Nov 04 08:58:12 srv-web01 systemd[1]: Failed to start nginx.service - A high performance web server and a reverse proxy server."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl restart nginx",
+        "systemctl start nginx",
+        "systemctl restart nginx.service",
+        "systemctl start nginx.service"
+      ],
+      "bedeutung": "Einen Dienst (neu) starten",
+      "frage": "Starte den Dienst nginx neu",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "wenn": {
+            "datei:/etc/nginx/conf.d/shop.conf": {
+              "keine_zeile_enthaelt": "root /var/www/shop;"
+            }
+          },
+          "fehler": true,
+          "ausgabe": [
+            "Job for nginx.service failed because the control process exited with error code.",
+            "See \"systemctl status nginx.service\" and \"journalctl -xeu nginx.service\" for details."
+          ]
+        },
+        {
+          "setze": {
+            "nginx_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "curl -I http://localhost",
+        "curl -I localhost"
+      ],
+      "bedeutung": "Nur die Kopfzeilen einer Webseite abrufen (Test, ob der Webserver antwortet)",
+      "faelle": [
+        {
+          "wenn": {
+            "nginx_aktiv": false
+          },
+          "ausgabe": "curl: (7) Failed to connect to localhost port 80 after 0 ms: Couldn't connect to server"
+        },
+        {
+          "ausgabe": [
+            "HTTP/1.1 200 OK",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html",
+            "Connection: keep-alive"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "nginx_aktiv": true
+  },
+  "hinweise": [
+    "nginx prüft beim Start seine Konfiguration. Lass dir den Fehler zeigen – nginx hat dafür einen eigenen Testschalter.",
+    "„sudo nginx -t“ nennt Datei und Zeile. Achtung: Fehlt in einer Zeile das Semikolon, meldet nginx oft erst die Zeile danach. Bearbeiten mit „sudo nano …“.",
+    "In /etc/nginx/conf.d/shop.conf Zeile 4 fehlt das „;“ hinter „root /var/www/shop“. Danach „sudo nginx -t“ und „sudo systemctl restart nginx“."
+  ],
+  "erklaerung": [
+    "In nginx endet jede Anweisung mit einem Semikolon. Ohne „;“ liest nginx weiter:",
+    "„root /var/www/shop index index.html;“ – root bekommt drei statt einem Wert. Darum die Meldung",
+    "„invalid number of arguments in \"root\" directive … shop.conf:5“ – die Zeile danach, nicht Zeile 4.",
+    "„sudo nginx -t“ prüft die Konfiguration, ohne den Dienst anzufassen – immer vor einem Neustart ausführen.",
+    "Danach startet „sudo systemctl restart nginx“ den Webserver wieder."
+  ],
+  "begriffe": {
+    "nginx -t": "Testet die nginx-Konfiguration auf Syntaxfehler.",
+    "[emerg]": "Schwerster Fehlergrad bei nginx: Der Server kann so nicht starten.",
+    "conf.d": "Ordner für zusätzliche Konfigurationsdateien, die nginx.conf mit include einbindet.",
+    "curl -I": "Ruft nur die Antwort-Kopfzeilen einer Webseite ab – schneller Test, ob ein Webserver antwortet."
+  },
+  "loesung": [
+    "systemctl status nginx",
+    "sudo nginx -t",
+    "sudo nano /etc/nginx/conf.d/shop.conf",
+    {
+      "speichern": "/etc/nginx/conf.d/shop.conf",
+      "inhalt": [
+        "server {",
+        "    listen 80;",
+        "    server_name shop.firma.internal;",
+        "    root /var/www/shop;",
+        "    index index.html;",
+        "}"
+      ]
+    },
+    "sudo nginx -t",
+    "sudo systemctl restart nginx",
+    "curl -I http://localhost"
+  ]
+}

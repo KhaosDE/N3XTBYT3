@@ -1,0 +1,97 @@
+{
+  "id": "ls-ssh-schluessel-rechte",
+  "system": "linux_server",
+  "titel": "SSH-Schlüssel wird ignoriert",
+  "kategorie": "SSH und Firewall",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/sshd.8.html",
+    "https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html",
+    "https://man7.org/linux/man-pages/man1/chmod.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Das Deploy-Werkzeug meldet sich als Benutzer deploy per SSH-Schlüssel an srv-web01 an.",
+    "Seit gestern fragt der Server stattdessen nach einem Passwort. Jemand hat in /home/deploy „Rechte repariert“.",
+    "Der Schlüssel in /home/deploy/.ssh/authorized_keys ist der richtige.",
+    "",
+    "Aufgabe: Finde im Journal von ssh den Grund und stelle sichere Rechte her."
+  ],
+  "zustand": {},
+  "dateien": {
+    "/home/deploy/": {
+      "rechte": "750",
+      "besitzer": "deploy:deploy"
+    },
+    "/home/deploy/.ssh/": {
+      "rechte": "777",
+      "besitzer": "deploy:deploy"
+    },
+    "/home/deploy/.ssh/authorized_keys": {
+      "inhalt": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBeispielSchluesselNurZumUebenXYZ deploy@ci",
+      "rechte": "666",
+      "besitzer": "deploy:deploy"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "journalctl -u ssh",
+        "journalctl -u ssh -n 20",
+        "journalctl -u ssh.service",
+        "journalctl -t sshd"
+      ],
+      "bedeutung": "Protokoll des SSH-Dienstes anzeigen",
+      "frage": "Zeige das Journal des Dienstes ssh",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Nov 04 08:44:02 srv-web01 sshd[2051]: Authentication refused: bad ownership or modes for directory /home/deploy/.ssh",
+            "Nov 04 08:44:05 srv-web01 sshd[2051]: Connection closed by authenticating user deploy 192.168.10.80 port 51022 [preauth]"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "rechte:/home/deploy/.ssh": {
+      "in": [
+        "rwx------",
+        "rwxr-xr-x",
+        "rwxr-x---",
+        "rwx--x--x"
+      ]
+    },
+    "rechte:/home/deploy/.ssh/authorized_keys": {
+      "in": [
+        "rw-------",
+        "rw-r--r--",
+        "rw-r-----"
+      ]
+    }
+  },
+  "hinweise": [
+    "sshd ist bei Schlüsseln streng: Darf jemand anderes als der Besitzer etwas an .ssh ändern, wird der Schlüssel ignoriert.",
+    "„journalctl -u ssh“ nennt das Problem. „sudo ls -la /home/deploy/.ssh“ zeigt die Rechte. Ändern mit „chmod“.",
+    "„sudo chmod 700 /home/deploy/.ssh“ und „sudo chmod 600 /home/deploy/.ssh/authorized_keys“."
+  ],
+  "erklaerung": [
+    "sshd prüft mit StrictModes: Home-Ordner, .ssh und authorized_keys dürfen nicht für Gruppe oder andere",
+    "beschreibbar sein – sonst könnte jemand einen fremden Schlüssel einschmuggeln. Mit 777/666 lehnte sshd ab",
+    "(„bad ownership or modes for directory /home/deploy/.ssh“). Üblich ist 700 für .ssh und 600 für",
+    "authorized_keys. Danach klappt die Anmeldung per Schlüssel wieder."
+  ],
+  "begriffe": {
+    "authorized_keys": "Liste der öffentlichen Schlüssel, mit denen man sich als dieser Benutzer anmelden darf.",
+    "StrictModes": "sshd-Einstellung (Standard yes): prüft Rechte von Home, .ssh und Schlüsseldatei.",
+    "700 / 600": "rwx------ bzw. rw-------: nur der Besitzer darf etwas.",
+    "Öffentlicher Schlüssel": "Teil eines Schlüsselpaars, den man weitergeben darf; der private bleibt geheim."
+  },
+  "loesung": [
+    "journalctl -u ssh",
+    "sudo ls -la /home/deploy/.ssh",
+    "sudo chmod 700 /home/deploy/.ssh",
+    "sudo chmod 600 /home/deploy/.ssh/authorized_keys"
+  ]
+}

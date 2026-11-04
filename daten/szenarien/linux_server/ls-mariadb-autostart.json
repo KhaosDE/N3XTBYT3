@@ -1,0 +1,200 @@
+{
+  "id": "ls-mariadb-autostart",
+  "system": "linux_server",
+  "titel": "Nach Neustart: Datenbank weg",
+  "kategorie": "Dienste",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://documentation.ubuntu.com/server/how-to/databases/install-mysql/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Nach dem nächtlichen Neustart zeigt der Webshop „Error establishing a database connection“.",
+    "Die Datenbank (MariaDB) lief vorher. Jemand hatte sie vor Wochen von Hand gestartet.",
+    "",
+    "Aufgabe: Starte MariaDB und sorge dafür, dass sie bei jedem Neustart automatisch startet."
+  ],
+  "zustand": {
+    "db_aktiv": false,
+    "db_enabled": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl status mariadb",
+        "systemctl status mariadb.service"
+      ],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes mariadb",
+      "faelle": [
+        {
+          "wenn": {
+            "db_aktiv": false
+          },
+          "ausgabe": [
+            "○ mariadb.service - MariaDB 10.11.8 database server",
+            "     Loaded: loaded (/usr/lib/systemd/system/mariadb.service; disabled; preset: enabled)",
+            "     Active: inactive (dead)",
+            "       Docs: man:mariadbd(8)",
+            "             https://mariadb.com/kb/en/library/systemd/"
+          ]
+        },
+        {
+          "wenn": {
+            "db_enabled": true
+          },
+          "ausgabe": [
+            "● mariadb.service - MariaDB 10.11.8 database server",
+            "     Loaded: loaded (/usr/lib/systemd/system/mariadb.service; enabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:11:40 CET; 5s ago",
+            "   Main PID: 2210 (mariadbd)",
+            "     Status: \"Taking your SQL requests now...\""
+          ]
+        },
+        {
+          "ausgabe": [
+            "● mariadb.service - MariaDB 10.11.8 database server",
+            "     Loaded: loaded (/usr/lib/systemd/system/mariadb.service; disabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:11:40 CET; 5s ago",
+            "   Main PID: 2210 (mariadbd)",
+            "     Status: \"Taking your SQL requests now...\""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl start mariadb"
+      ],
+      "bedeutung": "Einen Dienst starten",
+      "frage": "Starte den Dienst mariadb",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "db_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl enable mariadb"
+      ],
+      "bedeutung": "Einen Dienst beim Systemstart automatisch starten lassen",
+      "frage": "Lass mariadb beim Systemstart automatisch starten",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "db_enabled": true
+          },
+          "ausgabe": [
+            "Synchronizing state of mariadb.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install enable mariadb",
+            "Created symlink /etc/systemd/system/multi-user.target.wants/mariadb.service → /usr/lib/systemd/system/mariadb.service."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl enable --now mariadb"
+      ],
+      "bedeutung": "Einen Dienst aktivieren und sofort starten",
+      "frage": "Aktiviere mariadb und starte sie sofort (ein Befehl)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "db_enabled": true,
+            "db_aktiv": true
+          },
+          "ausgabe": [
+            "Synchronizing state of mariadb.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install enable mariadb",
+            "Created symlink /etc/systemd/system/multi-user.target.wants/mariadb.service → /usr/lib/systemd/system/mariadb.service."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl is-enabled mariadb"
+      ],
+      "bedeutung": "Prüfen, ob ein Dienst beim Start automatisch startet",
+      "faelle": [
+        {
+          "wenn": {
+            "db_enabled": false
+          },
+          "ausgabe": "disabled"
+        },
+        {
+          "ausgabe": "enabled"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl is-active mariadb"
+      ],
+      "bedeutung": "Prüfen, ob ein Dienst gerade läuft",
+      "faelle": [
+        {
+          "wenn": {
+            "db_aktiv": false
+          },
+          "ausgabe": "inactive"
+        },
+        {
+          "ausgabe": "active"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "db_aktiv": true,
+    "db_enabled": true
+  },
+  "hinweise": [
+    "Ein Dienst kann laufen, ohne beim Start mitzustarten – und umgekehrt. Prüfe beides.",
+    "„systemctl status mariadb“ zeigt „inactive (dead)“ und „disabled“. „start“ startet jetzt, „enable“ beim Systemstart.",
+    "„sudo systemctl enable --now mariadb“."
+  ],
+  "erklaerung": [
+    "MariaDB war „disabled“: Sie startet nicht automatisch. Von Hand gestartet lief sie bis zum Neustart.",
+    "„sudo systemctl enable --now mariadb“ trägt den Dienst für den Systemstart ein (Symlink in multi-user.target.wants)",
+    "und startet ihn sofort. Mit „systemctl is-enabled“ und „is-active“ lässt sich beides schnell prüfen."
+  ],
+  "begriffe": {
+    "enabled / disabled": "Startet ein Dienst beim Systemstart automatisch (enabled) oder nicht (disabled)?",
+    "--now": "Bei enable: zusätzlich sofort starten. Bei disable: zusätzlich sofort stoppen.",
+    "multi-user.target": "Der normale Betriebszustand eines Servers; hier eingetragene Dienste starten beim Booten."
+  },
+  "loesung": [
+    "systemctl status mariadb",
+    "sudo systemctl enable --now mariadb",
+    "systemctl is-enabled mariadb"
+  ]
+}

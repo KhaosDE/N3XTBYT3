@@ -1,0 +1,199 @@
+{
+  "id": "ls-ssh-root-login",
+  "system": "linux_server",
+  "titel": "Sicherheitsprüfung: root darf sich per SSH anmelden",
+  "kategorie": "SSH und Firewall",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html",
+    "https://manpages.ubuntu.com/manpages/noble/man8/sshd.8.html",
+    "https://documentation.ubuntu.com/server/how-to/security/openssh-server/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Ein Sicherheitscheck meldet: Auf srv-web01 kann man sich als root per SSH anmelden.",
+    "Im Journal stehen Tausende fehlgeschlagene Anmeldeversuche für root aus dem Internet.",
+    "Alle Admins melden sich mit eigenem Konto an und nutzen sudo.",
+    "",
+    "Aufgabe: Verbiete die root-Anmeldung per SSH, prüfe die Konfiguration und lade sshd neu."
+  ],
+  "zustand": {
+    "ssh_neu_geladen": false
+  },
+  "dateien": {
+    "/etc/ssh/sshd_config": {
+      "inhalt": [
+        "Include /etc/ssh/sshd_config.d/*.conf",
+        "Port 22",
+        "PermitRootLogin yes",
+        "PasswordAuthentication yes",
+        "KbdInteractiveAuthentication no",
+        "UsePAM yes",
+        "X11Forwarding yes",
+        "Subsystem sftp /usr/lib/openssh/sftp-server"
+      ],
+      "rechte": "644"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "journalctl -u ssh -n 5",
+        "journalctl -u ssh"
+      ],
+      "bedeutung": "Protokoll des SSH-Dienstes anzeigen",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Nov 04 09:01:00 srv-web01 sshd[3000]: Failed password for root from 10.66.12.40 port 50000 ssh2",
+            "Nov 04 09:01:01 srv-web01 sshd[3001]: Failed password for root from 10.66.12.41 port 50001 ssh2",
+            "Nov 04 09:01:02 srv-web01 sshd[3002]: Failed password for root from 10.66.12.42 port 50002 ssh2",
+            "Nov 04 09:01:03 srv-web01 sshd[3003]: Failed password for root from 10.66.12.43 port 50003 ssh2",
+            "Nov 04 09:01:04 srv-web01 sshd[3004]: Failed password for root from 10.66.12.44 port 50004 ssh2"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "sshd -t"
+      ],
+      "bedeutung": "Die sshd-Konfiguration auf Fehler prüfen (keine Ausgabe = in Ordnung)",
+      "frage": "Prüfe die Konfiguration von sshd auf Fehler",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl reload ssh",
+        "systemctl restart ssh",
+        "systemctl reload ssh.service",
+        "systemctl restart ssh.service"
+      ],
+      "bedeutung": "Einen Dienst seine Konfiguration neu laden lassen",
+      "frage": "Lass den Dienst ssh seine Konfiguration neu laden",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "wenn": {
+            "datei:/etc/ssh/sshd_config": {
+              "zeile_enthaelt": "PermitRootLogin no"
+            }
+          },
+          "setze": {
+            "ssh_neu_geladen": true
+          }
+        },
+        {
+          "setze": {
+            "ssh_neu_geladen": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "sshd -T | grep permitrootlogin",
+        "sshd -T"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "datei:/etc/ssh/sshd_config": {
+              "zeile_enthaelt": "PermitRootLogin no"
+            }
+          },
+          "ausgabe": "permitrootlogin no"
+        },
+        {
+          "ausgabe": "permitrootlogin yes"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "passwd -l root"
+      ],
+      "bedeutung": "Das Passwort eines Kontos sperren",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": "passwd: password changed."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "datei:/etc/ssh/sshd_config": {
+      "keine_zeile_enthaelt": "PermitRootLogin yes"
+    },
+    "ssh_neu_geladen": true
+  },
+  "hinweise": [
+    "Die Einstellungen des SSH-Servers stehen in /etc/ssh/sshd_config. Welche Zeile regelt die root-Anmeldung?",
+    "Ändere „PermitRootLogin yes“ auf „no“ (mit sudo nano). Danach mit „sshd -t“ prüfen und den Dienst ssh neu laden.",
+    "„sudo nano /etc/ssh/sshd_config“ → PermitRootLogin no → speichern → „sudo sshd -t“ → „sudo systemctl reload ssh“."
+  ],
+  "erklaerung": [
+    "Mit „PermitRootLogin yes“ konnten Angreifer direkt das Passwort von root raten – das Journal zeigte die Versuche.",
+    "„PermitRootLogin no“ verbietet das. „sudo sshd -t“ prüft die Datei vorher (keine Ausgabe = in Ordnung),",
+    "„sudo systemctl reload ssh“ übernimmt die Einstellung, ohne bestehende Verbindungen zu trennen.",
+    "Admins melden sich mit eigenem Konto an und nutzen sudo – so ist auch nachvollziehbar, wer was getan hat.",
+    "Unter Ubuntu heißt der Dienst „ssh“, das Programm „sshd“."
+  ],
+  "begriffe": {
+    "PermitRootLogin": "sshd-Einstellung: Darf sich root per SSH anmelden? (yes, no, prohibit-password …)",
+    "sshd -t": "Testet die sshd-Konfiguration; meldet nur Fehler.",
+    "reload": "Dienst liest seine Konfiguration neu, ohne komplett neu zu starten.",
+    "Brute Force": "Massenhaftes Ausprobieren von Passwörtern."
+  },
+  "loesung": [
+    "journalctl -u ssh -n 5",
+    "sudo nano /etc/ssh/sshd_config",
+    {
+      "speichern": "/etc/ssh/sshd_config",
+      "inhalt": [
+        "Include /etc/ssh/sshd_config.d/*.conf",
+        "Port 22",
+        "PermitRootLogin no",
+        "PasswordAuthentication yes",
+        "KbdInteractiveAuthentication no",
+        "UsePAM yes",
+        "X11Forwarding yes",
+        "Subsystem sftp /usr/lib/openssh/sftp-server"
+      ]
+    },
+    "sudo sshd -t",
+    "sudo systemctl reload ssh"
+  ]
+}

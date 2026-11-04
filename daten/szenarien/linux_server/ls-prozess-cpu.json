@@ -1,0 +1,207 @@
+{
+  "id": "ls-prozess-cpu",
+  "system": "linux_server",
+  "titel": "Server langsam: ein Prozess bei 100 % CPU",
+  "kategorie": "Prozesse",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/ps.1.html",
+    "https://man7.org/linux/man-pages/man1/kill.1.html",
+    "https://man7.org/linux/man-pages/man1/uptime.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der Webshop ist seit heute Morgen extrem langsam. Der Artikel-Import läuft nachts um 3 Uhr und braucht",
+    "sonst 10 Minuten. Der Hersteller sagt: Ein hängender Import darf abgebrochen werden, er läuft morgen neu.",
+    "",
+    "Aufgabe: Finde den Prozess, der die CPU auslastet, und beende ihn."
+  ],
+  "zustand": {
+    "import_laeuft": true
+  },
+  "befehle": [
+    {
+      "muster": [
+        "uptime"
+      ],
+      "bedeutung": "Laufzeit und Systemlast anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "import_laeuft": true
+          },
+          "ausgabe": " 09:15:02 up 1 day,  6:12,  1 user,  load average: 1.98, 2.01, 2.00"
+        },
+        {
+          "ausgabe": " 09:16:40 up 1 day,  6:14,  1 user,  load average: 0.31, 1.52, 1.85"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ps aux --sort=-%cpu",
+        "ps aux --sort=-pcpu"
+      ],
+      "bedeutung": "Alle Prozesse nach CPU-Last sortiert anzeigen",
+      "frage": "Zeige alle Prozesse, absteigend nach CPU-Last sortiert",
+      "faelle": [
+        {
+          "wenn": {
+            "import_laeuft": true
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "www-data    3312 99.8  6.1 412880 251004 ?       R    03:00 382:51 php /var/www/shop/tools/import.php --full",
+            "mysql       1290  2.1 11.4 2471560 469108 ?      Ssl  Nov03  31:12 /usr/sbin/mariadbd",
+            "www-data    1181  0.3  0.2  55712 10340 ?        S    Nov03   4:02 nginx: worker process",
+            "root           1  0.0  0.3  22636 13300 ?        Ss   Nov03   0:09 /sbin/init"
+          ]
+        },
+        {
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "mysql       1290  2.1 11.4 2471560 469108 ?      Ssl  Nov03  31:12 /usr/sbin/mariadbd",
+            "www-data    1181  0.3  0.2  55712 10340 ?        S    Nov03   4:02 nginx: worker process",
+            "root           1  0.0  0.3  22636 13300 ?        Ss   Nov03   0:09 /sbin/init"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ps aux"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "import_laeuft": true
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.3  22636 13300 ?        Ss   Nov03   0:09 /sbin/init",
+            "www-data    1181  0.3  0.2  55712 10340 ?        S    Nov03   4:02 nginx: worker process",
+            "mysql       1290  2.1 11.4 2471560 469108 ?      Ssl  Nov03  31:12 /usr/sbin/mariadbd",
+            "www-data    3312 99.8  6.1 412880 251004 ?       R    03:00 382:51 php /var/www/shop/tools/import.php --full"
+          ]
+        },
+        {
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.3  22636 13300 ?        Ss   Nov03   0:09 /sbin/init",
+            "www-data    1181  0.3  0.2  55712 10340 ?        S    Nov03   4:02 nginx: worker process",
+            "mysql       1290  2.1 11.4 2471560 469108 ?      Ssl  Nov03  31:12 /usr/sbin/mariadbd"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "top",
+        "htop"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Live-Ansicht (q beendet) – hier nicht nachgebaut. Nimm „ps aux --sort=-%cpu | head“."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill 3312",
+        "kill -15 3312"
+      ],
+      "bedeutung": "Einen Prozess beenden (Signal TERM)",
+      "frage": "Beende den Prozess 3312 (normales Signal)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "import_laeuft": true
+          },
+          "setze": {
+            "import_laeuft": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "kill: (3312): No such process"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill -9 3312"
+      ],
+      "bedeutung": "Einen Prozess erzwungen beenden (Signal KILL)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "import_laeuft": true
+          },
+          "setze": {
+            "import_laeuft": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "kill: (3312): No such process"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill 1290",
+        "kill -9 1290",
+        "systemctl stop mariadb"
+      ],
+      "falsch": true,
+      "warum": "Die Datenbank braucht etwas CPU, ist aber nicht das Problem. Beende nur den hängenden Import (PID 3312).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das ist die Datenbank des Shops. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "import_laeuft": false
+  },
+  "hinweise": [
+    "Hohe Last zeigt „uptime“ (load average). Welcher Prozess verbraucht die Rechenzeit?",
+    "„ps aux --sort=-%cpu | head -5“ zeigt die gierigsten Prozesse oben. Beenden mit „kill PID“ – der Prozess gehört www-data, also mit sudo.",
+    "„sudo kill 3312“."
+  ],
+  "erklaerung": [
+    "Der Import (PID 3312, Benutzer www-data) lief seit 3 Uhr mit 99,8 % CPU – load average um 2 bei wenigen Kernen.",
+    "„ps aux --sort=-%cpu | head“ sortiert absteigend nach CPU. Weil der Prozess einem anderen Benutzer gehört,",
+    "braucht kill Root-Rechte. Erst TERM (kill 3312) – reagiert er nicht, KILL (kill -9 3312).",
+    "Danach sinkt die Last. Die Ursache (warum der Import hing) gehört an den Hersteller."
+  ],
+  "begriffe": {
+    "load average": "Durchschnittliche Anzahl wartender/laufender Prozesse über 1, 5 und 15 Minuten.",
+    "--sort=-%cpu": "ps-Ausgabe absteigend nach CPU-Anteil sortieren.",
+    "www-data": "Benutzer, unter dem Webserver und PHP auf Ubuntu laufen."
+  },
+  "loesung": [
+    "uptime",
+    "ps aux --sort=-%cpu | head -5",
+    "sudo kill 3312",
+    "uptime"
+  ]
+}

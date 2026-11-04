@@ -1,0 +1,230 @@
+{
+  "id": "ls-updates-neustart",
+  "system": "linux_server",
+  "titel": "Sicherheitsupdates einspielen",
+  "kategorie": "Pakete",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html",
+    "https://man7.org/linux/man-pages/man8/shutdown.8.html",
+    "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Beim Anmelden auf srv-web01 erscheint: „12 updates can be applied immediately.“ Darunter Sicherheitsupdates.",
+    "Der Server ist tagsüber im Einsatz. Ein Neustart ist nur abends ab 22:00 Uhr erlaubt.",
+    "",
+    "Aufgabe: Spiele die Updates ein, prüfe, ob ein Neustart nötig ist, und plane ihn für 22:00 Uhr."
+  ],
+  "zustand": {
+    "aktuell": false,
+    "aktualisiert": false,
+    "neustart_geplant": false
+  },
+  "dateien": {
+    "/var/run/reboot-required": null
+  },
+  "befehle": [
+    {
+      "muster": [
+        "apt update"
+      ],
+      "bedeutung": "Paketlisten aus den Paketquellen neu laden",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "aktualisiert": false
+          },
+          "setze": {
+            "aktuell": true
+          },
+          "ausgabe": [
+            "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease",
+            "Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]",
+            "Reading package lists... Done",
+            "Building dependency tree... Done",
+            "Reading state information... Done",
+            "12 packages can be upgraded. Run 'apt list --upgradable' to see them."
+          ]
+        },
+        {
+          "ausgabe": [
+            "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease",
+            "Reading package lists... Done",
+            "All packages are up to date."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apt list --upgradable"
+      ],
+      "bedeutung": "Pakete anzeigen, für die es Updates gibt",
+      "faelle": [
+        {
+          "wenn": {
+            "aktualisiert": false
+          },
+          "ausgabe": [
+            "Listing... Done",
+            "(12 Pakete, darunter linux-image-generic und openssl – Liste hier gekürzt)"
+          ]
+        },
+        {
+          "ausgabe": "Listing... Done"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apt upgrade -y",
+        "apt full-upgrade -y"
+      ],
+      "bedeutung": "Alle Pakete aktualisieren (ohne Rückfrage)",
+      "frage": "Spiele alle verfügbaren Updates ohne Rückfrage ein",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "aktuell": false
+          },
+          "sim": true,
+          "ausgabe": "Erst „sudo apt update“: Ohne frische Paketlisten kennt apt die neuen Versionen nicht."
+        },
+        {
+          "setze": {
+            "aktualisiert": true,
+            "datei:/var/run/reboot-required": "*** System restart required ***"
+          },
+          "ausgabe": [
+            "Reading package lists... Done",
+            "Building dependency tree... Done",
+            "Reading state information... Done",
+            "Calculating upgrade... Done",
+            "(Paketliste und Fortschritt hier gekürzt)",
+            "12 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apt upgrade",
+        "apt full-upgrade"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "sim": true,
+          "ausgabe": "apt fragt jetzt „Do you want to continue? [Y/n]“ – Rückfragen sind hier nicht nachgebaut. Hänge -y an."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "shutdown -r 22:00",
+        "shutdown -r 22:00 \"Neustart nach Updates\""
+      ],
+      "bedeutung": "Einen Neustart zu einer bestimmten Uhrzeit planen",
+      "frage": "Plane einen Neustart für 22:00 Uhr",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "neustart_geplant": true
+          },
+          "ausgabe": "Reboot scheduled for Wed 2026-11-04 22:00:00 CET, use 'shutdown -c' to cancel."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "shutdown -c"
+      ],
+      "bedeutung": "Einen geplanten Neustart abbrechen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "neustart_geplant": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "reboot",
+        "shutdown -r now",
+        "systemctl reboot"
+      ],
+      "falsch": true,
+      "warum": "Tagsüber ist der Server im Einsatz – ein sofortiger Neustart unterbricht alle. Plane ihn für 22:00 Uhr.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart wird in der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "aktualisiert": true,
+    "neustart_geplant": true
+  },
+  "hinweise": [
+    "Reihenfolge: Paketlisten holen, Updates einspielen, dann prüfen, ob Ubuntu einen Neustart verlangt.",
+    "„sudo apt update“, „sudo apt upgrade -y“. Ob ein Neustart nötig ist, steht in der Datei /var/run/reboot-required. Planen geht mit „shutdown -r <Uhrzeit>“.",
+    "„sudo apt update“, „sudo apt upgrade -y“, „cat /var/run/reboot-required“, „sudo shutdown -r 22:00“."
+  ],
+  "erklaerung": [
+    "„apt update“ holt die Listen, „apt upgrade -y“ spielt die Updates ohne Rückfrage ein.",
+    "Neue Kernel und manche Bibliotheken wirken erst nach einem Neustart; Ubuntu legt dann /var/run/reboot-required an.",
+    "„sudo shutdown -r 22:00“ plant den Neustart außerhalb der Arbeitszeit; „shutdown -c“ bricht ihn ab.",
+    "So bleiben Server sicher, ohne dass tagsüber jemand rausfliegt."
+  ],
+  "begriffe": {
+    "apt upgrade": "Aktualisiert installierte Pakete. -y beantwortet Rückfragen mit Ja.",
+    "/var/run/reboot-required": "Existiert, wenn ein Update einen Neustart braucht.",
+    "shutdown -r <Zeit>": "Neustart planen; -c bricht ab.",
+    "Sicherheitsupdate": "Update, das eine bekannte Sicherheitslücke schließt."
+  },
+  "loesung": [
+    "sudo apt update",
+    "sudo apt upgrade -y",
+    "cat /var/run/reboot-required",
+    "sudo shutdown -r 22:00"
+  ]
+}

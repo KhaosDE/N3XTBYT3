@@ -98,28 +98,40 @@ class AbnahmeM2Test(unittest.TestCase):
     """Abnahme M2 (PLAN.md), soweit automatisch prüfbar."""
 
     def test_windows_server_durchlauf(self):
+        self._durchlauf("windows_server")
+
+    def test_linux_durchlauf(self):
+        """Abnahme M3: Auswertung und Lernkartei funktionieren auch für Linux."""
+        self._durchlauf("linux")
+
+    def test_linux_server_durchlauf(self):
+        self._durchlauf("linux_server")
+
+    def _durchlauf(self, system_id):
         from n3xtbyt3.kern import auswahl
         from n3xtbyt3.kern.sitzung import Sitzung
         from n3xtbyt3.kern.szenario import lade_allgemein
 
         with Datenordner():
-            allgemein = lade_allgemein("windows_server")
-            szenarien = lade_system("windows_server", allgemein=allgemein).szenarien
+            allgemein = lade_allgemein(system_id)
+            szenarien = lade_system(system_id, allgemein=allgemein).szenarien
             self.assertGreaterEqual(len(szenarien), 15)
-            stand = Spielstand.lade("windows_server")
+            stand = Spielstand.lade(system_id)
             schwach = szenarien[0]
             # Mehrere Durchläufe: alle anderen sauber gelöst, eines zweimal nicht gelöst
             for sz in szenarien[1:]:
                 s = Sitzung(sz, allgemein)
                 for schritt in sz.loesung:
-                    s.eingabe(schritt)
+                    s.loesungsschritt(schritt)
+                self.assertTrue(s.geloest, sz.id)
                 stand.versuch_eintragen(sz.id, s.ergebnis())
             for _ in range(2):
                 s = Sitzung(schwach, allgemein)
                 s.eingabe("Get-Process")
                 s.naechster_hinweis()
                 stand.versuch_eintragen(schwach.id, s.ergebnis())
-            daten = auswertung.erstelle("windows_server", szenarien, stand)
+            daten = auswertung.erstelle(system_id, szenarien, stand)
+            self.assertTrue(training.sammle_karten(szenarien))
             self.assertTrue(any(schwach.titel in t for t in daten["schwaechen"]), daten["schwaechen"])
             self.assertTrue(any(schwach.kategorie in t for t in daten["schwaechen"]))
             self.assertTrue(any(schwach.titel in e for e in daten["empfehlung"]))

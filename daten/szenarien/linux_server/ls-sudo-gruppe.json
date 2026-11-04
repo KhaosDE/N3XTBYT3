@@ -1,0 +1,152 @@
+{
+  "id": "ls-sudo-gruppe",
+  "system": "linux_server",
+  "titel": "Neuer Admin darf kein sudo",
+  "kategorie": "Benutzer und sudo",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/usermod.8.html",
+    "https://man7.org/linux/man-pages/man1/id.1.html",
+    "https://man7.org/linux/man-pages/man8/sudo.8.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Marie Koch (Benutzer mkoch) unterstützt ab heute bei der Serverpflege. Ihr Konto existiert schon.",
+    "Bei „sudo apt update“ bekommt sie: „mkoch is not in the sudoers file.“",
+    "Auf Ubuntu bekommen Administratoren ihre Rechte über die Gruppe sudo.",
+    "",
+    "Aufgabe: Gib mkoch sudo-Rechte – ohne die sudoers-Datei von Hand zu ändern."
+  ],
+  "zustand": {
+    "mkoch_sudo": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "id mkoch"
+      ],
+      "bedeutung": "Benutzer-ID und Gruppen eines Benutzers anzeigen",
+      "frage": "Zeige UID und Gruppen des Benutzers mkoch",
+      "faelle": [
+        {
+          "wenn": {
+            "mkoch_sudo": false
+          },
+          "ausgabe": "uid=1001(mkoch) gid=1001(mkoch) groups=1001(mkoch),100(users)"
+        },
+        {
+          "ausgabe": "uid=1001(mkoch) gid=1001(mkoch) groups=1001(mkoch),27(sudo),100(users)"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "groups mkoch"
+      ],
+      "bedeutung": "Gruppen eines Benutzers anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "mkoch_sudo": false
+          },
+          "ausgabe": "mkoch : mkoch users"
+        },
+        {
+          "ausgabe": "mkoch : mkoch sudo users"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "usermod -aG sudo mkoch",
+        "usermod -a -G sudo mkoch",
+        "adduser mkoch sudo",
+        "gpasswd -a mkoch sudo"
+      ],
+      "bedeutung": "Einen Benutzer zusätzlich in eine Gruppe aufnehmen",
+      "frage": "Nimm mkoch zusätzlich in die Gruppe sudo auf",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "usermod: Permission denied.\nusermod: cannot lock /etc/passwd; try again later."
+        },
+        {
+          "setze": {
+            "mkoch_sudo": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "getent group sudo"
+      ],
+      "bedeutung": "Mitglieder einer Gruppe anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "mkoch_sudo": false
+          },
+          "ausgabe": "sudo:x:27:admin"
+        },
+        {
+          "ausgabe": "sudo:x:27:admin,mkoch"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "visudo"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "visudo öffnet die sudoers-Datei geprüft im Editor – hier nicht nötig: Die Gruppe sudo hat die Rechte schon."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "usermod -G sudo mkoch"
+      ],
+      "falsch": true,
+      "warum": "Ohne -a ersetzt -G alle Zusatzgruppen (mkoch verlöre z. B. users). Immer usermod -aG.",
+      "faelle": [
+        {
+          "setze": {
+            "mkoch_sudo": true
+          }
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "mkoch_sudo": true
+  },
+  "hinweise": [
+    "Unter Ubuntu darf sudo, wer in einer bestimmten Gruppe ist. Ist mkoch drin?",
+    "„id mkoch“ oder „groups mkoch“ zeigt die Gruppen. Hinzufügen mit „usermod -aG <gruppe> <benutzer>“.",
+    "„sudo usermod -aG sudo mkoch“ – Marie muss sich danach neu anmelden."
+  ],
+  "erklaerung": [
+    "In /etc/sudoers steht bei Ubuntu „%sudo ALL=(ALL:ALL) ALL“: Alle Mitglieder der Gruppe sudo dürfen sudo.",
+    "„sudo usermod -aG sudo mkoch“ nimmt Marie in die Gruppe auf – ohne die sudoers-Datei anzufassen.",
+    "Neue Gruppen gelten erst nach neuer Anmeldung. Muss man sudoers doch ändern, dann nur mit visudo,",
+    "das die Datei vor dem Speichern prüft – ein Fehler dort kann sudo für alle sperren."
+  ],
+  "begriffe": {
+    "sudo": "Führt einen Befehl mit Root-Rechten aus, wenn man es darf.",
+    "Gruppe sudo": "Unter Ubuntu die Gruppe der Administratoren (GID 27).",
+    "/etc/sudoers": "Regelt, wer sudo darf. Nur mit visudo bearbeiten.",
+    "id": "Zeigt UID, GID und alle Gruppen eines Benutzers."
+  },
+  "loesung": [
+    "id mkoch",
+    "sudo usermod -aG sudo mkoch",
+    "id mkoch"
+  ]
+}

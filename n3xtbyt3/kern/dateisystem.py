@@ -564,7 +564,28 @@ def befehl_nano(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
                             "nur_lesen": not schreiben, "neu": neu})
 
 
+def befehl_crontab(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    """crontab -l (anzeigen) und crontab -e (bearbeiten) für den aktuellen Benutzer."""
+    nutzer = fs.benutzer
+    if "-u" in woerter and woerter.index("-u") + 1 < len(woerter):
+        if not fs.z.get("root"):
+            return Ergebnis(["crontab: must be privileged to use -u"], fehler=True)
+        nutzer = woerter[woerter.index("-u") + 1]
+    pfad = f"/var/spool/cron/crontabs/{nutzer}"
+    if "-l" in woerter:
+        if not fs.ist_datei(pfad):
+            return Ergebnis([f"no crontab for {nutzer}"], fehler=True)
+        inhalt = fs.inhalt(pfad)
+        return Ergebnis(inhalt.split("\n") if inhalt else [])
+    if "-e" in woerter:
+        # crontab darf die eigene Datei immer bearbeiten (das Programm hat dafür besondere Rechte).
+        return Ergebnis(editor={"pfad": pfad, "inhalt": fs.inhalt(pfad), "nur_lesen": False,
+                                "neu": not fs.ist_datei(pfad)})
+    return Ergebnis(sim="Hier gehen crontab -l (anzeigen) und crontab -e (bearbeiten).")
+
+
 EINGEBAUT: dict[str, Callable[[Dateisystem, list[str]], Ergebnis]] = {
+    "crontab": befehl_crontab,
     "pwd": befehl_pwd,
     "cd": befehl_cd,
     "ls": befehl_ls,
@@ -591,6 +612,7 @@ BEDEUTUNG = {
     "chmod": "Dateirechte ändern (z. B. 644, u+x)",
     "chown": "Besitzer einer Datei ändern (benutzer:gruppe, nur root)",
     "nano": "Datei im Editor bearbeiten (Strg+O speichern, Strg+X beenden)",
+    "crontab": "Geplante Aufgaben anzeigen (-l) oder bearbeiten (-e)",
 }
 
 FILTER = ("grep", "head", "tail", "wc", "less", "more", "sort")

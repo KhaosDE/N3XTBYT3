@@ -1,0 +1,225 @@
+{
+  "id": "ls-netplan-dns",
+  "system": "linux_server",
+  "titel": "Server löst keine Namen auf",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://netplan.readthedocs.io/en/stable/netplan-yaml/",
+    "https://manpages.ubuntu.com/manpages/noble/man8/netplan-apply.8.html",
+    "https://man7.org/linux/man-pages/man1/resolvectl.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "srv-web01 erreicht andere Server per IP-Adresse, aber keine Namen: Updates und Mails scheitern.",
+    "Die Netzwerkeinstellungen stehen in /etc/netplan/50-cloud-init.yaml. Der richtige DNS-Server ist dc01 (192.168.10.5).",
+    "",
+    "Aufgabe: Korrigiere den DNS-Server in der Netplan-Datei und wende die Einstellung an."
+  ],
+  "zustand": {
+    "dns_aktiv": "192.168.10.250"
+  },
+  "dateien": {
+    "/etc/netplan/50-cloud-init.yaml": {
+      "inhalt": [
+        "network:",
+        "  version: 2",
+        "  ethernets:",
+        "    ens18:",
+        "      addresses:",
+        "        - 192.168.10.40/24",
+        "      routes:",
+        "        - to: default",
+        "          via: 192.168.10.1",
+        "      nameservers:",
+        "        addresses: [192.168.10.250]",
+        "        search: [firma.internal]"
+      ],
+      "rechte": "600"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ping intranet.firma.internal",
+        "ping -c 4 intranet.firma.internal"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "dns_aktiv": "192.168.10.250"
+          },
+          "ausgabe": "ping: intranet.firma.internal: Temporary failure in name resolution"
+        },
+        {
+          "ausgabe": [
+            "PING intranet.firma.internal (192.168.10.25) 56(84) bytes of data.",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=1 ttl=128 time=0.41 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=2 ttl=128 time=0.42 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=3 ttl=128 time=0.43 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=4 ttl=128 time=0.44 ms",
+            "",
+            "--- intranet.firma.internal ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping -c 4 192.168.10.25",
+        "ping 192.168.10.25"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "PING 192.168.10.25 (192.168.10.25) 56(84) bytes of data.",
+            "64 bytes from 192.168.10.25: icmp_seq=1 ttl=128 time=0.41 ms",
+            "64 bytes from 192.168.10.25: icmp_seq=2 ttl=128 time=0.42 ms",
+            "64 bytes from 192.168.10.25: icmp_seq=3 ttl=128 time=0.43 ms",
+            "64 bytes from 192.168.10.25: icmp_seq=4 ttl=128 time=0.44 ms",
+            "",
+            "--- 192.168.10.25 ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "resolvectl dns"
+      ],
+      "bedeutung": "Die verwendeten DNS-Server je Netzwerkschnittstelle anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "dns_aktiv": "192.168.10.250"
+          },
+          "ausgabe": [
+            "Global:",
+            "Link 2 (ens18): 192.168.10.250"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Global:",
+            "Link 2 (ens18): 192.168.10.5"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "netplan apply"
+      ],
+      "bedeutung": "Die Netplan-Konfiguration anwenden",
+      "frage": "Wende die Netplan-Konfiguration an",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "datei:/etc/netplan/50-cloud-init.yaml": {
+              "zeile_enthaelt": "addresses: [192.168.10.5]"
+            }
+          },
+          "setze": {
+            "dns_aktiv": "192.168.10.5"
+          }
+        },
+        {
+          "setze": {
+            "dns_aktiv": "192.168.10.250"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "netplan try"
+      ],
+      "bedeutung": "Netplan-Konfiguration testweise anwenden (mit automatischem Zurücksetzen)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "sim": true,
+          "ausgabe": "netplan try wendet die Einstellung an und nimmt sie nach 120 s zurück, wenn man nicht mit Enter bestätigt – hier nicht nachgebaut. Nimm netplan apply."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "nano /etc/resolv.conf"
+      ],
+      "falsch": true,
+      "warum": "/etc/resolv.conf wird automatisch erzeugt. Dauerhaft gehört der DNS-Server in die Netplan-Konfiguration.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Unter Ubuntu verwaltet systemd-resolved diese Datei; Änderungen sind beim nächsten Start weg. Ändere die Netplan-Datei."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "datei:/etc/netplan/50-cloud-init.yaml": {
+      "zeile_enthaelt": "addresses: [192.168.10.5]"
+    },
+    "dns_aktiv": "192.168.10.5"
+  },
+  "hinweise": [
+    "IP-Adressen gehen, Namen nicht: Es liegt an der Namensauflösung. Welcher DNS-Server ist eingestellt – und wo kommt die Einstellung her?",
+    "„resolvectl dns“ zeigt 192.168.10.250. Die Einstellung steht in /etc/netplan/50-cloud-init.yaml unter nameservers. Nach dem Ändern „netplan apply“.",
+    "„sudo nano /etc/netplan/50-cloud-init.yaml“, 192.168.10.250 durch 192.168.10.5 ersetzen, speichern, „sudo netplan apply“."
+  ],
+  "erklaerung": [
+    "Ubuntu Server konfiguriert das Netzwerk mit Netplan (YAML-Dateien in /etc/netplan/). Dort stand der falsche",
+    "DNS-Server 192.168.10.250. Nach der Korrektur übernimmt „sudo netplan apply“ die Einstellung;",
+    "systemd-resolved fragt dann 192.168.10.5. „Temporary failure in name resolution“ heißt: Kein DNS-Server hat geantwortet.",
+    "In YAML zählen Einrückungen (Leerzeichen, keine Tabs). Auf entfernten Servern ist „netplan try“ sicherer."
+  ],
+  "begriffe": {
+    "Netplan": "Netzwerkkonfiguration von Ubuntu in YAML-Dateien unter /etc/netplan/.",
+    "YAML": "Textformat für Einstellungen; die Struktur ergibt sich aus der Einrückung.",
+    "systemd-resolved": "Dienst, der unter Ubuntu Namen auflöst; resolvectl zeigt seine Einstellungen.",
+    "nameservers": "Abschnitt in Netplan mit den DNS-Servern (addresses) und Suchdomänen (search)."
+  },
+  "loesung": [
+    "ping -c 4 intranet.firma.internal",
+    "ping -c 4 192.168.10.25",
+    "resolvectl dns",
+    "sudo nano /etc/netplan/50-cloud-init.yaml",
+    {
+      "speichern": "/etc/netplan/50-cloud-init.yaml",
+      "inhalt": [
+        "network:",
+        "  version: 2",
+        "  ethernets:",
+        "    ens18:",
+        "      addresses:",
+        "        - 192.168.10.40/24",
+        "      routes:",
+        "        - to: default",
+        "          via: 192.168.10.1",
+        "      nameservers:",
+        "        addresses: [192.168.10.5]",
+        "        search: [firma.internal]"
+      ]
+    },
+    "sudo netplan apply",
+    "ping -c 4 intranet.firma.internal"
+  ]
+}

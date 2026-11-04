@@ -1,0 +1,87 @@
+{
+  "id": "ls-cron-zeit",
+  "system": "linux_server",
+  "titel": "Backup läuft nur sonntags",
+  "kategorie": "Cron-Aufgaben",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man5/crontab.5.html",
+    "https://man7.org/linux/man-pages/man1/crontab.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Das Datenbank-Backup /opt/backup/backup.sh soll jeden Tag um 02:30 Uhr laufen.",
+    "Im Backup-Ordner liegt aber nur eine Sicherung pro Woche, immer vom Sonntag.",
+    "Die Aufgabe ist in der crontab des Benutzers admin eingetragen.",
+    "",
+    "Aufgabe: Finde den Fehler in der crontab und stelle sie auf täglich 02:30 Uhr."
+  ],
+  "zustand": {},
+  "dateien": {
+    "/var/spool/cron/crontabs/admin": {
+      "inhalt": [
+        "# m h  dom mon dow   command",
+        "30 2 * * 0 /opt/backup/backup.sh"
+      ],
+      "rechte": "600",
+      "besitzer": "admin:crontab"
+    },
+    "/opt/backup/backup.sh": {
+      "inhalt": [
+        "#!/bin/bash",
+        "mysqldump --all-databases > /srv/backup/db-$(date +%F).sql"
+      ],
+      "rechte": "755"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ls /srv/backup",
+        "ls -l /srv/backup"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "db-2026-10-11.sql  db-2026-10-18.sql  db-2026-10-25.sql  db-2026-11-01.sql"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "datei:/var/spool/cron/crontabs/admin": {
+      "zeile_enthaelt": "30 2 * * * /opt/backup/backup.sh"
+    }
+  },
+  "hinweise": [
+    "Eine crontab-Zeile hat fünf Zeitfelder vor dem Befehl. Welches davon schränkt auf einen Wochentag ein?",
+    "„crontab -l“ zeigt die Aufgaben. Die Felder sind: Minute, Stunde, Tag im Monat, Monat, Wochentag (0 = Sonntag). Bearbeiten mit „crontab -e“.",
+    "„crontab -e“, die Zeile zu „30 2 * * * /opt/backup/backup.sh“ ändern, Strg+O, Strg+X."
+  ],
+  "erklaerung": [
+    "Die Zeile „30 2 * * 0 …“ heißt: Minute 30, Stunde 2, jeder Tag im Monat, jeder Monat, Wochentag 0 = Sonntag.",
+    "Mit * im letzten Feld läuft das Backup jeden Tag um 02:30. „crontab -e“ öffnet die eigene crontab im Editor",
+    "und prüft sie beim Speichern; „crontab -l“ zeigt sie an. Die Datei liegt unter /var/spool/cron/crontabs/,",
+    "man bearbeitet sie aber nur mit crontab -e."
+  ],
+  "begriffe": {
+    "cron": "Dienst, der Aufgaben zu festen Zeiten startet.",
+    "crontab-Felder": "Minute (0–59), Stunde (0–23), Tag (1–31), Monat (1–12), Wochentag (0–7, 0 und 7 = Sonntag).",
+    "*": "In crontab: jeder Wert, z. B. jede Stunde.",
+    "crontab -e / -l": "Eigene crontab bearbeiten / anzeigen."
+  },
+  "loesung": [
+    "crontab -l",
+    "crontab -e",
+    {
+      "speichern": "/var/spool/cron/crontabs/admin",
+      "inhalt": [
+        "# m h  dom mon dow   command",
+        "30 2 * * * /opt/backup/backup.sh"
+      ]
+    },
+    "crontab -l"
+  ]
+}

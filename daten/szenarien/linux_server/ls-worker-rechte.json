@@ -1,0 +1,160 @@
+{
+  "id": "ls-worker-rechte",
+  "system": "linux_server",
+  "titel": "Hintergrunddienst stürzt immer wieder ab",
+  "kategorie": "Protokolle",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html",
+    "https://man7.org/linux/man-pages/man1/chown.1.html",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der Dienst shop-worker verschickt Bestellbestätigungen. Seit dem Umzug der Daten nach /var/lib/shop",
+    "startet er nicht mehr. Er läuft als Benutzer „shop“ (so steht es in seiner Dienstdatei).",
+    "",
+    "Aufgabe: Finde im Journal den Grund, behebe ihn und starte den Dienst."
+  ],
+  "zustand": {
+    "worker_aktiv": false
+  },
+  "dateien": {
+    "/var/lib/shop/": {
+      "rechte": "755",
+      "besitzer": "root:root"
+    },
+    "/var/lib/shop/queue": {
+      "inhalt": "",
+      "rechte": "644",
+      "besitzer": "root:root"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl status shop-worker",
+        "systemctl status shop-worker.service"
+      ],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes shop-worker",
+      "faelle": [
+        {
+          "wenn": {
+            "worker_aktiv": false
+          },
+          "ausgabe": [
+            "× shop-worker.service - Shop Worker (Bestellmails)",
+            "     Loaded: loaded (/usr/lib/systemd/system/shop-worker.service; enabled; preset: enabled)",
+            "     Active: failed (Result: exit-code) since Wed 2026-11-04 08:58:12 CET; 9min ago"
+          ]
+        },
+        {
+          "ausgabe": [
+            "● shop-worker.service - Shop Worker (Bestellmails)",
+            "     Loaded: loaded (/usr/lib/systemd/system/shop-worker.service; enabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:12:10 CET; 2s ago",
+            "   Main PID: 2401 (python3)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "journalctl -u shop-worker",
+        "journalctl -u shop-worker -n 20",
+        "journalctl -u shop-worker.service",
+        "journalctl -xeu shop-worker.service"
+      ],
+      "bedeutung": "Protokoll eines Dienstes anzeigen",
+      "frage": "Zeige das Journal des Dienstes shop-worker",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Nov 04 08:58:30 srv-web01 shop-worker[1220]: Traceback (most recent call last):",
+            "Nov 04 08:58:30 srv-web01 shop-worker[1220]:   File \"/opt/shop/worker.py\", line 41, in <module>",
+            "Nov 04 08:58:30 srv-web01 shop-worker[1220]: PermissionError: [Errno 13] Permission denied: '/var/lib/shop/queue'",
+            "Nov 04 08:58:30 srv-web01 systemd[1]: shop-worker.service: Main process exited, code=exited, status=1/FAILURE",
+            "Nov 04 08:58:30 srv-web01 systemd[1]: shop-worker.service: Failed with result 'exit-code'."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl restart shop-worker",
+        "systemctl start shop-worker"
+      ],
+      "bedeutung": "Einen Dienst (neu) starten",
+      "frage": "Starte den Dienst shop-worker neu",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "wenn": {
+            "besitzer:/var/lib/shop": {
+              "nicht": "shop:shop"
+            }
+          },
+          "fehler": true,
+          "ausgabe": [
+            "Job for shop-worker.service failed because the control process exited with error code.",
+            "See \"systemctl status shop-worker.service\" and \"journalctl -xeu shop-worker.service\" for details."
+          ]
+        },
+        {
+          "setze": {
+            "worker_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "chmod -R 777 /var/lib/shop",
+        "chmod 777 /var/lib/shop"
+      ],
+      "falsch": true,
+      "warum": "777 heißt: alle dürfen alles. Richtig ist, dem Dienstbenutzer shop den Ordner zu geben (chown).",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Dann dürfte jeder auf dem Server die Bestelldaten ändern. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "besitzer:/var/lib/shop": "shop:shop",
+    "worker_aktiv": true
+  },
+  "hinweise": [
+    "Warum der Dienst abstürzt, steht im Journal. Lies die letzte Fehlermeldung.",
+    "„journalctl -u shop-worker“ zeigt „Permission denied: '/var/lib/shop/queue'“. „ls -l /var/lib/shop“ zeigt: alles gehört root. Den Besitzer ändert „chown“, mit -R für den ganzen Ordner.",
+    "„sudo chown -R shop:shop /var/lib/shop“, dann „sudo systemctl restart shop-worker“."
+  ],
+  "erklaerung": [
+    "Beim Umzug wurden die Daten als root kopiert – /var/lib/shop gehörte root, und der Dienst läuft als „shop“.",
+    "Er durfte die Warteschlange nicht öffnen (PermissionError, Errno 13). „sudo chown -R shop:shop /var/lib/shop“",
+    "gibt Ordner und Inhalt (-R = rekursiv) dem Dienstbenutzer. Danach startet der Dienst.",
+    "Dienste laufen aus Sicherheitsgründen oft unter eigenen Benutzern – ihre Daten müssen ihnen gehören."
+  ],
+  "begriffe": {
+    "Dienstbenutzer": "Eigener Benutzer für einen Dienst (hier shop), damit er nur an seine eigenen Daten kommt.",
+    "Errno 13": "Fehlernummer für „Permission denied“ (keine Berechtigung).",
+    "chown -R": "Ändert den Besitzer rekursiv: Ordner samt allem darin."
+  },
+  "loesung": [
+    "systemctl status shop-worker",
+    "journalctl -u shop-worker",
+    "ls -l /var/lib/shop",
+    "sudo chown -R shop:shop /var/lib/shop",
+    "sudo systemctl restart shop-worker"
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "id": "ls-ssh-port-ufw",
+  "system": "linux_server",
+  "titel": "SSH auf neuem Port – niemand kommt mehr rein",
+  "kategorie": "SSH und Firewall",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html",
+    "https://man7.org/linux/man-pages/man8/ss.8.html",
+    "https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Laut neuer Sicherheitsvorgabe läuft SSH auf srv-web01 jetzt auf Port 2222 statt 22.",
+    "Der Kollege hat sshd umgestellt, seitdem kommt aber niemand mehr per SSH auf den Server.",
+    "Du sitzt direkt an der Konsole des Servers (über die Virtualisierung).",
+    "",
+    "Aufgabe: Prüfe, worauf sshd lauscht und was die Firewall erlaubt. Erlaube 2222/tcp und entferne die alte Regel für 22/tcp."
+  ],
+  "zustand": {
+    "ufw_2222": false,
+    "ufw_22": true
+  },
+  "dateien": {
+    "/etc/ssh/sshd_config": {
+      "inhalt": [
+        "Include /etc/ssh/sshd_config.d/*.conf",
+        "Port 2222",
+        "KbdInteractiveAuthentication no",
+        "UsePAM yes",
+        "X11Forwarding yes",
+        "PrintMotd no",
+        "AcceptEnv LANG LC_*",
+        "Subsystem sftp /usr/lib/openssh/sftp-server"
+      ],
+      "rechte": "644"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ss -tln",
+        "ss -ltn"
+      ],
+      "bedeutung": "Lauschende TCP-Ports anzeigen (Zahlen statt Namen)",
+      "frage": "Zeige alle lauschenden TCP-Ports als Zahlen",
+      "faelle": [
+        {
+          "ausgabe": [
+            "State  Recv-Q Send-Q Local Address:Port  Peer Address:Port",
+            "LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*",
+            "LISTEN 0      4096         0.0.0.0:2222       0.0.0.0:*",
+            "LISTEN 0      511          0.0.0.0:80         0.0.0.0:*",
+            "LISTEN 0      4096            [::]:2222          [::]:*"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw status",
+        "ufw status verbose",
+        "ufw status numbered"
+      ],
+      "bedeutung": "Regeln der Firewall ufw anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "ufw_22": true,
+            "ufw_2222": false
+          },
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "22/tcp                     ALLOW       Anywhere",
+            "80/tcp                     ALLOW       Anywhere",
+            "22/tcp (v6)                ALLOW       Anywhere (v6)",
+            "80/tcp (v6)                ALLOW       Anywhere (v6)",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "ufw_22": true
+          },
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "22/tcp                     ALLOW       Anywhere",
+            "80/tcp                     ALLOW       Anywhere",
+            "2222/tcp                   ALLOW       Anywhere",
+            "22/tcp (v6)                ALLOW       Anywhere (v6)",
+            "80/tcp (v6)                ALLOW       Anywhere (v6)",
+            "2222/tcp (v6)              ALLOW       Anywhere (v6)",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "ufw_2222": true
+          },
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "80/tcp                     ALLOW       Anywhere",
+            "2222/tcp                   ALLOW       Anywhere",
+            "80/tcp (v6)                ALLOW       Anywhere (v6)",
+            "2222/tcp (v6)              ALLOW       Anywhere (v6)",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "80/tcp                     ALLOW       Anywhere",
+            "80/tcp (v6)                ALLOW       Anywhere (v6)",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw allow 2222/tcp",
+        "ufw allow 2222"
+      ],
+      "bedeutung": "Einen Port in der Firewall ufw freigeben",
+      "frage": "Gib in ufw den TCP-Port 2222 frei",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "ufw_2222": true
+          },
+          "ausgabe": [
+            "Rule added",
+            "Rule added (v6)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw delete allow 22/tcp"
+      ],
+      "bedeutung": "Eine ufw-Regel löschen",
+      "frage": "Lösche in ufw die Regel, die 22/tcp erlaubt",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "ufw_22": true
+          },
+          "setze": {
+            "ufw_22": false
+          },
+          "ausgabe": [
+            "Rule deleted",
+            "Rule deleted (v6)"
+          ]
+        },
+        {
+          "ausgabe": "Could not delete non-existent rule"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw disable"
+      ],
+      "falsch": true,
+      "warum": "Die Firewall ganz abzuschalten öffnet alle Ports. Erlaube nur den neuen SSH-Port.",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": "Firewall stopped and disabled on system startup"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "ufw_2222": true,
+    "ufw_22": false
+  },
+  "hinweise": [
+    "Zwei Seiten: Auf welchem Port lauscht sshd wirklich – und lässt die Firewall diesen Port herein?",
+    "„ss -tln“ zeigt sshd auf 2222. „sudo ufw status“ zeigt, dass nur 22 erlaubt ist. Regeln setzt „ufw allow“, löscht „ufw delete allow“.",
+    "„sudo ufw allow 2222/tcp“ und danach „sudo ufw delete allow 22/tcp“."
+  ],
+  "erklaerung": [
+    "sshd lauschte schon auf 2222 (ss -tln), aber ufw ließ nur 22/tcp und 80/tcp herein.",
+    "„sudo ufw allow 2222/tcp“ öffnet den neuen Port, „sudo ufw delete allow 22/tcp“ schließt den alten.",
+    "Reihenfolge ist wichtig, wenn man per SSH arbeitet: erst den neuen Port erlauben und testen, dann den alten schließen –",
+    "sonst sperrt man sich aus. ufw legt jede Regel für IPv4 und IPv6 an (v6)."
+  ],
+  "begriffe": {
+    "ufw": "Uncomplicated Firewall: einfache Firewall-Verwaltung unter Ubuntu.",
+    "ss": "Zeigt Netzwerkverbindungen und lauschende Ports (-t TCP, -l lauschend, -n Zahlen).",
+    "sshd": "Der SSH-Server-Dienst; Einstellungen in /etc/ssh/sshd_config.",
+    "Port": "Nummer eines Dienstes auf einem Rechner; SSH standardmäßig 22."
+  },
+  "loesung": [
+    "ss -tln",
+    "sudo ufw status",
+    "sudo ufw allow 2222/tcp",
+    "sudo ufw delete allow 22/tcp",
+    "sudo ufw status"
+  ]
+}

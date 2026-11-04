@@ -7,7 +7,7 @@
     "home": "/home/admin",
     "pfad": "/home/admin",
     "pfad_vorher": "/home/admin",
-    "gruppen": "admin,sudo",
+    "gruppen": "admin,adm,cdrom,sudo,dip,plugdev,lxd",
     "root": false,
     "sudo_erlaubt": true,
     "sudo_cache": false,

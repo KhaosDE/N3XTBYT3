@@ -1,0 +1,226 @@
+{
+  "id": "ls-ufw-web",
+  "system": "linux_server",
+  "titel": "Neuer Webserver nicht erreichbar",
+  "kategorie": "SSH und Firewall",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html",
+    "https://documentation.ubuntu.com/server/how-to/security/firewalls/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Auf dem neuen Server srv-web01 läuft nginx. Auf dem Server selbst liefert „curl -I http://localhost“ die Seite.",
+    "Von den Arbeitsplätzen aus läuft der Browser aber in eine Zeitüberschreitung.",
+    "Die Firewall ufw ist aktiv; bisher ist nur SSH erlaubt.",
+    "",
+    "Aufgabe: Gib HTTP und HTTPS für nginx in der Firewall frei."
+  ],
+  "zustand": {
+    "web_frei": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ufw status",
+        "ufw status verbose",
+        "ufw status numbered"
+      ],
+      "bedeutung": "Regeln der Firewall ufw anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "web_frei": false
+          },
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "OpenSSH                    ALLOW       Anywhere",
+            "OpenSSH (v6)               ALLOW       Anywhere (v6)",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "Status: active",
+            "",
+            "To                         Action      From",
+            "--                         ------      ----",
+            "OpenSSH                    ALLOW       Anywhere",
+            "Nginx Full                 ALLOW       Anywhere",
+            "OpenSSH (v6)               ALLOW       Anywhere (v6)",
+            "Nginx Full (v6)            ALLOW       Anywhere (v6)",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw app list"
+      ],
+      "bedeutung": "Vordefinierte Anwendungsprofile von ufw anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": [
+            "Available applications:",
+            "  Nginx Full",
+            "  Nginx HTTP",
+            "  Nginx HTTPS",
+            "  OpenSSH"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw allow \"Nginx Full\"",
+        "ufw allow 'Nginx Full'"
+      ],
+      "bedeutung": "Ein Anwendungsprofil in ufw freigeben",
+      "frage": "Gib in ufw das Anwendungsprofil Nginx Full frei",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "web_frei": true
+          },
+          "ausgabe": [
+            "Rule added",
+            "Rule added (v6)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw allow 80,443/tcp",
+        "ufw allow proto tcp from any to any port 80,443"
+      ],
+      "bedeutung": "Mehrere TCP-Ports in ufw freigeben",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "web_frei": true
+          },
+          "ausgabe": [
+            "Rule added",
+            "Rule added (v6)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw allow 80/tcp",
+        "ufw allow 80",
+        "ufw allow http"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": [
+            "Rule added",
+            "Rule added (v6)",
+            "",
+            "(Nur HTTP. Für HTTPS fehlt noch 443.)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "curl -I http://localhost"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "HTTP/1.1 200 OK",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ufw disable"
+      ],
+      "falsch": true,
+      "warum": "Die Firewall abzuschalten öffnet alle Ports. Gib nur HTTP und HTTPS frei.",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": "Firewall stopped and disabled on system startup"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "web_frei": true
+  },
+  "hinweise": [
+    "Auf dem Server selbst geht es, von außen nicht – dazwischen steht die Firewall. Was erlaubt sie?",
+    "„sudo ufw status“ zeigt nur OpenSSH. „sudo ufw app list“ zeigt fertige Profile, auch für nginx.",
+    "„sudo ufw allow \"Nginx Full\"“ (HTTP und HTTPS)."
+  ],
+  "erklaerung": [
+    "ufw blockiert eingehende Verbindungen, die nicht erlaubt sind. Erlaubt war nur OpenSSH (Port 22).",
+    "Pakete bringen oft ufw-Anwendungsprofile mit: „Nginx Full“ öffnet 80 und 443, „Nginx HTTP“ nur 80.",
+    "„sudo ufw allow \"Nginx Full\"“ gibt den Webserver frei. Anführungszeichen, weil der Name ein Leerzeichen hat.",
+    "Lokal (localhost) greift die Firewall nicht – darum ging curl auf dem Server immer."
+  ],
+  "begriffe": {
+    "Anwendungsprofil": "Vordefinierte ufw-Regel für ein Programm, z. B. Nginx Full = Ports 80 und 443.",
+    "HTTP / HTTPS": "Webseiten unverschlüsselt (Port 80) bzw. verschlüsselt (Port 443).",
+    "localhost": "Der Rechner selbst (127.0.0.1); Verbindungen dorthin gehen nicht durch die Firewall."
+  },
+  "loesung": [
+    "sudo ufw status",
+    "sudo ufw app list",
+    "sudo ufw allow \"Nginx Full\"",
+    "sudo ufw status"
+  ]
+}

@@ -4,9 +4,9 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-**M1 und M2 sind fertig** (bis auf deine Abnahmetests, siehe unten).
+**M1, M2 und M3 sind fertig** (bis auf deine Abnahmetests, siehe unten). Alle vier Systeme sind spielbar.
 
-**Nächster Schritt:** M3 — Linux und Linux Server (simuliertes Dateisystem, Editor, Szenarien).
+**Nächster Schritt:** M4 — Tickets, mehrere Rechner (ssh), MCP-Server für Claude Desktop.
 
 ## Fertig
 
@@ -56,6 +56,24 @@ Stand: 04.11.2026.
   DNS-Weiterleitung, DHCP-Bereich voll, Freigaberechte, NTFS-Rechte (icacls), Feature fehlt,
   Ereignisanzeige (wer hat neu gestartet), alte Logs löschen, RDP-Gruppe, Firewall-Port,
   Vertrauensstellung reparieren.
+
+### M3
+
+- Simuliertes Dateisystem für Linux: Dateien mit Inhalt, Rechten und Besitzer stehen im Szenario.
+  Eingebaut: `pwd`, `cd`, `ls` (-l -a -h), `cat`, `less`, `head`, `tail`, `grep`, `chmod`, `chown`,
+  `crontab -l/-e`, `nano` (Editor), `sudo` (auch `sudo -i`), Filter hinter Pipes (grep, head, tail, sort, wc -l).
+  Rechte werden geprüft (lesen, schreiben, betreten); ohne sudo kommt „Permission denied“.
+- Editor (nano-Ersatz) im Terminalbereich: Strg+O speichern, Strg+X beenden, Strg+K Zeile ausschneiden.
+- Ziele können den Inhalt von Konfigurationsdateien prüfen (`zeile_enthaelt`, Kommentare zählen nicht).
+- 16 Linux-Szenarien (Ubuntu 24.04 Desktop) und 15 Linux-Server-Szenarien (Ubuntu Server 24.04),
+  alle „ungeprüft“ mit Quellen (man7.org, manpages.ubuntu.com, Ubuntu-Doku, nginx/Apache-Doku; Adressen geprüft).
+
+### Abnahme M3 (PLAN.md)
+
+- [x] Alle vier Systeme spielbar (13 + 16 + 16 + 15 Szenarien, alle mit Lösungsweg getestet)
+- [x] Auswertung und Lernkartei funktionieren je System (automatischer Test für jedes System)
+- [ ] **Tobi:** je System ein, zwei Szenarien spielen; unter Linux einmal eine Datei mit `sudo nano`
+      bearbeiten und speichern
 
 ### Abnahme M2 (PLAN.md)
 
@@ -119,6 +137,17 @@ Stand: 04.11.2026.
 - 04.11.2026: Windows-Server-Szenarien spielen in einer erfundenen Domäne `firma.internal` (NetBIOS FIRMA)
   mit DC01 (192.168.10.5), SRV-DATEI01, SRV-APP01, SRV-TS01. Anmeldenamen wie kwagner@firma.internal
   sind erfunden; der Inhaltstest lässt `.internal`-Adressen zu.
+- 04.11.2026: Linux-Szenarien bilden Ubuntu 24.04 LTS nach (Desktop: Benutzer anna auf pc-lager02;
+  Server: Benutzer admin auf srv-web01). Grund: verbreitet, gut dokumentiert, nutzt apt, systemd, ufw, Netplan.
+- 04.11.2026: Dateien liegen als flache Zustandsschlüssel vor (`datei:/pfad`, `rechte:/pfad`, `besitzer:/pfad`).
+  Grund: Bedingungen und Änderungen funktionieren damit genauso wie bei allen anderen Werten.
+- 04.11.2026: `sudo` fragt nicht wirklich nach einem Passwort; die Zeile „[sudo] password for …“ erscheint einmal
+  pro Szenario mit Hinweis. Bei `sudo befehl ~/x` gilt wie im echten System das Home des Benutzers.
+- 04.11.2026: Der Editor ist ein eigener, einfacher nano-Ersatz mit deutschen Meldungen (kein Nachbau von nano).
+  Die nano-Tasten Strg+O, Strg+X, Strg+K funktionieren wie im Original.
+- 04.11.2026: Lösungswege dürfen unter Linux Speicherschritte enthalten (`{"speichern": pfad, "inhalt": …}`),
+  damit der automatische Test auch Szenarien mit Editor durchspielen kann.
+- 04.11.2026: Erklärungen als Liste von Zeilen werden zu Fließtext verbunden (leere Zeile = neuer Absatz).
 - 04.11.2026: Zweig: Die Sitzung gibt den Arbeitszweig `claude/busy-turing-1n3hmy` vor. Ich pushe
   dorthin **und** nach `main` (laut `CLAUDE.md`), beide Stände bleiben gleich.
 
@@ -132,6 +161,9 @@ Stand: 04.11.2026.
 5. Windows Server: ein paar Szenarien spielen, eines mit Esc abbrechen. Dann „Auswertung ansehen“:
    Steht das abgebrochene Szenario bei den Schwächen und in der Empfehlung? Kommt es bei
    „Zufälliges Szenario“ öfter dran?
-6. Befehls-Training ausprobieren: Sind die Fragen verständlich? Ist die Bewertung fair?
-7. Auf Abweichungen zum echten Windows achten (Ausgaben, Fehlermeldungen) und mir sagen,
+6. Linux und Linux Server: z. B. „Webserver startet nicht nach Änderung“ – Fehler mit `sudo nginx -t`
+   finden, mit `sudo nano …` beheben (Strg+O, Strg+X), `sudo systemctl restart nginx`. Ist der Editor
+   gut bedienbar? Stimmen die Ausgaben mit deinem Ubuntu überein?
+7. Befehls-Training ausprobieren: Sind die Fragen verständlich? Ist die Bewertung fair?
+8. Auf Abweichungen zum echten System achten (Ausgaben, Fehlermeldungen) und mir sagen,
    welches Szenario. Wenn alles stimmt: in der Datei `"pruefstatus": "bestaetigt"` setzen.

@@ -7,7 +7,7 @@
     "home": "/home/anna",
     "pfad": "/home/anna",
     "pfad_vorher": "/home/anna",
-    "gruppen": "anna,sudo",
+    "gruppen": "anna,adm,cdrom,sudo,dip,plugdev,lpadmin,users",
     "root": false,
     "sudo_erlaubt": true,
     "sudo_cache": false,
