@@ -1,37 +1,49 @@
-"""Szenarioauswahl: zufällig, ungelöste und schwache Szenarien kommen öfter dran."""
+"""Szenarioauswahl nach der Lernkartei.
+
+* Fällige Karten kommen zuerst dran: Fach 1 (falsch oder nicht gelöst) am häufigsten,
+  höhere Fächer seltener. Nie gespielte Szenarien zählen als fällig.
+* Ist nichts fällig, kommen Karten aus niedrigen Fächern eher dran als aus hohen.
+* Das gerade gespielte Szenario kommt nicht direkt noch einmal.
+"""
 
 from __future__ import annotations
 
 import random
 from typing import Sequence
 
+from .lernkartei import Lernkartei
 from .spielstand import Spielstand
 from .szenario import Szenario
 
+GEWICHT_FAELLIG = {1: 8.0, 2: 4.0, 3: 2.5, 4: 1.5, 5: 1.0}
+GEWICHT_NEU = 5.0
 
-def gewicht(eintrag: dict) -> float:
-    """Je höher, desto eher kommt das Szenario dran.
 
-    * nie gespielt: 5
-    * noch nie gelöst oder letzter Versuch nicht gelöst: 6
-    * gelöst: 1, plus 1 je Hinweisstufe und 0,5 je falschem Befehl (höchstens 3) im
-      letzten Versuch – wer Hilfe brauchte, übt es bald wieder.
-    """
-    if eintrag["versuche"] == 0:
-        return 5.0
-    letzter = eintrag["verlauf"][-1] if eintrag["verlauf"] else {}
-    if not eintrag["geloest"] or not letzter.get("geloest", False):
-        return 6.0
-    schwach = int(letzter.get("hinweise", 0)) + 0.5 * min(int(letzter.get("falsche_befehle", 0)), 3)
-    return 1.0 + schwach
+def gewicht(stand: Spielstand, szenario_id: str, kartei: Lernkartei | None = None) -> float:
+    """Gewicht eines Szenarios für die Zufallsauswahl unter den fälligen Karten."""
+    kartei = kartei or stand.kartei
+    if not stand.gesehen(szenario_id):
+        return GEWICHT_NEU
+    return GEWICHT_FAELLIG[kartei.szenario(szenario_id)["fach"]]
+
+
+def faellig(stand: Spielstand, szenario_id: str) -> bool:
+    if not stand.gesehen(szenario_id):
+        return True
+    kartei = stand.kartei
+    return kartei.ist_faellig(kartei.szenario(szenario_id))
 
 
 def waehle(szenarien: Sequence[Szenario], spielstand: Spielstand,
            zuletzt: str | None = None, rng: random.Random | None = None) -> Szenario | None:
-    """Wählt das nächste Szenario. Das gerade gespielte kommt nicht direkt noch einmal."""
     if not szenarien:
         return None
     rng = rng or random.Random()
     kandidaten = [s for s in szenarien if s.id != zuletzt] or list(szenarien)
-    gewichte = [gewicht(spielstand.eintrag(s.id)) for s in kandidaten]
+    kartei = spielstand.kartei
+    dran = [s for s in kandidaten if faellig(spielstand, s.id)]
+    if dran:
+        gewichte = [gewicht(spielstand, s.id, kartei) for s in dran]
+        return rng.choices(dran, weights=gewichte, k=1)[0]
+    gewichte = [1.0 / kartei.szenario(s.id)["fach"] for s in kandidaten]
     return rng.choices(kandidaten, weights=gewichte, k=1)[0]

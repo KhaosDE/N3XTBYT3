@@ -86,22 +86,36 @@ class AuswahlTest(unittest.TestCase):
 
     def test_gewichte(self):
         stand = Spielstand("windows")
-        self.assertEqual(auswahl.gewicht(stand.eintrag("neu")), 5.0)
+        self.assertEqual(auswahl.gewicht(stand, "neu"), auswahl.GEWICHT_NEU)
         stand.versuch_eintragen("falsch", versuch(geloest=False))
-        self.assertEqual(auswahl.gewicht(stand.eintrag("falsch")), 6.0)
+        self.assertEqual(stand.kartei.szenario("falsch")["fach"], 1)
+        self.assertEqual(auswahl.gewicht(stand, "falsch"), auswahl.GEWICHT_FAELLIG[1])
         stand.versuch_eintragen("sauber", versuch())
-        self.assertEqual(auswahl.gewicht(stand.eintrag("sauber")), 1.0)
-        stand.versuch_eintragen("hilfe", versuch(hinweise=3, falsch=2))
-        self.assertEqual(auswahl.gewicht(stand.eintrag("hilfe")), 5.0)
+        self.assertEqual(stand.kartei.szenario("sauber")["fach"], 2)
+        self.assertFalse(auswahl.faellig(stand, "sauber"))  # erst morgen wieder
+        self.assertTrue(auswahl.faellig(stand, "falsch"))
 
-    def test_ungeloeste_kommen_oefter(self):
+    def test_falsch_geloeste_kommen_oefter(self):
+        liste = self.szenarien(3)
+        stand = Spielstand("windows")
+        stand.versuch_eintragen("s0", versuch())                 # sauber gelöst → Fach 2, morgen
+        stand.versuch_eintragen("s1", versuch(geloest=False))    # nicht gelöst → Fach 1, sofort
+        stand.versuch_eintragen("s2", versuch(hinweise=3))       # mit Hilfe → bleibt Fach 1
+        rng = random.Random(1)
+        zaehler = Counter(auswahl.waehle(liste, stand, rng=rng).id for _ in range(300))
+        self.assertEqual(zaehler["s0"], 0)  # nicht fällig, solange anderes fällig ist
+        self.assertGreater(zaehler["s1"], 50)
+        self.assertGreater(zaehler["s2"], 50)
+
+    def test_nichts_faellig_niedrige_faecher_zuerst(self):
         liste = self.szenarien(2)
         stand = Spielstand("windows")
-        stand.versuch_eintragen("s0", versuch())                 # sauber gelöst
-        stand.versuch_eintragen("s1", versuch(geloest=False))    # nicht gelöst
-        rng = random.Random(1)
-        zaehler = Counter(auswahl.waehle(liste, stand, rng=rng).id for _ in range(700))
-        self.assertGreater(zaehler["s1"], zaehler["s0"] * 3)
+        for _ in range(3):
+            stand.versuch_eintragen("s0", versuch())  # Fach 4
+        stand.versuch_eintragen("s1", versuch())      # Fach 2
+        rng = random.Random(3)
+        zaehler = Counter(auswahl.waehle(liste, stand, rng=rng).id for _ in range(600))
+        self.assertGreater(zaehler["s1"], zaehler["s0"])
 
     def test_nicht_zweimal_hintereinander(self):
         liste = self.szenarien(3)
@@ -115,6 +129,36 @@ class AuswahlTest(unittest.TestCase):
         stand = Spielstand("windows")
         self.assertEqual(auswahl.waehle(liste, stand, zuletzt="s0").id, "s0")
         self.assertIsNone(auswahl.waehle([], stand))
+
+
+class LernkarteiTest(unittest.TestCase):
+    def test_szenario_faecher(self):
+        import datetime as dt
+        stand = Spielstand("windows")
+        k = stand.kartei
+        tag = dt.date(2026, 11, 4)
+        self.assertEqual(k.szenario_ergebnis("a", versuch(), am=tag)["fach"], 2)
+        self.assertEqual(k.szenario("a")["faellig"], "2026-11-05")
+        self.assertEqual(k.szenario_ergebnis("a", versuch(), am=tag)["fach"], 3)
+        self.assertEqual(k.szenario("a")["faellig"], "2026-11-07")
+        self.assertEqual(k.szenario_ergebnis("a", versuch(hinweise=1), am=tag)["fach"], 3)
+        self.assertEqual(k.szenario_ergebnis("a", versuch(hinweise=2), am=tag)["fach"], 2)
+        self.assertEqual(k.szenario_ergebnis("a", versuch(geloest=False), am=tag)["fach"], 1)
+        self.assertTrue(k.ist_faellig(k.szenario("a"), am=tag))
+        for _ in range(10):
+            k.szenario_ergebnis("a", versuch(), am=tag)
+        self.assertEqual(k.szenario("a")["fach"], 5)
+
+    def test_befehl_faecher_und_speichern(self):
+        with Datenordner():
+            stand = Spielstand.lade("windows")
+            k = stand.kartei
+            self.assertEqual(k.befehl_ergebnis("x", "richtig")["fach"], 2)
+            self.assertEqual(k.befehl_ergebnis("x", "halb")["fach"], 2)
+            self.assertEqual(k.befehl_ergebnis("x", "falsch")["fach"], 1)
+            stand.speichere()
+            karte = Spielstand.lade("windows").kartei.befehl("x")
+            self.assertEqual((karte["fach"], karte["richtig"], karte["falsch"]), (1, 1, 1))
 
 
 if __name__ == "__main__":

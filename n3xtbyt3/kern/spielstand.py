@@ -11,6 +11,7 @@ import copy
 from typing import Any, Iterable
 
 from .dateien import lies_json, schreibe_json
+from .lernkartei import Lernkartei
 
 VERSION = 1
 VERLAUF_MAX = 30
@@ -50,6 +51,10 @@ class Spielstand:
         stand = cls(system_id, daten if isinstance(daten, dict) else None)
         stand.warnung = warnung
         return stand
+
+    @property
+    def kartei(self) -> Lernkartei:
+        return Lernkartei(self.daten)
 
     def speichere(self) -> None:
         schreibe_json(dateiname(self.system_id), self.daten)
@@ -92,4 +97,5 @@ class Spielstand:
         e["zuletzt"] = ergebnis.get("datum")
         e["verlauf"] = (e["verlauf"] + [dict(ergebnis)])[-VERLAUF_MAX:]
         self.daten["szenarien"][szenario_id] = e
+        self.kartei.szenario_ergebnis(szenario_id, ergebnis)
         return True
