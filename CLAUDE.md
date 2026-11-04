@@ -60,10 +60,22 @@ Die Chats auf claude.ai lesen den Stand über GitHub. Deshalb führt das Reposit
 |---|---|---|
 | `STAND.md` | wird **überarbeitet** | aktueller Meilenstein, was fertig ist, offene Punkte, Entscheidungen, Testliste für Tobi |
 | `SITZUNGEN.md` | wird **angehängt** | ein Einzeiler pro Sitzung: Datum — was erledigt wurde |
-| `IDEEN.md` | wird überarbeitet | Ideen, die noch nicht dran sind; nichts davon ungefragt bauen |
+| `IDEEN.md` | wird überarbeitet | Ideen für das Programm, jede mit Status (siehe unten) |
 | `PLAN.md` | wird nur bei Planänderung überarbeitet | Meilensteine und Abnahmekriterien |
 
 Jede Sitzung endet mit aktualisiertem `STAND.md` und einer neuen Zeile in `SITZUNGEN.md`.
+
+### Ideen aus den Chats
+
+Tobi bespricht neue Ideen zuerst im Chat und lässt sie dort ausarbeiten. Die fertige
+Fassung landet in `IDEEN.md` mit einem Status:
+
+- `Status: offen` — nur notiert, **nicht bauen**.
+- `Status: freigegeben` — ausgearbeitet und von Tobi freigegeben. Baue sie nach dem
+  laufenden Meilenstein-Schritt ein (vor dem nächsten Meilenstein), trag sie in
+  `PLAN.md` ein und setz sie danach auf `Status: erledigt (<Datum>)`.
+- Widerspricht eine freigegebene Idee einer Regel aus „Unverhandelbar“, baust du sie
+  nicht und schreibst den Grund in `STAND.md`, Abschnitt „Offene Punkte“.
 
 ## Technik
 
