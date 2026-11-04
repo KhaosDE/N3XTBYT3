@@ -129,6 +129,14 @@ class Sitzung:
         if not text:
             return Antwort()
         self.anzahl_befehle += 1
+        shell_vorher = self.shell
+        antwort = self._auswerten(text)
+        # Die echte cmd setzt nach jedem Befehl eine Leerzeile vor den nächsten Prompt.
+        if shell_vorher == "cmd" and self.shell == "cmd" and antwort.aktion != "leeren":
+            antwort.zeilen.append(Zeile("", AUSGABE))
+        return antwort
+
+    def _auswerten(self, text: str) -> Antwort:
         roh_name = zerlege(text)[0][0] if zerlege(text)[0] else ""
 
         for falle in self.allgemein.shell_fallen:

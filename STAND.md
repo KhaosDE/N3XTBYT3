@@ -4,9 +4,9 @@ Stand: 04.11.2026.
 
 ## Aktuell
 
-M1 läuft. M1.1 (Kern ohne Oberfläche) ist fertig.
+M1 läuft. M1.1 (Kern), M1.2 (Oberfläche) und M1.3 (Spielstand) sind fertig.
 
-**Nächster Schritt:** M1.2 — Oberfläche (siehe `PLAN.md`).
+**Nächster Schritt:** M1.4 — Windows-Inhalte (siehe `PLAN.md`).
 
 ## Fertig
 
@@ -14,6 +14,13 @@ M1 läuft. M1.1 (Kern ohne Oberfläche) ist fertig.
 - M1.1 Kern: Szenario-Format (`daten/szenarien/SCHEMA.md`), Lader mit Prüfung,
   Befehlsauswertung, simulierter Zustand, allgemeine Windows-Befehle
   (`daten/allgemein/windows.json`), erstes Szenario `win-dns-cache`, Tests.
+- M1.2 Oberfläche (pygame-ce): Hauptmenü mit vier Systemen (leere als „kommt noch“),
+  Szenarioliste, Terminal mit Verlauf (Pfeiltasten), Scrollen, Kopfzeile mit System und Shell,
+  Seitenbereich mit Aufgabe, Hinweisen (F1, Stufe für Stufe), Begriffen, Erklärung nach dem
+  Lösen und deutlich sichtbarem Prüfstatus. Schriftgröße Strg +/−, Vollbild F11.
+- M1.3 Spielstand: `spielstand_<system>.json` im Datenordner (lesbares JSON) mit Versuchen,
+  gelöst, Hinweisstufen, falschen und unbekannten Befehlen, Zeit und Verlauf.
+  Zufallsauswahl bevorzugt ungelöste und schwache Szenarien.
 
 ## Offene Punkte
 
@@ -40,6 +47,12 @@ M1 läuft. M1.1 (Kern ohne Oberfläche) ist fertig.
 - 04.11.2026: `help` zeigt die Hilfe der Simulation (Tasten und Grundbefehle), nicht die echte
   Hilfe und keine Lösungsbefehle. Alle Meldungen der Simulation beginnen mit `[N3XTBYT3]`.
 - 04.11.2026: Erfundene interne Namen enden auf `.internal` (für private Netze reserviert).
+- 04.11.2026: Schriften DejaVu Sans und DejaVu Sans Mono liegen bei (freie Lizenz, Text in
+  `n3xtbyt3/oberflaeche/schriften/`). Grund: gleiches Aussehen auf jedem PC, Umlaute sicher.
+- 04.11.2026: Ein Versuch ohne einen einzigen Befehl und ohne Hinweis wird nicht gespeichert
+  (nur reingeschaut). Nach dem Lösen wird sofort gespeichert.
+- 04.11.2026: Auswahlgewichte (M1): neu 5, ungelöst 6, gelöst 1 + Hinweisstufen + 0,5 je falschem
+  Befehl. Das gerade gespielte Szenario kommt nicht direkt wieder. M2 ersetzt das durch die Lernkartei.
 - 04.11.2026: Zweig: Die Sitzung gibt den Arbeitszweig `claude/busy-turing-1n3hmy` vor. Ich pushe
   dorthin **und** nach `main` (laut `CLAUDE.md`), beide Stände bleiben gleich.
 
