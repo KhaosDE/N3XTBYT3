@@ -8,7 +8,9 @@ Bedingungen (``wenn`` und ``ziel``) vergleichen Schlüssel mit Werten:
 
 * einfacher Wert: muss gleich sein, z. B. ``{"admin": true}``
 * Vergleich: ``{"frei_gb": {">=": 10}}``; erlaubt sind
-  ``nicht``, ``in``, ``<``, ``<=``, ``>``, ``>=``
+  ``nicht``, ``in``, ``<``, ``<=``, ``>``, ``>=``, ``enthaelt``, ``enthaelt_nicht``
+  (prüfen, ob ein Text einen Teiltext enthält), ``zeile_enthaelt``, ``keine_zeile_enthaelt``
+  (wie enthaelt, aber nur in Zeilen, die keine Kommentare sind – für Konfigurationsdateien)
 
 Änderungen (``setze``) schreiben Werte; ``{"+": 1}`` bzw. ``{"-": 1}`` rechnen.
 """
@@ -18,7 +20,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-VERGLEICHE = ("nicht", "in", "<", "<=", ">", ">=")
+VERGLEICHE = ("nicht", "in", "<", "<=", ">", ">=", "enthaelt", "enthaelt_nicht",
+              "zeile_enthaelt", "keine_zeile_enthaelt")
 RECHNUNGEN = ("+", "-")
 SKALAR = (str, int, float, bool, type(None))
 
@@ -50,6 +53,17 @@ def bedingung_erfuellt(werte: dict[str, Any], bedingung: dict[str, Any]) -> bool
                     return False
             elif op == "in":
                 if not any(_gleich(ist, v) for v in vergleich):
+                    return False
+            elif op == "enthaelt":
+                if not isinstance(ist, str) or vergleich not in ist:
+                    return False
+            elif op == "enthaelt_nicht":
+                if isinstance(ist, str) and vergleich in ist:
+                    return False
+            elif op in ("zeile_enthaelt", "keine_zeile_enthaelt"):
+                gefunden = isinstance(ist, str) and any(
+                    vergleich in z for z in ist.split("\n") if not z.lstrip().startswith(("#", ";")))
+                if gefunden != (op == "zeile_enthaelt"):
                     return False
             else:
                 if not (_zahl(ist) and _zahl(vergleich)):
@@ -89,6 +103,9 @@ def pruefe_bedingung(bedingung: Any, bekannte: set[str], ort: str) -> list[str]:
             elif op == "nicht":
                 if not ist_skalar(wert):
                     fehler.append(f"{ort}: „nicht“ bei „{schluessel}“ braucht einen einfachen Wert.")
+            elif op in ("enthaelt", "enthaelt_nicht", "zeile_enthaelt", "keine_zeile_enthaelt"):
+                if not isinstance(wert, str) or not wert:
+                    fehler.append(f"{ort}: „{op}“ bei „{schluessel}“ braucht einen Text.")
             elif not _zahl(wert):
                 fehler.append(f"{ort}: „{op}“ bei „{schluessel}“ braucht eine Zahl.")
         elif not ist_skalar(soll):

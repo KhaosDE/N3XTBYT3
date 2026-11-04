@@ -1,0 +1,192 @@
+{
+  "id": "lin-dienst-cups",
+  "system": "linux",
+  "titel": "Drucken geht nicht – Druckdienst aus",
+  "kategorie": "Dienste",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://documentation.ubuntu.com/server/how-to/networking/cups-print-server/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Am Lager-PC druckt nichts mehr; die Druckeinstellungen melden „CUPS server is not running“.",
+    "Ein Praktikant hat „unnötige Dienste“ abgeschaltet, damit der PC schneller startet.",
+    "",
+    "Aufgabe: Starte den Druckdienst CUPS und sorge dafür, dass er auch nach dem Neustart wieder läuft."
+  ],
+  "zustand": {
+    "cups_aktiv": false,
+    "cups_enabled": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl status cups",
+        "systemctl status cups.service"
+      ],
+      "bedeutung": "Status eines Dienstes anzeigen",
+      "frage": "Zeige den Status des Dienstes cups",
+      "faelle": [
+        {
+          "wenn": {
+            "cups_aktiv": false
+          },
+          "ausgabe": [
+            "○ cups.service - CUPS Scheduler",
+            "     Loaded: loaded (/usr/lib/systemd/system/cups.service; disabled; preset: enabled)",
+            "     Active: inactive (dead)",
+            "TriggeredBy: ○ cups.socket",
+            "       Docs: man:cupsd(8)"
+          ]
+        },
+        {
+          "wenn": {
+            "cups_enabled": true
+          },
+          "ausgabe": [
+            "● cups.service - CUPS Scheduler",
+            "     Loaded: loaded (/usr/lib/systemd/system/cups.service; enabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:08:30 CET; 4s ago",
+            "TriggeredBy: ● cups.socket",
+            "       Docs: man:cupsd(8)",
+            "   Main PID: 5120 (cupsd)",
+            "     Status: \"Scheduler is running...\""
+          ]
+        },
+        {
+          "ausgabe": [
+            "● cups.service - CUPS Scheduler",
+            "     Loaded: loaded (/usr/lib/systemd/system/cups.service; disabled; preset: enabled)",
+            "     Active: active (running) since Wed 2026-11-04 09:08:30 CET; 4s ago",
+            "TriggeredBy: ● cups.socket",
+            "       Docs: man:cupsd(8)",
+            "   Main PID: 5120 (cupsd)",
+            "     Status: \"Scheduler is running...\""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl start cups",
+        "systemctl start cups.service"
+      ],
+      "bedeutung": "Einen Dienst starten",
+      "frage": "Starte den Dienst cups",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "cups_aktiv": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl enable cups",
+        "systemctl enable cups.service"
+      ],
+      "bedeutung": "Einen Dienst beim Systemstart automatisch starten lassen",
+      "frage": "Lass den Dienst cups beim Systemstart automatisch starten",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "cups_enabled": true
+          },
+          "ausgabe": [
+            "Synchronizing state of cups.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install enable cups",
+            "Created symlink /etc/systemd/system/multi-user.target.wants/cups.service → /usr/lib/systemd/system/cups.service."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl enable --now cups",
+        "systemctl enable --now cups.service"
+      ],
+      "bedeutung": "Einen Dienst aktivieren und sofort starten",
+      "frage": "Aktiviere den Dienst cups und starte ihn sofort (ein Befehl)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "cups_enabled": true,
+            "cups_aktiv": true
+          },
+          "ausgabe": [
+            "Synchronizing state of cups.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.",
+            "Executing: /usr/lib/systemd/systemd-sysv-install enable cups",
+            "Created symlink /etc/systemd/system/multi-user.target.wants/cups.service → /usr/lib/systemd/system/cups.service."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systemctl is-enabled cups"
+      ],
+      "bedeutung": "Prüfen, ob ein Dienst beim Start automatisch startet",
+      "faelle": [
+        {
+          "wenn": {
+            "cups_enabled": false
+          },
+          "ausgabe": "disabled"
+        },
+        {
+          "ausgabe": "enabled"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "cups_aktiv": true,
+    "cups_enabled": true
+  },
+  "hinweise": [
+    "Drucken unter Linux erledigt der Dienst CUPS. Dienste verwaltet systemd. Läuft er, und startet er mit?",
+    "„systemctl status cups“ zeigt „inactive (dead)“ und „disabled“. „start“ startet jetzt, „enable“ beim Systemstart – beides mit sudo.",
+    "„sudo systemctl enable --now cups“ (oder start und enable einzeln)."
+  ],
+  "erklaerung": [
+    "systemd unterscheidet: start/stop = jetzt; enable/disable = beim Systemstart automatisch.",
+    "CUPS war gestoppt und disabled. „sudo systemctl enable --now cups“ erledigt beides auf einmal.",
+    "In „systemctl status“ zeigt „Loaded: …; enabled“ den Autostart und „Active: active (running)“ den Lauf.",
+    "Die Zeilen „Synchronizing state … SysV“ erscheinen, weil cups zusätzlich ein altes Startskript mitbringt."
+  ],
+  "begriffe": {
+    "systemd / systemctl": "systemd startet und überwacht Dienste; systemctl ist das Werkzeug dazu.",
+    "CUPS": "Common UNIX Printing System: der Druckdienst unter Linux (Dienst cups).",
+    "enable / start": "enable = beim Systemstart starten; start = jetzt starten.",
+    "inactive (dead)": "Dienst läuft nicht."
+  },
+  "loesung": [
+    "systemctl status cups",
+    "sudo systemctl enable --now cups",
+    "systemctl status cups"
+  ]
+}

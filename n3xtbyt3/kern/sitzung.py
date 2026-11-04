@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from .befehle import Vergleicher, ist_cmdlet_name, zerlege
+from . import dateisystem as ds
 from .szenario import Allgemein, Befehl, Szenario
 from .zustand import Zustand
 
@@ -41,6 +42,7 @@ class Antwort:
     geloest_jetzt: bool = False
     aktion: str | None = None
     warum: str | None = None
+    editor: dict | None = None  # Linux: Datei im Editor öffnen (pfad, inhalt, nur_lesen, neu)
 
 
 def _sim(text: str) -> list[Zeile]:
@@ -68,6 +70,8 @@ class Sitzung:
         self._start = uhr()
         self._ende: float | None = None
         self._bekannte_namen = self._sammle_namen()
+        self.fs = ds.Dateisystem(self.zustand) if "bash" in self.system.shell_ids else None
+        self._root_stapel: list[str] = []  # gemerkte Pfade bei „sudo -i“
 
     # ------------------------------------------------------------------ Anzeige
 
@@ -77,11 +81,18 @@ class Sitzung:
 
     def prompt(self) -> str:
         vorlage = self.allgemein.prompt.get(self.shell, "> ")
-        return self.zustand.fuelle(vorlage)
+        if self.fs is None:
+            return self.zustand.fuelle(vorlage)
+        werte = dict(self.zustand.werte)
+        werte["benutzer_anzeige"] = self.fs.benutzer
+        werte["pfad_anzeige"] = self.fs.pfad_anzeige()
+        werte["prompt_zeichen"] = "#" if self.zustand.get("root") else "$"
+        return Zustand(werte).fuelle(vorlage)
 
     def fenstertitel(self) -> str:
         shell = self.system.shell(self.shell)
-        return shell.name_admin if self.zustand.get("admin") else shell.name
+        erhoeht = self.zustand.get("root") if self.fs is not None else self.zustand.get("admin")
+        return shell.name_admin if erhoeht else shell.name
 
     def startzeilen(self) -> list[Zeile]:
         return _sim(f"Szenario: {self.szenario.titel}\n"
@@ -156,6 +167,11 @@ class Sitzung:
         if andere:
             return self._andere_shell(andere, text, roh_name)
 
+        if self.fs is not None:
+            linux = self._linux(text, abschnitte, roh_name)
+            if linux is not None:
+                return linux
+
         name = abschnitte[0].name
         if name in self._bekannte_namen:
             self.nicht_erkannt.append(text)
@@ -177,8 +193,14 @@ class Sitzung:
         if self.shell == "cmd" and ist_cmdlet_name(roh_name):
             text += ("\nDer Name sieht aus wie ein PowerShell-Befehl (Verb-Nomen). "
                      "In der cmd gibt es solche Befehle nicht – wechseln mit: powershell")
+        kandidaten = list(self._bekannte_namen) + (list(ds.EINGEBAUT) if self.fs else [])
+        if not self.system.gross_klein_egal:
+            gleich = [n for n in kandidaten if n.casefold() == roh_name.casefold() and n != roh_name]
+            if gleich:
+                return (text + f"\nLinux unterscheidet Groß- und Kleinschreibung. "
+                        f"Meintest du „{gleich[0]}“?")
         aehnlich = difflib.get_close_matches(self.vergleicher.norm_name(roh_name),
-                                             list(self._bekannte_namen), n=1, cutoff=0.8)
+                                             kandidaten, n=1, cutoff=0.8)
         if aehnlich:
             return text + f"\nTippfehler? Meintest du „{aehnlich[0]}“?"
         return text + ("\nDas Szenario braucht andere Befehle. Überleg, was zum Problem passt, "
@@ -216,7 +238,12 @@ class Sitzung:
             antwort.zeilen += _sim(f"Jetzt in: {self.system.shell(self.shell).name}. "
                                    "Zurück mit: exit")
         elif fall.aktion == "exit":
-            if len(self.shell_stapel) > 1:
+            if self._root_stapel:
+                self.zustand.werte["root"] = False
+                self.zustand.werte["root_shell"] = False
+                self.zustand.werte["pfad"] = self._root_stapel.pop()
+                antwort.zeilen += [Zeile("logout", AUSGABE)]
+            elif len(self.shell_stapel) > 1:
                 self.shell_stapel.pop()
                 antwort.zeilen += _sim(f"Zurück in: {self.system.shell(self.shell).name}.")
             else:
@@ -230,6 +257,9 @@ class Sitzung:
             antwort.art = "falsch"
             antwort.warum = befehl.warum
 
+        return self._ziel_pruefen(antwort)
+
+    def _ziel_pruefen(self, antwort: Antwort) -> Antwort:
         if not self.geloest and any(self.zustand.erfuellt(z) for z in self.szenario.ziel):
             self.geloest = True
             self._ende = self._uhr()
@@ -239,6 +269,99 @@ class Sitzung:
                     "Gelöst! Die Erklärung steht rechts. Weiter mit F2.")
             ]
         return antwort
+
+    # ------------------------------------------------------------------ Linux
+
+    def _linux(self, text: str, abschnitte, roh_name: str) -> Antwort | None:
+        """sudo, Filter hinter Pipes und eingebaute Dateibefehle. None = nicht zuständig."""
+        woerter = zerlege(text)[0]
+        if roh_name == "sudo":
+            return self._sudo(text, woerter)
+        if len(abschnitte) >= 2:
+            links, rechts = _an_letzter_pipe(text)
+            filter_woerter = zerlege(rechts)[0] if zerlege(rechts) and zerlege(rechts)[0] else []
+            if filter_woerter and filter_woerter[0] in ds.FILTER:
+                return self._pipe(links, filter_woerter)
+            self.nicht_erkannt.append(text)
+            return Antwort(_sim(f"„{rechts}“ hinter einer Pipe ist hier nicht nachgebaut. "
+                                "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
+        befehl = ds.EINGEBAUT.get(roh_name)
+        if befehl is None:
+            if roh_name in ("vi", "vim"):
+                return Antwort(_sim(f"{roh_name} ist hier nicht nachgebaut – nimm nano (Strg+O speichern, Strg+X beenden)."),
+                               "treffer")
+            return None
+        ergebnis = befehl(self.fs, woerter[1:])
+        antwort = Antwort(art="treffer")
+        art = FEHLER if ergebnis.fehler else AUSGABE
+        antwort.zeilen = [Zeile(z, art) for z in ergebnis.zeilen]
+        if ergebnis.sim:
+            antwort.zeilen += _sim(ergebnis.sim)
+        if ergebnis.editor:
+            antwort.aktion = "editor"
+            antwort.editor = ergebnis.editor
+        return self._ziel_pruefen(antwort)
+
+    def _sudo(self, text: str, woerter: list[str]) -> Antwort:
+        rest = text.strip()[4:].strip()
+        if not self.zustand.get("sudo_erlaubt"):
+            return Antwort(_sim(f"{self.zustand.get('benutzer')} hat keine sudo-Rechte (nicht in der Gruppe sudo "
+                                "bzw. nicht in der sudoers-Datei)."), "treffer")
+        zeilen: list[Zeile] = []
+        if not self.zustand.get("root") and not self.zustand.get("sudo_cache"):
+            zeilen.append(Zeile(f"[sudo] password for {self.zustand.get('benutzer')}: ", AUSGABE))
+            zeilen += _sim("Passwort gilt als eingegeben (sudo merkt es sich einige Minuten).")
+            self.zustand.werte["sudo_cache"] = True
+        if not rest:
+            return Antwort(zeilen + _sim("sudo braucht einen Befehl, z. B. sudo systemctl restart nginx."), "treffer")
+        if woerter[1:] in (["-i"], ["su"], ["su", "-"], ["-s"], ["su", "root"]):
+            if self.zustand.get("root"):
+                return Antwort(zeilen, "treffer")
+            self._root_stapel.append(self.fs.cwd)
+            self.zustand.werte["root"] = True
+            self.zustand.werte["root_shell"] = True
+            if woerter[1:] in (["-i"], ["su", "-"]):
+                self.zustand.werte["pfad"] = "/root"
+            return Antwort(zeilen + _sim("Du bist jetzt root (Prompt endet auf #). Zurück mit: exit"), "treffer")
+        war_root = bool(self.zustand.get("root"))
+        self.zustand.werte["root"] = True
+        try:
+            antwort = self._auswerten(rest)
+        finally:
+            if not war_root:
+                self.zustand.werte["root"] = False
+        antwort.zeilen = zeilen + antwort.zeilen
+        return antwort
+
+    def _pipe(self, links: str, filter_woerter: list[str]) -> Antwort:
+        antwort = self._auswerten(links)
+        if antwort.art not in ("treffer",) or antwort.aktion:
+            return antwort
+        ausgabe = [z for z in antwort.zeilen if z.art in (AUSGABE, FEHLER)]
+        rest = [z for z in antwort.zeilen if z.art not in (AUSGABE, FEHLER)]
+        gefiltert, fehler = ds.filter_anwenden(filter_woerter[0], filter_woerter[1:], [z.text for z in ausgabe])
+        if fehler == "nicht":
+            return Antwort(_sim(f"„{' '.join(filter_woerter)}“ hinter einer Pipe ist hier nicht nachgebaut. "
+                                "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
+        if fehler:
+            return Antwort([Zeile(fehler, FEHLER)], "treffer")
+        antwort.zeilen = [Zeile(t, AUSGABE) for t in gefiltert] + [z for z in rest if z.art != ERFOLG]
+        if any(z.art == ERFOLG for z in rest):
+            antwort.zeilen += [Zeile("", AUSGABE)] + [z for z in rest if z.art == ERFOLG]
+        return antwort
+
+    def loesungsschritt(self, schritt) -> Antwort:
+        """Ein Schritt aus „loesung“: Befehl (Text) oder Speichern im Editor ({speichern, inhalt})."""
+        if isinstance(schritt, dict):
+            return self.datei_speichern(self.fs.absolut(schritt["speichern"]), schritt["inhalt"])
+        return self.eingabe(schritt)
+
+    def datei_speichern(self, pfad: str, inhalt: str) -> Antwort:
+        """Speichert eine Datei aus dem Editor in den simulierten Zustand."""
+        self.fs.schreibe(pfad, inhalt)
+        anzahl = len(inhalt.split("\n")) if inhalt else 0
+        antwort = Antwort([Zeile(f"[ Wrote {anzahl} line{'s' if anzahl != 1 else ''} ]", AUSGABE)], "treffer")
+        return self._ziel_pruefen(antwort)
 
     def hilfetext(self) -> str:
         zeilen = [
@@ -250,6 +373,10 @@ class Sitzung:
         for b in self.allgemein.befehle:
             if b.bedeutung and self.shell in b.shells:
                 zeilen.append(f"  {b.muster[0]:<20} {b.bedeutung}")
+        if self.fs is not None:
+            for name, bedeutung in ds.BEDEUTUNG.items():
+                zeilen.append(f"  {name:<20} {bedeutung}")
+            zeilen.append("  sudo <befehl>        Befehl als root ausführen · Pipes: … | grep, head, tail, sort, wc -l")
         zeilen.append("Welche Befehle das Problem lösen, findest du selbst heraus – dafür ist das Szenario da.")
         return "\n".join(zeilen)
 
@@ -268,3 +395,20 @@ class Sitzung:
             "falsch": (self.falsche + self.nicht_erkannt)[:20],
             "unbekannt": self.unbekannte[:20],
         }
+
+
+def _an_letzter_pipe(text: str) -> tuple[str, str]:
+    """Teilt die Eingabe an der letzten Pipe außerhalb von Anführungszeichen."""
+    quote: str | None = None
+    letzte = -1
+    for i, zeichen in enumerate(text):
+        if quote:
+            if zeichen == quote:
+                quote = None
+        elif zeichen in ("\"", "'"):
+            quote = zeichen
+        elif zeichen == "|":
+            letzte = i
+    if letzte < 0:
+        return text, ""
+    return text[:letzte].strip(), text[letzte + 1:].strip()

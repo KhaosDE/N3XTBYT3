@@ -21,7 +21,7 @@ class LoesbarTest(unittest.TestCase):
                             any(s.zustand.erfuellt(z) for z in szenario.ziel),
                             "Das Ziel ist schon am Anfang erfüllt.")
                         for schritt in szenario.loesung:
-                            antwort = s.eingabe(schritt)
+                            antwort = s.loesungsschritt(schritt)
                             self.assertIn(
                                 antwort.art, ("treffer",),
                                 f"Lösungsschritt „{schritt}“ wird nicht erkannt ({antwort.art}): "

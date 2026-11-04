@@ -1,0 +1,165 @@
+{
+  "id": "lin-gruppe-dialout",
+  "system": "linux",
+  "titel": "Kassendrucker am USB: Permission denied",
+  "kategorie": "Benutzer und Gruppen",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/usermod.8.html",
+    "https://man7.org/linux/man-pages/man1/groups.1.html",
+    "https://man7.org/linux/man-pages/man1/id.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Am Lager-PC hängt ein Etikettendrucker per USB, er erscheint als /dev/ttyUSB0.",
+    "Das Druckprogramm meldet bei Anna: „cannot open /dev/ttyUSB0: Permission denied“.",
+    "",
+    "Aufgabe: Finde heraus, wer auf das Gerät zugreifen darf, und gib Anna den Zugriff – ohne ihr andere Gruppen zu nehmen."
+  ],
+  "zustand": {
+    "in_dialout": false,
+    "gruppen_weg": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ls -l /dev/ttyUSB0"
+      ],
+      "bedeutung": "Rechte einer Gerätedatei anzeigen",
+      "frage": "Zeige die Rechte der Gerätedatei /dev/ttyUSB0",
+      "faelle": [
+        {
+          "ausgabe": "crw-rw---- 1 root dialout 188, 0 Nov  4 08:03 /dev/ttyUSB0"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "groups"
+      ],
+      "bedeutung": "Gruppen des angemeldeten Benutzers anzeigen (Stand der Anmeldung)",
+      "faelle": [
+        {
+          "wenn": {
+            "in_dialout": false
+          },
+          "ausgabe": "anna adm cdrom sudo dip plugdev lpadmin users"
+        },
+        {
+          "ausgabe": "anna adm cdrom sudo dip plugdev lpadmin users"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "groups anna",
+        "id anna"
+      ],
+      "bedeutung": "Gruppen eines Benutzers anzeigen (aktueller Stand)",
+      "frage": "Zeige die Gruppen des Benutzers anna",
+      "faelle": [
+        {
+          "wenn": {
+            "in_dialout": false,
+            "gruppen_weg": false
+          },
+          "ausgabe": "anna : anna adm cdrom sudo dip plugdev lpadmin users"
+        },
+        {
+          "wenn": {
+            "gruppen_weg": true
+          },
+          "ausgabe": "anna : anna dialout"
+        },
+        {
+          "ausgabe": "anna : anna adm dialout cdrom sudo dip plugdev lpadmin users"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "usermod -aG dialout anna",
+        "usermod -a -G dialout anna"
+      ],
+      "bedeutung": "Einen Benutzer zusätzlich in eine Gruppe aufnehmen (-a = anhängen)",
+      "frage": "Nimm anna zusätzlich in die Gruppe dialout auf",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "usermod: Permission denied.\nusermod: cannot lock /etc/passwd; try again later."
+        },
+        {
+          "setze": {
+            "in_dialout": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "usermod -G dialout anna"
+      ],
+      "falsch": true,
+      "warum": "Ohne -a ersetzt -G alle Zusatzgruppen: Anna wäre aus sudo, lpadmin usw. entfernt. Immer usermod -aG verwenden.",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "usermod: Permission denied.\nusermod: cannot lock /etc/passwd; try again later."
+        },
+        {
+          "setze": {
+            "in_dialout": true,
+            "gruppen_weg": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "chmod 666 /dev/ttyUSB0"
+      ],
+      "falsch": true,
+      "warum": "Rechte an Gerätedateien werden beim nächsten Einstecken neu gesetzt. Der richtige Weg ist die Gruppe dialout.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Das gilt nur bis zum Abziehen/Neustart und öffnet das Gerät für alle. Besser: Anna in die Gruppe dialout."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "in_dialout": true,
+    "gruppen_weg": false
+  },
+  "hinweise": [
+    "Wer darf auf /dev/ttyUSB0 zugreifen? Schau dir Besitzer und Gruppe der Gerätedatei an – und Annas Gruppen.",
+    "„ls -l /dev/ttyUSB0“ zeigt die Gruppe dialout mit rw-Rechten. „groups anna“ zeigt Annas Gruppen. Gruppen fügt „usermod -aG“ hinzu.",
+    "„sudo usermod -aG dialout anna“ – danach muss Anna sich ab- und wieder anmelden."
+  ],
+  "erklaerung": [
+    "Serielle Geräte wie /dev/ttyUSB0 gehören der Gruppe dialout (crw-rw----). Anna war nicht Mitglied.",
+    "„sudo usermod -aG dialout anna“ fügt die Gruppe hinzu. Das -a (append) ist wichtig: Ohne -a ersetzt -G",
+    "alle bisherigen Zusatzgruppen – Anna verlöre z. B. sudo. Die neue Gruppe gilt erst nach neuer Anmeldung;",
+    "darum zeigt „groups“ (eigene Sitzung) sie noch nicht, „groups anna“ schon."
+  ],
+  "begriffe": {
+    "Gerätedatei": "Hardware erscheint unter Linux als Datei in /dev, z. B. /dev/ttyUSB0. c = zeichenorientiertes Gerät.",
+    "dialout": "Gruppe für serielle Schnittstellen (Modems, USB-Seriell-Adapter, Kassendrucker).",
+    "usermod -aG": "Fügt einen Benutzer zusätzlich zu Gruppen hinzu (-a = anhängen, -G = Zusatzgruppen).",
+    "groups / id": "Zeigen Gruppen und Nummern (UID/GID) eines Benutzers."
+  },
+  "loesung": [
+    "ls -l /dev/ttyUSB0",
+    "groups anna",
+    "sudo usermod -aG dialout anna",
+    "groups anna"
+  ]
+}

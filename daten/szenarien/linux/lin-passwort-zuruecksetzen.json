@@ -1,0 +1,161 @@
+{
+  "id": "lin-passwort-zuruecksetzen",
+  "system": "linux",
+  "titel": "Kollege hat sein Passwort vergessen",
+  "kategorie": "Benutzer und Gruppen",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/passwd.1.html",
+    "https://man7.org/linux/man-pages/man1/chage.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Ben (Benutzer ben) hat am gemeinsamen Lager-PC sein Passwort vergessen. Anna ist Administratorin (sudo).",
+    "Ben soll ein vorläufiges Passwort bekommen und es bei der nächsten Anmeldung selbst ändern müssen.",
+    "",
+    "Aufgabe: Setze Bens Passwort zurück und erzwinge eine Änderung bei der nächsten Anmeldung."
+  ],
+  "zustand": {
+    "pw_neu": false,
+    "pw_abgelaufen": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "passwd ben"
+      ],
+      "bedeutung": "Das Passwort eines Benutzers neu setzen (als root)",
+      "frage": "Setze das Passwort des Benutzers ben neu",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "passwd: You may not view or modify password information for ben."
+        },
+        {
+          "setze": {
+            "pw_neu": true
+          },
+          "ausgabe": [
+            "New password: ",
+            "Retype new password: ",
+            "passwd: password updated successfully"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "passwd -e ben",
+        "passwd --expire ben"
+      ],
+      "bedeutung": "Ein Passwort sofort ablaufen lassen (Änderung bei nächster Anmeldung)",
+      "frage": "Lass das Passwort von ben sofort ablaufen, damit er es bei der nächsten Anmeldung ändern muss",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "passwd: You may not view or modify password information for ben."
+        },
+        {
+          "setze": {
+            "pw_abgelaufen": true
+          },
+          "ausgabe": "passwd: password changed."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "chage -d 0 ben"
+      ],
+      "bedeutung": "Datum der letzten Passwortänderung setzen (0 = Änderung erzwingen)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "chage: Permission denied."
+        },
+        {
+          "setze": {
+            "pw_abgelaufen": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "chage -l ben"
+      ],
+      "bedeutung": "Passwort-Ablaufdaten eines Benutzers anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "pw_abgelaufen": true
+          },
+          "ausgabe": [
+            "Last password change\t\t\t\t\t: password must be changed",
+            "Password expires\t\t\t\t\t: password must be changed",
+            "Password inactive\t\t\t\t\t: password must be changed",
+            "Account expires\t\t\t\t\t\t: never",
+            "Minimum number of days between password change\t\t: 0",
+            "Maximum number of days between password change\t\t: 99999",
+            "Number of days of warning before password expires\t: 7"
+          ]
+        },
+        {
+          "sim": true,
+          "ausgabe": "Die Passwortdaten von ben: Passwort läuft nie ab. (Liste hier vereinfacht.)"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "passwd"
+      ],
+      "falsch": true,
+      "warum": "Ohne Benutzername ändert passwd dein eigenes Passwort (anna), nicht das von Ben.",
+      "faelle": [
+        {
+          "ausgabe": [
+            "Changing password for anna.",
+            "Current password: ",
+            "(Abfrage hier nicht nachgebaut)"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "pw_neu": true,
+    "pw_abgelaufen": true
+  },
+  "hinweise": [
+    "Zwei Schritte: neues Passwort setzen, und dafür sorgen, dass Ben es gleich ändern muss. Beides geht mit demselben Werkzeug.",
+    "„passwd ben“ setzt ein neues Passwort (mit sudo, ohne das alte zu kennen). „passwd -e ben“ lässt es sofort ablaufen.",
+    "„sudo passwd ben“ und danach „sudo passwd -e ben“."
+  ],
+  "erklaerung": [
+    "„sudo passwd ben“ setzt als root ein neues Passwort, ohne das alte zu kennen; die Eingabe ist unsichtbar.",
+    "„sudo passwd -e ben“ (expire) markiert es als abgelaufen: Bei der nächsten Anmeldung muss Ben ein eigenes wählen.",
+    "So kennt am Ende nur Ben sein Passwort. „chage -l ben“ zeigt die Ablaufdaten. Ohne Benutzernamen ändert passwd",
+    "das eigene Passwort."
+  ],
+  "begriffe": {
+    "passwd": "Ändert Passwörter. Als root für jeden Benutzer: passwd name.",
+    "passwd -e": "Lässt das Passwort sofort ablaufen (expire).",
+    "chage": "Zeigt und ändert Passwort-Ablaufregeln eines Benutzers."
+  },
+  "loesung": [
+    "sudo passwd ben",
+    "sudo passwd -e ben",
+    "sudo chage -l ben"
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "id": "lin-usb-einhaengen",
+  "system": "linux",
+  "titel": "USB-Stick taucht nicht auf",
+  "kategorie": "Speicher",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/lsblk.8.html",
+    "https://man7.org/linux/man-pages/man8/mount.8.html",
+    "https://man7.org/linux/man-pages/man1/mkdir.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Am Lager-PC (ohne Desktop-Oberfläche, nur Terminal) wurde ein USB-Stick mit Inventurlisten eingesteckt.",
+    "Er wird nicht automatisch eingebunden.",
+    "",
+    "Aufgabe: Finde die Partition des Sticks und hänge sie unter /mnt/usb ein, damit man die Dateien sieht."
+  ],
+  "zustand": {
+    "eingehaengt": false,
+    "verzeichnis:/mnt/usb": null
+  },
+  "befehle": [
+    {
+      "muster": [
+        "lsblk"
+      ],
+      "bedeutung": "Datenträger und Partitionen mit Einhängepunkten anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "eingehaengt": false
+          },
+          "ausgabe": [
+            "NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS",
+            "sdb           8:16   1  28.9G  0 disk ",
+            "└─sdb1        8:17   1  28.9G  0 part",
+            "nvme0n1     259:0    0 238.5G  0 disk ",
+            "├─nvme0n1p1 259:1    0     1G  0 part /boot/efi",
+            "└─nvme0n1p2 259:2    0 237.4G  0 part /"
+          ]
+        },
+        {
+          "ausgabe": [
+            "NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS",
+            "sdb           8:16   1  28.9G  0 disk ",
+            "└─sdb1        8:17   1  28.9G  0 part /mnt/usb",
+            "nvme0n1     259:0    0 238.5G  0 disk ",
+            "├─nvme0n1p1 259:1    0     1G  0 part /boot/efi",
+            "└─nvme0n1p2 259:2    0 237.4G  0 part /"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "mkdir /mnt/usb",
+        "mkdir -p /mnt/usb"
+      ],
+      "bedeutung": "Einen Ordner anlegen",
+      "frage": "Lege den Ordner /mnt/usb an",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "mkdir: cannot create directory '/mnt/usb': Permission denied"
+        },
+        {
+          "setze": {
+            "verzeichnis:/mnt/usb": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "mount /dev/sdb1 /mnt/usb"
+      ],
+      "bedeutung": "Eine Partition in einen Ordner einhängen",
+      "frage": "Hänge /dev/sdb1 unter /mnt/usb ein",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "mount: /mnt/usb: must be superuser to use mount."
+        },
+        {
+          "wenn": {
+            "verzeichnis:/mnt/usb": null
+          },
+          "fehler": true,
+          "ausgabe": "mount: /mnt/usb: mount point does not exist."
+        },
+        {
+          "setze": {
+            "eingehaengt": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "mount /dev/sdb /mnt/usb"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Das ist der ganze Stick, nicht die Partition – nimm /dev/sdb1."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ls /mnt/usb"
+      ],
+      "bedeutung": "Dateien auflisten",
+      "faelle": [
+        {
+          "wenn": {
+            "eingehaengt": true
+          },
+          "ausgabe": [
+            "inventur_2026-10.csv  inventur_2026-11.csv  lagerplaetze.ods"
+          ]
+        },
+        {
+          "wenn": {
+            "verzeichnis:/mnt/usb": null
+          },
+          "fehler": true,
+          "ausgabe": "ls: cannot access '/mnt/usb': No such file or directory"
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "df -h"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "eingehaengt": true
+          },
+          "ausgabe": [
+            "Filesystem      Size  Used Avail Use% Mounted on",
+            "/dev/nvme0n1p2  234G   61G  162G  28% /",
+            "/dev/nvme0n1p1  1.1G  6.2M  1.1G   1% /boot/efi",
+            "/dev/sdb1        29G  1.2G   28G   5% /mnt/usb"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Filesystem      Size  Used Avail Use% Mounted on",
+            "/dev/nvme0n1p2  234G   61G  162G  28% /",
+            "/dev/nvme0n1p1  1.1G  6.2M  1.1G   1% /boot/efi"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "eingehaengt": true
+  },
+  "hinweise": [
+    "Unter Linux erscheint ein Stick als Gerät (/dev/sd…). Um die Dateien zu sehen, hängt man eine Partition in einen Ordner ein.",
+    "„lsblk“ zeigt Datenträger und Partitionen: Der Stick ist sdb mit Partition sdb1, ohne Einhängepunkt. Ordner anlegen mit „mkdir“, einhängen mit „mount“ – beides als root.",
+    "„sudo mkdir /mnt/usb“, dann „sudo mount /dev/sdb1 /mnt/usb“, dann „ls /mnt/usb“."
+  ],
+  "erklaerung": [
+    "Linux kennt keine Laufwerksbuchstaben: Datenträger werden in Ordner eingehängt (mount). „lsblk“ zeigte den Stick",
+    "als sdb mit der Partition sdb1 ohne MOUNTPOINTS. Der Einhängeordner muss existieren – darum erst „sudo mkdir /mnt/usb“.",
+    "„sudo mount /dev/sdb1 /mnt/usb“ hängt ein; danach liegen die Dateien unter /mnt/usb. Vor dem Abziehen: „sudo umount /mnt/usb“."
+  ],
+  "begriffe": {
+    "mount / umount": "Datenträger in einen Ordner einhängen / wieder aushängen.",
+    "Einhängepunkt (Mountpoint)": "Ordner, unter dem der Inhalt eines Datenträgers erscheint.",
+    "/dev/sdb1": "Erste Partition auf dem zweiten Datenträger (sdb).",
+    "lsblk": "Listet Datenträger (block devices) als Baum auf."
+  },
+  "loesung": [
+    "lsblk",
+    "sudo mkdir /mnt/usb",
+    "sudo mount /dev/sdb1 /mnt/usb",
+    "ls /mnt/usb"
+  ]
+}

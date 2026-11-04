@@ -29,7 +29,7 @@ def pruefe_alle() -> tuple[int, list[str]]:
             anzahl += 1
             sitzung = Sitzung(szenario, allgemein)
             for schritt in szenario.loesung:
-                antwort = sitzung.eingabe(schritt)
+                antwort = sitzung.loesungsschritt(schritt)
                 if antwort.art != "treffer":
                     fehler.append(f"{szenario.id}: Lösungsschritt „{schritt}“ nicht erkannt ({antwort.art}).")
                     break

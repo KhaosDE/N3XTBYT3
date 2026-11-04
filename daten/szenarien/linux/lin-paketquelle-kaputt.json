@@ -1,0 +1,122 @@
+{
+  "id": "lin-paketquelle-kaputt",
+  "system": "linux",
+  "titel": "apt update: Malformed entry",
+  "kategorie": "Pakete",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man5/sources.list.5.html",
+    "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Für den neuen Etikettendrucker hat ein Kollege eine Paketquelle des Herstellers eingetragen.",
+    "Seitdem bricht „sudo apt update“ mit einer Fehlermeldung ab, und es kommen keine Updates mehr.",
+    "Der Hersteller schreibt: Die Zeile muss lauten  deb http://repo.etikett.example/ubuntu noble main",
+    "",
+    "Aufgabe: Finde die kaputte Datei und korrigiere die Zeile."
+  ],
+  "zustand": {},
+  "dateien": {
+    "/etc/apt/sources.list.d/etikett.list": {
+      "inhalt": [
+        "# Paketquelle Etikettendrucker",
+        "deb http://repo.etikett.example/ubuntu"
+      ],
+      "rechte": "644"
+    },
+    "/etc/apt/sources.list.d/ubuntu.sources": [
+      "Types: deb",
+      "URIs: http://archive.ubuntu.com/ubuntu",
+      "Suites: noble noble-updates noble-backports",
+      "Components: main restricted universe multiverse",
+      "Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"
+    ]
+  },
+  "befehle": [
+    {
+      "muster": [
+        "apt update"
+      ],
+      "bedeutung": "Paketlisten aus den Paketquellen neu laden",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "datei:/etc/apt/sources.list.d/etikett.list": {
+              "keine_zeile_enthaelt": "ubuntu noble main"
+            }
+          },
+          "fehler": true,
+          "ausgabe": [
+            "E: Malformed entry 2 in list file /etc/apt/sources.list.d/etikett.list (Suite)",
+            "E: The list of sources could not be read."
+          ]
+        },
+        {
+          "ausgabe": [
+            "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease",
+            "Get:2 http://repo.etikett.example/ubuntu noble InRelease",
+            "Reading package lists... Done",
+            "Building dependency tree... Done",
+            "Reading state information... Done",
+            "All packages are up to date."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ls /etc/apt/sources.list.d",
+        "ls /etc/apt/sources.list.d/"
+      ],
+      "faelle": [
+        {
+          "ausgabe": "etikett.list  ubuntu.sources"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "datei:/etc/apt/sources.list.d/etikett.list": {
+      "zeile_enthaelt": "deb http://repo.etikett.example/ubuntu noble main"
+    }
+  },
+  "hinweise": [
+    "Die Fehlermeldung nennt Datei und Zeile. Schau dir die Datei an.",
+    "In /etc/apt/sources.list.d/etikett.list fehlen in Zeile 2 die Teile hinter der Adresse (Suite und Komponente). Bearbeiten mit „sudo nano …“.",
+    "„sudo nano /etc/apt/sources.list.d/etikett.list“, Zeile 2 zu „deb http://repo.etikett.example/ubuntu noble main“ ändern, Strg+O, Strg+X, dann „sudo apt update“."
+  ],
+  "erklaerung": [
+    "Eine Paketquellen-Zeile im alten Format hat vier Teile: deb, Adresse, Suite (Ubuntu-Version, hier noble) und",
+    "Komponente(n) (main …). In der Datei fehlten Suite und Komponente – apt meldete „Malformed entry 2 … (Suite)“",
+    "und las dann gar keine Quellen mehr. Nach der Korrektur läuft apt update wieder.",
+    "Ubuntu 24.04 nutzt für eigene Quellen das neuere Format *.sources (Types/URIs/Suites/Components)."
+  ],
+  "begriffe": {
+    "Paketquelle": "Adresse, von der apt Pakete holt. Eingetragen in /etc/apt/sources.list.d/.",
+    "Suite": "Name der Distributionsversion in der Quelle, z. B. noble (= Ubuntu 24.04).",
+    "Komponente": "Bereich einer Quelle, z. B. main, universe.",
+    "deb-Zeile": "Format: deb <Adresse> <Suite> <Komponente(n)>."
+  },
+  "loesung": [
+    "sudo apt update",
+    "cat /etc/apt/sources.list.d/etikett.list",
+    "sudo nano /etc/apt/sources.list.d/etikett.list",
+    {
+      "speichern": "/etc/apt/sources.list.d/etikett.list",
+      "inhalt": [
+        "# Paketquelle Etikettendrucker",
+        "deb http://repo.etikett.example/ubuntu noble main"
+      ]
+    },
+    "sudo apt update"
+  ]
+}

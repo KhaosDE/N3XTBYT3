@@ -26,15 +26,41 @@ Felder, die mit `_` beginnen (z. B. `"_notiz"`), sind Kommentare und werden nich
 | `befehle` | Liste der Befehle, die das Szenario kennt (siehe unten). |
 | `ziel` | Bedingung für „gelöst“, z. B. `{"dienst_spooler": "Running"}`. Eine Liste von Bedingungen heißt: eine davon reicht. |
 | `hinweise` | Genau 3 Texte: 1 Richtung → 2 Werkzeug → 3 fast die Lösung. |
-| `erklaerung` | Warum das die Lösung ist. Erscheint nach dem Lösen. Text oder Liste von Zeilen. |
+| `erklaerung` | Warum das die Lösung ist. Erscheint nach dem Lösen. Text oder Liste von Zeilen; die Zeilen werden zu Fließtext verbunden, eine leere Zeile beginnt einen neuen Absatz. |
 | `begriffe` | Fachbegriffe mit kurzer Erklärung: `{"DNS": "übersetzt Namen in IP-Adressen"}`. |
-| `loesung` | Liste der Befehle, die das Szenario lösen. Ein Test spielt sie automatisch durch. |
+| `loesung` | Liste der Befehle, die das Szenario lösen. Ein Test spielt sie automatisch durch. Unter Linux darf ein Schritt auch `{"speichern": "/pfad", "inhalt": …}` sein: das Speichern der Datei im Editor nach `nano`. |
 
 ## Freiwillige Felder
 
 | Feld | Inhalt |
 |---|---|
 | `shell` | Womit das Szenario startet. Windows: `powershell` (Standard) oder `cmd`. Linux: `bash`. |
+| `dateien` | Nur Linux: simulierte Dateien (siehe „Dateien (Linux)“). |
+
+## Dateien (Linux)
+
+```json
+"dateien": {
+  "/etc/hosts": ["127.0.0.1 localhost", "192.168.10.20 intranet.firma.internal"],
+  "/etc/ssh/sshd_config": {"inhalt": ["Port 22"], "rechte": "644", "besitzer": "root:root"},
+  "/home/anna/backup.sh": {"inhalt": "#!/bin/bash", "rechte": "rw-r--r--", "besitzer": "anna:anna"},
+  "/var/www/html/": {},
+  "/etc/neu.conf": null
+}
+```
+
+* Schlüssel ist der volle Pfad. Ein `/` am Ende heißt: leeres Verzeichnis. Ordner, in denen Dateien
+  liegen, gibt es automatisch.
+* Wert: Text, Liste von Zeilen oder Objekt mit `inhalt`, `rechte` (`rw-r--r--` oder `644`),
+  `besitzer` (`benutzer:gruppe`, Standard `root:root`, im Home-Ordner der Benutzer) und `zeit` (für `ls -l`).
+* `null`: Die Datei gibt es am Anfang nicht, sie darf aber entstehen (z. B. mit nano).
+* Im Zustand stehen sie als `datei:/pfad` (Inhalt), `rechte:/pfad`, `besitzer:/pfad`. So kann ein
+  `ziel` oder `wenn` den Inhalt prüfen, und `setze` kann Dateien ändern (`null` löscht).
+* Eingebaut (müssen nicht ins Szenario): `pwd`, `cd`, `ls` (-l -a -h), `cat`, `less`, `head`, `tail`,
+  `grep` (-i -n -v -c), `chmod`, `chown`, `nano` (Editor), `sudo` (auch `sudo -i`), Filter hinter Pipes
+  (`… | grep`, `head`, `tail`, `sort`, `wc -l`). Ein Befehl im Szenario mit gleichem Muster hat Vorrang.
+* Der Zustand `root` ist `true`, während ein Befehl mit `sudo` läuft – so kann ein Fall
+  `{"wenn": {"root": false}, …}` die Fehlermeldung ohne sudo zeigen.
 
 ## Zustand
 
@@ -90,6 +116,9 @@ Alle genannten Schlüssel müssen passen.
 * Gleichheit: `{"dienst_spooler": "Running", "admin": true}`
 * Vergleich: `{"frei_gb": {">=": 10}}` – erlaubt sind `<`, `<=`, `>`, `>=` (nur Zahlen),
   `nicht` (`{"status": {"nicht": "Stopped"}}`) und `in` (`{"status": {"in": ["A", "B"]}}`).
+* Text: `enthaelt` / `enthaelt_nicht` (Teiltext), `zeile_enthaelt` / `keine_zeile_enthaelt`
+  (Teiltext nur in Zeilen, die nicht mit `#` oder `;` beginnen – für Konfigurationsdateien).
+  Beispiel: `{"datei:/etc/hosts": {"keine_zeile_enthaelt": "192.168.10.20"}}`.
 
 Jeder Schlüssel in `wenn`, `setze` und `ziel` muss im Zustand vorkommen (Szenario oder
 allgemein). Tippfehler meldet der Lader.

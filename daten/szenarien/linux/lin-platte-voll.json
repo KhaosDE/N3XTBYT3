@@ -1,0 +1,201 @@
+{
+  "id": "lin-platte-voll",
+  "system": "linux",
+  "titel": "Festplatte voll – trotz gelöschter Videos",
+  "kategorie": "Speicher",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/df.1.html",
+    "https://man7.org/linux/man-pages/man1/du.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/gio.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Ubuntu meldet „Wenig Speicherplatz auf dem Datenträger“. Anna hat gestern 30 GB alte Schulungsvideos",
+    "im Dateimanager gelöscht – frei geworden ist nichts.",
+    "",
+    "Aufgabe: Prüfe den Speicherplatz, finde heraus, wo der Platz steckt, und gib ihn frei, ohne Annas Dateien anzufassen."
+  ],
+  "zustand": {
+    "papierkorb_voll": true
+  },
+  "befehle": [
+    {
+      "muster": [
+        "df -h",
+        "df -h /"
+      ],
+      "bedeutung": "Belegten und freien Platz der Dateisysteme anzeigen (lesbare Größen)",
+      "frage": "Zeige den Platz aller Dateisysteme in lesbaren Größen",
+      "faelle": [
+        {
+          "wenn": {
+            "papierkorb_voll": true
+          },
+          "ausgabe": [
+            "Filesystem      Size  Used Avail Use% Mounted on",
+            "tmpfs           1.6G  2.1M  1.6G   1% /run",
+            "/dev/nvme0n1p2  234G  222G     0 100% /",
+            "tmpfs           7.8G     0  7.8G   0% /dev/shm",
+            "tmpfs           5.0M  8.0K  5.0M   1% /run/lock",
+            "/dev/nvme0n1p1  1.1G  6.2M  1.1G   1% /boot/efi",
+            "tmpfs           1.6G  128K  1.6G   1% /run/user/1000"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Filesystem      Size  Used Avail Use% Mounted on",
+            "tmpfs           1.6G  2.1M  1.6G   1% /run",
+            "/dev/nvme0n1p2  234G  191G   32G  86% /",
+            "tmpfs           7.8G     0  7.8G   0% /dev/shm",
+            "tmpfs           5.0M  8.0K  5.0M   1% /run/lock",
+            "/dev/nvme0n1p1  1.1G  6.2M  1.1G   1% /boot/efi",
+            "tmpfs           1.6G  128K  1.6G   1% /run/user/1000"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "du -sh ~/*",
+        "du -sh /home/anna/*"
+      ],
+      "bedeutung": "Größe jedes Eintrags im Home-Ordner anzeigen",
+      "frage": "Zeige die Größe jedes Eintrags in deinem Home-Ordner (zusammengefasst, lesbar)",
+      "faelle": [
+        {
+          "ausgabe": [
+            "12K\t/home/anna/Bilder",
+            "4.0K\t/home/anna/Desktop",
+            "1.3G\t/home/anna/Dokumente",
+            "2.1G\t/home/anna/Downloads",
+            "4.0K\t/home/anna/Musik",
+            "4.0K\t/home/anna/Videos"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "du -sh ~/.local/share/Trash",
+        "du -sh /home/anna/.local/share/Trash"
+      ],
+      "bedeutung": "Größe des Papierkorbs anzeigen",
+      "frage": "Zeige, wie groß der Papierkorb ~/.local/share/Trash ist",
+      "faelle": [
+        {
+          "wenn": {
+            "papierkorb_voll": true
+          },
+          "ausgabe": "30G\t/home/anna/.local/share/Trash"
+        },
+        {
+          "ausgabe": "4.0K\t/home/anna/.local/share/Trash"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "du -sh ~/.[!.]*",
+        "du -sh ~/.*"
+      ],
+      "bedeutung": "Größe der versteckten Ordner im Home-Ordner anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "papierkorb_voll": true
+          },
+          "ausgabe": [
+            "4.0K\t/home/anna/.bash_logout",
+            "4.0K\t/home/anna/.bashrc",
+            "512M\t/home/anna/.cache",
+            "8.0M\t/home/anna/.config",
+            "30G\t/home/anna/.local",
+            "4.0K\t/home/anna/.profile"
+          ]
+        },
+        {
+          "ausgabe": [
+            "4.0K\t/home/anna/.bash_logout",
+            "4.0K\t/home/anna/.bashrc",
+            "512M\t/home/anna/.cache",
+            "8.0M\t/home/anna/.config",
+            "120M\t/home/anna/.local",
+            "4.0K\t/home/anna/.profile"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "gio trash --empty"
+      ],
+      "bedeutung": "Den Papierkorb leeren",
+      "frage": "Leere den Papierkorb (mit gio)",
+      "faelle": [
+        {
+          "setze": {
+            "papierkorb_voll": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "rm -rf ~/.local/share/Trash/*",
+        "rm -rf /home/anna/.local/share/Trash/*"
+      ],
+      "bedeutung": "Inhalt des Papierkorb-Ordners endgültig löschen",
+      "faelle": [
+        {
+          "setze": {
+            "papierkorb_voll": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "rm -rf ~/Dokumente",
+        "rm -rf ~/Dokumente/*",
+        "rm -rf ~/*"
+      ],
+      "falsch": true,
+      "warum": "Persönliche Dateien löscht man nicht, um Platz zu schaffen – erst Papierkorb, Caches und Downloads prüfen und fragen.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das wären Annas eigene Dateien. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "papierkorb_voll": false
+  },
+  "hinweise": [
+    "Erst messen: Wie voll ist die Platte, und welcher Ordner ist groß? Wo landen im Dateimanager gelöschte Dateien?",
+    "„df -h“ zeigt den Platz, „du -sh ~/*“ die Größe der Ordner. Versteckte Ordner beginnen mit einem Punkt – der Papierkorb liegt in ~/.local/share/Trash.",
+    "Leere den Papierkorb: „gio trash --empty“."
+  ],
+  "erklaerung": [
+    "Im Dateimanager gelöschte Dateien landen im Papierkorb unter ~/.local/share/Trash und belegen weiter Platz.",
+    "„du -sh ~/*“ zeigt keine versteckten Ordner (mit Punkt am Anfang) – darum fiel der Papierkorb erst bei",
+    "„du -sh ~/.local/share/Trash“ oder „du -sh ~/.[!.]*“ auf. „gio trash --empty“ leert ihn wie der Dateimanager.",
+    "„df -h“ misst das ganze Dateisystem, „du -sh“ einzelne Ordner."
+  ],
+  "begriffe": {
+    "df": "Disk free: belegter und freier Platz je Dateisystem. -h = lesbare Größen (G, M).",
+    "du": "Disk usage: wie viel ein Ordner belegt. -s = nur Summe, -h = lesbar.",
+    "Versteckte Dateien": "Namen mit Punkt am Anfang (.local). ls zeigt sie erst mit -a.",
+    "~/.local/share/Trash": "Der Papierkorb des Benutzers unter Linux-Desktops."
+  },
+  "loesung": [
+    "df -h",
+    "du -sh ~/*",
+    "du -sh ~/.local/share/Trash",
+    "gio trash --empty",
+    "df -h"
+  ]
+}

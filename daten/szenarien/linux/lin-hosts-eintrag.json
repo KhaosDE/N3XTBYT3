@@ -1,0 +1,154 @@
+{
+  "id": "lin-hosts-eintrag",
+  "system": "linux",
+  "titel": "Intranet geht nur auf diesem Laptop nicht",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man5/hosts.5.html",
+    "https://man7.org/linux/man-pages/man1/getent.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Anna arbeitet mit Ubuntu. intranet.firma.internal lädt bei ihr nicht, bei allen anderen schon.",
+    "Der Intranet-Server ist vor einem Monat von 192.168.10.20 auf 192.168.10.25 umgezogen.",
+    "Ein Kollege hatte damals „zum Testen“ etwas an ihrem Laptop eingetragen.",
+    "",
+    "Aufgabe: Finde heraus, warum der Laptop die alte Adresse nimmt, und behebe es."
+  ],
+  "zustand": {},
+  "dateien": {
+    "/etc/hosts": {
+      "inhalt": [
+        "127.0.0.1 localhost",
+        "127.0.1.1 pc-lager02",
+        "",
+        "# Testeintrag Intranet",
+        "192.168.10.20   intranet.firma.internal",
+        "",
+        "# The following lines are desirable for IPv6 capable hosts",
+        "::1     ip6-localhost ip6-loopback",
+        "ff02::1 ip6-allnodes",
+        "ff02::2 ip6-allrouters"
+      ],
+      "rechte": "644"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ping intranet.firma.internal",
+        "ping -c 4 intranet.firma.internal"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe mit vier Paketen, ob intranet.firma.internal antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "datei:/etc/hosts": {
+              "zeile_enthaelt": "192.168.10.20"
+            }
+          },
+          "ausgabe": [
+            "PING intranet.firma.internal (192.168.10.20) 56(84) bytes of data.",
+            "From 192.168.10.57 icmp_seq=1 Destination Host Unreachable",
+            "From 192.168.10.57 icmp_seq=2 Destination Host Unreachable",
+            "From 192.168.10.57 icmp_seq=3 Destination Host Unreachable",
+            "From 192.168.10.57 icmp_seq=4 Destination Host Unreachable",
+            "",
+            "--- intranet.firma.internal ping statistics ---",
+            "4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 3051ms"
+          ]
+        },
+        {
+          "ausgabe": [
+            "PING intranet.firma.internal (192.168.10.25) 56(84) bytes of data.",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=1 ttl=128 time=0.412 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=2 ttl=128 time=0.388 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=3 ttl=128 time=0.401 ms",
+            "64 bytes from intranet.firma.internal (192.168.10.25): icmp_seq=4 ttl=128 time=0.395 ms",
+            "",
+            "--- intranet.firma.internal ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms",
+            "rtt min/avg/max/mdev = 0.388/0.399/0.412/0.009 ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "getent hosts intranet.firma.internal"
+      ],
+      "bedeutung": "Einen Namen so auflösen, wie es das System tut (inkl. /etc/hosts)",
+      "frage": "Löse intranet.firma.internal so auf, wie es das System tut (mit getent)",
+      "faelle": [
+        {
+          "wenn": {
+            "datei:/etc/hosts": {
+              "zeile_enthaelt": "192.168.10.20"
+            }
+          },
+          "ausgabe": "192.168.10.20   intranet.firma.internal"
+        },
+        {
+          "ausgabe": "192.168.10.25   intranet.firma.internal"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "host intranet.firma.internal"
+      ],
+      "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
+      "frage": "Frage den DNS-Server direkt nach intranet.firma.internal (mit host)",
+      "faelle": [
+        {
+          "ausgabe": "intranet.firma.internal has address 192.168.10.25"
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "datei:/etc/hosts": {
+      "keine_zeile_enthaelt": "192.168.10.20"
+    }
+  },
+  "hinweise": [
+    "Der DNS-Server kennt die neue Adresse. Wo könnte der Laptop die alte Adresse herhaben, bevor er überhaupt DNS fragt?",
+    "Vergleiche „getent hosts intranet.firma.internal“ (wie das System auflöst) mit „host intranet.firma.internal“ (nur DNS). Lokale Einträge stehen in /etc/hosts.",
+    "Öffne die Datei mit „sudo nano /etc/hosts“, lösche die Zeile mit 192.168.10.20 (oder setze # davor), speichere mit Strg+O, beende mit Strg+X."
+  ],
+  "erklaerung": [
+    "Linux schaut bei Namen zuerst in /etc/hosts und fragt erst danach den DNS-Server (Reihenfolge in /etc/nsswitch.conf).",
+    "Der alte Testeintrag zeigte noch auf 192.168.10.20. „host“ fragt nur DNS und lieferte die richtige Adresse,",
+    "„getent hosts“ und „ping“ nahmen den Eintrag aus /etc/hosts. Nach dem Löschen bzw. Auskommentieren mit #",
+    "greift wieder DNS. /etc/hosts gehört root – darum „sudo nano“. Unter Windows heißt die Datei C:\\Windows\\System32\\drivers\\etc\\hosts."
+  ],
+  "begriffe": {
+    "/etc/hosts": "Lokale Liste „IP-Adresse Name“. Wird vor dem DNS gefragt.",
+    "getent hosts": "Löst einen Namen über alle eingestellten Quellen auf (hosts-Datei, DNS …) – wie Programme es tun.",
+    "Kommentar (#)": "Zeilen, die mit # beginnen, werden in Konfigurationsdateien ignoriert.",
+    "nano": "Einfacher Texteditor im Terminal. Strg+O speichert, Strg+X beendet."
+  },
+  "loesung": [
+    "ping -c 4 intranet.firma.internal",
+    "getent hosts intranet.firma.internal",
+    "cat /etc/hosts",
+    "sudo nano /etc/hosts",
+    {
+      "speichern": "/etc/hosts",
+      "inhalt": [
+        "127.0.0.1 localhost",
+        "127.0.1.1 pc-lager02",
+        "",
+        "# The following lines are desirable for IPv6 capable hosts",
+        "::1     ip6-localhost ip6-loopback",
+        "ff02::1 ip6-allnodes",
+        "ff02::2 ip6-allrouters"
+      ]
+    },
+    "ping -c 4 intranet.firma.internal"
+  ]
+}

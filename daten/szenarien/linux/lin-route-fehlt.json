@@ -1,0 +1,172 @@
+{
+  "id": "lin-route-fehlt",
+  "system": "linux",
+  "titel": "Lokales Netz geht, anderes Netz nicht",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 3,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/ip-route.8.html",
+    "https://man7.org/linux/man-pages/man8/ping.8.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Annas PC (192.168.10.57) erreicht den Drucker im eigenen Netz, aber nicht den Warenwirtschaftsserver",
+    "10.20.0.15 im Rechenzentrumsnetz. Bei den Kollegen geht es. Annas PC hat eine feste IP-Konfiguration,",
+    "an der jemand „aufgeräumt“ hat. Das Gateway ins andere Netz ist der Router 192.168.10.1.",
+    "",
+    "Aufgabe: Finde heraus, warum der PC das andere Netz nicht erreicht, und trage den fehlenden Weg ein (gilt bis zum Neustart)."
+  ],
+  "zustand": {
+    "route": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ip route",
+        "ip r",
+        "ip route show"
+      ],
+      "bedeutung": "Die Routing-Tabelle anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "route": false
+          },
+          "ausgabe": [
+            "192.168.10.0/24 dev enp0s31f6 proto kernel scope link src 192.168.10.57 metric 100"
+          ]
+        },
+        {
+          "ausgabe": [
+            "default via 192.168.10.1 dev enp0s31f6",
+            "192.168.10.0/24 dev enp0s31f6 proto kernel scope link src 192.168.10.57 metric 100"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping 10.20.0.15",
+        "ping -c 4 10.20.0.15"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe mit vier Paketen, ob 10.20.0.15 antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "route": false
+          },
+          "ausgabe": "ping: connect: Network is unreachable"
+        },
+        {
+          "ausgabe": [
+            "PING 10.20.0.15 (10.20.0.15) 56(84) bytes of data.",
+            "64 bytes from 10.20.0.15: icmp_seq=1 ttl=63 time=0.412 ms",
+            "64 bytes from 10.20.0.15: icmp_seq=2 ttl=63 time=0.388 ms",
+            "64 bytes from 10.20.0.15: icmp_seq=3 ttl=63 time=0.401 ms",
+            "64 bytes from 10.20.0.15: icmp_seq=4 ttl=63 time=0.395 ms",
+            "",
+            "--- 10.20.0.15 ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms",
+            "rtt min/avg/max/mdev = 0.388/0.399/0.412/0.009 ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping 192.168.10.1",
+        "ping -c 4 192.168.10.1"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "PING 192.168.10.1 (192.168.10.1) 56(84) bytes of data.",
+            "64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=0.412 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=0.388 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=3 ttl=64 time=0.401 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=4 ttl=64 time=0.395 ms",
+            "",
+            "--- 192.168.10.1 ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms",
+            "rtt min/avg/max/mdev = 0.388/0.399/0.412/0.009 ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ip route add default via 192.168.10.1",
+        "ip route add default via 192.168.10.1 dev enp0s31f6"
+      ],
+      "bedeutung": "Eine Standardroute (Default-Gateway) eintragen",
+      "frage": "Trage 192.168.10.1 als Standardroute (default) ein",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "RTNETLINK answers: Operation not permitted"
+        },
+        {
+          "wenn": {
+            "route": true
+          },
+          "fehler": true,
+          "ausgabe": "RTNETLINK answers: File exists"
+        },
+        {
+          "setze": {
+            "route": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ip route add 10.20.0.0/24 via 192.168.10.1"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "RTNETLINK answers: Operation not permitted"
+        },
+        {
+          "sim": true,
+          "ausgabe": "Eingetragen – aber dann fehlt der Weg ins Internet und in alle anderen Netze weiter. Das Gateway gehört als Standardroute (default) hinein."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "route": true
+  },
+  "hinweise": [
+    "Für Ziele außerhalb des eigenen Netzes braucht der PC einen Weg: das Gateway. Ist eins eingetragen?",
+    "„ip route“ zeigt die Routing-Tabelle. Es fehlt die Zeile „default via …“. Eintragen geht mit „ip route add“.",
+    "„sudo ip route add default via 192.168.10.1“."
+  ],
+  "erklaerung": [
+    "In der Routing-Tabelle stand nur das eigene Netz 192.168.10.0/24. Für alle anderen Ziele fehlte die",
+    "Standardroute (default). Darum „Network is unreachable“ – der PC wusste nicht, wohin mit den Paketen.",
+    "„sudo ip route add default via 192.168.10.1“ trägt den Router als Gateway ein. Achtung: Mit ip eingetragene",
+    "Routen gelten nur bis zum Neustart; dauerhaft gehört das Gateway in die Netzwerkkonfiguration (NetworkManager/Netplan)."
+  ],
+  "begriffe": {
+    "Route": "Eintrag „Ziele in Netz X erreicht man über Y“.",
+    "Standardroute (default)": "Weg für alle Ziele, für die es keine genauere Route gibt – das Gateway.",
+    "Gateway": "Router, der Pakete in andere Netze weiterleitet.",
+    "Network is unreachable": "Es gibt keine Route zum Ziel."
+  },
+  "loesung": [
+    "ping -c 4 10.20.0.15",
+    "ip route",
+    "sudo ip route add default via 192.168.10.1",
+    "ping -c 4 10.20.0.15"
+  ]
+}

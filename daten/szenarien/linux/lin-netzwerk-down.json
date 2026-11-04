@@ -1,0 +1,190 @@
+{
+  "id": "lin-netzwerk-down",
+  "system": "linux",
+  "titel": "Kabel steckt, aber keine IP-Adresse",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/ip-address.8.html",
+    "https://man7.org/linux/man-pages/man8/ip-link.8.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Der Lager-PC hat kein Netzwerk. Das Kabel steckt, am Switch leuchtet der Anschluss.",
+    "Ein Praktikant hat gestern „die Netzwerkkarte zum Testen ausgeschaltet“.",
+    "",
+    "Aufgabe: Prüfe die Netzwerkschnittstelle und schalte sie wieder ein."
+  ],
+  "zustand": {
+    "link_up": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ip a",
+        "ip addr",
+        "ip address",
+        "ip addr show",
+        "ip address show"
+      ],
+      "bedeutung": "Netzwerkschnittstellen und ihre IP-Adressen anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "link_up": false
+          },
+          "ausgabe": [
+            "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+            "    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00",
+            "    inet 127.0.0.1/8 scope host lo",
+            "       valid_lft forever preferred_lft forever",
+            "2: enp0s31f6: <BROADCAST,MULTICAST> mtu 1500 qdisc fq_codel state DOWN group default qlen 1000",
+            "    link/ether 3c:52:82:1a:2b:3c brd ff:ff:ff:ff:ff:ff"
+          ]
+        },
+        {
+          "ausgabe": [
+            "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+            "    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00",
+            "    inet 127.0.0.1/8 scope host lo",
+            "       valid_lft forever preferred_lft forever",
+            "2: enp0s31f6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000",
+            "    link/ether 3c:52:82:1a:2b:3c brd ff:ff:ff:ff:ff:ff",
+            "    inet 192.168.10.57/24 brd 192.168.10.255 scope global dynamic noprefixroute enp0s31f6",
+            "       valid_lft 86394sec preferred_lft 86394sec"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ip link",
+        "ip link show"
+      ],
+      "bedeutung": "Netzwerkschnittstellen und ihren Zustand (UP/DOWN) anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "link_up": false
+          },
+          "ausgabe": [
+            "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+            "    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00",
+            "2: enp0s31f6: <BROADCAST,MULTICAST> mtu 1500 qdisc fq_codel state DOWN group default qlen 1000",
+            "    link/ether 3c:52:82:1a:2b:3c brd ff:ff:ff:ff:ff:ff"
+          ]
+        },
+        {
+          "ausgabe": [
+            "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+            "    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00",
+            "2: enp0s31f6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000",
+            "    link/ether 3c:52:82:1a:2b:3c brd ff:ff:ff:ff:ff:ff"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ip link set enp0s31f6 up",
+        "ip link set dev enp0s31f6 up"
+      ],
+      "bedeutung": "Eine Netzwerkschnittstelle einschalten",
+      "frage": "Schalte die Schnittstelle enp0s31f6 ein",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": "RTNETLINK answers: Operation not permitted"
+        },
+        {
+          "setze": {
+            "link_up": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ping 192.168.10.1",
+        "ping -c 4 192.168.10.1"
+      ],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "frage": "Prüfe mit vier Paketen, ob das Gateway 192.168.10.1 antwortet",
+      "faelle": [
+        {
+          "wenn": {
+            "link_up": false
+          },
+          "ausgabe": "ping: connect: Network is unreachable"
+        },
+        {
+          "ausgabe": [
+            "PING 192.168.10.1 (192.168.10.1) 56(84) bytes of data.",
+            "64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=0.412 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=0.388 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=3 ttl=64 time=0.401 ms",
+            "64 bytes from 192.168.10.1: icmp_seq=4 ttl=64 time=0.395 ms",
+            "",
+            "--- 192.168.10.1 ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3004ms",
+            "rtt min/avg/max/mdev = 0.388/0.399/0.412/0.009 ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "nmcli device status"
+      ],
+      "bedeutung": "Netzwerkgeräte im NetworkManager anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "link_up": false
+          },
+          "ausgabe": [
+            "DEVICE     TYPE      STATE                   CONNECTION",
+            "enp0s31f6  ethernet  unavailable             --",
+            "lo         loopback  connected (externally)  lo"
+          ]
+        },
+        {
+          "ausgabe": [
+            "DEVICE     TYPE      STATE                   CONNECTION",
+            "enp0s31f6  ethernet  connected               Wired connection 1",
+            "lo         loopback  connected (externally)  lo"
+          ]
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "link_up": true
+  },
+  "hinweise": [
+    "Schau dir die Netzwerkschnittstellen an: Hat die Ethernet-Schnittstelle eine IP-Adresse, und ist sie überhaupt an (UP)?",
+    "„ip a“ zeigt alle Schnittstellen. enp0s31f6 steht auf state DOWN und hat kein UP in den spitzen Klammern. Einschalten geht mit „ip link set … up“.",
+    "„sudo ip link set enp0s31f6 up“."
+  ],
+  "erklaerung": [
+    "Die Schnittstelle enp0s31f6 war administrativ ausgeschaltet: In <BROADCAST,MULTICAST> fehlte UP, state DOWN.",
+    "„sudo ip link set enp0s31f6 up“ schaltet sie ein. Danach holt sich der NetworkManager per DHCP die Adresse",
+    "192.168.10.57/24 (inet-Zeile). LOWER_UP heißt: Kabelverbindung steht. Ohne sudo: „Operation not permitted“.",
+    "„Network is unreachable“ bei ping heißt: Es gibt gar keinen Weg ins Netz – hier, weil die Karte aus war."
+  ],
+  "begriffe": {
+    "enp0s31f6": "Name der Ethernet-Schnittstelle (vorhersagbare Namen nach Steckplatz).",
+    "UP / LOWER_UP": "UP = eingeschaltet; LOWER_UP = Kabel verbunden (Link steht).",
+    "inet": "IPv4-Adresse mit Präfix, z. B. 192.168.10.57/24 (/24 = 255.255.255.0).",
+    "ip": "Werkzeug für Netzwerkeinstellungen unter Linux (ip a, ip link, ip route)."
+  },
+  "loesung": [
+    "ip a",
+    "sudo ip link set enp0s31f6 up",
+    "ip a"
+  ]
+}

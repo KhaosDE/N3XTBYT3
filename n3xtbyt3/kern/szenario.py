@@ -15,6 +15,7 @@ from typing import Any
 
 from . import pfade
 from .befehle import Vergleicher, ist_cmdlet_name, zerlege
+from .dateisystem import dateien_zu_zustand
 from .systeme import REIHENFOLGE, SYSTEME, System
 from .zustand import ist_skalar, pruefe_aenderung, pruefe_bedingung
 
@@ -27,7 +28,7 @@ PFLICHTFELDER = (
     "datum", "ausgangslage", "zustand", "befehle", "ziel", "hinweise", "erklaerung",
     "begriffe", "loesung",
 )
-FREIE_FELDER = ("shell",)
+FREIE_FELDER = ("shell", "dateien")
 
 
 class SzenarioFehler(Exception):
@@ -118,6 +119,24 @@ def _text(wert: Any) -> str | None:
     if isinstance(wert, list) and all(isinstance(z, str) for z in wert):
         return "\n".join(wert)
     return None
+
+
+def _fliesstext(wert: Any) -> str | None:
+    """Wie _text, aber eine Liste wird zu Fließtext: Zeilen mit Leerzeichen verbunden,
+    eine leere Zeile beginnt einen neuen Absatz. (Lange Erklärungen lassen sich in JSON so
+    bequem auf mehrere Zeilen verteilen, ohne dass mitten im Satz umbrochen wird.)"""
+    if isinstance(wert, list) and all(isinstance(z, str) for z in wert):
+        absaetze, aktuell = [], []
+        for z in wert:
+            if z.strip():
+                aktuell.append(z.strip())
+            elif aktuell:
+                absaetze.append(" ".join(aktuell))
+                aktuell = []
+        if aktuell:
+            absaetze.append(" ".join(aktuell))
+        return "\n".join(absaetze)
+    return _text(wert)
 
 
 def _lies_json(datei: Path) -> Any:
@@ -276,11 +295,12 @@ def lade_allgemein(system_id: str, ordner: Path | None = None) -> Allgemein:
     if not isinstance(roh, dict):
         raise SzenarioFehler(datei, ["Die Datei muss ein JSON-Objekt enthalten."])
     for k in roh:
-        if k not in {"system", "zustand", "prompt", "befehle", "shell_fallen"} and not k.startswith("_"):
+        if k not in {"system", "zustand", "prompt", "befehle", "shell_fallen", "dateien"} and not k.startswith("_"):
             fehler.append(f"unbekanntes Feld „{k}“.")
     if roh.get("system") != system_id:
         fehler.append(f"„system“ muss „{system_id}“ sein.")
     zustand = _pruefe_zustand(roh.get("zustand", {}), "zustand", fehler)
+    zustand.update(dateien_zu_zustand(roh.get("dateien"), "dateien", fehler))
     prompt = roh.get("prompt", {})
     if not isinstance(prompt, dict) or any(
         k not in system.shell_ids or not isinstance(v, str) for k, v in prompt.items()
@@ -365,16 +385,20 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
     ausgangslage = _text(roh.get("ausgangslage"))
     if "ausgangslage" in roh and not ausgangslage:
         fehler.append("„ausgangslage“: Text oder Liste von Zeilen.")
-    erklaerung = _text(roh.get("erklaerung"))
+    erklaerung = _fliesstext(roh.get("erklaerung"))
     if "erklaerung" in roh and not erklaerung:
         fehler.append("„erklaerung“: Text oder Liste von Zeilen.")
 
     zustand = _pruefe_zustand(roh.get("zustand", {}), "zustand", fehler)
+    if "dateien" in roh and "bash" not in system.shell_ids:
+        fehler.append("„dateien“ gibt es nur bei Linux-Systemen.")
+    zustand.update(dateien_zu_zustand(roh.get("dateien"), "dateien", fehler))
     bekannte = set(allgemein.zustand) | set(zustand)
 
     befehle = _lies_befehle(roh.get("befehle", []), system, bekannte, "befehle", fehler)
-    if "befehle" in roh and not befehle and not fehler:
-        fehler.append("„befehle“: mindestens ein Befehl.")
+    if "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids:
+        fehler.append("„befehle“: mindestens ein Befehl (nur unter Linux darf die Liste leer sein, "
+                      "wenn die eingebauten Dateibefehle reichen).")
 
     ziel = roh.get("ziel")
     if isinstance(ziel, dict):
@@ -407,12 +431,24 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         begriffe = {}
 
     loesung = roh.get("loesung")
-    if "loesung" in roh and (
-        not isinstance(loesung, list) or not loesung
-        or not all(isinstance(s, str) and s.strip() for s in loesung)
-    ):
-        fehler.append("„loesung“: Liste der Befehle, die das Szenario lösen.")
+
+    def _schritt_ok(schritt) -> bool:
+        if isinstance(schritt, str):
+            return bool(schritt.strip())
+        if isinstance(schritt, dict) and "bash" in system.shell_ids:
+            inhalt = _text(schritt.get("inhalt"))
+            return (set(schritt) <= {"speichern", "inhalt"} and isinstance(schritt.get("speichern"), str)
+                    and inhalt is not None)
+        return False
+
+    if "loesung" in roh and (not isinstance(loesung, list) or not loesung
+                             or not all(_schritt_ok(s) for s in loesung)):
+        fehler.append("„loesung“: Liste der Befehle, die das Szenario lösen. Unter Linux auch "
+                      "{\"speichern\": \"/pfad\", \"inhalt\": …} für das Speichern im Editor.")
         loesung = []
+    else:
+        loesung = [s if isinstance(s, str) else {"speichern": s["speichern"], "inhalt": _text(s["inhalt"])}
+                   for s in (loesung or [])]
 
     shell = roh.get("shell", system.start_shell)
     if shell not in system.shell_ids:

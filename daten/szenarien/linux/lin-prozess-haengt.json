@@ -1,0 +1,187 @@
+{
+  "id": "lin-prozess-haengt",
+  "system": "linux",
+  "titel": "Tabellenkalkulation friert ein",
+  "kategorie": "Prozesse",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/ps.1.html",
+    "https://man7.org/linux/man-pages/man1/kill.1.html",
+    "https://man7.org/linux/man-pages/man7/signal.7.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "LibreOffice Calc reagiert bei Anna seit Minuten nicht mehr, der Lüfter dreht hoch.",
+    "Thunderbird ist offen und soll weiterlaufen.",
+    "",
+    "Aufgabe: Finde den hängenden Prozess und beende gezielt nur ihn."
+  ],
+  "zustand": {
+    "haengt": true,
+    "sigterm": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ps aux"
+      ],
+      "bedeutung": "Alle laufenden Prozesse mit CPU- und Speicherverbrauch anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc",
+            "anna        4711 99.6 14.2 3984112 1163520 ?    Rl   08:41  21:37 /usr/lib/libreoffice/program/soffice.bin --calc"
+          ]
+        },
+        {
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "top"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "top zeigt eine Live-Liste (q beendet) – hier nicht nachgebaut. Nimm ps aux."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "pgrep soffice",
+        "pgrep -a soffice"
+      ],
+      "bedeutung": "Prozess-IDs nach Namen suchen",
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "ausgabe": "4711"
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill 4711",
+        "kill -15 4711",
+        "kill -TERM 4711"
+      ],
+      "bedeutung": "Einen Prozess höflich beenden (Signal TERM)",
+      "frage": "Bitte den Prozess 4711 höflich, sich zu beenden",
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "setze": {
+            "sigterm": true
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "bash: kill: (4711) - No such process"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill -9 4711",
+        "kill -KILL 4711",
+        "kill -s KILL 4711"
+      ],
+      "bedeutung": "Einen Prozess erzwungen beenden (Signal KILL)",
+      "frage": "Beende den Prozess 4711 erzwungen",
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "setze": {
+            "haengt": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "bash: kill: (4711) - No such process"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "pkill -9 soffice.bin",
+        "pkill -9 soffice",
+        "killall -9 soffice.bin"
+      ],
+      "bedeutung": "Prozesse nach Namen erzwungen beenden",
+      "faelle": [
+        {
+          "setze": {
+            "haengt": false
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill -9 3305",
+        "pkill thunderbird",
+        "killall thunderbird"
+      ],
+      "falsch": true,
+      "warum": "Thunderbird läuft normal und soll weiterlaufen. Beende nur den hängenden Prozess.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Das würde Thunderbird beenden. In der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "haengt": false
+  },
+  "hinweise": [
+    "Finde den Prozess, der fast 100 % Rechenleistung braucht. Notiere seine Prozess-ID (PID).",
+    "„ps aux“ zeigt alle Prozesse (Filter: „ps aux | grep soffice“). „kill PID“ bittet um Beenden; reagiert er nicht, hilft das Signal KILL (-9).",
+    "„kill 4711“ – wenn er weiterläuft: „kill -9 4711“."
+  ],
+  "erklaerung": [
+    "LibreOffice läuft als Prozess soffice.bin mit PID 4711 und belegte 99,6 % CPU.",
+    "„kill 4711“ schickt das Signal TERM: „Bitte beende dich“. Ein hängendes Programm reagiert darauf oft nicht.",
+    "„kill -9 4711“ schickt KILL: Der Kernel beendet den Prozess sofort, ungespeicherte Daten sind weg.",
+    "Erst TERM versuchen, dann KILL. Mit „ps aux | grep soffice“ findet man den Prozess schneller."
+  ],
+  "begriffe": {
+    "Prozess / PID": "Ein laufendes Programm und seine Nummer.",
+    "Signal TERM (15)": "Bitte um Beenden; das Programm kann noch aufräumen.",
+    "Signal KILL (9)": "Sofortiges Beenden durch den Kernel; nicht abfangbar.",
+    "ps aux": "Liste aller Prozesse aller Benutzer mit CPU (%CPU) und Speicher (%MEM)."
+  },
+  "loesung": [
+    "ps aux | grep soffice",
+    "kill 4711",
+    "ps aux | grep soffice",
+    "kill -9 4711"
+  ]
+}

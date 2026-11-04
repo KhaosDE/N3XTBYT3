@@ -1,0 +1,152 @@
+{
+  "id": "lin-dpkg-unterbrochen",
+  "system": "linux",
+  "titel": "Updates brechen ab: dpkg was interrupted",
+  "kategorie": "Pakete",
+  "schwierigkeit": 2,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man1/dpkg.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Gestern ist Annas Laptop während der Updates ausgegangen (Akku leer).",
+    "Seitdem bricht jede Installation und jedes Update mit einer Fehlermeldung ab.",
+    "",
+    "Aufgabe: Lies die Fehlermeldung genau, repariere die Paketverwaltung und spiele die Updates ein."
+  ],
+  "zustand": {
+    "dpkg_ok": false,
+    "aktualisiert": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "apt upgrade",
+        "apt upgrade -y",
+        "apt full-upgrade",
+        "apt full-upgrade -y",
+        "apt install -f"
+      ],
+      "bedeutung": "Alle installierten Pakete aktualisieren",
+      "frage": "Spiele alle verfügbaren Updates ein (ohne Rückfrage)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "dpkg_ok": false
+          },
+          "fehler": true,
+          "ausgabe": "E: dpkg was interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem."
+        },
+        {
+          "setze": {
+            "aktualisiert": true
+          },
+          "ausgabe": [
+            "Reading package lists... Done",
+            "Building dependency tree... Done",
+            "Reading state information... Done",
+            "Calculating upgrade... Done",
+            "(Paketliste und Fortschritt hier gekürzt)",
+            "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apt update"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": [
+            "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease",
+            "Reading package lists... Done"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "dpkg --configure -a"
+      ],
+      "bedeutung": "Halb installierte Pakete fertig einrichten (nach Abbruch)",
+      "frage": "Richte alle halb installierten Pakete fertig ein (wie es die Fehlermeldung verlangt)",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "setze": {
+            "dpkg_ok": true
+          },
+          "ausgabe": [
+            "Setting up linux-firmware (…) ...",
+            "Setting up libreoffice-core (…) ...",
+            "(weitere Zeilen hier gekürzt)",
+            "Processing triggers for man-db ..."
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "rm /var/lib/dpkg/lock-frontend",
+        "rm /var/lib/dpkg/lock",
+        "rm -f /var/lib/dpkg/lock*"
+      ],
+      "falsch": true,
+      "warum": "Die Meldung sagt genau, was zu tun ist: „sudo dpkg --configure -a“. Sperrdateien von Hand zu löschen ist gefährlich, wenn noch ein Paketvorgang läuft.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Stopp: Sperrdateien löschen hilft hier nicht und kann die Paketdatenbank beschädigen."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "dpkg_ok": true,
+    "aktualisiert": true
+  },
+  "hinweise": [
+    "Die Fehlermeldung von apt enthält schon den Befehl, der das Problem behebt. Lies sie ganz.",
+    "dpkg hat Pakete nur halb eingerichtet. „dpkg --configure -a“ richtet alle fertig ein – mit Root-Rechten.",
+    "„sudo dpkg --configure -a“, danach „sudo apt upgrade -y“."
+  ],
+  "erklaerung": [
+    "Beim Stromausfall waren einige Pakete entpackt, aber noch nicht eingerichtet. dpkg merkt sich das und",
+    "lässt keine weiteren Änderungen zu, bis das erledigt ist. „sudo dpkg --configure -a“ richtet alle",
+    "halb installierten Pakete fertig ein. Danach funktionieren apt upgrade und apt install wieder.",
+    "Tipp: Updates nie bei fast leerem Akku starten."
+  ],
+  "begriffe": {
+    "dpkg --configure -a": "Richtet alle entpackten, aber nicht fertig eingerichteten Pakete ein.",
+    "apt upgrade": "Aktualisiert alle installierten Pakete auf die neueste Version aus den Paketlisten.",
+    "-y": "Beantwortet Rückfragen automatisch mit „Ja“."
+  },
+  "loesung": [
+    "sudo apt upgrade -y",
+    "sudo dpkg --configure -a",
+    "sudo apt upgrade -y"
+  ]
+}

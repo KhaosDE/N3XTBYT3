@@ -1,0 +1,129 @@
+{
+  "_info": "Befehle und Startwerte für jedes Linux-Szenario (Ubuntu 24.04 LTS, Desktop). Eingebaut sind außerdem: pwd, cd, ls, cat, less, head, tail, grep, chmod, chown, nano, sudo und Filter hinter Pipes.",
+  "system": "linux",
+  "zustand": {
+    "hostname": "pc-lager02",
+    "benutzer": "anna",
+    "home": "/home/anna",
+    "pfad": "/home/anna",
+    "pfad_vorher": "/home/anna",
+    "gruppen": "anna,sudo",
+    "root": false,
+    "sudo_erlaubt": true,
+    "sudo_cache": false,
+    "admin": false
+  },
+  "prompt": {
+    "bash": "{benutzer_anzeige}@{hostname}:{pfad_anzeige}{prompt_zeichen} "
+  },
+  "dateien": {
+    "/etc/hostname": "pc-lager02",
+    "/etc/os-release": [
+      "PRETTY_NAME=\"Ubuntu 24.04.1 LTS\"",
+      "NAME=\"Ubuntu\"",
+      "VERSION_ID=\"24.04\"",
+      "VERSION=\"24.04.1 LTS (Noble Numbat)\"",
+      "VERSION_CODENAME=noble",
+      "ID=ubuntu",
+      "ID_LIKE=debian"
+    ],
+    "/etc/shadow": {
+      "inhalt": "",
+      "rechte": "640",
+      "besitzer": "root:shadow"
+    },
+    "/home/anna/.bashrc": {
+      "inhalt": "# ~/.bashrc: executed by bash(1) for non-login shells.",
+      "besitzer": "anna:anna"
+    },
+    "/home/anna/.profile": {
+      "inhalt": "# ~/.profile: executed by the command interpreter for login shells.",
+      "besitzer": "anna:anna"
+    },
+    "/tmp/": {
+      "rechte": "rwxrwxrwt"
+    }
+  },
+  "befehle": [
+    {
+      "muster": [
+        "help",
+        "hilfe"
+      ],
+      "bedeutung": "Hilfe der Simulation anzeigen",
+      "faelle": [
+        {
+          "aktion": "hilfe"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "clear"
+      ],
+      "bedeutung": "Bildschirm leeren",
+      "faelle": [
+        {
+          "aktion": "leeren"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "hostname"
+      ],
+      "bedeutung": "Namen des Rechners anzeigen",
+      "faelle": [
+        {
+          "ausgabe": "{hostname}"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "whoami"
+      ],
+      "bedeutung": "Angemeldeten Benutzer anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "root": true
+          },
+          "ausgabe": "root"
+        },
+        {
+          "ausgabe": "{benutzer}"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "exit",
+        "logout"
+      ],
+      "bedeutung": "Shell bzw. root-Shell verlassen",
+      "faelle": [
+        {
+          "aktion": "exit"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "reboot",
+        "shutdown -r now",
+        "shutdown now",
+        "poweroff",
+        "systemctl reboot"
+      ],
+      "falsch": true,
+      "warum": "Neu starten ist hier nicht die Lösung: Die Ursache bleibt, und auf einem Server fliegen alle Benutzer raus. Finde den Fehler und behebe ihn gezielt.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Neustart und Herunterfahren werden in der Simulation nicht ausgeführt."
+        }
+      ]
+    }
+  ]
+}

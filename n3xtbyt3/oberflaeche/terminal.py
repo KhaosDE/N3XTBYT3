@@ -36,6 +36,8 @@ class Terminal:
     # ------------------------------------------------------------------ Puffer
 
     def schreibe(self, text: str, art: str = "ausgabe", prompt_laenge: int = 0) -> None:
+        if "\t" in text:
+            text = text.expandtabs(8)
         self.zeilen.append(TZeile(text, art, prompt_laenge))
         if len(self.zeilen) > MAX_ZEILEN:
             self.zeilen = self.zeilen[-MAX_ZEILEN:]

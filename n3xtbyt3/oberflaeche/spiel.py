@@ -9,7 +9,9 @@ import pygame
 from ..kern import auswahl, auswertung
 from ..kern.sitzung import Sitzung
 from ..kern.systeme import SYSTEME
+from ..kern.editor import EditorPuffer
 from .basis import Ansicht, Knopf, knopf_klick, zeichne_knopf
+from .editor_ansicht import EditorFeld
 from .menue import Szenarioliste, etikett, lade_alles, schwierigkeit_zeichnen
 from .stil import FARBE, glow_text
 from .terminal import Terminal
@@ -39,6 +41,7 @@ class Spielansicht(Ansicht):
         self.knoepfe: list[Knopf] = []
         self.blink = 0.0
         self._gespeichert = False
+        self.editor: EditorFeld | None = None
 
     # ------------------------------------------------------------------ Aktionen
 
@@ -87,6 +90,22 @@ class Spielansicht(Ansicht):
         if antwort.geloest_jetzt:
             self.panel_scroll = 0
             self._speichern_geloest()
+        if antwort.aktion == "editor" and antwort.editor:
+            puffer = EditorPuffer(antwort.editor["pfad"], antwort.editor["inhalt"],
+                                  antwort.editor["nur_lesen"], antwort.editor["neu"])
+            self.editor = EditorFeld(puffer, self._datei_speichern, self._editor_zu)
+
+    def _datei_speichern(self, pfad: str, text: str) -> str:
+        antwort = self.sitzung.datei_speichern(pfad, text)
+        if antwort.geloest_jetzt:
+            for z in antwort.zeilen[1:]:
+                self.terminal.schreibe(z.text, z.art)
+            self.panel_scroll = 0
+            self._speichern_geloest()
+        return antwort.zeilen[0].text if antwort.zeilen else ""
+
+    def _editor_zu(self) -> None:
+        self.editor = None
 
     def _speichern_geloest(self) -> None:
         # Gelöst: sofort speichern, damit nichts verloren geht. Weitere Eingaben zählen nicht mehr.
@@ -96,6 +115,15 @@ class Spielansicht(Ansicht):
 
     def ereignis(self, e):
         if knopf_klick(self.knoepfe, e):
+            return
+        if self.editor is not None:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
+                self.hinweis()
+            elif e.type == pygame.KEYDOWN:
+                self.editor.taste(e)
+            elif e.type == pygame.TEXTINPUT:
+                self.editor.text_eingabe(e.text)
+            self.blink = 0.0
             return
         if e.type == pygame.KEYDOWN:
             if e.key == pygame.K_F1:
@@ -139,7 +167,10 @@ class Spielansicht(Ansicht):
         self.terminal_rect = pygame.Rect(0, kopf_h, w - panel_b, h - kopf_h - fuss_h)
         self.panel_rect = pygame.Rect(w - panel_b, kopf_h, panel_b, h - kopf_h - fuss_h)
         cursor_an = (self.blink % 1.0) < 0.6
-        self.terminal.zeichnen(f, self.terminal_rect, s, self.sitzung.prompt(), cursor_an)
+        if self.editor is not None:
+            self.editor.zeichnen(f, self.terminal_rect, s, cursor_an)
+        else:
+            self.terminal.zeichnen(f, self.terminal_rect, s, self.sitzung.prompt(), cursor_an)
         pygame.draw.line(f, FARBE["linie"], self.panel_rect.topleft, self.panel_rect.bottomleft, 2)
         self._panel(f, self.panel_rect)
         self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h))

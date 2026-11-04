@@ -1,0 +1,119 @@
+{
+  "id": "lin-zeit-ntp",
+  "system": "linux",
+  "titel": "Uhr geht falsch, Anmeldung an Webseiten scheitert",
+  "kategorie": "System",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/timedatectl.1.html",
+    "https://documentation.ubuntu.com/server/how-to/networking/timedatectl-and-timesyncd/"
+  ],
+  "datum": "2026-11-04",
+  "ausgangslage": [
+    "Annas Uhr geht sieben Minuten nach. Manche Webseiten melden Zertifikatsfehler,",
+    "die Zwei-Faktor-Codes werden abgelehnt. Die Zeitzone stimmt (Europe/Berlin).",
+    "",
+    "Aufgabe: Prüfe die Zeiteinstellungen und schalte die automatische Zeitsynchronisierung ein."
+  ],
+  "zustand": {
+    "ntp": false
+  },
+  "befehle": [
+    {
+      "muster": [
+        "timedatectl",
+        "timedatectl status"
+      ],
+      "bedeutung": "Uhrzeit, Zeitzone und Zeitsynchronisierung anzeigen",
+      "faelle": [
+        {
+          "wenn": {
+            "ntp": false
+          },
+          "ausgabe": [
+            "               Local time: Wed 2026-11-04 09:07:12 CET",
+            "           Universal time: Wed 2026-11-04 08:07:12 UTC",
+            "                 RTC time: Wed 2026-11-04 08:07:12",
+            "                Time zone: Europe/Berlin (CET, +0100)",
+            "System clock synchronized: no",
+            "              NTP service: inactive",
+            "          RTC in local TZ: no"
+          ]
+        },
+        {
+          "ausgabe": [
+            "               Local time: Wed 2026-11-04 09:14:31 CET",
+            "           Universal time: Wed 2026-11-04 08:14:31 UTC",
+            "                 RTC time: Wed 2026-11-04 08:14:31",
+            "                Time zone: Europe/Berlin (CET, +0100)",
+            "System clock synchronized: yes",
+            "              NTP service: active",
+            "          RTC in local TZ: no"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "timedatectl set-ntp true",
+        "timedatectl set-ntp on",
+        "timedatectl set-ntp yes"
+      ],
+      "bedeutung": "Automatische Zeitsynchronisierung (NTP) einschalten",
+      "frage": "Schalte die automatische Zeitsynchronisierung (NTP) ein",
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {
+          "setze": {
+            "ntp": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "timedatectl set-time 09:14:00",
+        "date -s 09:14"
+      ],
+      "falsch": true,
+      "warum": "Die Ursache ist die ausgeschaltete Synchronisierung. Die Uhr von Hand zu stellen behebt das nicht.",
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Von Hand stellen hilft nur kurz – die Uhr läuft wieder weg."
+        }
+      ]
+    }
+  ],
+  "ziel": {
+    "ntp": true
+  },
+  "hinweise": [
+    "Unter Linux gleicht ein Dienst die Uhr übers Netz ab. Ist das eingeschaltet?",
+    "„timedatectl“ zeigt „NTP service: inactive“ und „System clock synchronized: no“. Einschalten geht mit „timedatectl set-ntp“.",
+    "„sudo timedatectl set-ntp true“."
+  ],
+  "erklaerung": [
+    "Die Zeitsynchronisierung (systemd-timesyncd, NTP) war ausgeschaltet; die Uhr lief langsam weg.",
+    "„sudo timedatectl set-ntp true“ schaltet sie ein; kurz danach steht „System clock synchronized: yes“.",
+    "Falsche Uhrzeit bricht vieles: Zertifikate wirken ungültig, Einmal-Codes (2FA) passen nicht, Protokolle haben falsche Zeiten."
+  ],
+  "begriffe": {
+    "NTP": "Network Time Protocol: Uhrzeit über das Netzwerk abgleichen.",
+    "timedatectl": "Zeigt und ändert Uhrzeit, Zeitzone und NTP-Einstellung.",
+    "RTC": "Real Time Clock: die Hardware-Uhr auf der Hauptplatine.",
+    "polkit": "Regelt, welche Benutzer welche Systemaktionen ausführen dürfen (fragt ggf. nach Passwort)."
+  },
+  "loesung": [
+    "timedatectl",
+    "sudo timedatectl set-ntp true",
+    "timedatectl"
+  ]
+}
