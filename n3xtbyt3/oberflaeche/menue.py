@@ -166,33 +166,29 @@ class Hauptmenue(Ansicht):
         ort = s.klein.render(f"Spielstand und eigene Szenarien: {pfade.datenordner()}", True, FARBE["text_schwach"])
         f.blit(ort, ort.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 0.5)))
 
+    def _ticket_kachel(self, f, rect, i):
+        s = self.app.schriften
+        self.rects.append(rect)
+        spielbar = self._spielbar("tickets")
+        gewaehlt = i == self.auswahl
+        hinter = pygame.Surface(rect.size, pygame.SRCALPHA)
+        hinter.fill((60, 20, 50, 230) if gewaehlt else (17, 9, 15, 230))
+        f.blit(hinter, rect.topleft)
+        rand = FARBE["magenta"] if spielbar else FARBE["aus"]
+        pygame.draw.rect(f, rand, rect, width=3 if gewaehlt else 2, border_radius=6)
+        name = f"{i + 1}  Tickets (alle Systeme gemischt)"
+        farbe = FARBE["magenta"] if spielbar else FARBE["aus"]
+        f.blit(s.zwischen.render(name, True, farbe), (rect.left + s.zeichen_breite * 2, rect.top + rect.height // 6))
+        info = f"{self.tickets} Tickets · Störungen mit Dringlichkeit, über mehrere Rechner" if spielbar else "kommt noch"
+        bild = s.text.render(info, True, FARBE["text"] if spielbar else FARBE["aus"])
+        f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.bottom - bild.get_height() - rect.height // 6))
+
 
 SONDER = (
     ("zufall", "»  Zufälliges Szenario (empfohlen: Fälliges und Schwaches zuerst)"),
     ("training", "»  Befehls-Training: Welcher Befehl …?"),
     ("auswertung", "»  Auswertung ansehen: Stärken, Schwächen, Empfehlung"),
 )
-
-
-def _ticket_kachel_zeichnen(self, f, rect, i):
-    s = self.app.schriften
-    self.rects.append(rect)
-    spielbar = self._spielbar("tickets")
-    gewaehlt = i == self.auswahl
-    hinter = pygame.Surface(rect.size, pygame.SRCALPHA)
-    hinter.fill((60, 20, 50, 230) if gewaehlt else (17, 9, 15, 230))
-    f.blit(hinter, rect.topleft)
-    rand = FARBE["magenta"] if spielbar else FARBE["aus"]
-    pygame.draw.rect(f, rand, rect, width=3 if gewaehlt else 2, border_radius=6)
-    name = f"{i + 1}  Tickets (alle Systeme gemischt)"
-    farbe = FARBE["magenta"] if spielbar else FARBE["aus"]
-    f.blit(s.zwischen.render(name, True, farbe), (rect.left + s.zeichen_breite * 2, rect.top + rect.height // 6))
-    info = f"{self.tickets} Tickets · Störungen mit Dringlichkeit, über mehrere Rechner" if spielbar else "kommt noch"
-    bild = s.text.render(info, True, FARBE["text"] if spielbar else FARBE["aus"])
-    f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.bottom - bild.get_height() - rect.height // 6))
-
-
-Hauptmenue._ticket_kachel = _ticket_kachel_zeichnen
 
 
 class Szenarioliste(Ansicht):
