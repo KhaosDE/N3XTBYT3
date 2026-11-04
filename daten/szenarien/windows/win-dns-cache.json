@@ -1,0 +1,224 @@
+{
+  "id": "win-dns-cache",
+  "system": "windows",
+  "titel": "Intranet-Seite lädt nicht mehr",
+  "kategorie": "Netzwerk",
+  "schwierigkeit": 1,
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
+    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client"
+  ],
+  "datum": "2026-11-04",
+  "shell": "cmd",
+  "ausgangslage": [
+    "Frau Berger ruft an: „Das Intranet geht nicht mehr. Andere Seiten gehen.“",
+    "Gestern Abend hat die IT den Intranet-Server auf eine neue IP-Adresse umgezogen.",
+    "Bei den Kollegen geht das Intranet wieder, nur bei Frau Berger nicht.",
+    "Der Name der Seite: intranet.firma.internal",
+    "",
+    "Aufgabe: Finde heraus, warum der PC die Seite nicht erreicht, und behebe es."
+  ],
+  "zustand": {
+    "dns_cache_alt": true
+  },
+  "befehle": [
+    {
+      "muster": ["ipconfig"],
+      "bedeutung": "IP-Adresse, Subnetzmaske und Gateway anzeigen",
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Windows IP Configuration",
+          "",
+          "",
+          "Ethernet adapter Ethernet:",
+          "",
+          "   Connection-specific DNS Suffix  . : firma.internal",
+          "   IPv4 Address. . . . . . . . . . . : 192.168.10.57",
+          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+          "   Default Gateway . . . . . . . . . : 192.168.10.1"
+        ]
+      }]
+    },
+    {
+      "muster": ["ipconfig /all"],
+      "bedeutung": "Vollständige Netzwerkeinstellungen anzeigen (auch DNS-Server)",
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Windows IP Configuration",
+          "",
+          "   Host Name . . . . . . . . . . . . : {hostname}",
+          "   Primary Dns Suffix  . . . . . . . :",
+          "   Node Type . . . . . . . . . . . . : Hybrid",
+          "   IP Routing Enabled. . . . . . . . : No",
+          "   WINS Proxy Enabled. . . . . . . . : No",
+          "   DNS Suffix Search List. . . . . . : firma.internal",
+          "",
+          "Ethernet adapter Ethernet:",
+          "",
+          "   Connection-specific DNS Suffix  . : firma.internal",
+          "   Description . . . . . . . . . . . : Intel(R) Ethernet Connection I219-V",
+          "   Physical Address. . . . . . . . . : 00-1A-2B-3C-4D-5E",
+          "   DHCP Enabled. . . . . . . . . . . : Yes",
+          "   Autoconfiguration Enabled . . . . : Yes",
+          "   IPv4 Address. . . . . . . . . . . : 192.168.10.57(Preferred)",
+          "   Subnet Mask . . . . . . . . . . . : 255.255.255.0",
+          "   Default Gateway . . . . . . . . . : 192.168.10.1",
+          "   DHCP Server . . . . . . . . . . . : 192.168.10.5",
+          "   DNS Servers . . . . . . . . . . . : 192.168.10.5",
+          "   NetBIOS over Tcpip. . . . . . . . : Enabled"
+        ]
+      }]
+    },
+    {
+      "muster": ["ping intranet.firma.internal"],
+      "bedeutung": "Prüfen, ob ein Rechner antwortet",
+      "faelle": [
+        {
+          "wenn": {"dns_cache_alt": true},
+          "ausgabe": [
+            "",
+            "Pinging intranet.firma.internal [192.168.10.20] with 32 bytes of data:",
+            "Request timed out.",
+            "Request timed out.",
+            "Request timed out.",
+            "Request timed out.",
+            "",
+            "Ping statistics for 192.168.10.20:",
+            "    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),"
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Pinging intranet.firma.internal [192.168.10.25] with 32 bytes of data:",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+            "",
+            "Ping statistics for 192.168.10.25:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": ["ping 192.168.10.25"],
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Pinging 192.168.10.25 with 32 bytes of data:",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "Reply from 192.168.10.25: bytes=32 time<1ms TTL=128",
+          "",
+          "Ping statistics for 192.168.10.25:",
+          "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+          "Approximate round trip times in milli-seconds:",
+          "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+        ]
+      }]
+    },
+    {
+      "muster": ["ping 192.168.10.20"],
+      "faelle": [{
+        "ausgabe": [
+          "",
+          "Pinging 192.168.10.20 with 32 bytes of data:",
+          "Request timed out.",
+          "Request timed out.",
+          "Request timed out.",
+          "Request timed out.",
+          "",
+          "Ping statistics for 192.168.10.20:",
+          "    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),"
+        ]
+      }]
+    },
+    {
+      "muster": ["nslookup intranet.firma.internal"],
+      "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
+      "faelle": [{
+        "ausgabe": [
+          "Server:  dc01.firma.internal",
+          "Address:  192.168.10.5",
+          "",
+          "Name:    intranet.firma.internal",
+          "Address:  192.168.10.25",
+          ""
+        ]
+      }]
+    },
+    {
+      "muster": ["ipconfig /displaydns"],
+      "bedeutung": "Inhalt des DNS-Zwischenspeichers (Cache) anzeigen",
+      "faelle": [
+        {
+          "wenn": {"dns_cache_alt": true},
+          "ausgabe": [
+            "",
+            "Windows IP Configuration",
+            "",
+            "    intranet.firma.internal",
+            "    ----------------------------------------",
+            "    Record Name . . . . . : intranet.firma.internal",
+            "    Record Type . . . . . : 1",
+            "    Time To Live  . . . . : 2950",
+            "    Data Length . . . . . : 4",
+            "    Section . . . . . . . : Answer",
+            "    A (Host) Record . . . : 192.168.10.20",
+            ""
+          ]
+        },
+        {
+          "ausgabe": ["", "Windows IP Configuration", ""]
+        }
+      ]
+    },
+    {
+      "muster": ["ipconfig /flushdns"],
+      "bedeutung": "DNS-Zwischenspeicher (Cache) leeren",
+      "faelle": [{
+        "setze": {"dns_cache_alt": false},
+        "ausgabe": ["", "Windows IP Configuration", "", "Successfully flushed the DNS Resolver Cache."]
+      }]
+    },
+    {
+      "muster": ["Clear-DnsClientCache"],
+      "bedeutung": "DNS-Zwischenspeicher (Cache) leeren (PowerShell)",
+      "faelle": [{"setze": {"dns_cache_alt": false}}]
+    }
+  ],
+  "ziel": {"dns_cache_alt": false},
+  "hinweise": [
+    "Der Server hat eine neue Adresse. Woher „weiß“ der PC, welche Adresse zum Namen gehört – und könnte er sich die alte gemerkt haben?",
+    "Vergleiche: Welche Adresse nennt „ping“ für den Namen, welche „nslookup“? Den Zwischenspeicher zeigt „ipconfig /displaydns“.",
+    "Der PC hat sich die alte Adresse im DNS-Cache gemerkt. Leere den Cache mit „ipconfig /flushdns“."
+  ],
+  "erklaerung": [
+    "Windows merkt sich Antworten des DNS-Servers eine Zeit lang im DNS-Cache (Zwischenspeicher).",
+    "Frau Bergers PC hatte noch die alte Adresse 192.168.10.20 gespeichert – „ping“ und der Browser nehmen diese.",
+    "„nslookup“ fragt dagegen direkt den DNS-Server und bekommt die neue Adresse 192.168.10.25.",
+    "„ipconfig /flushdns“ leert den Cache. Danach fragt Windows neu nach und bekommt die richtige Adresse.",
+    "In der PowerShell macht „Clear-DnsClientCache“ dasselbe."
+  ],
+  "begriffe": {
+    "DNS": "Domain Name System: übersetzt Namen wie intranet.firma.internal in IP-Adressen.",
+    "DNS-Cache": "Zwischenspeicher, in dem Windows schon gefragte Namen und ihre Adressen eine Zeit lang aufbewahrt.",
+    "TTL (Time To Live)": "Wie viele Sekunden ein Eintrag noch im Cache bleibt. Bei ping: wie viele Netzwerk-Sprünge ein Paket noch darf.",
+    "nslookup": "Werkzeug, das einen DNS-Server direkt fragt – am Cache vorbei.",
+    "ping": "Schickt kleine Testpakete an einen Rechner und zeigt, ob und wie schnell er antwortet."
+  },
+  "loesung": [
+    "ping intranet.firma.internal",
+    "nslookup intranet.firma.internal",
+    "ipconfig /flushdns",
+    "ping intranet.firma.internal"
+  ]
+}

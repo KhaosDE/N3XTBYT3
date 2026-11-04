@@ -1,0 +1,79 @@
+{
+  "_info": "Befehle und Startwerte, die in jedem Windows-Szenario gelten. Szenarien können Startwerte überschreiben und eigene Befehle mit gleichem Muster vorziehen.",
+  "system": "windows",
+  "zustand": {
+    "hostname": "PC-BUERO-07",
+    "benutzer": "mberger",
+    "whoami": "pc-buero-07\\mberger",
+    "admin": true,
+    "pfad": "C:\\Windows\\system32"
+  },
+  "prompt": {
+    "powershell": "PS {pfad}> ",
+    "cmd": "{pfad}>"
+  },
+  "befehle": [
+    {
+      "muster": ["help", "hilfe"],
+      "bedeutung": "Hilfe der Simulation anzeigen",
+      "faelle": [{"aktion": "hilfe"}]
+    },
+    {
+      "muster": ["cls"],
+      "bedeutung": "Bildschirm leeren",
+      "faelle": [{"aktion": "leeren"}]
+    },
+    {
+      "muster": ["Clear-Host", "clear"],
+      "shell": "powershell",
+      "bedeutung": "Bildschirm leeren (PowerShell)",
+      "faelle": [{"aktion": "leeren"}]
+    },
+    {
+      "muster": ["hostname"],
+      "bedeutung": "Namen des Computers anzeigen",
+      "faelle": [{"ausgabe": "{hostname}"}]
+    },
+    {
+      "muster": ["$env:COMPUTERNAME"],
+      "shell": "powershell",
+      "bedeutung": "Namen des Computers anzeigen (PowerShell-Variable)",
+      "faelle": [{"ausgabe": "{hostname}"}]
+    },
+    {
+      "muster": ["whoami"],
+      "bedeutung": "Angemeldeten Benutzer anzeigen (Computer\\Benutzer)",
+      "faelle": [{"ausgabe": "{whoami}"}]
+    },
+    {
+      "muster": ["powershell"],
+      "bedeutung": "PowerShell starten",
+      "faelle": [{
+        "ausgabe": ["Windows PowerShell", "Copyright (C) Microsoft Corporation. All rights reserved.", ""],
+        "aktion": "wechsel:powershell"
+      }]
+    },
+    {
+      "muster": ["cmd"],
+      "bedeutung": "Eingabeaufforderung (cmd) starten",
+      "faelle": [{"aktion": "wechsel:cmd"}]
+    },
+    {
+      "muster": ["exit"],
+      "bedeutung": "Aktuelle Befehlszeile verlassen",
+      "faelle": [{"aktion": "exit"}]
+    }
+  ],
+  "shell_fallen": [
+    {
+      "_quelle": "Get-Alias sc zeigt in Windows PowerShell 5.1: sc -> Set-Content. Microsoft schreibt in der Doku deshalb sc.exe: https://learn.microsoft.com/windows-server/administration/windows-commands/sc-config",
+      "shell": "powershell",
+      "name": "sc",
+      "meldung": [
+        "Vorsicht: In Windows PowerShell ist „sc“ ein Alias (Kurzname) für Set-Content.",
+        "Damit würdest du in eine Datei schreiben und keinen Dienst steuern.",
+        "Schreib „sc.exe“ oder wechsle mit „cmd“ in die Eingabeaufforderung."
+      ]
+    }
+  ]
+}
