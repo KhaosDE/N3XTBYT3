@@ -37,6 +37,9 @@ den Fortschritt je System.
 
 Tobi will, dass du **ohne Unterbrechungen** arbeitest.
 
+- **Zu Beginn jeder Sitzung liest du als Erstes `IDEEN.md`**, danach `STAND.md` und `PLAN.md`.
+  Einträge mit `Status: freigegeben` haben Vorrang vor allem anderen (Regel unten:
+  „Ideen aus den Chats“).
 - Arbeite `PLAN.md` der Reihe nach ab: Meilenstein für Meilenstein, Schritt für Schritt.
 - Musst du etwas entscheiden, das der Plan offenlässt: entscheide selbst, nimm die
   einfachere Lösung, und schreib die Entscheidung mit Begründung in `STAND.md`,
@@ -71,9 +74,13 @@ Tobi bespricht neue Ideen zuerst im Chat und lässt sie dort ausarbeiten. Die fe
 Fassung landet in `IDEEN.md` mit einem Status:
 
 - `Status: offen` — nur notiert, **nicht bauen**.
-- `Status: freigegeben` — ausgearbeitet und von Tobi freigegeben. Baue sie nach dem
-  laufenden Meilenstein-Schritt ein (vor dem nächsten Meilenstein), trag sie in
-  `PLAN.md` ein und setz sie danach auf `Status: erledigt (<Datum>)`.
+- `Status: freigegeben` — ausgearbeitet und von Tobi freigegeben. Bau sie als Nächstes
+  (läuft gerade ein Meilenstein-Schritt, erst diesen Schritt abschließen). Trag sie in
+  `PLAN.md` ein, hak die Abnahme in `STAND.md` ab und setz sie danach auf
+  `Status: erledigt (<Datum>)`. Mehrere freigegebene Ideen: von oben nach unten.
+- `IDEEN.md` ist der einzige Weg, auf dem Aufträge aus den Chats zu dir kommen. Was dort
+  steht, ist ausgearbeitet; lass dir Lücken nicht bestätigen, sondern entscheide nach den
+  Regeln oben und notiere es in `STAND.md`.
 - Widerspricht eine freigegebene Idee einer Regel aus „Unverhandelbar“, baust du sie
   nicht und schreibst den Grund in `STAND.md`, Abschnitt „Offene Punkte“.
 
