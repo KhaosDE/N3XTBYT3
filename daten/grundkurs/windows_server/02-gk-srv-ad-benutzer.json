@@ -1,0 +1,82 @@
+{
+  "id": "gk-srv-ad-benutzer",
+  "system": "windows_server",
+  "titel": "Active Directory: Benutzerkonten prüfen und entsperren",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser",
+    "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount",
+    "https://learn.microsoft.com/powershell/module/activedirectory/unlock-adaccount"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-ad-konto-gesperrt",
+  "shell": "powershell",
+  "erklaeren": [
+    "Jeder Mitarbeiter hat im Active Directory ein Benutzerkonto. Typische Anrufe: „Ich komme nicht rein!“ –",
+    "das Konto ist gesperrt (zu oft falsches Passwort), deaktiviert oder abgelaufen. Die AD-Befehle der",
+    "PowerShell heißen alle …-AD…: Get-ADUser zeigt ein Konto, Search-ADAccount sucht Konten mit Problemen.",
+    "Hier ruft Kai Wagner (kwagner) aus dem Vertrieb an: Er kommt nach dem Urlaub nicht mehr rein."
+  ],
+  "begriffe": {
+    "SamAccountName": "Der Anmeldename eines Kontos, z. B. kwagner.",
+    "DistinguishedName": "Der volle Pfad eines Objekts im AD, z. B. CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal.",
+    "OU": "Organisationseinheit: ein Ordner im AD, z. B. für eine Abteilung.",
+    "Gesperrt (LockedOut)": "Nach zu vielen falschen Passwörtern sperrt das AD das Konto für eine Zeit."
+  },
+  "mitmachen": [
+    {
+      "text": "Sieh dir das Konto an: Get-ADUser kwagner",
+      "eingabe": "Get-ADUser kwagner",
+      "danach": "Enabled: True heißt: das Konto ist aktiv. Ob es gesperrt ist, zeigt Get-ADUser von sich aus nicht – dafür muss man die Eigenschaft ausdrücklich anfordern."
+    },
+    {
+      "text": "Mit der Eigenschaft LockedOut: Get-ADUser kwagner -Properties LockedOut",
+      "eingabe": "Get-ADUser kwagner -Properties LockedOut",
+      "danach": "LockedOut: True – das Konto ist gesperrt. Mit -Properties holst du Eigenschaften dazu, die standardmäßig nicht angezeigt werden."
+    },
+    {
+      "text": "Wer ist noch gesperrt? Search-ADAccount -LockedOut",
+      "eingabe": "Search-ADAccount -LockedOut",
+      "danach": "Search-ADAccount sucht Konten mit einem Problem – hier alle gesperrten. Nur Kai."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Entsperre das Konto von kwagner.",
+      "ziel": {
+        "gesperrt": false
+      },
+      "hinweise": [
+        "Das Verb für „entsperren“ ist Unlock.",
+        "Unlock-ADAccount mit -Identity und dem Anmeldenamen.",
+        "Tippe: Unlock-ADAccount -Identity kwagner"
+      ],
+      "loesung": [
+        "Unlock-ADAccount -Identity kwagner"
+      ],
+      "danach": "Entsperrt. Ein neues Passwort war nicht nötig – Kai kennt sein Passwort ja wieder."
+    },
+    {
+      "aufgabe": "Prüf nach, dass das Konto nicht mehr gesperrt ist.",
+      "eingabe": [
+        "Get-ADUser kwagner -Properties LockedOut",
+        "Get-ADUser -Identity kwagner -Properties LockedOut",
+        "Search-ADAccount -LockedOut"
+      ],
+      "wenn": {
+        "gesperrt": false
+      },
+      "hinweise": [
+        "Mit welchem Befehl hast du die Sperre vorhin gesehen?",
+        "Get-ADUser mit -Properties LockedOut.",
+        "Tippe: Get-ADUser kwagner -Properties LockedOut"
+      ],
+      "danach": "LockedOut: False – Kai kann sich wieder anmelden."
+    }
+  ],
+  "fertig": [
+    "Get-ADUser <name> zeigt ein Konto; -Properties … holt weitere Eigenschaften.",
+    "Search-ADAccount -LockedOut findet gesperrte Konten.",
+    "Unlock-ADAccount -Identity <name> entsperrt ein Konto."
+  ]
+}

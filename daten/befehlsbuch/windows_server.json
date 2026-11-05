@@ -1,0 +1,342 @@
+{
+  "_info": "Befehlsbuch Windows Server: aus den Lektionen des Grundkurses. Ein Test prüft jedes Beispiel in der genannten Lektion.",
+  "system": "windows_server",
+  "befehle": [
+    {
+      "befehl": "hostname",
+      "was": "Zeigt den Namen des Servers.",
+      "beispiel": "hostname",
+      "wann": "Bevor du etwas änderst: Bin ich auf dem richtigen Server?",
+      "lektion": "gk-srv-server",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/hostname"
+    },
+    {
+      "befehl": "whoami",
+      "was": "Zeigt das angemeldete Konto (DOMÄNE\\benutzer).",
+      "beispiel": "whoami",
+      "wann": "Um zu sehen, mit welchem Konto du arbeitest.",
+      "lektion": "gk-srv-server",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami"
+    },
+    {
+      "befehl": "Enter-PSSession",
+      "was": "Verbindet dich mit der PowerShell eines anderen Servers.",
+      "beispiel": "Enter-PSSession -ComputerName srv-datei01",
+      "auch": [
+        "Enter-PSSession srv-datei01"
+      ],
+      "parameter": {
+        "-ComputerName": "Name des Servers."
+      },
+      "wann": "Um einen Server aus der Ferne zu bedienen.",
+      "lektion": "gk-srv-server",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enter-pssession?view=powershell-5.1"
+    },
+    {
+      "befehl": "Exit-PSSession",
+      "was": "Beendet die Fernverbindung (wie exit).",
+      "beispiel": "Exit-PSSession",
+      "wann": "Wenn du auf dem anderen Server fertig bist.",
+      "lektion": "gk-srv-server",
+      "vorher": [
+        "Enter-PSSession -ComputerName srv-datei01"
+      ],
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/exit-pssession?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-ADUser",
+      "was": "Zeigt ein Benutzerkonto im Active Directory.",
+      "beispiel": "Get-ADUser kwagner -Properties LockedOut",
+      "auch": [
+        "Get-ADUser kwagner",
+        "Get-ADUser -Identity kwagner -Properties LockedOut"
+      ],
+      "parameter": {
+        "-Identity": "Anmeldename (darf man weglassen).",
+        "-Properties": "Weitere Eigenschaften, z. B. LockedOut, AccountExpirationDate."
+      },
+      "wann": "Wenn sich jemand nicht anmelden kann: gesperrt, deaktiviert, abgelaufen?",
+      "lektion": "gk-srv-ad-benutzer",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser"
+    },
+    {
+      "befehl": "Search-ADAccount",
+      "was": "Sucht Konten mit Problemen (gesperrt, abgelaufen, deaktiviert …).",
+      "beispiel": "Search-ADAccount -LockedOut",
+      "parameter": {
+        "-LockedOut": "Gesperrte Konten.",
+        "-AccountExpired": "Abgelaufene Konten.",
+        "-AccountDisabled": "Deaktivierte Konten."
+      },
+      "wann": "Um alle betroffenen Konten auf einmal zu finden.",
+      "lektion": "gk-srv-ad-benutzer",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount"
+    },
+    {
+      "befehl": "Unlock-ADAccount",
+      "was": "Entsperrt ein Konto.",
+      "beispiel": "Unlock-ADAccount -Identity kwagner",
+      "auch": [
+        "Unlock-ADAccount kwagner"
+      ],
+      "wann": "Wenn ein Konto nach zu vielen falschen Passwörtern gesperrt ist.",
+      "lektion": "gk-srv-ad-benutzer",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/unlock-adaccount"
+    },
+    {
+      "befehl": "Get-ADGroupMember",
+      "was": "Zeigt, wer in einer Gruppe ist.",
+      "beispiel": "Get-ADGroupMember GG-Vertrieb",
+      "auch": [
+        "Get-ADGroupMember -Identity GG-Vertrieb"
+      ],
+      "wann": "Bei Rechte-Problemen: Ist die Person in der richtigen Gruppe?",
+      "lektion": "gk-srv-ad-gruppen",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/get-adgroupmember"
+    },
+    {
+      "befehl": "Get-ADPrincipalGroupMembership",
+      "was": "Zeigt, in welchen Gruppen jemand ist.",
+      "beispiel": "Get-ADPrincipalGroupMembership nbecker",
+      "auch": [
+        "Get-ADPrincipalGroupMembership -Identity nbecker"
+      ],
+      "wann": "Andersherum gefragt: Welche Gruppen hat diese Person?",
+      "lektion": "gk-srv-ad-gruppen",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/get-adprincipalgroupmembership"
+    },
+    {
+      "befehl": "Add-ADGroupMember",
+      "was": "Nimmt jemanden in eine Gruppe auf.",
+      "beispiel": "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker",
+      "auch": [
+        "Add-ADGroupMember GG-Vertrieb nbecker"
+      ],
+      "parameter": {
+        "-Identity": "Die Gruppe.",
+        "-Members": "Wer hinein soll."
+      },
+      "wann": "Wenn jemand neu in eine Abteilung kommt und deren Rechte braucht.",
+      "lektion": "gk-srv-ad-gruppen",
+      "frage": "Welcher Befehl nimmt nbecker in die Gruppe GG-Vertrieb auf?",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/add-adgroupmember"
+    },
+    {
+      "befehl": "Get-WindowsFeature",
+      "was": "Zeigt Rollen und Features und ob sie installiert sind.",
+      "beispiel": "Get-WindowsFeature *Backup*",
+      "auch": [
+        "Get-WindowsFeature -Name *Backup*"
+      ],
+      "wann": "Wenn ein Programm oder Befehl auf dem Server fehlt.",
+      "lektion": "gk-srv-features",
+      "quelle": "https://learn.microsoft.com/powershell/module/servermanager/get-windowsfeature"
+    },
+    {
+      "befehl": "Install-WindowsFeature",
+      "was": "Installiert eine Rolle oder ein Feature.",
+      "beispiel": "Install-WindowsFeature Windows-Server-Backup",
+      "auch": [
+        "Install-WindowsFeature -Name Windows-Server-Backup"
+      ],
+      "parameter": {
+        "-IncludeManagementTools": "Auch die Verwaltungswerkzeuge installieren."
+      },
+      "wann": "Um einen fehlenden Baustein nachzurüsten.",
+      "lektion": "gk-srv-features",
+      "quelle": "https://learn.microsoft.com/powershell/module/servermanager/install-windowsfeature"
+    },
+    {
+      "befehl": "Resolve-DnsName",
+      "was": "Fragt DNS nach der Adresse zu einem Namen.",
+      "beispiel": "Resolve-DnsName drucker02.firma.internal",
+      "auch": [
+        "Resolve-DnsName -Name drucker02.firma.internal"
+      ],
+      "wann": "Wenn ein Gerät per Name nicht erreichbar ist.",
+      "lektion": "gk-srv-dns",
+      "quelle": "https://learn.microsoft.com/powershell/module/dnsclient/resolve-dnsname"
+    },
+    {
+      "befehl": "Get-DnsServerResourceRecord",
+      "was": "Zeigt die Einträge einer DNS-Zone.",
+      "beispiel": "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
+      "parameter": {
+        "-ZoneName": "Die Zone, z. B. firma.internal.",
+        "-RRType": "Art des Eintrags, z. B. A."
+      },
+      "wann": "Um zu sehen, welche Namen im DNS-Server stehen.",
+      "lektion": "gk-srv-dns",
+      "quelle": "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverresourcerecord"
+    },
+    {
+      "befehl": "Add-DnsServerResourceRecordA",
+      "was": "Legt einen A-Eintrag (Name → IPv4-Adresse) an.",
+      "beispiel": "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42",
+      "parameter": {
+        "-Name": "Name ohne Zone.",
+        "-IPv4Address": "Die Adresse.",
+        "-CreatePtr": "Auch den Rückwärts-Eintrag (Adresse → Name) anlegen."
+      },
+      "wann": "Wenn ein neues Gerät per Namen erreichbar sein soll.",
+      "lektion": "gk-srv-dns",
+      "quelle": "https://learn.microsoft.com/powershell/module/dnsserver/add-dnsserverresourcerecorda"
+    },
+    {
+      "befehl": "Get-DhcpServerv4ScopeStatistics",
+      "was": "Zeigt, wie voll ein DHCP-Bereich ist.",
+      "beispiel": "Get-DhcpServerv4ScopeStatistics",
+      "wann": "Wenn Geräte keine Adresse bekommen (169.254…).",
+      "lektion": "gk-srv-dhcp",
+      "quelle": "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scopestatistics"
+    },
+    {
+      "befehl": "Get-DhcpServerv4Scope",
+      "was": "Zeigt die DHCP-Bereiche mit Anfang und Ende.",
+      "beispiel": "Get-DhcpServerv4Scope",
+      "wann": "Um zu sehen, welche Adressen verteilt werden.",
+      "lektion": "gk-srv-dhcp",
+      "quelle": "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scope"
+    },
+    {
+      "befehl": "Set-DhcpServerv4Scope",
+      "was": "Ändert einen DHCP-Bereich.",
+      "beispiel": "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
+      "parameter": {
+        "-ScopeId": "Welcher Bereich.",
+        "-StartRange / -EndRange": "Erste / letzte Adresse.",
+        "-LeaseDuration": "Wie lange eine Adresse verliehen wird."
+      },
+      "wann": "Wenn der Bereich zu klein ist.",
+      "lektion": "gk-srv-dhcp",
+      "quelle": "https://learn.microsoft.com/powershell/module/dhcpserver/set-dhcpserverv4scope"
+    },
+    {
+      "befehl": "Get-WinEvent",
+      "was": "Liest Ereignisprotokolle.",
+      "beispiel": "Get-WinEvent -LogName System -MaxEvents 5",
+      "auch": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
+      ],
+      "parameter": {
+        "-LogName": "Welches Protokoll (System, Application …).",
+        "-MaxEvents": "Nur die neuesten n.",
+        "-FilterHashtable": "Gezielt filtern, z. B. @{LogName='System'; Id=1074}."
+      },
+      "wann": "Um herauszufinden, was auf dem Server passiert ist.",
+      "lektion": "gk-srv-ereignisse",
+      "quelle": "https://learn.microsoft.com/powershell/module/microsoft.powershell.diagnostics/get-winevent"
+    },
+    {
+      "befehl": "Set-ADAccountExpiration",
+      "was": "Setzt das Ablaufdatum eines Kontos.",
+      "beispiel": "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01",
+      "auch": [
+        "Set-ADAccountExpiration trichter -DateTime 2027-03-01"
+      ],
+      "parameter": {
+        "-DateTime": "Das Datum. Das Konto läuft zu Beginn dieses Tages ab."
+      },
+      "wann": "Bei Praktikanten und Aushilfen – oder wenn ein Konto abgelaufen ist.",
+      "lektion": "gk-srv-fehlersuche",
+      "quelle": "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountexpiration"
+    }
+  ],
+  "situationen": [
+    {
+      "wenn": "… ich auf einem anderen Server arbeiten muss?",
+      "befehle": [
+        "Enter-PSSession -ComputerName srv-datei01"
+      ],
+      "lektion": "gk-srv-server"
+    },
+    {
+      "wenn": "… ich prüfen will, auf welchem Server und mit welchem Konto ich arbeite?",
+      "befehle": [
+        "hostname",
+        "whoami"
+      ],
+      "lektion": "gk-srv-server"
+    },
+    {
+      "wenn": "… sich jemand nicht anmelden kann?",
+      "befehle": [
+        "Get-ADUser kwagner -Properties LockedOut",
+        "Search-ADAccount -LockedOut"
+      ],
+      "lektion": "gk-srv-ad-benutzer",
+      "erklaerung": "Gesperrt, deaktiviert oder abgelaufen? -Properties zeigt es."
+    },
+    {
+      "wenn": "… ein Konto gesperrt ist?",
+      "befehle": [
+        "Unlock-ADAccount -Identity kwagner"
+      ],
+      "lektion": "gk-srv-ad-benutzer"
+    },
+    {
+      "wenn": "… ein Konto abgelaufen ist (Praktikant, Aushilfe)?",
+      "befehle": [
+        "Get-ADUser trichter -Properties AccountExpirationDate",
+        "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01"
+      ],
+      "lektion": "gk-srv-fehlersuche"
+    },
+    {
+      "wenn": "… jemand nicht an die Dateien seiner Abteilung kommt?",
+      "befehle": [
+        "Get-ADPrincipalGroupMembership nbecker",
+        "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker"
+      ],
+      "lektion": "gk-srv-ad-gruppen",
+      "erklaerung": "Rechte hängen an Gruppen: Fehlt die Gruppe, aufnehmen. Danach einmal ab- und wieder anmelden."
+    },
+    {
+      "wenn": "… ich wissen will, wer in einer Gruppe ist?",
+      "befehle": [
+        "Get-ADGroupMember GG-Vertrieb"
+      ],
+      "lektion": "gk-srv-ad-gruppen"
+    },
+    {
+      "wenn": "… ein Programm oder Befehl auf dem Server fehlt?",
+      "befehle": [
+        "Get-WindowsFeature *Backup*",
+        "Install-WindowsFeature Windows-Server-Backup"
+      ],
+      "lektion": "gk-srv-features"
+    },
+    {
+      "wenn": "… ein Gerät nur per IP-Adresse erreichbar ist, nicht per Name?",
+      "befehle": [
+        "Resolve-DnsName drucker02.firma.internal",
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42"
+      ],
+      "lektion": "gk-srv-dns"
+    },
+    {
+      "wenn": "… Geräte keine IP-Adresse bekommen (169.254…)?",
+      "befehle": [
+        "Get-DhcpServerv4ScopeStatistics",
+        "Get-DhcpServerv4Scope"
+      ],
+      "lektion": "gk-srv-dhcp",
+      "erklaerung": "Free 0 heißt: Bereich voll. Dann den Bereich vergrößern oder die Lease-Dauer kürzen."
+    },
+    {
+      "wenn": "… ich wissen will, wer oder was den Server neu gestartet hat?",
+      "befehle": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
+      ],
+      "lektion": "gk-srv-ereignisse",
+      "erklaerung": "Ereignis 1074 im Protokoll System: Wer den Neustart ausgelöst hat."
+    },
+    {
+      "wenn": "… ich sehen will, was zuletzt im Systemprotokoll steht?",
+      "befehle": [
+        "Get-WinEvent -LogName System -MaxEvents 5"
+      ],
+      "lektion": "gk-srv-ereignisse"
+    }
+  ]
+}

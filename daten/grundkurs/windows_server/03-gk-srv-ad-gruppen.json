@@ -1,0 +1,76 @@
+{
+  "id": "gk-srv-ad-gruppen",
+  "system": "windows_server",
+  "titel": "Active Directory: Gruppen und Rechte",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-adgroupmember",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-adprincipalgroupmembership",
+    "https://learn.microsoft.com/powershell/module/activedirectory/add-adgroupmember"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-ad-gruppe-fehlt",
+  "shell": "powershell",
+  "erklaeren": [
+    "Rechte (z. B. auf den Ordner Vertrieb) gibt man in Firmen nicht einzelnen Personen, sondern Gruppen.",
+    "Wer in der Gruppe GG-Vertrieb ist, darf in den Vertriebsordner. Kommt jemand neu dazu, nimmt man ihn in",
+    "die Gruppe auf – fertig. Hier: Nina Becker (nbecker) ist neu im Vertrieb und kommt nicht an die Dateien."
+  ],
+  "begriffe": {
+    "Gruppe": "Sammlung von Benutzern. Rechte bekommt die Gruppe, alle Mitglieder erben sie.",
+    "Sicherheitsgruppe": "Gruppe, die für Rechte benutzt wird (GroupCategory: Security).",
+    "Mitglied": "Ein Benutzer (oder eine Gruppe), der zu einer Gruppe gehört."
+  },
+  "mitmachen": [
+    {
+      "text": "Wer ist in der Gruppe? Get-ADGroupMember GG-Vertrieb",
+      "eingabe": "Get-ADGroupMember GG-Vertrieb",
+      "danach": "Die Mitglieder der Gruppe GG-Vertrieb. Nina Becker fehlt."
+    },
+    {
+      "text": "Andersherum: In welchen Gruppen ist Nina? Get-ADPrincipalGroupMembership nbecker",
+      "eingabe": "Get-ADPrincipalGroupMembership nbecker",
+      "danach": "Nur in Domain Users – darin ist jeder. GG-Vertrieb fehlt: Darum kommt sie nicht an die Dateien."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Nimm nbecker in die Gruppe GG-Vertrieb auf.",
+      "ziel": {
+        "in_gruppe": true
+      },
+      "hinweise": [
+        "Hinzufügen heißt Add.",
+        "Add-ADGroupMember mit -Identity (die Gruppe) und -Members (wer dazu soll).",
+        "Tippe: Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker"
+      ],
+      "loesung": [
+        "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker"
+      ],
+      "danach": "Aufgenommen. Nina muss sich einmal ab- und wieder anmelden, damit die neue Gruppe wirkt."
+    },
+    {
+      "aufgabe": "Prüf nach, dass Nina jetzt Mitglied ist.",
+      "eingabe": [
+        "Get-ADGroupMember GG-Vertrieb",
+        "Get-ADGroupMember -Identity GG-Vertrieb",
+        "Get-ADPrincipalGroupMembership nbecker",
+        "Get-ADPrincipalGroupMembership -Identity nbecker"
+      ],
+      "wenn": {
+        "in_gruppe": true
+      },
+      "hinweise": [
+        "Einer der beiden Befehle vom Mitmachen zeigt es.",
+        "Get-ADGroupMember mit dem Gruppennamen.",
+        "Tippe: Get-ADGroupMember GG-Vertrieb"
+      ],
+      "danach": "Nina steht in der Liste."
+    }
+  ],
+  "fertig": [
+    "Rechte hängen an Gruppen, nicht an Personen.",
+    "Get-ADGroupMember zeigt, wer in einer Gruppe ist; Get-ADPrincipalGroupMembership, worin jemand ist.",
+    "Add-ADGroupMember -Identity <Gruppe> -Members <Benutzer> nimmt jemanden auf."
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "id": "gk-srv-dns",
+  "system": "windows_server",
+  "titel": "DNS-Server: Namen eintragen",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dnsclient/resolve-dnsname",
+    "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverresourcerecord",
+    "https://learn.microsoft.com/powershell/module/dnsserver/add-dnsserverresourcerecorda"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-dns-eintrag-fehlt",
+  "shell": "powershell",
+  "erklaeren": [
+    "Aus dem Windows-Kurs kennst du DNS: Es übersetzt Namen in IP-Adressen. In der Firma ist DC01 der",
+    "DNS-Server. Die Namen stehen dort in einer Zone (firma.internal) als Einträge – ein A-Eintrag verbindet",
+    "einen Namen mit einer IPv4-Adresse. Hier: Der neue Drucker drucker02 (192.168.10.42) geht nur per IP."
+  ],
+  "begriffe": {
+    "Zone": "Bereich, für den ein DNS-Server zuständig ist, z. B. firma.internal.",
+    "A-Eintrag": "DNS-Eintrag: Name → IPv4-Adresse.",
+    "TTL": "Wie lange eine DNS-Antwort zwischengespeichert werden darf."
+  },
+  "mitmachen": [
+    {
+      "text": "Kennt DNS den Drucker? Resolve-DnsName drucker02.firma.internal",
+      "eingabe": "Resolve-DnsName drucker02.firma.internal",
+      "danach": "„DNS name does not exist“ – der Name ist nicht eingetragen."
+    },
+    {
+      "text": "Was steht in der Zone? Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
+      "eingabe": "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
+      "danach": "Alle A-Einträge der Zone. drucker02 fehlt."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Trag drucker02 mit der Adresse 192.168.10.42 in die Zone firma.internal ein.",
+      "ziel": {
+        "eintrag": true
+      },
+      "hinweise": [
+        "Ein A-Eintrag wird hinzugefügt: Add-DnsServerResourceRecord…",
+        "Add-DnsServerResourceRecordA mit -ZoneName, -Name und -IPv4Address.",
+        "Tippe: Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42"
+      ],
+      "loesung": [
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42"
+      ],
+      "danach": "Eingetragen."
+    },
+    {
+      "aufgabe": "Prüf nach, ob der Name jetzt aufgelöst wird.",
+      "eingabe": [
+        "Resolve-DnsName drucker02.firma.internal",
+        "Resolve-DnsName -Name drucker02.firma.internal"
+      ],
+      "wenn": {
+        "eintrag": true
+      },
+      "hinweise": [
+        "Wie hast du es am Anfang geprüft?",
+        "Resolve-DnsName mit dem vollen Namen.",
+        "Tippe: Resolve-DnsName drucker02.firma.internal"
+      ],
+      "danach": "192.168.10.42 – der Drucker ist per Namen erreichbar."
+    }
+  ],
+  "fertig": [
+    "Ein DNS-Server hat Zonen mit Einträgen; ein A-Eintrag verbindet Name und IPv4-Adresse.",
+    "Get-DnsServerResourceRecord zeigt Einträge, Add-DnsServerResourceRecordA legt einen an.",
+    "Resolve-DnsName prüft, ob ein Name aufgelöst wird."
+  ]
+}

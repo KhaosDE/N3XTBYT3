@@ -1,0 +1,75 @@
+{
+  "id": "gk-srv-dhcp",
+  "system": "windows_server",
+  "titel": "DHCP-Server: wenn die Adressen ausgehen",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scope",
+    "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scopestatistics",
+    "https://learn.microsoft.com/powershell/module/dhcpserver/set-dhcpserverv4scope"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-dhcp-bereich-voll",
+  "shell": "powershell",
+  "erklaeren": [
+    "Der DHCP-Server verteilt IP-Adressen automatisch. Er hat dafür einen Bereich (Scope), z. B. 192.168.10.100",
+    "bis .150. Jede vergebene Adresse ist für eine Zeit verliehen (Lease). Ist der Bereich voll, bekommen neue",
+    "Geräte keine Adresse – unter Windows zeigen sie dann eine 169.254-Adresse (APIPA). Hier bekommen die",
+    "Schulungslaptops keine Adresse."
+  ],
+  "begriffe": {
+    "Scope (Bereich)": "Die Adressen, die ein DHCP-Server verteilen darf.",
+    "Lease": "Ausleihe einer Adresse für eine bestimmte Zeit.",
+    "APIPA": "Notadresse 169.254.x.x, wenn kein DHCP-Server antwortet."
+  },
+  "mitmachen": [
+    {
+      "text": "Wie voll ist der Bereich? Get-DhcpServerv4ScopeStatistics",
+      "eingabe": "Get-DhcpServerv4ScopeStatistics",
+      "danach": "Free 0, PercentageInUse 100: Keine Adresse mehr frei."
+    },
+    {
+      "text": "Wie groß ist er? Get-DhcpServerv4Scope",
+      "eingabe": "Get-DhcpServerv4Scope",
+      "danach": "StartRange und EndRange zeigen den Bereich. Er ist zu klein für alle Geräte."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Vergrößere den Bereich 192.168.10.0: Er soll bis 192.168.10.200 gehen.",
+      "ziel": {
+        "bereich_gross": true
+      },
+      "hinweise": [
+        "Einstellungen ändern: Set-…",
+        "Set-DhcpServerv4Scope mit -ScopeId und -EndRange.",
+        "Tippe: Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+      ],
+      "loesung": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+      ],
+      "danach": "Der Bereich ist größer."
+    },
+    {
+      "aufgabe": "Prüf nach, ob wieder Adressen frei sind.",
+      "eingabe": [
+        "Get-DhcpServerv4ScopeStatistics",
+        "Get-DhcpServerv4ScopeStatistics -ScopeId 192.168.10.0"
+      ],
+      "wenn": {
+        "bereich_gross": true
+      },
+      "hinweise": [
+        "Wie hast du am Anfang gesehen, dass der Bereich voll ist?",
+        "Get-DhcpServerv4ScopeStatistics.",
+        "Tippe: Get-DhcpServerv4ScopeStatistics"
+      ],
+      "danach": "Free 50 – die Laptops bekommen wieder Adressen."
+    }
+  ],
+  "fertig": [
+    "DHCP verteilt Adressen aus einem Bereich (Scope), verliehen als Lease.",
+    "Get-DhcpServerv4ScopeStatistics zeigt, wie voll der Bereich ist.",
+    "Set-DhcpServerv4Scope ändert den Bereich."
+  ]
+}

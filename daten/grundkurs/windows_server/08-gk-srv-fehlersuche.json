@@ -1,0 +1,73 @@
+{
+  "id": "gk-srv-fehlersuche",
+  "system": "windows_server",
+  "titel": "Fehlersuche am Server: Praktikant kommt nicht rein",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser",
+    "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount",
+    "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountexpiration"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-ad-konto-abgelaufen",
+  "shell": "powershell",
+  "erklaeren": [
+    "Dieselben fünf Schritte wie im Windows-Kurs: beschreiben, Infos sammeln, vermuten, gezielt beheben,",
+    "nachprüfen und notieren. Der Fall: Tom Richter (trichter), Praktikant, kann sich seit heute nicht mehr",
+    "anmelden. Sein Praktikum wurde bis Ende Februar verlängert. Passwort und Sperre hast du schon im Blick –",
+    "aber hier steckt etwas anderes dahinter."
+  ],
+  "begriffe": {
+    "Kontoablauf (AccountExpirationDate)": "Datum, ab dem ein Konto nicht mehr gilt – gut für Praktikanten und Aushilfen."
+  },
+  "mitmachen": [
+    {
+      "text": "Infos sammeln: Get-ADUser trichter -Properties AccountExpirationDate",
+      "eingabe": "Get-ADUser trichter -Properties AccountExpirationDate",
+      "danach": "AccountExpirationDate 11/1/2026: Das Konto ist abgelaufen. Vermutung: Bei der Verlängerung wurde das Ablaufdatum vergessen."
+    },
+    {
+      "text": "Gibt es noch mehr abgelaufene Konten? Search-ADAccount -AccountExpired",
+      "eingabe": "Search-ADAccount -AccountExpired",
+      "danach": "Nur Tom – es ist kein größeres Problem."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Beheben: Setz das Ablaufdatum auf den 1. März 2027 (Format 2027-03-01) – der Tag nach dem letzten Praktikumstag.",
+      "ziel": {
+        "ablauf": "verlaengert"
+      },
+      "hinweise": [
+        "Das Verb zum Einstellen ist Set.",
+        "Set-ADAccountExpiration mit -Identity und -DateTime.",
+        "Tippe: Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01"
+      ],
+      "loesung": [
+        "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01"
+      ],
+      "danach": "Gesetzt. Das Konto läuft zu Beginn des 1. März ab – Tom kann bis einschließlich 28. Februar arbeiten."
+    },
+    {
+      "aufgabe": "Nachprüfen: Zeig das neue Ablaufdatum an.",
+      "eingabe": [
+        "Get-ADUser trichter -Properties AccountExpirationDate",
+        "Get-ADUser -Identity trichter -Properties AccountExpirationDate"
+      ],
+      "wenn": {
+        "ablauf": "verlaengert"
+      },
+      "hinweise": [
+        "Wie hast du das Datum am Anfang gesehen?",
+        "Get-ADUser mit -Properties AccountExpirationDate.",
+        "Tippe: Get-ADUser trichter -Properties AccountExpirationDate"
+      ],
+      "danach": "3/1/2027 – passt. Notiz: „Konto abgelaufen (Verlängerung nicht eingetragen); Ablauf auf 01.03.2027 gesetzt.“"
+    }
+  ],
+  "fertig": [
+    "Die fünf Schritte der Fehlersuche funktionieren auch am Server.",
+    "Konten können gesperrt, deaktiviert oder abgelaufen sein – -Properties zeigt, was zutrifft.",
+    "Set-ADAccountExpiration setzt das Ablaufdatum (es gilt ab Beginn des Tages)."
+  ]
+}

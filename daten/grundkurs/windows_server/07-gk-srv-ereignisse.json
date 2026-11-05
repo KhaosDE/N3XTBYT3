@@ -1,0 +1,52 @@
+{
+  "id": "gk-srv-ereignisse",
+  "system": "windows_server",
+  "titel": "Ereignisprotokolle: was ist passiert?",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.diagnostics/get-winevent",
+    "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-ereignisanzeige-neustart",
+  "shell": "powershell",
+  "erklaeren": [
+    "Windows schreibt fast alles mit, was passiert: Starts, Fehler, Anmeldungen. Diese Ereignisse stehen in",
+    "Protokollen (System, Application, Security). Jedes Ereignis hat eine Nummer (Id). Get-WinEvent liest sie –",
+    "wie die Ereignisanzeige, nur in der Konsole. Hier: Der Server DC01 wurde heute Nacht neu gestartet. Von wem?"
+  ],
+  "begriffe": {
+    "Ereignisprotokoll": "Liste aller Ereignisse eines Bereichs, z. B. System.",
+    "Ereignis-Id": "Nummer eines Ereignistyps, z. B. 1074 = Neustart wurde ausgelöst.",
+    "Ereignisanzeige": "Das Windows-Programm mit Fenster, das dieselben Protokolle zeigt (eventvwr)."
+  },
+  "mitmachen": [
+    {
+      "text": "Die neuesten Systemereignisse: Get-WinEvent -LogName System -MaxEvents 5",
+      "eingabe": "Get-WinEvent -LogName System -MaxEvents 5",
+      "danach": "-MaxEvents begrenzt auf die neuesten. Du siehst den Neustart (Event log service started), aber nicht, wer ihn ausgelöst hat."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Finde das Ereignis mit der Id 1074 im Protokoll System und zeig es ausführlich an (Format-List).",
+      "ziel": {
+        "gefunden": true
+      },
+      "hinweise": [
+        "Gefiltert wird mit -FilterHashtable @{…}.",
+        "In die Klammern gehören LogName='System' und Id=1074, dahinter | Format-List.",
+        "Tippe: Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
+      ],
+      "loesung": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
+      ],
+      "danach": "Ereignis 1074: azubi01 hat den Neustart mit shutdown.exe ausgelöst. Mit -FilterHashtable filterst du gezielt nach Protokoll und Id, Format-List zeigt alles untereinander."
+    }
+  ],
+  "fertig": [
+    "Windows protokolliert Ereignisse mit einer Id in Protokollen wie System.",
+    "Get-WinEvent -LogName System -MaxEvents 5 zeigt die neuesten.",
+    "-FilterHashtable @{LogName='System'; Id=1074} filtert gezielt; | Format-List zeigt alles."
+  ]
+}

@@ -359,8 +359,12 @@ def lade_allgemein(system_id: str, ordner: Path | None = None) -> Allgemein:
 
 def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
                  erwartete_id: str | None = None,
-                 erwartetes_system: str | None = None) -> tuple[Szenario | None, list[str]]:
-    """Prüft ein eingelesenes Szenario. Gibt (Szenario, []) oder (None, Fehler) zurück."""
+                 erwartetes_system: str | None = None,
+                 befehle_pflicht: bool = True) -> tuple[Szenario | None, list[str]]:
+    """Prüft ein eingelesenes Szenario. Gibt (Szenario, []) oder (None, Fehler) zurück.
+
+    ``befehle_pflicht=False``: eigene Befehle dürfen fehlen (Lektionen, die nur allgemeine Befehle nutzen).
+    """
     fehler: list[str] = []
     if not isinstance(roh, dict):
         return None, ["Die Datei muss ein JSON-Objekt enthalten."]
@@ -505,7 +509,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
             ticket = {**ticket, "text": text or ""}
 
     befehle = _lies_befehle(roh.get("befehle", []), system, bekannte, "befehle", fehler)
-    if "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids \
+    if befehle_pflicht and "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids \
             and not roh.get("dateien"):
         fehler.append("„befehle“: mindestens ein Befehl (leer darf die Liste nur sein, wenn das Szenario "
                       "Dateien hat und die eingebauten Dateibefehle reichen).")

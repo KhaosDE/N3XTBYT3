@@ -233,7 +233,7 @@ def pruefe_lektion(roh: Any, nr: int, allgemein: Allgemein | None = None,
             szenario_roh[feld] = roh[feld]
         elif feld in basis:
             szenario_roh[feld] = basis[feld]
-    szenario, sz_fehler = pruefe_daten(szenario_roh, allgemein)
+    szenario, sz_fehler = pruefe_daten(szenario_roh, allgemein, befehle_pflicht=False)
     fehler.extend(sz_fehler)
     if szenario is None:
         return None, fehler

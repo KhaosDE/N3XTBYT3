@@ -1,0 +1,77 @@
+{
+  "id": "gk-srv-features",
+  "system": "windows_server",
+  "titel": "Rollen und Features: was auf dem Server installiert ist",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/powershell/module/servermanager/get-windowsfeature",
+    "https://learn.microsoft.com/powershell/module/servermanager/install-windowsfeature"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "srv-feature-fehlt",
+  "shell": "powershell",
+  "erklaeren": [
+    "Windows Server bringt viele Bausteine mit, die erst installiert werden müssen: Rollen (z. B. DNS, DHCP,",
+    "Dateiserver) und Features (z. B. Windows Server-Sicherung). Fehlt ein Baustein, fehlen auch seine Befehle.",
+    "Get-WindowsFeature zeigt, was installiert ist, Install-WindowsFeature installiert. Hier, auf SRV-DATEI01,",
+    "soll eine Datensicherung mit wbadmin laufen."
+  ],
+  "begriffe": {
+    "Rolle": "Hauptaufgabe eines Servers, z. B. DNS-Server oder DHCP-Server.",
+    "Feature": "Zusätzlicher Baustein, z. B. Windows Server-Sicherung.",
+    "Install State": "Installed = installiert, Available = verfügbar, aber nicht installiert."
+  },
+  "mitmachen": [
+    {
+      "text": "Versuch die Sicherung: wbadmin",
+      "eingabe": "wbadmin",
+      "danach": "„is not recognized“ – das Programm gibt es hier nicht. Der Grund: Das Feature fehlt."
+    },
+    {
+      "text": "Was ist installiert? Get-WindowsFeature *Backup*",
+      "eingabe": "Get-WindowsFeature *Backup*",
+      "danach": "[ ] und Available: Windows Server Backup ist verfügbar, aber nicht installiert. [X] hieße installiert."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Installiere das Feature Windows-Server-Backup.",
+      "ziel": {
+        "installiert": true
+      },
+      "hinweise": [
+        "Installieren heißt Install.",
+        "Install-WindowsFeature und der Name aus der Spalte Name.",
+        "Tippe: Install-WindowsFeature Windows-Server-Backup"
+      ],
+      "loesung": [
+        "Install-WindowsFeature Windows-Server-Backup"
+      ],
+      "danach": "Success: True, Restart Needed: No – fertig, ohne Neustart."
+    },
+    {
+      "aufgabe": "Prüf nach, dass es jetzt installiert ist.",
+      "eingabe": [
+        "Get-WindowsFeature *Backup*",
+        "Get-WindowsFeature Windows-Server-Backup",
+        "Get-WindowsFeature -Name Windows-Server-Backup",
+        "Get-WindowsFeature -Name *Backup*",
+        "wbadmin"
+      ],
+      "wenn": {
+        "installiert": true
+      },
+      "hinweise": [
+        "Wie hast du vorhin nachgesehen?",
+        "Get-WindowsFeature mit *Backup*.",
+        "Tippe: Get-WindowsFeature *Backup*"
+      ],
+      "danach": "[X] Installed – und wbadmin ist jetzt da."
+    }
+  ],
+  "fertig": [
+    "Rollen und Features sind Bausteine, die man installieren muss.",
+    "Get-WindowsFeature zeigt den Stand ([X] = installiert).",
+    "Install-WindowsFeature <Name> installiert einen Baustein."
+  ]
+}
