@@ -62,7 +62,7 @@ class HilfsfunktionenTest(unittest.TestCase):
         _, fehler = pruefe_daten(daten)
         self.assertTrue(any("Pfade beginnen" in f for f in fehler))
         _, fehler = pruefe_daten(mini(dateien={"/x": "a"}))
-        self.assertTrue(any("nur bei Linux" in f for f in fehler))
+        self.assertTrue(any("Windows-Pfade beginnen mit Laufwerk" in f for f in fehler))
 
 
 class DateisystemTest(unittest.TestCase):

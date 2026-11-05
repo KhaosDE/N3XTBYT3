@@ -10,7 +10,7 @@ Dateien stehen im Szenario unter ``dateien`` und landen als flache Schlüssel im
 
 Verzeichnisse, in denen Dateien liegen, gibt es automatisch.
 Allgemeine Befehle, die hier eingebaut sind: pwd, cd, ls, cat, less, head, tail, grep,
-chmod, chown, nano (Editor) – Szenarien können jeden davon mit eigenen Mustern überschreiben.
+chmod, chown, nano (Editor), mkdir, touch, cp, mv, rm – Szenarien können jeden davon mit eigenen Mustern überschreiben.
 Alle Ausgaben entstehen nur aus diesen Daten; es wird nie auf echte Dateien zugegriffen.
 """
 
@@ -584,6 +584,202 @@ def befehl_crontab(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
     return Ergebnis(sim="Hier gehen crontab -l (anzeigen) und crontab -e (bearbeiten).")
 
 
+
+# ---------------------------------------------------------------------- Anlegen, kopieren, verschieben, löschen
+
+def _jetzt_ls() -> str:
+    import datetime as _dt
+    j = _dt.datetime.now()
+    monat = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[j.month - 1]
+    return f"{monat} {j.day:2d} {j.hour:02d}:{j.minute:02d}"
+
+
+def _neu_angelegt(fs: Dateisystem, pfad: str, ordner: bool) -> None:
+    """Besitzer, Rechte und Zeit für etwas Neues (Ubuntu: umask 002 für Benutzer, 022 für root)."""
+    root = bool(fs.z.get("root"))
+    if ordner:
+        fs.z.werte[f"verzeichnis:{pfad}"] = True
+        rechte = "rwxr-xr-x" if root else "rwxrwxr-x"
+    else:
+        rechte = "rw-r--r--" if root else "rw-rw-r--"
+    fs.setze_rechte(pfad, rechte)
+    nutzer = fs.benutzer
+    fs.setze_besitzer(pfad, f"{nutzer}:{nutzer}")
+    fs.z.werte[f"zeit:{pfad}"] = _jetzt_ls()
+
+
+def _unter(fs: Dateisystem, pfad: str) -> list[str]:
+    """Alle Zustandsschlüssel des Pfads und darunter."""
+    ergebnis = []
+    for k in fs.z.werte:
+        art, _, rest = k.partition(":")
+        if art in ("datei", "verzeichnis", "rechte", "besitzer", "zeit") and (
+                rest == pfad or rest.startswith(pfad.rstrip("/") + "/")):
+            ergebnis.append(k)
+    return ergebnis
+
+
+def _entferne(fs: Dateisystem, pfad: str) -> None:
+    for k in _unter(fs, pfad):
+        art = k.split(":", 1)[0]
+        if art == "datei":
+            fs.z.werte[k] = None
+        elif art == "verzeichnis":
+            fs.z.werte[k] = False
+        else:
+            fs.z.werte.pop(k, None)
+
+
+def befehl_mkdir(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    optionen, argumente = _optionen(woerter)
+    if not argumente:
+        return Ergebnis(["mkdir: missing operand"], fehler=True)
+    zeilen: list[str] = []
+    for ziel in argumente:
+        pfad = fs.absolut(ziel)
+        if fs.existiert(pfad):
+            if "p" not in optionen:
+                zeilen.append(f"mkdir: cannot create directory '{ziel}': File exists")
+            continue
+        ketten = [pfad]
+        while not fs.existiert(posixpath.dirname(ketten[-1])):
+            ketten.append(posixpath.dirname(ketten[-1]))
+        if len(ketten) > 1 and "p" not in optionen:
+            zeilen.append(f"mkdir: cannot create directory '{ziel}': No such file or directory")
+            continue
+        if not fs.darf_schreiben(posixpath.dirname(ketten[-1])):
+            zeilen.append(f"mkdir: cannot create directory '{ziel}': Permission denied")
+            continue
+        for p in reversed(ketten):
+            _neu_angelegt(fs, p, ordner=True)
+    return Ergebnis(zeilen, fehler=bool(zeilen))
+
+
+def befehl_touch(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    _, argumente = _optionen(woerter)
+    if not argumente:
+        return Ergebnis(["touch: missing file operand"], fehler=True)
+    zeilen: list[str] = []
+    for ziel in argumente:
+        pfad = fs.absolut(ziel)
+        if fs.existiert(pfad):
+            if not fs.darf_schreiben(pfad):
+                zeilen.append(f"touch: cannot touch '{ziel}': Permission denied")
+            else:
+                fs.z.werte[f"zeit:{pfad}"] = _jetzt_ls()
+            continue
+        ordner = posixpath.dirname(pfad)
+        if not fs.ist_verzeichnis(ordner):
+            zeilen.append(f"touch: cannot touch '{ziel}': No such file or directory")
+        elif not fs.darf_schreiben(ordner):
+            zeilen.append(f"touch: cannot touch '{ziel}': Permission denied")
+        else:
+            fs.schreibe(pfad, "")
+            _neu_angelegt(fs, pfad, ordner=False)
+    return Ergebnis(zeilen, fehler=bool(zeilen))
+
+
+def _ziel_von(fs: Dateisystem, quelle: str, ziel: str) -> str:
+    pfad = fs.absolut(ziel)
+    if fs.ist_verzeichnis(pfad):
+        return posixpath.join(pfad, posixpath.basename(quelle))
+    return pfad
+
+
+def _kopiere(fs: Dateisystem, quelle: str, ziel: str) -> None:
+    if fs.ist_datei(quelle):
+        fs.schreibe(ziel, fs.inhalt(quelle))
+        _neu_angelegt(fs, ziel, ordner=False)
+        return
+    _neu_angelegt(fs, ziel, ordner=True)
+    for name in fs.eintraege(quelle):
+        _kopiere(fs, posixpath.join(quelle, name), posixpath.join(ziel, name))
+
+
+def befehl_cp(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    optionen, argumente = _optionen(woerter)
+    if len(argumente) < 2:
+        return Ergebnis([f"cp: missing destination file operand after '{argumente[0]}'" if argumente
+                         else "cp: missing file operand"], fehler=True)
+    *quellen, ziel = argumente
+    zeilen: list[str] = []
+    for q_text in quellen:
+        q = fs.absolut(q_text)
+        if not fs.existiert(q):
+            zeilen.append(f"cp: cannot stat '{q_text}': No such file or directory")
+            continue
+        if fs.ist_verzeichnis(q) and not ({"r", "R", "a"} & optionen):
+            zeilen.append(f"cp: -r not specified; omitting directory '{q_text}'")
+            continue
+        if not fs.darf_lesen(q):
+            zeilen.append(f"cp: cannot open '{q_text}' for reading: Permission denied")
+            continue
+        z = _ziel_von(fs, q, ziel)
+        if not fs.ist_verzeichnis(posixpath.dirname(z)):
+            zeilen.append(f"cp: cannot create regular file '{ziel}': No such file or directory")
+            continue
+        if not fs.darf_schreiben(posixpath.dirname(z)) and not fs.ist_datei(z):
+            zeilen.append(f"cp: cannot create regular file '{ziel}': Permission denied")
+            continue
+        _kopiere(fs, q, z)
+    return Ergebnis(zeilen, fehler=bool(zeilen))
+
+
+def befehl_mv(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    _, argumente = _optionen(woerter)
+    if len(argumente) < 2:
+        return Ergebnis([f"mv: missing destination file operand after '{argumente[0]}'" if argumente
+                         else "mv: missing file operand"], fehler=True)
+    *quellen, ziel = argumente
+    zeilen: list[str] = []
+    for q_text in quellen:
+        q = fs.absolut(q_text)
+        if not fs.existiert(q):
+            zeilen.append(f"mv: cannot stat '{q_text}': No such file or directory")
+            continue
+        z = _ziel_von(fs, q, ziel)
+        if z == q:
+            continue
+        if not fs.darf_schreiben(posixpath.dirname(q)) or not fs.darf_schreiben(posixpath.dirname(z)):
+            zeilen.append(f"mv: cannot move '{q_text}' to '{ziel}': Permission denied")
+            continue
+        if not fs.ist_verzeichnis(posixpath.dirname(z)):
+            zeilen.append(f"mv: cannot move '{q_text}' to '{ziel}': No such file or directory")
+            continue
+        alte = {k: fs.z.werte[k] for k in _unter(fs, q)}
+        _entferne(fs, q)
+        for k, v in alte.items():
+            art, _, rest = k.partition(":")
+            fs.z.werte[f"{art}:{z}{rest[len(q):]}"] = v
+    return Ergebnis(zeilen, fehler=bool(zeilen))
+
+
+def befehl_rm(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
+    optionen, argumente = _optionen(woerter)
+    if not argumente:
+        return Ergebnis(["rm: missing operand"], fehler=True)
+    zeilen: list[str] = []
+    for ziel in argumente:
+        pfad = fs.absolut(ziel)
+        if pfad == "/":
+            return Ergebnis(sim="Das würde das ganze System löschen. Das echte rm verweigert „rm -r /“ "
+                                "ohnehin (Schutz --preserve-root) – hier passiert nichts.")
+        if not fs.existiert(pfad):
+            if "f" not in optionen:
+                zeilen.append(f"rm: cannot remove '{ziel}': No such file or directory")
+            continue
+        if fs.ist_verzeichnis(pfad) and not ({"r", "R"} & optionen):
+            zeilen.append(f"rm: cannot remove '{ziel}': Is a directory")
+            continue
+        if not fs.darf_schreiben(posixpath.dirname(pfad)):
+            zeilen.append(f"rm: cannot remove '{ziel}': Permission denied")
+            continue
+        if fs.cwd == pfad or fs.cwd.startswith(pfad + "/"):
+            fs.z.werte["pfad"] = posixpath.dirname(pfad)
+        _entferne(fs, pfad)
+    return Ergebnis(zeilen, fehler=bool(zeilen))
+
+
 EINGEBAUT: dict[str, Callable[[Dateisystem, list[str]], Ergebnis]] = {
     "crontab": befehl_crontab,
     "pwd": befehl_pwd,
@@ -598,6 +794,11 @@ EINGEBAUT: dict[str, Callable[[Dateisystem, list[str]], Ergebnis]] = {
     "chmod": befehl_chmod,
     "chown": befehl_chown,
     "nano": befehl_nano,
+    "mkdir": befehl_mkdir,
+    "touch": befehl_touch,
+    "cp": befehl_cp,
+    "mv": befehl_mv,
+    "rm": befehl_rm,
 }
 
 BEDEUTUNG = {
@@ -613,6 +814,11 @@ BEDEUTUNG = {
     "chown": "Besitzer einer Datei ändern (benutzer:gruppe, nur root)",
     "nano": "Datei im Editor bearbeiten (Strg+O speichern, Strg+X beenden)",
     "crontab": "Geplante Aufgaben anzeigen (-l) oder bearbeiten (-e)",
+    "mkdir": "Verzeichnis anlegen (-p auch die Ordner davor)",
+    "touch": "Leere Datei anlegen (oder Zeit aktualisieren)",
+    "cp": "Kopieren (-r ganze Verzeichnisse)",
+    "mv": "Verschieben oder umbenennen",
+    "rm": "Löschen (-r Verzeichnisse) – ohne Papierkorb!",
 }
 
 FILTER = ("grep", "head", "tail", "wc", "less", "more", "sort")

@@ -16,6 +16,7 @@ from typing import Any
 from . import pfade
 from .befehle import Vergleicher, ist_cmdlet_name, zerlege
 from .dateisystem import dateien_zu_zustand
+from .dateisystem_win import win_dateien_zu_zustand
 from .systeme import REIHENFOLGE, SYSTEME, System
 from .zustand import ist_skalar, pruefe_aenderung, pruefe_bedingung
 
@@ -292,6 +293,13 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
     return befehle
 
 
+def _dateien(roh: Any, system: System, ort: str, fehler: list[str]) -> dict[str, Any]:
+    """Feld „dateien“: Linux-Pfade (/…) bei Linux, Windows-Pfade (C:\\…) bei Windows."""
+    if "bash" in system.shell_ids:
+        return dateien_zu_zustand(roh, ort, fehler)
+    return win_dateien_zu_zustand(roh, ort, fehler)
+
+
 def _pruefe_zustand(roh: Any, ort: str, fehler: list[str]) -> dict[str, Any]:
     if not isinstance(roh, dict):
         fehler.append(f"{ort}: muss ein Objekt sein (Schlüssel und Startwerte).")
@@ -321,7 +329,7 @@ def lade_allgemein(system_id: str, ordner: Path | None = None) -> Allgemein:
     if roh.get("system") != system_id:
         fehler.append(f"„system“ muss „{system_id}“ sein.")
     zustand = _pruefe_zustand(roh.get("zustand", {}), "zustand", fehler)
-    zustand.update(dateien_zu_zustand(roh.get("dateien"), "dateien", fehler))
+    zustand.update(_dateien(roh.get("dateien"), system, "dateien", fehler))
     prompt = roh.get("prompt", {})
     if not isinstance(prompt, dict) or any(
         k not in system.shell_ids or not isinstance(v, str) for k, v in prompt.items()
@@ -411,9 +419,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         fehler.append("„erklaerung“: Text oder Liste von Zeilen.")
 
     zustand = _pruefe_zustand(roh.get("zustand", {}), "zustand", fehler)
-    if "dateien" in roh and "bash" not in system.shell_ids:
-        fehler.append("„dateien“ gibt es nur bei Linux-Systemen.")
-    zustand.update(dateien_zu_zustand(roh.get("dateien"), "dateien", fehler))
+    zustand.update(_dateien(roh.get("dateien"), system, "dateien", fehler))
     eigene = set(allgemein.zustand) | set(zustand)
     hauptrechner = str({**allgemein.zustand, **zustand}.get("hostname", system.id)).lower()
 
@@ -447,9 +453,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
             fehler.append(f"{stelle}: allgemeine Befehle fehlerhaft: {e}")
             continue
         r_zustand = _pruefe_zustand(r.get("zustand", {}), f"{stelle}.zustand", fehler)
-        if "dateien" in r and "bash" not in r_system.shell_ids:
-            fehler.append(f"{stelle}: „dateien“ gibt es nur bei Linux-Systemen.")
-        r_zustand.update(dateien_zu_zustand(r.get("dateien"), f"{stelle}.dateien", fehler))
+        r_zustand.update(_dateien(r.get("dateien"), r_system, f"{stelle}.dateien", fehler))
         r_zustand.setdefault("hostname", name)
         rechner_daten[name] = (r_system, r_allgemein, r_zustand)
 

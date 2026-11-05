@@ -15,6 +15,7 @@ from typing import Callable
 
 from .befehle import Vergleicher, ist_cmdlet_name, zerlege
 from . import dateisystem as ds
+from . import dateisystem_win as dsw
 from .szenario import Allgemein, Befehl, Szenario
 from .zustand import Zustand
 
@@ -67,6 +68,9 @@ class RechnerLauf:
         self.zustand = Zustand(werte)
         self.shell_stapel: list[str] = [shell]
         self.fs = ds.Dateisystem(self.zustand) if "bash" in system.shell_ids else None
+        # Windows: Dateibefehle nur, wenn das Szenario (oder die Lektion) Dateien mitbringt
+        self.wfs = dsw.WinDateisystem(self.zustand) if (
+            self.fs is None and dsw.WinDateisystem.aktiv_fuer(werte)) else None
         self.root_stapel: list[str] = []
         self.zugang = [self.vergleicher.vorbereiten(z) for z in (zugang or [])]
         self.zugang_text = list(zugang or [])
@@ -263,6 +267,10 @@ class Sitzung:
             linux = self._linux(text, abschnitte, roh_name)
             if linux is not None:
                 return linux
+        if self.aktiv.wfs is not None:
+            windows = self._windows_datei(text, abschnitte, roh_name)
+            if windows is not None:
+                return windows
 
         name = abschnitte[0].name
         if name in self._bekannte_namen:
@@ -285,7 +293,8 @@ class Sitzung:
         if self.shell == "cmd" and ist_cmdlet_name(roh_name):
             text += ("\nDer Name sieht aus wie ein PowerShell-Befehl (Verb-Nomen). "
                      "In der cmd gibt es solche Befehle nicht – wechseln mit: powershell")
-        kandidaten = list(self._bekannte_namen) + (list(ds.EINGEBAUT) if self.fs else [])
+        kandidaten = list(self._bekannte_namen) + (list(ds.EINGEBAUT) if self.fs else []) \
+            + (dsw.NAMEN if self.aktiv.wfs else [])
         if not self.system.gross_klein_egal:
             gleich = [n for n in kandidaten if n.casefold() == roh_name.casefold() and n != roh_name]
             if gleich:
@@ -398,6 +407,30 @@ class Sitzung:
         self.ticket_notiz = notiz.strip()
         return True, f"Ticket {self.szenario.ticket.get('nummer', '')} geschlossen."
 
+    # ------------------------------------------------------------------ Windows-Dateien
+
+    def _windows_datei(self, text: str, abschnitte, roh_name: str) -> Antwort | None:
+        name = roh_name.casefold()
+        if name not in dsw.BEFEHLE and name not in ("cd..", "cd\\"):
+            return None
+        if self.shell != "powershell":
+            self.nicht_erkannt.append(text)
+            return Antwort(_sim("In der cmd sind die Dateibefehle in dieser Simulation nicht nachgebaut. "
+                                "Nimm die PowerShell (wechseln mit: powershell)."), "nicht_erkannt")
+        if len(abschnitte) >= 2:
+            self.nicht_erkannt.append(text)
+            return Antwort(_sim("Pipes hinter Dateibefehlen sind in dieser Simulation nicht nachgebaut."),
+                           "nicht_erkannt")
+        ergebnis = dsw.ausfuehren(self.aktiv.wfs, zerlege(text)[0])
+        if ergebnis is None:
+            return None
+        antwort = Antwort(art="treffer")
+        art = FEHLER if ergebnis.fehler else AUSGABE
+        antwort.zeilen = [Zeile(z, art) for z in ergebnis.zeilen]
+        if ergebnis.sim:
+            antwort.zeilen += _sim(ergebnis.sim)
+        return self._ziel_pruefen(antwort)
+
     # ------------------------------------------------------------------ Linux
 
     def _linux(self, text: str, abschnitte, roh_name: str) -> Antwort | None:
@@ -501,6 +534,9 @@ class Sitzung:
         for b in self.allgemein.befehle:
             if b.bedeutung and self.shell in b.shells:
                 zeilen.append(f"  {b.muster[0]:<20} {b.bedeutung}")
+        if self.aktiv.wfs is not None and self.shell == "powershell":
+            for name, bedeutung in dsw.BEDEUTUNG.items():
+                zeilen.append(f"  {name:<20} {bedeutung}")
         if self.fs is not None:
             for name, bedeutung in ds.BEDEUTUNG.items():
                 zeilen.append(f"  {name:<20} {bedeutung}")
