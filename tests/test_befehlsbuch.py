@@ -74,5 +74,33 @@ class LexikonTest(unittest.TestCase):
         self.assertTrue(dns and "dns" in dns[0].name.casefold())
 
 
+class GrundkursInTrainingUndAuswertungTest(unittest.TestCase):
+    def test_karten_erst_nach_der_lektion(self):
+        from n3xtbyt3.kern import auswertung, training
+        from n3xtbyt3.kern.befehle import Vergleicher
+        from n3xtbyt3.kern.spielstand import Spielstand
+        from n3xtbyt3.kern.systeme import SYSTEME
+        from tests.hilfen import Datenordner
+        with Datenordner():
+            buch = bb.lade("windows")
+            lektionen = gk.lade_kurs("windows").lektionen
+            stand = Spielstand.lade("windows")
+            vorher = training.sammle_karten([], buch, stand, lektionen)
+            self.assertEqual(vorher, [])
+            stand.lektion_eintragen("gk-win-ordner", {"fertig": True, "befehle": 3})
+            karten = training.sammle_karten([], buch, stand, lektionen)
+            beispiele = {k.beispiel for k in karten}
+            self.assertIn("Get-ChildItem", beispiele)
+            karte = next(k for k in karten if k.beispiel == "Get-ChildItem")
+            self.assertIn("Lektion 2", training.frage_text(karte))
+            # Aliase gelten als richtig
+            self.assertEqual(training.bewerte(karte, "dir", Vergleicher(SYSTEME["windows"])), "richtig")
+            a = auswertung.erstelle("windows", [], stand, lektionen=lektionen, buch=buch)
+            self.assertEqual(a["grundkurs"]["fertig"], 1)
+            self.assertTrue(a["empfehlung"][0].startswith("Grundkurs weitermachen: Lektion 1"))
+            self.assertIn("## Grundkurs", auswertung.als_markdown(a))
+            self.assertIn("- [x] Lektion 2", auswertung.als_markdown(a))
+
+
 if __name__ == "__main__":
     unittest.main()

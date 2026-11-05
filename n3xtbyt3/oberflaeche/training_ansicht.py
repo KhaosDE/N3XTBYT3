@@ -30,7 +30,9 @@ class Trainingsansicht(Ansicht):
         self.ergebnis = ergebnis
         self.stand = stand
         self.kartei = stand.kartei
-        self.karten = training.sammle_karten(ergebnis.szenarien)
+        from ..kern import befehlsbuch, grundkurs
+        self.karten = training.sammle_karten(ergebnis.szenarien, befehlsbuch.lade(system_id), stand,
+                                             grundkurs.lade_kurs(system_id).lektionen)
         self.vergleicher = Vergleicher(SYSTEME[system_id])
         self.terminal = Terminal()
         self.karte: training.Karte | None = None

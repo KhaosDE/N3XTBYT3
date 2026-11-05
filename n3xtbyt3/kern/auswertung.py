@@ -38,8 +38,13 @@ def _kategorie_bewertung(werte: list[dict]) -> str:
 
 
 def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
-             jetzt: _dt.datetime | None = None) -> dict[str, Any]:
+             jetzt: _dt.datetime | None = None, lektionen=None, buch=None) -> dict[str, Any]:
     jetzt = (jetzt or _dt.datetime.now()).replace(microsecond=0)
+    from . import befehlsbuch, grundkurs
+    if lektionen is None:
+        lektionen = grundkurs.lade_kurs(system_id).lektionen
+    if buch is None:
+        buch = befehlsbuch.lade(system_id)
     system = SYSTEME[system_id]
     vergleicher = Vergleicher(system)
     kartei: Lernkartei = stand.kartei
@@ -98,7 +103,7 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
                     beispiele.setdefault(name, eingabe)
 
     befehl_werte = []
-    for karte in sammle_karten(szenarien):
+    for karte in sammle_karten(szenarien, buch, stand, lektionen):
         k = kartei.befehl(karte.schluessel)
         if not (k["richtig"] or k["falsch"] or k["zuletzt"]):
             continue
@@ -121,7 +126,19 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
     schwaechen += [f"Befehl „{b['befehl']}“ ({b['bedeutung']}): {b['falsch']}× falsch im Training"
                    for b in befehl_werte if b["falsch"] and b["fach"] <= 2][:5]
 
+    kurs_fertig = [l for l in lektionen if stand.lektion(l.id)["fertig"]]
+    kurs_offen = next((l for l in lektionen if not stand.lektion(l.id)["fertig"]), None)
+    grundkurs_werte = {
+        "lektionen": len(lektionen),
+        "fertig": len(kurs_fertig),
+        "naechste": f"Lektion {kurs_offen.nr}: {kurs_offen.titel}" if kurs_offen else None,
+        "liste": [{"nr": l.nr, "id": l.id, "titel": l.titel, "fertig": stand.lektion(l.id)["fertig"]}
+                  for l in lektionen],
+    }
+
     empfehlung: list[str] = []
+    if kurs_offen:
+        empfehlung.append(f"Grundkurs weitermachen: Lektion {kurs_offen.nr} – {kurs_offen.titel}")
     dran = sorted(
         (w for w in szenario_werte if w["versuche"] and kartei.ist_faellig(kartei.szenario(w["id"]), jetzt.date())),
         key=lambda w: (w["fach"] or 0, w["titel"]))
@@ -151,6 +168,7 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
             "zeit_minuten": round(sum(w["zeit_minuten"] for w in szenario_werte), 1),
             "faecher": dict(Counter(str(w["fach"]) for w in szenario_werte if w["fach"])),
         },
+        "grundkurs": grundkurs_werte,
         "staerken": staerken,
         "schwaechen": schwaechen,
         "empfehlung": empfehlung,
@@ -162,6 +180,15 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
         },
         "szenarien": szenario_werte,
     }
+
+
+def _grundkurs_md(g: dict[str, Any] | None) -> list[str]:
+    if not g or not g["lektionen"]:
+        return []
+    z = ["## Grundkurs", "", f"{g['fertig']} von {g['lektionen']} Lektionen geschafft"
+         + (f" · als Nächstes: {g['naechste']}" if g["naechste"] else " · alles geschafft") + ".", ""]
+    z += [f"- [{'x' if l['fertig'] else ' '}] Lektion {l['nr']}: {l['titel']}" for l in g["liste"]]
+    return z + [""]
 
 
 def als_markdown(a: dict[str, Any]) -> str:
@@ -176,6 +203,7 @@ def als_markdown(a: dict[str, Any]) -> str:
         "",
         *[f"- {e}" for e in a["empfehlung"]],
         "",
+        *_grundkurs_md(a.get("grundkurs")),
         "## Stärken",
         "",
         *([f"- {s}" for s in a["staerken"]] or ["- (noch keine)"]),

@@ -1,7 +1,8 @@
 """Befehls-Training: kurze Abfragen „Welcher Befehl …?“ aus den Befehlen der Szenarien.
 
 Jeder Befehl mit ``bedeutung`` wird zu einer Karte. Die Frage ist die Bedeutung plus das
-Szenario, aus dem der Befehl stammt. Bewertung der Antwort:
+Szenario, aus dem der Befehl stammt. Dazu kommen die Befehle aus dem Befehlsbuch, sobald ihre
+Lektion im Grundkurs geschafft ist. Bewertung der Antwort:
 
 * richtig – passt zu einem Muster des Befehls (wie im Szenario)
 * halb    – richtiger Befehlsname, aber andere Parameter
@@ -18,7 +19,7 @@ from typing import Sequence
 
 from .befehle import Vergleicher
 from .lernkartei import Lernkartei
-from .szenario import Befehl, Szenario
+from .szenario import Befehl, Szenario, _lies_befehle
 
 GEWICHT = {1: 8.0, 2: 4.0, 3: 2.5, 4: 1.5, 5: 1.0}
 
@@ -41,8 +42,12 @@ def _schluessel(vergleicher: Vergleicher, muster: str) -> str:
     return " | ".join(" ".join(a.woerter) for a in abschnitte)
 
 
-def sammle_karten(szenarien: Sequence[Szenario]) -> list[Karte]:
-    """Alle Befehle mit Bedeutung, ohne „falsche“ Befehle, doppelte zusammengefasst."""
+def sammle_karten(szenarien: Sequence[Szenario], buch=None, stand=None, lektionen=None) -> list[Karte]:
+    """Alle Befehle mit Bedeutung, ohne „falsche“ Befehle, doppelte zusammengefasst.
+
+    Mit ``buch`` (Befehlsbuch) und ``stand`` (Spielstand) kommen die Befehle der geschafften
+    Lektionen dazu; ``lektionen`` liefert dafür Nummer und Titel.
+    """
     karten: dict[str, Karte] = {}
     for sz in szenarien:
         vergleicher = Vergleicher(sz.system)
@@ -55,6 +60,27 @@ def sammle_karten(szenarien: Sequence[Szenario]) -> list[Karte]:
                     karten[schluessel].szenarien.append(sz.titel)
                 continue
             karten[schluessel] = Karte(schluessel, b.bedeutung, b.muster[0], b, [sz.titel])
+    if buch is not None and stand is not None:
+        from .systeme import SYSTEME
+        system = SYSTEME[buch.system_id]
+        vergleicher = Vergleicher(system)
+        namen = {l.id: f"Grundkurs, Lektion {l.nr}" for l in (lektionen or [])}
+        for e in buch.eintraege:
+            if not stand.lektion(e.lektion)["fertig"]:
+                continue
+            herkunft = namen.get(e.lektion, "Grundkurs")
+            schluessel = _schluessel(vergleicher, e.beispiel)
+            if schluessel in karten:
+                if herkunft not in karten[schluessel].szenarien:
+                    karten[schluessel].szenarien.append(herkunft)
+                continue
+            fehler: list[str] = []
+            roh = {"muster": e.muster, "faelle": [{"ausgabe": ""}], "bedeutung": e.was}
+            if e.frage:
+                roh["frage"] = e.frage
+            befehl = _lies_befehle([roh], system, set(), "befehlsbuch", fehler)
+            if befehl and not fehler:
+                karten[schluessel] = Karte(schluessel, e.was, e.beispiel, befehl[0], [herkunft])
     return list(karten.values())
 
 
