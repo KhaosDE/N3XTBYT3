@@ -10,6 +10,7 @@
     "https://documentation.ubuntu.com/server/how-to/databases/install-mysql/"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-ls-systemctl",
   "ausgangslage": [
     "Nach dem nächtlichen Neustart zeigt der Webshop „Error establishing a database connection“.",
     "Die Datenbank (MariaDB) lief vorher. Jemand hatte sie vor Wochen von Hand gestartet.",

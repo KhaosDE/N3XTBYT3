@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/activedirectory/set-aduser"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-benutzer",
   "ausgangslage": [
     "Lisa Hoffmann (Buchhaltung, lhoffmann) hat ihr Passwort vergessen und steht vor dem gesperrten Bildschirm.",
     "Du hast ihre Identität am Telefon geprüft (Rückruf über die Nummer aus dem Telefonbuch).",

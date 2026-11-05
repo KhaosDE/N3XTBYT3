@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/windows/win32/setupapi/run-and-runonce-registry-keys"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-prozesse",
   "shell": "cmd",
   "ausgangslage": [
     "Frau Berger: „Seit ich letzte Woche ein PDF-Programm aus dem Internet installiert habe, dauert das Hochfahren ewig.",

@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/troubleshoot/windows-server/active-directory/time-synchronization-not-succeed-non-ntp"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-dienste",
   "shell": "cmd",
   "ausgangslage": [
     "Am Empfangs-PC geht die Uhr sieben Minuten nach. Manche Webseiten melden Zertifikatsfehler,",

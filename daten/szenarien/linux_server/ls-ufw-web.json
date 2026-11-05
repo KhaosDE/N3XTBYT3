@@ -10,6 +10,7 @@
     "https://documentation.ubuntu.com/server/how-to/security/firewalls/"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-ls-ufw",
   "ausgangslage": [
     "Auf dem neuen Server srv-web01 läuft nginx. Auf dem Server selbst liefert „curl -I http://localhost“ die Seite.",
     "Von den Arbeitsplätzen aus läuft der Browser aber in eine Zeitüberschreitung.",

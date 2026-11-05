@@ -10,6 +10,7 @@
     "https://man7.org/linux/man-pages/man1/chage.1.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-rechte",
   "ausgangslage": [
     "Ben (Benutzer ben) hat am gemeinsamen Lager-PC sein Passwort vergessen. Anna ist Administratorin (sudo).",
     "Ben soll ein vorläufiges Passwort bekommen und es bei der nächsten Anmeldung selbst ändern müssen.",

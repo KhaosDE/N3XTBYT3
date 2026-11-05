@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/windows-server/administration/windows-commands/icacls"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-gruppen",
   "ausgangslage": [
     "Der Vertrieb kann in \\\\SRV-DATEI01\\Vertrieb Dateien öffnen, aber nicht speichern:",
     "„You need permission to perform this action.“",

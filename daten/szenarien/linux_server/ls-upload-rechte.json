@@ -11,6 +11,7 @@
     "https://nginx.org/en/docs/ngx_core_module.html#error_log"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-rechte",
   "ausgangslage": [
     "Im Webshop kommt beim Hochladen von Produktbildern nur „Upload fehlgeschlagen“.",
     "Der Ordner /var/www/shop/uploads wurde gestern aus einer Sicherung zurückgespielt.",

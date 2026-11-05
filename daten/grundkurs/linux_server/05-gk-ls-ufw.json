@@ -1,0 +1,78 @@
+{
+  "id": "gk-ls-ufw",
+  "system": "linux_server",
+  "titel": "Firewall: ufw",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html",
+    "https://documentation.ubuntu.com/server/how-to/security/firewalls/"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-ufw-web",
+  "erklaeren": [
+    "Eine Firewall entscheidet, welche Verbindungen von außen auf den Server dürfen. Unter Ubuntu ist das ufw",
+    "(uncomplicated firewall). Jeder Dienst lauscht auf einem Port (Web: 80 und 443, ssh: 22); nur was die",
+    "Firewall erlaubt, kommt durch. Hier läuft der neue Webserver, aber von außen kommt niemand dran."
+  ],
+  "begriffe": {
+    "Firewall": "Filter für Netzwerkverbindungen: erlaubt oder blockiert.",
+    "Port": "Nummer, unter der ein Dienst erreichbar ist (80 = HTTP, 443 = HTTPS, 22 = ssh).",
+    "Anwendungsprofil": "In ufw ein Name für die Ports eines Programms, z. B. „Nginx Full“ = 80 und 443."
+  },
+  "mitmachen": [
+    {
+      "text": "Was ist erlaubt? sudo ufw status",
+      "eingabe": "sudo ufw status",
+      "danach": "Status: active – nur OpenSSH ist erlaubt. Port 80 und 443 fehlen."
+    },
+    {
+      "text": "Welche Profile gibt es? sudo ufw app list",
+      "eingabe": "sudo ufw app list",
+      "danach": "Nginx Full steht für 80 und 443 zusammen."
+    },
+    {
+      "text": "Läuft der Webserver lokal? curl -I http://localhost",
+      "eingabe": "curl -I http://localhost",
+      "danach": "HTTP/1.1 200 OK – auf dem Server selbst antwortet nginx. Es liegt also an der Firewall."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Erlaube den Webserver mit dem Profil „Nginx Full“.",
+      "ziel": {
+        "web_frei": true
+      },
+      "hinweise": [
+        "Erlauben heißt allow.",
+        "sudo ufw allow und der Profilname in Anführungszeichen.",
+        "Tippe: sudo ufw allow \"Nginx Full\""
+      ],
+      "loesung": [
+        "sudo ufw allow \"Nginx Full\""
+      ],
+      "danach": "Freigegeben."
+    },
+    {
+      "aufgabe": "Prüf die Regeln nach.",
+      "eingabe": [
+        "sudo ufw status",
+        "sudo ufw status verbose",
+        "sudo ufw status numbered"
+      ],
+      "wenn": {
+        "web_frei": true
+      },
+      "hinweise": [
+        "Wie hast du die Regeln am Anfang angesehen?",
+        "sudo ufw status.",
+        "Tippe: sudo ufw status"
+      ],
+      "danach": "Nginx Full: ALLOW – der Shop ist erreichbar."
+    }
+  ],
+  "fertig": [
+    "sudo ufw status zeigt die Regeln.",
+    "sudo ufw allow … öffnet Ports oder Profile.",
+    "Erst lokal prüfen (curl -I http://localhost), dann die Firewall."
+  ]
+}

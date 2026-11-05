@@ -10,6 +10,7 @@
     "https://man7.org/linux/man-pages/man8/ping.8.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-netzwerk",
   "ausgangslage": [
     "Annas PC (192.168.10.57) erreicht den Drucker im eigenen Netz, aber nicht den Warenwirtschaftsserver",
     "10.20.0.15 im Rechenzentrumsnetz. Bei den Kollegen geht es. Annas PC hat eine feste IP-Konfiguration,",

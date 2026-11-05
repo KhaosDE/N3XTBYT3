@@ -1,0 +1,93 @@
+{
+  "id": "gk-ls-ssh",
+  "system": "linux_server",
+  "titel": "Mit dem Server verbinden: ssh",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/ssh.1.html",
+    "https://documentation.ubuntu.com/server/how-to/security/openssh-server/"
+  ],
+  "datum": "2026-11-05",
+  "voraussetzung": "gk-lin-fehlersuche",
+  "rechner": {
+    "srv-db01": {
+      "system": "linux_server"
+    }
+  },
+  "erklaeren": [
+    "Server stehen im Serverraum oder in einem Rechenzentrum – bedient werden sie aus der Ferne. Unter Linux",
+    "geht das mit ssh benutzer@server: Du arbeitest dann im Terminal des Servers, verschlüsselt über das Netz.",
+    "Ein Linux-Server hat meist keine grafische Oberfläche; alles läuft über die Befehle aus dem Linux-Kurs.",
+    "Du bist gerade auf dem Webserver srv-web01. Daneben gibt es den Datenbankserver srv-db01."
+  ],
+  "begriffe": {
+    "ssh": "Secure Shell: verschlüsselte Verbindung zum Terminal eines anderen Rechners.",
+    "Port 22": "Standard-Port von ssh. Die Firewall muss ihn durchlassen.",
+    "SSH-Schlüssel": "Anmeldung mit einem Schlüsselpaar statt Passwort – sicherer und bequemer."
+  },
+  "mitmachen": [
+    {
+      "text": "Wo bist du? hostname",
+      "eingabe": "hostname",
+      "danach": "srv-web01 – der Webserver."
+    },
+    {
+      "text": "Verbinde dich mit dem Datenbankserver: ssh admin@srv-db01",
+      "eingabe": "ssh admin@srv-db01",
+      "danach": "Sieh auf den Prompt: admin@srv-db01. Alles läuft jetzt auf dem anderen Server. (Beim echten ersten Verbinden fragt ssh, ob du dem Server-Schlüssel vertraust, und dann nach dem Passwort.)"
+    },
+    {
+      "text": "Prüf nach: hostname",
+      "eingabe": "hostname",
+      "danach": "srv-db01 – du bist wirklich drüben."
+    },
+    {
+      "text": "Zurück: exit",
+      "eingabe": "exit",
+      "danach": "„Connection to srv-db01 closed.“ – du bist wieder auf srv-web01."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Verbinde dich noch einmal als admin mit srv-db01.",
+      "eingabe": [
+        "ssh admin@srv-db01",
+        "ssh srv-db01"
+      ],
+      "hinweise": [
+        "Der Befehl heißt wie die Verbindung.",
+        "ssh benutzer@server.",
+        "Tippe: ssh admin@srv-db01"
+      ],
+      "danach": "Verbunden. Ohne admin@ nimmt ssh den Benutzernamen, mit dem du gerade arbeitest."
+    },
+    {
+      "aufgabe": "Zeig an, mit welchem Benutzer du auf srv-db01 angemeldet bist.",
+      "eingabe": [
+        "whoami"
+      ],
+      "hinweise": [
+        "Wer bin ich?",
+        "Ein Wort, klein.",
+        "Tippe: whoami"
+      ],
+      "danach": "admin."
+    },
+    {
+      "aufgabe": "Beende die Verbindung.",
+      "eingabe": [
+        "exit"
+      ],
+      "hinweise": [
+        "Wie hast du vorhin die Verbindung beendet?",
+        "Ein Wort: Ausgang.",
+        "Tippe: exit"
+      ],
+      "danach": "Zurück auf srv-web01."
+    }
+  ],
+  "fertig": [
+    "ssh benutzer@server verbindet dich mit dem Terminal eines Servers.",
+    "Der Prompt zeigt, auf welchem Server du bist; exit trennt die Verbindung."
+  ]
+}

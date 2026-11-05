@@ -1,0 +1,78 @@
+{
+  "id": "gk-ls-benutzer",
+  "system": "linux_server",
+  "titel": "Benutzer und Gruppen: id, usermod",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/id.1.html",
+    "https://man7.org/linux/man-pages/man8/usermod.8.html",
+    "https://man7.org/linux/man-pages/man8/sudo.8.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-sudo-gruppe",
+  "erklaeren": [
+    "Wer was auf dem Server darf, hängt an Gruppen. Wer in der Gruppe sudo ist, darf Befehle mit sudo als root",
+    "ausführen. id benutzer zeigt alle Gruppen eines Benutzers, usermod -aG gruppe benutzer nimmt ihn",
+    "zusätzlich in eine Gruppe auf. Hier: Der neue Admin Max Koch (mkoch) darf kein sudo."
+  ],
+  "begriffe": {
+    "uid / gid": "Nummer des Benutzers / seiner Hauptgruppe.",
+    "Gruppe sudo": "Wer darin ist, darf sudo benutzen.",
+    "usermod -aG": "-a = append (dazu), -G = Gruppen. Ohne -a würden alle anderen Gruppen ersetzt!"
+  },
+  "mitmachen": [
+    {
+      "text": "Welche Gruppen hat mkoch? id mkoch",
+      "eingabe": "id mkoch",
+      "danach": "Nur mkoch und users – sudo fehlt."
+    },
+    {
+      "text": "Wer ist in der Gruppe sudo? getent group sudo",
+      "eingabe": "getent group sudo",
+      "danach": "Nur admin."
+    },
+    {
+      "text": "Versuch ohne sudo: usermod -aG sudo mkoch",
+      "eingabe": "usermod -aG sudo mkoch",
+      "danach": "Permission denied – Benutzer ändern darf nur root."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Nimm mkoch zusätzlich in die Gruppe sudo auf.",
+      "ziel": {
+        "mkoch_sudo": true
+      },
+      "hinweise": [
+        "Der Befehl ist richtig – es fehlen die Rechte.",
+        "sudo davor; -a nicht vergessen.",
+        "Tippe: sudo usermod -aG sudo mkoch"
+      ],
+      "loesung": [
+        "sudo usermod -aG sudo mkoch"
+      ],
+      "danach": "Aufgenommen. mkoch muss sich neu anmelden, damit die Gruppe wirkt."
+    },
+    {
+      "aufgabe": "Prüf nach.",
+      "eingabe": [
+        "id mkoch",
+        "groups mkoch",
+        "getent group sudo"
+      ],
+      "wenn": {
+        "mkoch_sudo": true
+      },
+      "hinweise": [
+        "Wie hast du die Gruppen am Anfang angesehen?",
+        "id und der Benutzername.",
+        "Tippe: id mkoch"
+      ],
+      "danach": "sudo steht jetzt dabei."
+    }
+  ],
+  "fertig": [
+    "id benutzer zeigt Gruppen; getent group gruppe zeigt Mitglieder.",
+    "sudo usermod -aG gruppe benutzer nimmt jemanden zusätzlich auf (immer mit -a!)."
+  ]
+}

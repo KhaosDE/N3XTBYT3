@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/windows-server/administration/windows-commands/net-user"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-admin",
   "ausgangslage": [
     "Die Auszubildende Jana Schulz kommt nach drei Wochen Berufsschule zurück.",
     "An ihrem PC (lokales Konto „jschulz“) erscheint bei der Anmeldung:",

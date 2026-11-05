@@ -10,6 +10,9 @@ from n3xtbyt3.kern.szenario import pruefe_daten
 
 WURZEL = Path(__file__).resolve().parents[1]
 SZENARIEN = sorted((WURZEL / "daten" / "szenarien").glob("*/*.json"))
+# Für die Regeln zu IP-Adressen und Mailadressen zählen auch Lektionen und Befehlsbücher.
+ALLE_DATEN = SZENARIEN + sorted((WURZEL / "daten" / "grundkurs").glob("*/*.json")) \
+    + sorted((WURZEL / "daten" / "befehlsbuch").glob("*.json"))
 IP = re.compile(r"(?<![\d.])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?![\d.])")
 
 ERLAUBT = [
@@ -20,9 +23,13 @@ ERLAUBT = [
 ]
 
 
+# Versionsnummern, die wie IP-Adressen aussehen (Modulversion in der Ausgabe von Get-Command)
+VERSIONEN = {"3.1.0.0"}
+
+
 def _ist_maske_oder_sonder(adresse: ipaddress.IPv4Address) -> bool:
     text = str(adresse)
-    if text == "0.0.0.0" or text.startswith("255."):
+    if text == "0.0.0.0" or text.startswith("255.") or text in VERSIONEN:
         return True
     return False
 
@@ -34,7 +41,7 @@ class InhaltTest(unittest.TestCase):
 
     def test_nur_private_ip_adressen(self):
         funde = []
-        for datei in SZENARIEN:
+        for datei in ALLE_DATEN:
             for treffer in IP.findall(datei.read_text(encoding="utf-8")):
                 try:
                     adresse = ipaddress.ip_address(treffer)
@@ -47,7 +54,7 @@ class InhaltTest(unittest.TestCase):
 
     def test_keine_echten_mailadressen(self):
         mail = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
-        funde = [f"{d.name}: {m}" for d in SZENARIEN for m in mail.findall(d.read_text(encoding="utf-8"))
+        funde = [f"{d.name}: {m}" for d in ALLE_DATEN for m in mail.findall(d.read_text(encoding="utf-8"))
                  if not m.endswith(".internal")]  # erfundene Domäne firma.internal ist erlaubt
         self.assertEqual(funde, [])
 
@@ -56,6 +63,26 @@ class InhaltTest(unittest.TestCase):
         szenario, fehler = pruefe_daten(daten)
         self.assertEqual(fehler, [])
         self.assertEqual(szenario.id, "win-mein-fehler")
+
+    def test_jedes_szenario_hat_eine_passende_lektion(self):
+        """Grundkurs: „braucht: Lektion n“ – jede voraussetzung zeigt auf eine vorhandene Lektion."""
+        from n3xtbyt3.kern import grundkurs
+        kurse = grundkurs.alle_kurse()
+        for datei in SZENARIEN:
+            daten = json.loads(datei.read_text(encoding="utf-8"))
+            with self.subTest(szenario=datei.name):
+                self.assertIn("voraussetzung", daten)
+                self.assertIsNotNone(grundkurs.finde_lektion(kurse, daten["voraussetzung"]))
+
+    def test_lektionen_haben_quelle_und_pruefstatus(self):
+        from n3xtbyt3.kern import grundkurs
+        from n3xtbyt3.kern.systeme import REIHENFOLGE
+        for sid in REIHENFOLGE:
+            kurs = grundkurs.lade_kurs(sid)
+            self.assertTrue(kurs.lektionen, f"Grundkurs {sid} fehlt")
+            for l in kurs.lektionen:
+                self.assertIn(l.pruefstatus, ("ungeprueft", "bestaetigt"))
+                self.assertTrue(l.quelle and all(q.startswith("https://") for q in l.quelle), l.id)
 
     def test_claude_szenarien_sind_ungeprueft_oder_bestaetigt(self):
         for datei in SZENARIEN:

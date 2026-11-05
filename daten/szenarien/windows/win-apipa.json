@@ -7,6 +7,7 @@
   "pruefstatus": "ungeprueft",
   "quelle": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-netzwerk",
   "shell": "cmd",
   "ausgangslage": [
     "Im Büro wurde heute früh der Router neu gestartet.",

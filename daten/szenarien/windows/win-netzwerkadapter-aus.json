@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/netadapter/enable-netadapter"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-netzwerk",
   "ausgangslage": [
     "Herr Neumann meldet: „Unten rechts ist beim Netzwerk ein rotes Kreuz. Gar nichts geht.“",
     "Er hat gestern „ein paar Einstellungen aufgeräumt“. Das Kabel steckt fest, am Switch leuchtet der Anschluss.",

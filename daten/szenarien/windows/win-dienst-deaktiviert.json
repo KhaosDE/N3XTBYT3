@@ -12,6 +12,7 @@
     "https://learn.microsoft.com/windows/win32/debug/system-error-codes--1000-1299-"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-dienste",
   "ausgangslage": [
     "Herr Krüger hat ein „Tuning-Programm“ laufen lassen, damit der PC schneller wird.",
     "Seitdem: kein Ton mehr. Unten rechts am Lautsprecher-Symbol steht ein rotes Kreuz:",

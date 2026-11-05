@@ -11,6 +11,7 @@
     "https://manpages.ubuntu.com/manpages/noble/man1/gio.1.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-dateien",
   "ausgangslage": [
     "Ubuntu meldet „Wenig Speicherplatz auf dem Datenträger“. Anna hat gestern 30 GB alte Schulungsvideos",
     "im Dateimanager gelöscht – frei geworden ist nichts.",

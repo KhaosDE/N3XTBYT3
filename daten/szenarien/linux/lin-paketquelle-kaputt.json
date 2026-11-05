@@ -10,6 +10,7 @@
     "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-nano",
   "ausgangslage": [
     "Für den neuen Etikettendrucker hat ein Kollege eine Paketquelle des Herstellers eingetragen.",
     "Seitdem bricht „sudo apt update“ mit einer Fehlermeldung ab, und es kommen keine Updates mehr.",

@@ -1,0 +1,266 @@
+{
+  "_info": "Befehlsbuch Linux Server: aus den Lektionen des Grundkurses. Ein Test prüft jedes Beispiel in der genannten Lektion.",
+  "system": "linux_server",
+  "befehle": [
+    {
+      "befehl": "ssh",
+      "was": "Verbindet dich mit dem Terminal eines anderen Rechners.",
+      "beispiel": "ssh admin@srv-db01",
+      "auch": [
+        "ssh srv-db01"
+      ],
+      "parameter": {
+        "benutzer@server": "Als wer und wohin.",
+        "-p": "Anderer Port als 22."
+      },
+      "wann": "Um einen Server aus der Ferne zu bedienen. exit trennt die Verbindung.",
+      "lektion": "gk-ls-ssh",
+      "quelle": "https://man7.org/linux/man-pages/man1/ssh.1.html"
+    },
+    {
+      "befehl": "systemctl status",
+      "was": "Zeigt, ob ein Dienst läuft und ob er automatisch startet.",
+      "beispiel": "systemctl status mariadb",
+      "wann": "Als Erstes, wenn ein Dienst nicht funktioniert.",
+      "lektion": "gk-ls-systemctl",
+      "quelle": "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    },
+    {
+      "befehl": "systemctl is-enabled",
+      "was": "Zeigt, ob ein Dienst beim Hochfahren startet.",
+      "beispiel": "systemctl is-enabled mariadb",
+      "auch": [
+        "systemctl is-active mariadb"
+      ],
+      "wann": "Wenn ein Dienst nach einem Neustart fehlt.",
+      "lektion": "gk-ls-systemctl",
+      "quelle": "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    },
+    {
+      "befehl": "systemctl enable --now",
+      "was": "Startet einen Dienst jetzt und bei jedem Hochfahren.",
+      "beispiel": "sudo systemctl enable --now mariadb",
+      "parameter": {
+        "start / stop / restart": "Nur jetzt.",
+        "enable / disable": "Beim Hochfahren starten / nicht starten.",
+        "--now": "Zusammen mit enable: auch gleich starten."
+      },
+      "wann": "Wenn ein Dienst dauerhaft laufen soll.",
+      "lektion": "gk-ls-systemctl",
+      "quelle": "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    },
+    {
+      "befehl": "systemctl restart",
+      "was": "Startet einen Dienst neu.",
+      "beispiel": "sudo systemctl restart shop-worker",
+      "wann": "Nach einer Änderung an der Konfiguration oder nach einem Absturz.",
+      "lektion": "gk-ls-logs",
+      "quelle": "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    },
+    {
+      "befehl": "journalctl -u",
+      "was": "Zeigt das Protokoll eines Dienstes.",
+      "beispiel": "journalctl -u shop-worker",
+      "parameter": {
+        "-n 20": "Nur die letzten 20 Zeilen.",
+        "-b": "Nur seit dem letzten Start.",
+        "-p err": "Nur Fehler."
+      },
+      "wann": "Wenn ein Dienst abstürzt oder nicht startet – die letzte Fehlerzeile nennt den Grund.",
+      "lektion": "gk-ls-logs",
+      "quelle": "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+    },
+    {
+      "befehl": "df -h",
+      "was": "Zeigt freien Platz je Dateisystem.",
+      "beispiel": "df -h",
+      "wann": "Wenn Dienste ausfallen oder „No space left“ kommt.",
+      "lektion": "gk-ls-speicher",
+      "quelle": "https://man7.org/linux/man-pages/man1/df.1.html"
+    },
+    {
+      "befehl": "du -sh",
+      "was": "Zeigt, wie viel ein Ordner belegt.",
+      "beispiel": "sudo du -sh /var/log/*",
+      "parameter": {
+        "-s": "Nur die Summe je Ordner.",
+        "-h": "Lesbare Größen."
+      },
+      "wann": "Um herauszufinden, was die Platte füllt.",
+      "lektion": "gk-ls-speicher",
+      "quelle": "https://man7.org/linux/man-pages/man1/du.1.html"
+    },
+    {
+      "befehl": "journalctl --vacuum-size",
+      "was": "Verkleinert das Journal auf eine Größe.",
+      "beispiel": "sudo journalctl --vacuum-size=500M",
+      "auch": [
+        "sudo journalctl --vacuum-time=2weeks"
+      ],
+      "wann": "Wenn das Journal die Platte füllt.",
+      "lektion": "gk-ls-speicher",
+      "quelle": "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+    },
+    {
+      "befehl": "ufw status",
+      "was": "Zeigt die Regeln der Firewall.",
+      "beispiel": "sudo ufw status",
+      "auch": [
+        "sudo ufw status verbose",
+        "sudo ufw status numbered"
+      ],
+      "wann": "Wenn ein Dienst von außen nicht erreichbar ist.",
+      "lektion": "gk-ls-ufw",
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html"
+    },
+    {
+      "befehl": "ufw allow",
+      "was": "Erlaubt einen Port oder ein Profil in der Firewall.",
+      "beispiel": "sudo ufw allow \"Nginx Full\"",
+      "auch": [
+        "sudo ufw allow 80/tcp"
+      ],
+      "parameter": {
+        "80/tcp": "Ein Port.",
+        "\"Nginx Full\"": "Ein Profil (sudo ufw app list)."
+      },
+      "wann": "Wenn ein neuer Dienst von außen erreichbar sein soll.",
+      "lektion": "gk-ls-ufw",
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html"
+    },
+    {
+      "befehl": "curl -I",
+      "was": "Fragt eine Webseite ab und zeigt nur die Kopfzeilen.",
+      "beispiel": "curl -I http://localhost",
+      "wann": "Um zu prüfen, ob ein Webserver antwortet.",
+      "lektion": "gk-ls-ufw",
+      "quelle": "https://curl.se/docs/manpage.html"
+    },
+    {
+      "befehl": "id",
+      "was": "Zeigt Benutzernummer und Gruppen.",
+      "beispiel": "id mkoch",
+      "auch": [
+        "groups mkoch"
+      ],
+      "wann": "Wenn jemand etwas nicht darf (z. B. kein sudo).",
+      "lektion": "gk-ls-benutzer",
+      "quelle": "https://man7.org/linux/man-pages/man1/id.1.html"
+    },
+    {
+      "befehl": "usermod -aG",
+      "was": "Nimmt einen Benutzer zusätzlich in eine Gruppe auf.",
+      "beispiel": "sudo usermod -aG sudo mkoch",
+      "wann": "Wenn jemand Rechte einer Gruppe braucht. Immer mit -a!",
+      "lektion": "gk-ls-benutzer",
+      "quelle": "https://man7.org/linux/man-pages/man8/usermod.8.html"
+    },
+    {
+      "befehl": "getent group",
+      "was": "Zeigt die Mitglieder einer Gruppe.",
+      "beispiel": "getent group sudo",
+      "wann": "Wer darf sudo?",
+      "lektion": "gk-ls-benutzer",
+      "quelle": "https://man7.org/linux/man-pages/man1/getent.1.html"
+    },
+    {
+      "befehl": "nginx -t",
+      "was": "Prüft die nginx-Konfiguration auf Fehler.",
+      "beispiel": "sudo nginx -t",
+      "wann": "Nach jeder Änderung an der Konfiguration – vor dem Neustart.",
+      "lektion": "gk-ls-fehlersuche",
+      "quelle": "https://nginx.org/en/docs/switches.html"
+    }
+  ],
+  "situationen": [
+    {
+      "wenn": "… ich auf einem anderen Server arbeiten muss?",
+      "befehle": [
+        "ssh admin@srv-db01"
+      ],
+      "lektion": "gk-ls-ssh"
+    },
+    {
+      "wenn": "… ein Dienst nicht läuft?",
+      "befehle": [
+        "systemctl status mariadb",
+        "sudo systemctl start mariadb"
+      ],
+      "lektion": "gk-ls-systemctl"
+    },
+    {
+      "wenn": "… ein Dienst nach einem Neustart weg ist?",
+      "befehle": [
+        "systemctl is-enabled mariadb",
+        "sudo systemctl enable --now mariadb"
+      ],
+      "lektion": "gk-ls-systemctl",
+      "erklaerung": "disabled heißt: startet nicht beim Hochfahren. enable --now behebt beides."
+    },
+    {
+      "wenn": "… ein Dienst immer wieder abstürzt?",
+      "befehle": [
+        "systemctl status shop-worker",
+        "journalctl -u shop-worker"
+      ],
+      "lektion": "gk-ls-logs",
+      "erklaerung": "Die letzte Fehlerzeile im Journal nennt den Grund."
+    },
+    {
+      "wenn": "… ich wissen will, wem eine Datei oder ein Ordner gehört?",
+      "befehle": [
+        "ls -l /var/lib/shop"
+      ],
+      "lektion": "gk-ls-logs"
+    },
+    {
+      "wenn": "… die Festplatte voll ist?",
+      "befehle": [
+        "df -h",
+        "sudo du -sh /var/log/*"
+      ],
+      "lektion": "gk-ls-speicher"
+    },
+    {
+      "wenn": "… das Journal zu viel Platz belegt?",
+      "befehle": [
+        "journalctl --disk-usage",
+        "sudo journalctl --vacuum-size=500M"
+      ],
+      "lektion": "gk-ls-speicher"
+    },
+    {
+      "wenn": "… ein Dienst lokal läuft, von außen aber nicht erreichbar ist?",
+      "befehle": [
+        "curl -I http://localhost",
+        "sudo ufw status"
+      ],
+      "lektion": "gk-ls-ufw",
+      "erklaerung": "Antwortet er lokal, liegt es meist an der Firewall."
+    },
+    {
+      "wenn": "… ich einen Port in der Firewall öffnen muss?",
+      "befehle": [
+        "sudo ufw allow \"Nginx Full\""
+      ],
+      "lektion": "gk-ls-ufw"
+    },
+    {
+      "wenn": "… jemand kein sudo darf?",
+      "befehle": [
+        "id mkoch",
+        "sudo usermod -aG sudo mkoch"
+      ],
+      "lektion": "gk-ls-benutzer"
+    },
+    {
+      "wenn": "… nginx nach einer Änderung nicht mehr startet?",
+      "befehle": [
+        "sudo nginx -t",
+        "journalctl -u nginx"
+      ],
+      "lektion": "gk-ls-fehlersuche",
+      "erklaerung": "nginx -t nennt Datei und Zeile des Fehlers."
+    }
+  ]
+}

@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/activedirectory/get-adprincipalgroupmembership"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-gruppen",
   "ausgangslage": [
     "Nina Becker (nbecker) ist neu im Vertrieb. Beim Öffnen von \\\\SRV-DATEI01\\Vertrieb kommt: „Access is denied.“",
     "Ihre Kollegen kommen hinein. Die Rechte auf den Ordner sind über die Gruppe GG-Vertrieb vergeben.",

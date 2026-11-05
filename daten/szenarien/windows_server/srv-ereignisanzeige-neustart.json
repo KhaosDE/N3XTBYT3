@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ereignisse",
   "ausgangslage": [
     "DC01 war gestern Abend gegen 22:42 Uhr kurz weg – alle Verbindungen sind abgebrochen.",
     "Die Chefin fragt: War das ein Absturz, oder hat jemand den Server neu gestartet? Und wer?",

@@ -10,6 +10,7 @@
     "https://documentation.ubuntu.com/server/how-to/networking/timedatectl-and-timesyncd/"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-fehlersuche",
   "ausgangslage": [
     "Annas Uhr geht sieben Minuten nach. Manche Webseiten melden Zertifikatsfehler,",
     "die Zwei-Faktor-Codes werden abgelehnt. Die Zeitzone stimmt (Europe/Berlin).",

@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/activedirectory/clear-adaccountexpiration"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-benutzer",
   "ausgangslage": [
     "Der Praktikant Tom Richter (trichter) bleibt länger – sein Vertrag geht jetzt bis zum 28.02.2027.",
     "Heute früh kommt bei der Anmeldung: „Your account has expired. Please see your system administrator.“",

@@ -12,6 +12,7 @@
     "https://curl.se/docs/manpage.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-fehlersuche",
   "ticket": {
     "nummer": "T-2026-0412",
     "von": "Herr Neumann (Vertrieb)",

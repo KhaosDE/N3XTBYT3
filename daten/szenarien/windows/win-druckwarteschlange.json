@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/troubleshoot/windows-server/printing/print-spooler-service-not-running"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-dienste",
   "ausgangslage": [
     "Frau Berger: „Meine Rechnung hängt im Drucker fest. Da steht ‚Fehler – Wird gedruckt‘.",
     "Löschen geht nicht, und alles, was ich danach drucke, bleibt dahinter stecken.“",

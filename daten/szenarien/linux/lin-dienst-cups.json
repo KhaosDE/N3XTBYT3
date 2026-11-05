@@ -10,6 +10,7 @@
     "https://documentation.ubuntu.com/server/how-to/networking/cups-print-server/"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-ls-systemctl",
   "ausgangslage": [
     "Am Lager-PC druckt nichts mehr; die Druckeinstellungen melden „CUPS server is not running“.",
     "Ein Praktikant hat „unnötige Dienste“ abgeschaltet, damit der PC schneller startet.",

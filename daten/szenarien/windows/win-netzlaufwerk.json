@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/new-psdrive"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-netzwerk",
   "shell": "cmd",
   "ausgangslage": [
     "Herr Krüger: „Mein Laufwerk Z: mit den Projektdaten ist weg! Da ist nur noch ein rotes Kreuz.“",

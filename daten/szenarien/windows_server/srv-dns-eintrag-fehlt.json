@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/dnsclient/resolve-dnsname"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-dns",
   "ausgangslage": [
     "Der neue Netzwerkdrucker im Lager hat die feste IP-Adresse 192.168.10.42 und soll drucker02.firma.internal heißen.",
     "Per IP-Adresse kann man drucken, über den Namen nicht. Weil er eine feste Adresse hat, trägt er sich nicht selbst im DNS ein.",

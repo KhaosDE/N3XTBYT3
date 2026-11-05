@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverforwarder"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-dns",
   "ausgangslage": [
     "Seit DC01 neu aufgesetzt wurde, öffnen die PCs keine Internetseiten mehr. Interne Namen (intranet.firma.internal) gehen.",
     "Alle PCs fragen DC01 als DNS-Server. Die Firewall erlaubt DNS-Anfragen ins Internet nur über den Router 192.168.10.1.",

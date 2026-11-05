@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/start-process"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-admin",
   "ausgangslage": [
     "Nach einem Stromausfall stürzt bei Herrn Neumann die Windows-Suche ständig ab, und manche",
     "Systemprogramme öffnen sich nicht. Die Kollegin aus der IT sagt am Telefon: „Lass mal die",

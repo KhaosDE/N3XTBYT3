@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/reset-computermachinepassword"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-server",
   "ausgangslage": [
     "PC-BUERO-12 wurde aus einem alten Image wiederhergestellt. Seitdem kann sich kein Domänenbenutzer mehr anmelden:",
     "„The trust relationship between this workstation and the primary domain failed.“",

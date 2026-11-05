@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/nettcpip/get-nettcpconnection"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-server",
   "ausgangslage": [
     "Die neue Warenwirtschaft auf SRV-APP01 (192.168.10.30) läuft und lauscht auf TCP-Port 8080.",
     "Auf dem Server selbst geht sie, von den Arbeitsplätzen aus nicht: Zeitüberschreitung.",

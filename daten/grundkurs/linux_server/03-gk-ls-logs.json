@@ -1,0 +1,102 @@
+{
+  "id": "gk-ls-logs",
+  "system": "linux_server",
+  "titel": "Protokolle lesen: journalctl und /var/log",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://man7.org/linux/man-pages/man1/chown.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-worker-rechte",
+  "dateien": {
+    "/var/log/apt/": {},
+    "/var/log/journal/": {},
+    "/var/log/nginx/": {},
+    "/var/log/auth.log": {
+      "inhalt": "",
+      "rechte": "640",
+      "besitzer": "syslog:adm"
+    },
+    "/var/log/syslog": {
+      "inhalt": "",
+      "rechte": "640",
+      "besitzer": "syslog:adm"
+    },
+    "/var/log/dpkg.log": {
+      "inhalt": "",
+      "rechte": "644"
+    }
+  },
+  "erklaeren": [
+    "Was ein Dienst tut und warum er abstürzt, steht im Protokoll (Log). systemd sammelt alles im Journal:",
+    "journalctl -u dienst zeigt die Meldungen eines Dienstes. Viele Programme schreiben zusätzlich Dateien",
+    "nach /var/log (z. B. nginx). Hier stürzt der Hintergrunddienst shop-worker immer wieder ab."
+  ],
+  "begriffe": {
+    "Log": "Protokoll: Meldungen eines Programms mit Zeit, oft mit Fehlergrund.",
+    "Journal": "Das Protokoll von systemd; lesen mit journalctl.",
+    "/var/log": "Ordner mit Protokolldateien vieler Programme.",
+    "Traceback": "Fehlerbericht eines Python-Programms; die letzte Zeile nennt den Grund."
+  },
+  "mitmachen": [
+    {
+      "text": "Was ist mit dem Dienst? systemctl status shop-worker",
+      "eingabe": "systemctl status shop-worker",
+      "danach": "failed – der Dienst ist abgestürzt. Den Grund zeigt das Journal."
+    },
+    {
+      "text": "Sein Protokoll: journalctl -u shop-worker",
+      "eingabe": "journalctl -u shop-worker",
+      "danach": "Die letzte Zeile ist entscheidend: PermissionError – der Dienst darf in /var/lib/shop nicht schreiben."
+    },
+    {
+      "text": "Wem gehört der Ordner? ls -l /var/lib/shop",
+      "eingabe": "ls -l /var/lib/shop",
+      "danach": "Er gehört root – der Dienst läuft aber als Benutzer shop."
+    },
+    {
+      "text": "Wo liegen die anderen Protokolle? ls /var/log",
+      "eingabe": "ls /var/log",
+      "danach": "auth.log (Anmeldungen), syslog (Systemmeldungen), nginx/ (Webserver) … Lesen meist nur mit sudo."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Gib den Ordner /var/lib/shop samt Inhalt dem Benutzer und der Gruppe shop.",
+      "ziel": {
+        "besitzer:/var/lib/shop": "shop:shop"
+      },
+      "hinweise": [
+        "Besitzer ändert chown – mit sudo.",
+        "sudo chown -R benutzer:gruppe ordner",
+        "Tippe: sudo chown -R shop:shop /var/lib/shop"
+      ],
+      "loesung": [
+        "sudo chown -R shop:shop /var/lib/shop"
+      ],
+      "danach": "Besitzer geändert. -R heißt: auch alles darin."
+    },
+    {
+      "aufgabe": "Starte den Dienst neu.",
+      "ziel": {
+        "worker_aktiv": true
+      },
+      "hinweise": [
+        "systemctl kennt restart.",
+        "sudo systemctl restart und der Dienstname.",
+        "Tippe: sudo systemctl restart shop-worker"
+      ],
+      "loesung": [
+        "sudo systemctl restart shop-worker"
+      ],
+      "danach": "Der shop-worker läuft wieder."
+    }
+  ],
+  "fertig": [
+    "systemctl status zeigt, dass ein Dienst ausgefallen ist; journalctl -u dienst zeigt, warum.",
+    "Die letzte Fehlerzeile im Log nennt meist die Ursache.",
+    "Weitere Protokolle liegen in /var/log."
+  ]
+}

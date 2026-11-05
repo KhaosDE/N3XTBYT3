@@ -11,6 +11,7 @@
     "https://man7.org/linux/man-pages/man1/resolvectl.1.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-netzwerk",
   "ausgangslage": [
     "srv-web01 erreicht andere Server per IP-Adresse, aber keine Namen: Updates und Mails scheitern.",
     "Die Netzwerkeinstellungen stehen in /etc/netplan/50-cloud-init.yaml. Der richtige DNS-Server ist dc01 (192.168.10.5).",

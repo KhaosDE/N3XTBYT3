@@ -9,6 +9,7 @@
     "https://learn.microsoft.com/windows-server/administration/windows-commands/icacls"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-gruppen",
   "shell": "cmd",
   "ausgangslage": [
     "Der neue Ordner D:\\Daten\\Buchhaltung auf SRV-DATEI01 ist über die Freigabe \\\\SRV-DATEI01\\Buchhaltung erreichbar.",

@@ -362,7 +362,7 @@ class Szenarioliste(Ansicht):
                 pygame.draw.circle(f, punkt, (x + r, rect.centery), r)
                 x += 3 * r + s.zeichen_breite
                 f.blit(s.text.render(sz.kategorie, True, FARBE["text_schwach"]), (x, ty))
-                x += s.zeichen_breite * 12
+                x += max(s.text.size(k.kategorie)[0] for k in self.szenarien) + s.zeichen_breite * 2
                 x += schwierigkeit_zeichnen(f, x, rect.centery - s.zeilen_hoehe // 4, sz.schwierigkeit,
                                             s.zeilen_hoehe // 2) + s.zeichen_breite
                 f.blit(s.text.render(sz.titel, True, FARBE["gruen_hell"] if gewaehlt else FARBE["text"]), (x, ty))

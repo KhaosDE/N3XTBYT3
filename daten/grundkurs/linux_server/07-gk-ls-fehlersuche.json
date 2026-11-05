@@ -1,0 +1,114 @@
+{
+  "id": "gk-ls-fehlersuche",
+  "system": "linux_server",
+  "titel": "Fehlersuche am Server: Webserver startet nicht",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://nginx.org/en/docs/switches.html",
+    "https://nginx.org/en/docs/beginners_guide.html",
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-nginx-konfig",
+  "erklaeren": [
+    "Zum Abschluss die fünf Schritte am Server. Der Fall: Nach einer Änderung an der Konfiguration startet der",
+    "Webserver nginx nicht mehr, der Shop ist weg. Viele Dienste können ihre Konfiguration selbst prüfen –",
+    "bei nginx mit nginx -t. Das sagt dir Datei und Zeile des Fehlers."
+  ],
+  "begriffe": {
+    "Konfiguration": "Einstellungsdatei eines Programms, unter Linux meist in /etc.",
+    "nginx -t": "Prüft die nginx-Konfiguration, ohne etwas zu ändern (t = test).",
+    "Direktive": "Eine Einstellung in der nginx-Konfiguration; jede endet mit einem Semikolon (;)."
+  },
+  "mitmachen": [
+    {
+      "text": "Infos sammeln: systemctl status nginx",
+      "eingabe": "systemctl status nginx",
+      "danach": "failed – nginx läuft nicht."
+    },
+    {
+      "text": "Warum? journalctl -u nginx",
+      "eingabe": "journalctl -u nginx",
+      "danach": "[emerg] invalid number of arguments in \"root\" directive – irgendwas mit der Zeile root."
+    },
+    {
+      "text": "Die Konfiguration prüfen: sudo nginx -t",
+      "eingabe": "sudo nginx -t",
+      "danach": "Datei und Zeile: /etc/nginx/conf.d/shop.conf, Zeile 5. Vermutung: ein Tippfehler bei root."
+    },
+    {
+      "text": "Nachsehen: cat /etc/nginx/conf.d/shop.conf",
+      "eingabe": "cat /etc/nginx/conf.d/shop.conf",
+      "danach": "Bei root /var/www/shop fehlt das Semikolon am Ende – nginx liest die nächste Zeile mit dazu."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Beheben: Ergänze das fehlende Semikolon in /etc/nginx/conf.d/shop.conf und speichere.",
+      "ziel": {
+        "datei:/etc/nginx/conf.d/shop.conf": {
+          "zeile_enthaelt": "root /var/www/shop;"
+        }
+      },
+      "hinweise": [
+        "Die Datei gehört root.",
+        "sudo nano /etc/nginx/conf.d/shop.conf – ; ans Ende der root-Zeile, Strg+O.",
+        "Tippe: sudo nano /etc/nginx/conf.d/shop.conf – dann hinter /var/www/shop ein ; setzen und Strg+O."
+      ],
+      "loesung": [
+        "sudo nano /etc/nginx/conf.d/shop.conf",
+        {
+          "speichern": "/etc/nginx/conf.d/shop.conf",
+          "inhalt": [
+            "server {",
+            "    listen 80;",
+            "    server_name shop.firma.internal;",
+            "    root /var/www/shop;",
+            "    index index.html;",
+            "}"
+          ]
+        }
+      ],
+      "danach": "Gespeichert."
+    },
+    {
+      "aufgabe": "Prüf die Konfiguration erneut und starte nginx neu.",
+      "ziel": {
+        "nginx_aktiv": true
+      },
+      "hinweise": [
+        "Erst testen, dann den Dienst neu starten.",
+        "sudo nginx -t, dann sudo systemctl restart nginx.",
+        "Tippe: sudo nginx -t – und danach: sudo systemctl restart nginx"
+      ],
+      "loesung": [
+        "sudo nginx -t",
+        "sudo systemctl restart nginx"
+      ],
+      "danach": "syntax is ok – und nginx läuft. Erst testen, dann neu starten: So legt eine kaputte Konfiguration nie den laufenden Dienst lahm."
+    },
+    {
+      "aufgabe": "Nachprüfen: Antwortet der Webserver?",
+      "eingabe": [
+        "curl -I http://localhost",
+        "curl -I localhost",
+        "systemctl status nginx"
+      ],
+      "wenn": {
+        "nginx_aktiv": true
+      },
+      "hinweise": [
+        "Mit curl kannst du eine Webseite abfragen.",
+        "curl -I und die Adresse.",
+        "Tippe: curl -I http://localhost"
+      ],
+      "danach": "200 OK. Notiz: „Fehlendes Semikolon in shop.conf (root-Zeile); korrigiert, nginx -t ok, neu gestartet.“"
+    }
+  ],
+  "fertig": [
+    "Status, Log, Konfigurationstest – so findest du Datei und Zeile des Fehlers.",
+    "Erst nginx -t, dann neu starten.",
+    "Ab jetzt kannst du die Linux-Server-Szenarien allein lösen."
+  ]
+}

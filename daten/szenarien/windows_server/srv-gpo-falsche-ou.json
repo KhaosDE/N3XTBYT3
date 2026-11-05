@@ -12,6 +12,7 @@
     "https://learn.microsoft.com/troubleshoot/windows-server/group-policy/applying-group-policy-troubleshooting-guidance"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-ad-benutzer",
   "ausgangslage": [
     "Alle im Vertrieb bekommen über die Gruppenrichtlinie „Vertrieb-Laufwerke“ automatisch das Laufwerk V:.",
     "Nur Jonas Klein (jklein) nicht – auch nicht nach Neustart und „gpupdate /force“ an seinem PC.",

@@ -1,0 +1,81 @@
+{
+  "id": "gk-ls-systemctl",
+  "system": "linux_server",
+  "titel": "Dienste mit systemctl",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://documentation.ubuntu.com/server/how-to/databases/install-mysql/"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-mariadb-autostart",
+  "erklaeren": [
+    "Dienste (Webserver, Datenbank, ssh) verwaltet unter Linux systemd. Der Befehl dazu ist systemctl:",
+    "status zeigt den Zustand, start/stop/restart steuern ihn, enable sorgt dafür, dass er beim Hochfahren",
+    "startet. Wichtig: start wirkt nur jetzt, enable erst beim nächsten Start – enable --now macht beides.",
+    "Hier: Nach einem Neustart läuft die Datenbank MariaDB nicht mehr."
+  ],
+  "begriffe": {
+    "systemd": "Startet und überwacht unter Ubuntu alle Dienste.",
+    "Unit": "Ein von systemd verwalteter Baustein, z. B. mariadb.service.",
+    "active / inactive": "Dienst läuft / läuft nicht.",
+    "enabled / disabled": "Startet beim Hochfahren / startet nicht von selbst."
+  },
+  "mitmachen": [
+    {
+      "text": "Zustand ansehen: systemctl status mariadb",
+      "eingabe": "systemctl status mariadb",
+      "danach": "Loaded: … disabled heißt: startet nicht beim Hochfahren. Active: inactive (dead): läuft gerade nicht."
+    },
+    {
+      "text": "Kurz gefragt: systemctl is-enabled mariadb",
+      "eingabe": "systemctl is-enabled mariadb",
+      "danach": "disabled – darum war die Datenbank nach dem Neustart weg."
+    },
+    {
+      "text": "Versuch ohne sudo: systemctl enable --now mariadb",
+      "eingabe": "systemctl enable --now mariadb",
+      "danach": "Dienste ändern darf nur root."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Starte MariaDB jetzt und sorg dafür, dass sie bei jedem Hochfahren startet – in einem Befehl.",
+      "ziel": {
+        "db_aktiv": true,
+        "db_enabled": true
+      },
+      "hinweise": [
+        "enable und start zusammen gehen mit einem Zusatz.",
+        "sudo systemctl enable --now …",
+        "Tippe: sudo systemctl enable --now mariadb"
+      ],
+      "loesung": [
+        "sudo systemctl enable --now mariadb"
+      ],
+      "danach": "enable --now: startet jetzt und künftig beim Hochfahren."
+    },
+    {
+      "aufgabe": "Prüf nach, ob der Dienst jetzt läuft.",
+      "eingabe": [
+        "systemctl status mariadb",
+        "systemctl is-active mariadb",
+        "systemctl status mariadb.service"
+      ],
+      "wenn": {
+        "db_aktiv": true
+      },
+      "hinweise": [
+        "Wie hast du am Anfang nachgesehen?",
+        "systemctl status und der Dienstname.",
+        "Tippe: systemctl status mariadb"
+      ],
+      "danach": "active (running) – die Datenbank läuft."
+    }
+  ],
+  "fertig": [
+    "systemctl status zeigt, ob ein Dienst läuft (active) und ob er automatisch startet (enabled).",
+    "sudo systemctl start/stop/restart steuert ihn jetzt.",
+    "sudo systemctl enable --now startet ihn jetzt und bei jedem Hochfahren."
+  ]
+}

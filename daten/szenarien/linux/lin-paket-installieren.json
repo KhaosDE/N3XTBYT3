@@ -10,6 +10,7 @@
     "https://documentation.ubuntu.com/server/how-to/software/package-management/"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-pakete",
   "ausgangslage": [
     "Für die Fehlersuche soll Anna sich mit „htop“ anschauen, welche Programme viel Rechenleistung brauchen.",
     "Das Terminal kennt htop aber nicht.",

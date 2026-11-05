@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/stop-process"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-prozesse",
   "ausgangslage": [
     "Bei Herrn Neumann ist Excel eingefroren: „Keine Rückmeldung“ im Fenstertitel, seit zehn Minuten.",
     "Schließen über das X geht nicht. Seine anderen Programme (Outlook, Word) laufen normal und",

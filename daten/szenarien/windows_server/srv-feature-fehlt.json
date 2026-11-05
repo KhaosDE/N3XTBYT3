@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/windows-server/administration/windows-commands/wbadmin"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-features",
   "ausgangslage": [
     "Auf SRV-DATEI01 soll eine nächtliche Sicherung eingerichtet werden. Die Anleitung beginnt mit „wbadmin“.",
     "Die PowerShell meldet aber, dass es diesen Befehl nicht gibt.",

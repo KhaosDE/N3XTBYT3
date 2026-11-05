@@ -10,6 +10,7 @@
     "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-win-netzwerk",
   "shell": "cmd",
   "ausgangslage": [
     "Frau Berger ruft an: „Das Intranet geht nicht mehr. Andere Seiten gehen.“",

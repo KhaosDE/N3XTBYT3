@@ -1,0 +1,77 @@
+{
+  "id": "gk-ls-speicher",
+  "system": "linux_server",
+  "titel": "Speicherplatz: df und du",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/df.1.html",
+    "https://man7.org/linux/man-pages/man1/du.1.html",
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "ls-journal-voll",
+  "erklaeren": [
+    "Ist die Festplatte eines Servers voll, fallen Dienste aus. df -h zeigt, wie voll jedes Dateisystem ist,",
+    "du -sh zeigt, wie viel ein Ordner belegt. -h heißt: lesbare Größen (G, M, K). Hier ist die Platte von",
+    "srv-web01 fast voll."
+  ],
+  "begriffe": {
+    "Dateisystem": "Ein Speicherbereich mit Ordnern und Dateien; / ist das Haupt-Dateisystem.",
+    "Use%": "Wie viel Prozent belegt sind. Ab 90 % wird es eng."
+  },
+  "mitmachen": [
+    {
+      "text": "Wie voll ist die Platte? df -h",
+      "eingabe": "df -h",
+      "danach": "Use% bei / ist fast 100 % – kaum noch Platz."
+    },
+    {
+      "text": "Wer belegt den Platz in /var/log? sudo du -sh /var/log/*",
+      "eingabe": "sudo du -sh /var/log/*",
+      "danach": "/var/log/journal ist riesig: Das Journal ist übergelaufen."
+    },
+    {
+      "text": "Wie groß genau? journalctl --disk-usage",
+      "eingabe": "journalctl --disk-usage",
+      "danach": "Rund 18 GB Protokolle."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Verkleinere das Journal auf 500 MB.",
+      "ziel": {
+        "journal_gross": false
+      },
+      "hinweise": [
+        "journalctl kann selbst aufräumen (vacuum).",
+        "sudo journalctl --vacuum-size=…",
+        "Tippe: sudo journalctl --vacuum-size=500M"
+      ],
+      "loesung": [
+        "sudo journalctl --vacuum-size=500M"
+      ],
+      "danach": "Alte Protokolle sind weg, die neuesten bleiben."
+    },
+    {
+      "aufgabe": "Prüf nach, wie voll die Platte jetzt ist.",
+      "eingabe": [
+        "df -h",
+        "df -h /"
+      ],
+      "wenn": {
+        "journal_gross": false
+      },
+      "hinweise": [
+        "Wie hast du es am Anfang gesehen?",
+        "df mit lesbaren Größen.",
+        "Tippe: df -h"
+      ],
+      "danach": "Wieder genug Platz."
+    }
+  ],
+  "fertig": [
+    "df -h zeigt den freien Platz je Dateisystem.",
+    "du -sh ordner/* zeigt, was wie viel belegt.",
+    "journalctl --vacuum-size räumt das Journal sicher auf."
+  ]
+}

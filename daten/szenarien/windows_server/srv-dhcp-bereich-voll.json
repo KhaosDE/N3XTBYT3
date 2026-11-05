@@ -11,6 +11,7 @@
     "https://learn.microsoft.com/powershell/module/dhcpserver/get-dhcpserverv4scope"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-srv-dhcp",
   "ausgangslage": [
     "Heute ist Schulung: 30 Gäste-Laptops im Besprechungsraum. Fast alle zeigen eine Adresse 169.254.x.x und kein Netzwerk.",
     "Die Büro-PCs laufen normal. DHCP-Server ist DC01, Bereich 192.168.10.0.",

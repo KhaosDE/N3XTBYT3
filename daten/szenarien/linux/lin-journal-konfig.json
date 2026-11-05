@@ -10,6 +10,7 @@
     "https://man7.org/linux/man-pages/man1/cp.1.html"
   ],
   "datum": "2026-11-04",
+  "voraussetzung": "gk-lin-dateien",
   "ausgangslage": [
     "Das Programm „lagerscan“ (Barcode-Scanner der Firma) startet bei Anna nicht mehr – es blitzt kurz auf und ist weg.",
     "Es wurde gestern neu installiert. Die IT sagt: „Schau ins Journal, da steht der Grund.“",
