@@ -164,13 +164,11 @@ die vom echten System abweichen, korrigieren.
   erlaubten Adressen im Update-Paket, das Lernprogramm kennt das Update-Paket nicht.
 - 05.11.2026: Repository öffentlich (Tobi). Geprüft ohne Anmeldung: Repository-Seite erreichbar, fester
   Download-Link liefert die `.exe`, der echte Ablauf gegen Release `build-22` lädt, prüft die Prüfsumme,
-  tauscht und startet (unter Linux mit Platzhalter-Datei; unter Windows noch offen).
+  tauscht und startet (unter Linux mit Platzhalter-Datei).
+- 05.11.2026: **Unter Windows von Tobi bestätigt:** Build 22 hat sich beim Start selbst auf Build 23
+  aktualisiert und läuft.
 
 ## Offene Punkte
-
-- Selbst-Update nicht unter echtem Windows getestet (hier gibt es kein Windows): Umbenennen der laufenden
-  `.exe` und Neustart folgen der Windows- und PyInstaller-Doku, sind aber erst bei dir wirklich erprobt.
-  Virenscanner können ein Programm, das sich selbst austauscht, misstrauisch beäugen.
 
 - Szenario-Ausgaben sind „ungeprüft“. Bitte beim Spielen auf Abweichungen zum echten Windows achten.
   Besonders unsicher (bewusst so markiert oder gekürzt):
@@ -300,16 +298,6 @@ die vom echten System abweichen, korrigieren.
   Rückfrage (Wunsch: „sollte sich selbst aktualisieren“); Esc im Fortschrittsfenster bricht ab.
 
 ## Für Tobi zum Testen
-
-**Neu: Selbst-Update**
-
-1. Absichtlich die ältere Version laden: <https://github.com/KhaosDE/N3XTBYT3/releases/download/build-22/N3XTBYT3.exe>
-   – in einen Ordner, in dem du schreiben darfst (z. B. Dokumente). Windows-Warnung: „Weitere Informationen“
-   → „Trotzdem ausführen“.
-2. Starten: Es sollte kurz ein Fenster „Neue Version wird geladen: Build 22 → Build 23“ erscheinen, danach
-   startet N3XTBYT3 neu. Unten im Hauptmenü steht dann „Build 23“ (oder höher).
-3. Programm schließen, Ordner ansehen: Nur noch `N3XTBYT3.exe` (die `.alt`-Datei wird beim Start gelöscht).
-4. Klappt es nicht: `update.log` im Datenordner (`%APPDATA%\N3XTBYT3`) ansehen und mir den Inhalt schicken.
 
 **Neu: Grundkurs**
 
