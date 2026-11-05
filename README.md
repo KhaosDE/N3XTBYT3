@@ -32,6 +32,21 @@ pip install -r requirements.txt
 python -m n3xtbyt3
 ```
 
+## Neu an der Konsole? Der Grundkurs
+
+Beim ersten Start begrüßt dich N3XTBYT3 und bietet den **Grundkurs** an (Enter). Er fängt ganz vorn an –
+was ist ein Prompt, wie tippe ich einen Befehl – und führt Schritt für Schritt durch die wichtigsten
+Befehle: erst erklären, dann mittippen (rechts steht genau, was du tippen sollst, und danach, was die
+Ausgabe bedeutet), dann selbst probieren (mit Hinweisen über F1).
+
+- Windows (10 Lektionen, PowerShell zuerst), Windows Server (8), Linux (10), Linux Server (7).
+- Später erreichst du ihn in jeder Szenarioliste über den ersten Eintrag „Grundkurs“.
+- Szenarien zeigen „braucht: Lektion 6“, wenn die passende Lektion noch fehlt – nur ein Hinweis, gesperrt
+  wird nichts.
+- **F4 Befehlsbuch** (überall): jeder Befehl mit Beispiel, Parametern und „Wann brauche ich das?“;
+  mit Tab die Sicht **„Was tippe ich, wenn …?“**. Einfach lostippen zum Suchen.
+- **F5 Lexikon** (überall): alle Fachbegriffe mit Erklärung und wo sie vorkommen.
+
 ## Spielen
 
 1. Im Hauptmenü ein System wählen (Pfeiltasten oder 1–4, dann Enter) – oder 5 für die Tickets.
@@ -47,6 +62,8 @@ python -m n3xtbyt3
 | F1 | nächster Hinweis |
 | F2 | nächstes Szenario |
 | F3 | Ticket schließen (nur bei Tickets, wenn das Problem behoben ist) |
+| F4 | Befehlsbuch (Tab: „Was tippe ich, wenn …?“) |
+| F5 | Lexikon |
 | Esc | zurück zur Liste / zum Menü |
 | Pfeil hoch/runter | frühere Befehle |
 | Bild hoch/runter, Mausrad | blättern |
@@ -78,7 +95,10 @@ Gut zu wissen:
   `powershell`, zurück mit `exit`. Befehle wie `Get-Service` gehen nur in der PowerShell.
 - Unter Linux zählt Groß-/Kleinschreibung. Root-Rechte bekommst du mit `sudo` vor dem Befehl
   (oder `sudo -i` für eine root-Shell, zurück mit `exit`). Dateibefehle wie `ls -l`, `cd`, `cat`,
-  `grep`, `tail -n`, `chmod`, `chown` und Pipes (`… | grep fehler`) funktionieren in jedem Szenario.
+  `grep`, `tail -n`, `chmod`, `chown`, `mkdir`, `cp`, `mv`, `rm` und Pipes (`… | grep fehler`)
+  funktionieren in jedem Szenario.
+- In der Windows-PowerShell gehen `Get-Location`, `cd`, `dir`, `Get-Content`, `New-Item`, `Copy-Item`,
+  `Move-Item` und `Remove-Item`, wo ein Szenario oder eine Lektion Dateien mitbringt.
 - Dateien bearbeitest du unter Linux mit `nano <datei>` (bzw. `sudo nano …`): **Strg+O** speichert,
   **Strg+X** beendet, **Strg+K** schneidet eine Zeile aus. Es ist ein vereinfachter Ersatz für nano.
 - `help` zeigt die Hilfe der Simulation (nicht die echte Hilfe des Systems).
@@ -101,6 +121,7 @@ Echte Fehler, die du gelöst hast, werden zu neuen Übungen – ohne neue Progra
 Anleitung: [`docs/eigenes_szenario.md`](docs/eigenes_szenario.md).
 Vorlage: [`vorlagen/szenario_vorlage.json`](vorlagen/szenario_vorlage.json).
 Alle Felder: [`daten/szenarien/SCHEMA.md`](daten/szenarien/SCHEMA.md).
+Lektionen und Befehlsbuch: [`daten/grundkurs/SCHEMA.md`](daten/grundkurs/SCHEMA.md).
 
 ## Mit Claude Desktop verbinden
 
@@ -113,8 +134,9 @@ Ein kleiner MCP-Server lässt Claude Desktop deine Auswertung lesen und Szenario
 python -m unittest
 ```
 
-Prüft unter anderem: jedes Szenario lädt und ist mit seinem Lösungsweg lösbar, und im
-Programm kommen keine Systemaufrufe oder Netzwerkzugriffe vor.
+Prüft unter anderem: jedes Szenario lädt und ist mit seinem Lösungsweg lösbar, jede Lektion lässt sich
+durchspielen, jedes Beispiel im Befehlsbuch funktioniert in der Simulation, und im Programm kommen keine
+Systemaufrufe oder Netzwerkzugriffe vor.
 
 Die `.exe` kann sich selbst prüfen (PowerShell, im Ordner der `.exe`):
 

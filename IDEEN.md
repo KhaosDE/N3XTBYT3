@@ -15,7 +15,7 @@ Umfang: <was dazu gehört, was ausdrücklich nicht>
 ```
 
 ## Grundkurs: Konsole von den Babyschuhen an
-Status: freigegeben
+Status: erledigt (05.11.2026)
 Datum: 05.11.2026
 Was: Ein geführter Grundkurs je System, der bei null anfängt: was eine Konsole ist, wie man
 einen Befehl eingibt, und Schritt für Schritt, welche Befehle man in welcher Situation

@@ -1,14 +1,16 @@
 # STAND — N3XTBYT3
 
-Stand: 04.11.2026.
+Stand: 05.11.2026.
 
 ## Aktuell
 
-**M1 bis M4 sind fertig** (bis auf deine Abnahmetests, siehe unten). Alle vier Systeme sind spielbar,
-dazu Tickets über mehrere Rechner und der MCP-Server für Claude Desktop.
+**M1 bis M4 sind fertig, dazu der Grundkurs „Konsole von den Babyschuhen an“ (G, aus `IDEEN.md`)**
+(bis auf deine Abnahmetests, siehe unten). Alle vier Systeme haben jetzt einen Grundkurs
+(10 + 8 + 10 + 7 Lektionen), ein Befehlsbuch (F4) und ein Lexikon (F5).
 
-**Nächster Schritt:** Deine Tests und Rückmeldungen. Danach laufend: deine echten Fehler als Szenarien
-aufnehmen (PLAN.md, „Laufend“) und Ausgaben, die vom echten System abweichen, korrigieren.
+**Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
+Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
+die vom echten System abweichen, korrigieren.
 
 ## Fertig
 
@@ -105,6 +107,45 @@ aufnehmen (PLAN.md, „Laufend“) und Ausgaben, die vom echten System abweichen
 - [ ] **Tobi:** einige Windows-Server-Szenarien spielen, eines absichtlich nicht lösen,
       danach Auswertung ansehen und prüfen, ob die Empfehlung passt
 
+### G — Grundkurs (aus IDEEN.md, freigegeben 05.11.2026)
+
+- Lektionen als Daten: `daten/grundkurs/<system>/<nr>-<id>.json`, Format in `daten/grundkurs/SCHEMA.md`.
+  Ablauf: Worum es geht → Mitmachen (rechts steht, was zu tippen ist; nach jedem Schritt eine Erklärung;
+  freundliche Tippfehler-Hinweise) → Selbst probieren (Aufgaben mit drei Hinweisstufen, F1) →
+  „Das kannst du jetzt“. Fortschritt je Lektion im Spielstand des Systems.
+- Windows (10): Konsole, Ordner und Pfade, Hilfe (Get-Help, Get-Command, /?), Infos über den PC,
+  Dateien, Prozesse, Dienste, Netzwerk, Adminrechte, Fehlersuche mit Methode (geführt am Druckerproblem).
+- Windows Server (8): Server/Domäne/Fernzugriff, AD-Konten, AD-Gruppen, Rollen und Features, DNS, DHCP,
+  Ereignisprotokolle, geführte Fehlersuche. Braucht Windows-Lektion 10.
+- Linux (10): Terminal, Ordner, Hilfe (man, --help, whatis), Dateien, nano, Rechte und sudo, apt,
+  Prozesse mit Pipe und grep, Netzwerk, geführte Fehlersuche (/etc/hosts).
+- Linux Server (7): ssh, systemctl, Protokolle (journalctl, /var/log), df/du, ufw, Benutzer und Gruppen,
+  geführte Fehlersuche (nginx). Braucht Linux-Lektion 10.
+- Neu im Kern: Dateibefehle für die Windows-PowerShell (Get-Location, Set-Location, Get-ChildItem,
+  Get-Content, New-Item/mkdir, Copy-Item, Move-Item, Remove-Item); unter Linux zusätzlich mkdir, touch,
+  cp, mv, rm. Feld `notiz` (blaue Meldung nach einer echten Ausgabe, z. B. „gekürzt“).
+- Oberfläche: Willkommensbild beim ersten Start („Grundkurs starten“ vorgewählt), Grundkurs als erster
+  Eintrag jeder Szenarioliste („Lektion 3 von 10 ist dran · Empfohlen: zuerst den Grundkurs“),
+  Lektionsliste je System, Lektionsansicht. Szenarien zeigen „braucht: Lektion n“ (Feld `voraussetzung`,
+  in allen 62 Szenarien nachgetragen) – nur ein Hinweis, keine Sperre.
+- Befehlsbuch (F4, überall): je System Befehl, was er tut, Beispiel, Parameter, „Wann brauche ich das?“,
+  Quelle; Sicht „Was tippe ich, wenn …?“ (Windows 14, Windows Server 12, Linux 12, Linux Server 11
+  Situationen). Daten in `daten/befehlsbuch/<system>.json`.
+- Lexikon (F5, überall): alle Begriffe aus Lektionen und Szenarien, alphabetisch, mit Suche und Fundstellen.
+- Befehle geschaffter Lektionen kommen ins Befehls-Training; die Auswertung zeigt den Kursstand und
+  empfiehlt die nächste Lektion. Der Selbsttest der `.exe` spielt auch alle Lektionen durch.
+
+### Abnahme G (IDEEN.md / PLAN.md)
+
+- [x] Erster Start zeigt das Willkommensbild, „Grundkurs starten“ führt in Windows-Lektion 1
+      (automatischer Oberflächentest bis Lektion 2)
+- [x] Befehlsbuch und Lexikon sind von überall erreichbar (F4/F5, automatischer Test)
+- [x] „Was tippe ich, wenn …?“ hat mindestens 10 Situationen je System (automatischer Test)
+- [x] Grundkurse für alle vier Systeme vorhanden; jede Lektion lässt sich vollständig durchspielen
+      und jedes Befehlsbuch-Beispiel funktioniert in seiner Lektion (automatische Tests)
+- [x] Jede `voraussetzung` zeigt auf eine vorhandene Lektion (automatischer Test)
+- [ ] **Tobi:** ohne Vorwissen durch die Windows-Lektionen 1–10 kommen, ohne woanders nachzusehen
+
 ## Offene Punkte
 
 - Szenario-Ausgaben sind „ungeprüft“. Bitte beim Spielen auf Abweichungen zum echten Windows achten.
@@ -114,6 +155,14 @@ aufnehmen (PLAN.md, „Laufend“) und Ausgaben, die vom echten System abweichen
   - `net user jschulz`: Ausgabe gekürzt (Passwort- und Anmeldezeilen weggelassen).
   - Wo die echte Ausgabe nicht sicher bekannt ist oder ein Fenster aufgehen würde, zeigt die
     Simulation eine blaue `[N3XTBYT3]`-Meldung statt eines erfundenen Textes.
+- Grundkurs: Lektionen, Befehlsbuch und Lexikon sind „ungeprüft“. Besonders unsicher:
+  - `Get-ChildItem`: Spalten und Datumsformat nach dem Beispiel der Microsoft-Doku (Uhrzeit 24 Stunden,
+    z. B. `08:29`). Ein echtes englisches Windows zeigt die Uhrzeit vermutlich als `8:29 AM`.
+  - `Get-Command`: Spalten Version/Source nach der Beschreibung in der Doku; Spaltenbreiten wie im Beispiel.
+  - `Resolve-DnsName` und `Get-Service … | Select-Object …`: Spaltenformat nicht aus einem Doku-Beispiel.
+  - `whatis` (Spaltenbreite) und Ubuntus Meldung „Command 'Whoami' not found, did you mean:“ (gekürzt).
+  - Neue Dateien unter Linux: `rw-rw-r--` (Ubuntu-Standard für normale Benutzer, umask 002).
+  - `Get-Help`, `man`, `systeminfo`, Prozess- und Dienstlisten sind gekürzt (blaue Notiz darunter).
 
 ## Entscheidungen
 
@@ -181,8 +230,61 @@ aufnehmen (PLAN.md, „Laufend“) und Ausgaben, die vom echten System abweichen
   Lösungsnotiz dabei ist.
 - 04.11.2026: Zweig: Die Sitzung gibt den Arbeitszweig `claude/busy-turing-1n3hmy` vor. Ich pushe
   dorthin **und** nach `main` (laut `CLAUDE.md`), beide Stände bleiben gleich.
+- 05.11.2026: **Grundkurs auf derselben Befehlsauswertung:** Aus jeder Lektion wird intern ein Szenario
+  gebaut und in einer normalen Sitzung gespielt. Die geführten Lektionen nutzen vorhandene Szenarien als
+  Grundlage (Feld `szenario`). Grund: geprüfte Ausgaben wiederverwenden, kein zweites System.
+- 05.11.2026: Lektions-ids haben die Vorsilbe `gk-win-`, `gk-srv-`, `gk-lin-`, `gk-ls-` und sind über alle
+  Kurse eindeutig; `voraussetzung` darf auf eine Lektion eines anderen Systems zeigen (Server-Kurse bauen
+  auf Windows bzw. Linux auf).
+- 05.11.2026: **Windows-Dateibefehle nur in der PowerShell** und nur, wenn ein Szenario oder eine Lektion
+  Windows-Dateien hat. Die cmd-Varianten (dir, type, copy …) sind nicht nachgebaut und melden das klar.
+  Grund: Die Idee sagt „keine neuen Systemfunktionen über das hinaus, was die Lektionen brauchen“, und der
+  Grundkurs lehrt PowerShell zuerst.
+- 05.11.2026: Ausgabe von `Get-ChildItem` nach dem Beispiel der Microsoft-Doku (Seite für PowerShell 5.1).
+  Die beiden Szenarien mit eigener Get-ChildItem-Tabelle (Druckwarteschlange, Festplatte voll) habe ich
+  angeglichen, damit es überall gleich aussieht.
+- 05.11.2026: Fehlermeldungen der PowerShell-Dateibefehle zeigen nur die erste Zeile (mit dem getippten
+  Befehlsnamen vorn, wie Windows PowerShell). Rückfragen (Ordner nicht leer ohne -Recurse) und unbekannte
+  Parameter beantwortet die Simulation blau – nie mit einer erfundenen Fehlermeldung.
+- 05.11.2026: Neues Feld `notiz` in einem Fall: echte Ausgabe plus blaue Meldung danach (z. B. „Gekürzt …“).
+  Grund: Regel „lieber kürzen als erfinden“, und Tobi soll sehen, dass gekürzt wurde.
+- 05.11.2026: Ein Mitmachen-Schritt zählt nur, wenn der Befehl wirklich lief (nicht in der falschen Shell).
+  Eine Ziel-Bedingung lässt andere Schreibweisen zu (z. B. `cd .\documents`).
+- 05.11.2026: Das Willkommensbild erscheint, solange es noch keinen Spielstand gibt (keine
+  `spielstand_*.json`) – also bis zum ersten getippten Befehl in einer Lektion oder einem Szenario.
+- 05.11.2026: F2 springt auch ohne Abschluss zur nächsten Lektion („Überspringen“). Grund: Die Idee will
+  Hinweise statt Sperren.
+- 05.11.2026: Das Befehlsbuch zeigt immer alle Befehle; noch nicht gelernte stehen als „Kommt in Lektion n“
+  da. Ins Befehls-Training kommen sie erst, wenn die Lektion geschafft ist (Aliase zählen als richtig).
+  Grund: Nachschlagen soll immer gehen, das Training nur Gelerntes abfragen.
+- 05.11.2026: Befehlsbuch und Lexikon sind Einblendungen über der aktuellen Ansicht (Esc, F4 bzw. F5 schließt),
+  kein Ansichtswechsel. Grund: Ein laufendes Szenario wird dadurch nicht beendet oder gespeichert.
+- 05.11.2026: Das Lexikon zeigt die Begriffe des aktuellen Systems (Lektionen zuerst, dann Szenarien);
+  gleiche Begriffe werden zusammengefasst.
+- 05.11.2026: In den Lektionen gelten dieselben erfundenen Namen wie in den Szenarien (mberger, anna, admin;
+  PC-BUERO-07, pc-lager02, srv-web01) und nur private IP-Adressen (z. B. `ping 192.168.10.1` statt einer
+  öffentlichen Adresse). Grund: Regel 4.
+- 05.11.2026: Tab-Ergänzung wird in Windows-Lektion 2 nur erklärt, nicht nachgebaut (die Idee sagt „erklären“).
+- 05.11.2026: Neue Dateien unter Linux (mkdir, touch, cp) bekommen die Ubuntu-Standardrechte: normale
+  Benutzer `rw-rw-r--`/`rwxrwxr-x` (umask 002), root `rw-r--r--`/`rwxr-xr-x`.
 
 ## Für Tobi zum Testen
+
+**Neu: Grundkurs**
+
+1. Neueste `.exe` holen (wie unten). Das Willkommensbild kommt nur, solange es noch keinen Spielstand gibt.
+   Hast du schon gespielt, startest du den Grundkurs über Windows → erster Eintrag „Grundkurs“.
+   (Nur wenn du das Willkommensbild sehen willst: Ordner `%APPDATA%\N3XTBYT3` vorher umbenennen, z. B. in
+   `N3XTBYT3-alt`. Was du dann spielst, landet im neuen Ordner.)
+2. Im Willkommensbild Enter (bzw. „Grundkurs“): Windows-Lektion 1 startet. Arbeite die Lektionen 1–10 der
+   Reihe nach durch.
+   Wichtigste Frage: Kommst du durch, ohne woanders nachzusehen? Wo hast du gestockt?
+3. Absichtlich vertippen (z. B. `hostnme`): Ist der Hinweis rechts hilfreich?
+4. F4 (Befehlsbuch) und F5 (Lexikon) an verschiedenen Stellen drücken, etwas suchen, Tab im Befehlsbuch.
+5. In der Szenarioliste: Steht der Grundkurs oben, und zeigen Szenarien „braucht: Lektion n“?
+6. Wenn Zeit ist: je eine Lektion in Windows Server, Linux und Linux Server.
+
+**Bisherige Tests (M1–M4)**
 
 1. `.exe` holen: GitHub → Actions → neuester grüner Lauf → unten „N3XTBYT3-Windows“ → entpacken.
    Windows warnt beim ersten Start (nicht signiert): „Weitere Informationen“ → „Trotzdem ausführen“.

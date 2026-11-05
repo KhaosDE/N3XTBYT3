@@ -70,3 +70,31 @@ Eine Lektion läuft auf derselben Befehlsauswertung wie die Szenarien. Ablauf:
   (192.168.x.x / 10.x.x.x).
 * Texte für Tobi: einfach, Fachbegriffe beim ersten Auftreten erklären, Befehle im Original.
 * Ein Test spielt jede Lektion vollständig durch (`tests/test_grundkurs.py`).
+
+## Befehlsbuch
+
+Je System eine Datei `daten/befehlsbuch/<system>.json`:
+
+```json
+{
+  "system": "windows",
+  "befehle": [
+    {"befehl": "Get-ChildItem", "was": "Zeigt, was in einem Ordner liegt.", "beispiel": "Get-ChildItem",
+     "auch": ["dir", "ls"], "parameter": {"-Name": "Nur die Namen."},
+     "wann": "Um nachzusehen, welche Dateien da sind.", "lektion": "gk-win-ordner",
+     "quelle": "https://learn.microsoft.com/…"}
+  ],
+  "situationen": [
+    {"wenn": "… ein Programm nicht mehr reagiert?", "befehle": ["tasklist /FI \"STATUS eq NOT RESPONDING\""],
+     "lektion": "gk-win-prozesse", "erklaerung": "Erst finden, dann beenden."}
+  ]
+}
+```
+
+* `lektion`: die Lektion, in der der Befehl vorkommt. Ein Test führt `beispiel` und jede Schreibweise aus
+  `auch` dort aus (nach den Befehlen in `vorher`, falls nötig) – so stehen im Befehlsbuch nur Befehle,
+  die in der Simulation funktionieren. Ebenso alle `befehle` einer Situation, der Reihe nach.
+* Frei: `auch` (weitere richtige Schreibweisen, gelten auch im Befehls-Training), `parameter`, `vorher`,
+  `frage` (Frage im Befehls-Training, sonst `was`).
+* Mindestens 10 Situationen je System (Test).
+* Ins Befehls-Training kommt ein Eintrag, sobald seine Lektion geschafft ist.
