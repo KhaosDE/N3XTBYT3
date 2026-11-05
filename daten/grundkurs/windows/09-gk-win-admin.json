@@ -1,0 +1,220 @@
+{
+  "id": "gk-win-admin",
+  "system": "windows",
+  "titel": "Adminrechte: wann sie nötig sind und wie du sie bekommst",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/01-getting-started",
+    "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sfc"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "win-sfc-admin",
+  "shell": "powershell",
+  "zustand": {
+    "dienst_w32time": "Running"
+  },
+  "erklaeren": [
+    "Auch wer Administrator ist, arbeitet unter Windows normal mit einfachen Rechten. Erst wenn ein Programm",
+    "„Als Administrator ausführen“ gestartet wird, fragt die Benutzerkontensteuerung (UAC) nach – danach",
+    "hat nur dieses Fenster volle Rechte. Am Fenstertitel erkennst du es: „Administrator: Windows PowerShell“.",
+    "Dienste anhalten, Systemdateien prüfen, Einstellungen für alle Benutzer – das braucht Adminrechte."
+  ],
+  "begriffe": {
+    "Adminrechte": "Volle Rechte über den Computer (Administrator). Nur geben, wenn nötig.",
+    "UAC": "Benutzerkontensteuerung: das Fenster „Möchten Sie zulassen, dass …“. Es schützt vor heimlichen Änderungen.",
+    "Erhöht": "Ein Fenster, das „Als Administrator“ läuft (englisch: elevated)."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Stop-Service -Name W32Time"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "admin": false
+          },
+          "fehler": true,
+          "ausgabe": [
+            "Stop-Service : Service 'Windows Time (W32Time)' cannot be stopped due to the following error: Cannot open W32Time service on computer '.'.",
+            "At line:1 char:1",
+            "+ Stop-Service -Name W32Time",
+            "+ ~~~~~~~~~~~~~~~~~~~~~~~~~~",
+            "    + CategoryInfo          : CloseError: (System.ServiceProcess.ServiceController:ServiceController) [Stop-Service], ServiceCommandException",
+            "    + FullyQualifiedErrorId : CouldNotStopService,Microsoft.PowerShell.Commands.StopServiceCommand"
+          ]
+        },
+        {
+          "setze": {
+            "dienst_w32time": "Stopped"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Service W32Time"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "admin": false
+          },
+          "fehler": true,
+          "ausgabe": "Stop-Service : Service 'Windows Time (W32Time)' cannot be stopped due to the following error: Cannot open W32Time service on computer '.'."
+        },
+        {
+          "setze": {
+            "dienst_w32time": "Stopped"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Start-Service -Name W32Time",
+        "Start-Service W32Time"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "admin": false
+          },
+          "fehler": true,
+          "ausgabe": "Start-Service : Service 'Windows Time (W32Time)' cannot be started due to the following error: Cannot open W32Time service on computer '.'."
+        },
+        {
+          "setze": {
+            "dienst_w32time": "Running"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Service W32Time",
+        "Get-Service -Name W32Time"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "dienst_w32time": "Running"
+          },
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  W32Time            Windows Time",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Stopped  W32Time            Windows Time",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Start-Process powershell -Verb RunAs",
+        "Start-Process powershell.exe -Verb RunAs",
+        "Start-Process -FilePath powershell -Verb RunAs",
+        "Start-Process -FilePath powershell.exe -Verb RunAs"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "admin": false
+          },
+          "setze": {
+            "admin": true,
+            "pfad": "C:\\Windows\\system32"
+          },
+          "sim": true,
+          "ausgabe": [
+            "Die Benutzerkontensteuerung fragt: „Möchten Sie zulassen, dass durch diese App Änderungen an Ihrem Gerät vorgenommen werden?“ – du klickst „Ja“.",
+            "Ein neues Fenster „Administrator: Windows PowerShell“ öffnet sich – in der Simulation geht es hier weiter."
+          ]
+        },
+        {
+          "sim": true,
+          "ausgabe": "Du bist schon in einer PowerShell mit Administratorrechten."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Versuch, den Zeitdienst anzuhalten: Stop-Service -Name W32Time",
+      "eingabe": "Stop-Service -Name W32Time",
+      "danach": "„Cannot open W32Time service“: Windows lässt dich nicht an den Dienst – es fehlen die Rechte. Diese Meldung steht so auch in der Microsoft-Anleitung für Einsteiger."
+    },
+    {
+      "text": "Noch ein Beispiel: sfc /scannow (prüft die Windows-Systemdateien)",
+      "eingabe": "sfc /scannow",
+      "danach": "Klare Ansage: „You must be an administrator“ – du brauchst ein Fenster mit Adminrechten. Sieh auf den Fenstertitel oben: Dort steht nur „Windows PowerShell“."
+    },
+    {
+      "text": "Öffne eine PowerShell als Administrator: Start-Process powershell -Verb RunAs",
+      "eingabe": "Start-Process powershell -Verb RunAs",
+      "ziel": {
+        "admin": true
+      },
+      "danach": "-Verb RunAs heißt „als Administrator ausführen“. Im echten Windows kommt das UAC-Fenster, dann ein neues Fenster. Der Titel heißt jetzt „Administrator: Windows PowerShell“, der Prompt steht in C:\\Windows\\system32. (Ohne Konsole: Rechtsklick auf Start → „Terminal (Administrator)“.)"
+    },
+    {
+      "text": "Jetzt noch einmal: sfc /scannow",
+      "eingabe": "sfc /scannow",
+      "danach": "Diesmal läuft die Prüfung und repariert beschädigte Systemdateien."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Halte jetzt den Zeitdienst (W32Time) an.",
+      "ziel": {
+        "dienst_w32time": "Stopped"
+      },
+      "hinweise": [
+        "Der Befehl ist derselbe wie vorhin – nur das Fenster ist jetzt ein anderes.",
+        "Stop-Service mit -Name und dem Dienstnamen.",
+        "Tippe: Stop-Service -Name W32Time"
+      ],
+      "loesung": [
+        "Stop-Service -Name W32Time"
+      ],
+      "danach": "Mit Adminrechten klappt es ohne Fehler."
+    },
+    {
+      "aufgabe": "Starte den Zeitdienst wieder und prüf nach, dass er läuft.",
+      "eingabe": [
+        "Get-Service W32Time",
+        "Get-Service -Name W32Time"
+      ],
+      "wenn": {
+        "dienst_w32time": "Running"
+      },
+      "hinweise": [
+        "Erst starten, dann anzeigen.",
+        "Start-Service -Name W32Time, danach Get-Service W32Time.",
+        "Tippe: Start-Service -Name W32Time – und danach: Get-Service W32Time"
+      ],
+      "loesung": [
+        "Start-Service -Name W32Time",
+        "Get-Service W32Time"
+      ],
+      "danach": "Running – alles wieder wie vorher."
+    }
+  ],
+  "fertig": [
+    "Fehlermeldungen wie „cannot open … service“ oder „must be an administrator“ heißen: Adminrechte fehlen.",
+    "Am Fenstertitel erkennst du, ob die Konsole erhöht läuft.",
+    "Start-Process powershell -Verb RunAs öffnet ein Admin-Fenster (mit UAC-Rückfrage)."
+  ]
+}

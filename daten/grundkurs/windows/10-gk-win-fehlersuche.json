@@ -1,0 +1,107 @@
+{
+  "id": "gk-win-fehlersuche",
+  "system": "windows",
+  "titel": "Fehlersuche mit Methode: der Drucker druckt nicht",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/troubleshoot/windows-server/printing/printer-not-responding",
+    "https://learn.microsoft.com/troubleshoot/windows-server/printing/print-spooler-service-not-running"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "win-druckwarteschlange",
+  "shell": "powershell",
+  "erklaeren": [
+    "Fehlersuche in fünf Schritten: 1. Problem genau beschreiben (Was geht nicht? Seit wann? Wer ist betroffen?).",
+    "2. Informationen sammeln (Status prüfen, nachsehen). 3. Eine Vermutung aufstellen. 4. Gezielt beheben –",
+    "eine Änderung nach der anderen. 5. Nachprüfen und kurz aufschreiben, was es war.",
+    "",
+    "Der Fall: Seit heute früh druckt im Büro nichts mehr. Ein Auftrag hängt in der Warteschlange, alle anderen",
+    "warten dahinter. Neustarten wäre der Holzhammer – du gehst es mit Methode an."
+  ],
+  "begriffe": {
+    "Druckwarteschlange": "Liste der Druckaufträge, die auf den Drucker warten.",
+    "Spooler": "Der Druckdienst von Windows (Print Spooler). Er verwaltet die Warteschlange.",
+    "Spool-Ordner": "C:\\Windows\\System32\\spool\\PRINTERS – dort liegen die Aufträge als Dateien."
+  },
+  "mitmachen": [
+    {
+      "text": "Schritt 2 – Informationen sammeln. Läuft der Druckdienst? Get-Service Spooler",
+      "eingabe": "Get-Service Spooler",
+      "danach": "Er läuft (Running). Der Dienst ist also nicht einfach aus – die Ursache liegt woanders."
+    },
+    {
+      "text": "Was hängt in der Warteschlange? Get-PrintJob -PrinterName Drucker-Buero",
+      "eingabe": "Get-PrintJob -PrinterName Drucker-Buero",
+      "danach": "Ein Auftrag (Rechnung_2026-117.pdf) hängt mit Fehler – alle anderen warten dahinter."
+    },
+    {
+      "text": "Die Aufträge als Dateien: Get-ChildItem C:\\Windows\\System32\\spool\\PRINTERS",
+      "eingabe": "Get-ChildItem C:\\Windows\\System32\\spool\\PRINTERS",
+      "danach": "Im Spool-Ordner liegt der Auftrag als zwei Dateien (.SHD und .SPL). Schritt 3 – Vermutung: Diese Dateien blockieren die Warteschlange."
+    },
+    {
+      "text": "Versuch, sie zu löschen: Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*",
+      "eingabe": "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*",
+      "danach": "„being used by another process“: Die Dateien sind gesperrt, weil der Druckdienst sie gerade benutzt. Auch eine Fehlermeldung ist eine Information! Die Reihenfolge muss also sein: Dienst anhalten, löschen, Dienst starten."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Schritt 4 – beheben, Teil 1: Halte den Druckdienst an.",
+      "ziel": {
+        "dienst_spooler": "Stopped"
+      },
+      "hinweise": [
+        "Dienste hältst du mit einem Stop-… an.",
+        "Stop-Service und der Dienstname Spooler.",
+        "Tippe: Stop-Service Spooler"
+      ],
+      "loesung": [
+        "Stop-Service Spooler"
+      ],
+      "danach": "Der Spooler ist gestoppt, die Dateien sind frei."
+    },
+    {
+      "aufgabe": "Teil 2: Lösch die hängenden Druckaufträge im Spool-Ordner.",
+      "ziel": {
+        "spool_dateien": false
+      },
+      "hinweise": [
+        "Den Befehl hast du vorhin schon versucht – jetzt ist der Dienst aus.",
+        "Remove-Item mit dem Spool-Ordner und \\* für „alles darin“.",
+        "Tippe: Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*"
+      ],
+      "loesung": [
+        "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*"
+      ],
+      "danach": "Die Warteschlange ist leer."
+    },
+    {
+      "aufgabe": "Teil 3: Starte den Druckdienst wieder – und Schritt 5: prüf nach, dass er läuft.",
+      "eingabe": [
+        "Get-Service Spooler",
+        "Get-Service -Name Spooler"
+      ],
+      "wenn": {
+        "dienst_spooler": "Running",
+        "spool_dateien": false
+      },
+      "hinweise": [
+        "Erst starten, dann anzeigen.",
+        "Start-Service Spooler, danach Get-Service Spooler.",
+        "Tippe: Start-Service Spooler – und danach: Get-Service Spooler"
+      ],
+      "loesung": [
+        "Start-Service Spooler",
+        "Get-Service Spooler"
+      ],
+      "danach": "Der Spooler läuft, die Warteschlange ist leer – der Drucker druckt wieder. Zum Schluss notierst du kurz: „Hängender Auftrag blockierte die Warteschlange; Spooler angehalten, Spool-Ordner geleert, Spooler gestartet.“"
+    }
+  ],
+  "fertig": [
+    "Die fünf Schritte: beschreiben, Infos sammeln, vermuten, gezielt beheben, nachprüfen und notieren.",
+    "Fehlermeldungen sind Informationen – sie zeigen oft den nächsten Schritt.",
+    "Hängende Druckaufträge: Spooler anhalten, Spool-Ordner leeren, Spooler starten.",
+    "Ab jetzt kannst du die Szenarien in der Liste allein lösen. Viel Erfolg!"
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "id": "gk-win-infos",
+  "system": "windows",
+  "titel": "Infos über den Computer: Name, Benutzer, Datum, Windows-Version",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/hostname",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-computerinfo?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/systeminfo"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger"
+  },
+  "erklaeren": [
+    "Wer am Telefon hilft, braucht zuerst ein paar Grunddaten: Wie heißt der Computer? Wer ist angemeldet?",
+    "Welche Windows-Version läuft? Stimmt die Uhrzeit? Dafür gibt es kurze Befehle – das ist meist der",
+    "erste Schritt jeder Fehlersuche."
+  ],
+  "begriffe": {
+    "Windows-Version": "Welche Ausgabe (z. B. Windows 11 Pro) und welcher Stand (Build-Nummer) installiert ist.",
+    "Build": "Die genaue Versionsnummer von Windows, z. B. 22631. Wichtig, wenn Updates fehlen.",
+    "Domäne": "Ein Firmennetz mit zentraler Anmeldung. Der Computer ist dann „Mitglied“ (Member)."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Date"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Thursday, November 5, 2026 10:15:32",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ComputerInfo"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Get-ComputerInfo zeigt eine sehr lange Liste (weit über hundert Einträge: Windows-Version, BIOS, Prozessor, Arbeitsspeicher …). Sie ist hier nicht nachgebaut. Nimm -Property, um nur bestimmte Einträge zu sehen: Get-ComputerInfo -Property OsName, OsVersion, CsName"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ComputerInfo -Property OsName, OsVersion, CsName",
+        "Get-ComputerInfo -Property OsName,OsVersion,CsName",
+        "Get-ComputerInfo OsName, OsVersion, CsName",
+        "Get-ComputerInfo OsName,OsVersion,CsName"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "OsName                   OsVersion  CsName",
+            "------                   ---------  ------",
+            "Microsoft Windows 11 Pro 10.0.22631 PC-BUERO-07",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "systeminfo"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Host Name:                 PC-BUERO-07",
+            "OS Name:                   Microsoft Windows 11 Pro",
+            "OS Version:                10.0.22631 N/A Build 22631",
+            "OS Manufacturer:           Microsoft Corporation",
+            "OS Configuration:          Member Workstation"
+          ],
+          "notiz": "Gekürzt: Das echte systeminfo zeigt danach noch viel mehr, u. a. Systemstartzeit, Hersteller, Prozessor, Arbeitsspeicher, Domäne, installierte Updates und Netzwerkkarten."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Der Name des Computers: hostname",
+      "eingabe": "hostname",
+      "danach": "Kennst du schon aus Lektion 1. Den Namen brauchst du, wenn du dich aus der Ferne verbindest oder ein Ticket schreibst."
+    },
+    {
+      "text": "Wer ist angemeldet? whoami",
+      "eingabe": "whoami",
+      "danach": "Auch bekannt. Wichtig bei Rechte-Problemen: Ist wirklich der Benutzer angemeldet, der sich meldet?"
+    },
+    {
+      "text": "Datum und Uhrzeit: Get-Date",
+      "eingabe": "Get-Date",
+      "danach": "Get-Date zeigt Datum und Uhrzeit des Computers. Geht die Uhr falsch, scheitern Anmeldungen und sichere Webseiten – dazu gibt es ein eigenes Szenario."
+    },
+    {
+      "text": "Die Windows-Version: Get-ComputerInfo -Property OsName, OsVersion, CsName",
+      "eingabe": "Get-ComputerInfo -Property OsName, OsVersion, CsName",
+      "danach": "OsName ist die Windows-Ausgabe, OsVersion die Version (22631 ist die Build-Nummer), CsName der Computername. Mit -Property wählst du aus, was du sehen willst – mehrere Einträge mit Komma getrennt."
+    },
+    {
+      "text": "Der Klassiker: systeminfo",
+      "eingabe": "systeminfo",
+      "danach": "systeminfo ist ein älteres Programm und zeigt alles auf einmal: Name, Windows-Version, Build und dass der PC Mitglied einer Domäne ist (Member Workstation). Das echte systeminfo zeigt danach noch viel mehr (Arbeitsspeicher, Updates, Netzwerkkarten) – hier ist es gekürzt."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Finde heraus, welche Windows-Ausgabe installiert ist.",
+      "eingabe": [
+        "systeminfo",
+        "Get-ComputerInfo -Property OsName, OsVersion, CsName",
+        "Get-ComputerInfo -Property OsName,OsVersion,CsName",
+        "Get-ComputerInfo OsName, OsVersion, CsName",
+        "Get-ComputerInfo OsName,OsVersion,CsName"
+      ],
+      "hinweise": [
+        "Zwei Befehle aus dieser Lektion zeigen es.",
+        "Der ältere zeigt alles auf einmal und heißt wie „System-Information“.",
+        "Tippe: systeminfo"
+      ],
+      "danach": "Richtig: Microsoft Windows 11 Pro."
+    },
+    {
+      "aufgabe": "Prüfe, ob Datum und Uhrzeit des Computers stimmen.",
+      "eingabe": [
+        "Get-Date"
+      ],
+      "hinweise": [
+        "Das Verb zum Anzeigen ist Get.",
+        "Datum auf Englisch: Date.",
+        "Tippe: Get-Date"
+      ],
+      "danach": "Genau, Get-Date."
+    }
+  ],
+  "fertig": [
+    "Du sammelst die Grunddaten eines Computers: hostname, whoami, Get-Date.",
+    "Get-ComputerInfo -Property … zeigt gezielt Windows-Ausgabe und Version.",
+    "systeminfo zeigt alles auf einmal."
+  ]
+}

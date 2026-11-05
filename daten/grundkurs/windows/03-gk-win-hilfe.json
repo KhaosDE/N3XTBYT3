@@ -1,0 +1,247 @@
+{
+  "id": "gk-win-hilfe",
+  "system": "windows",
+  "titel": "Hilfe finden: Get-Help, Get-Command, /?",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/02-help-system",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/get-help?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/get-command?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger"
+  },
+  "erklaeren": [
+    "Niemand kennt alle Befehle auswendig. Wichtiger ist: wissen, wie man sie findet.",
+    "PowerShell-Befehle heißen immer Verb-Nomen: Get-Service (Dienste holen), Stop-Process (Prozess anhalten).",
+    "Das Verb sagt, was passiert (Get = anzeigen, Set = einstellen, Start, Stop, New = anlegen, Remove = löschen),",
+    "das Nomen, womit. Get-Help erklärt einen Befehl, Get-Command sucht Befehle.",
+    "Ältere Programme wie ipconfig oder ping erklären sich selbst mit /?."
+  ],
+  "begriffe": {
+    "Cmdlet": "Ein eingebauter PowerShell-Befehl der Form Verb-Nomen, z. B. Get-Service (sprich: Commandlet).",
+    "Verb-Nomen": "Bauplan der PowerShell-Befehle: erst was passiert (Get), dann womit (Service).",
+    "Platzhalter (*)": "Steht für beliebige Zeichen: *-Service findet alles, was auf -Service endet.",
+    "Parameter": "Ein Zusatz zum Befehl, beginnt mit -, z. B. -Examples oder -Name.",
+    "Syntax": "Die Schreibweise eines Befehls: welche Parameter es gibt. [ ] heißt: darf man weglassen."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Help Get-Service",
+        "help Get-Service",
+        "Get-Help -Name Get-Service",
+        "Get-Service -?"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "NAME",
+            "    Get-Service",
+            "",
+            "SYNOPSIS",
+            "    Gets the services on a local or remote computer.",
+            "",
+            "",
+            "SYNTAX",
+            "    Get-Service [[-Name] <System.String[]>] [-ComputerName <System.String[]>] [-DependentServices] [-Exclude <System.String[]>] [-Include <System.String[]>] [-RequiredServices] [<CommonParameters>]"
+          ],
+          "notiz": "Gekürzt: Es folgen weitere Aufrufformen, eine Beschreibung (DESCRIPTION) und Hinweise (REMARKS), z. B. wie man die Beispiele anzeigt."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Help Get-Service -Examples",
+        "help Get-Service -Examples",
+        "Get-Help -Name Get-Service -Examples"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "NAME",
+            "    Get-Service",
+            "",
+            "SYNOPSIS",
+            "    Gets the services on a local or remote computer.",
+            ""
+          ],
+          "notiz": "Hier folgen in der echten Hilfe die Beispiele – Beispiel 1 ist einfach „Get-Service“ (alle Dienste). In der Simulation sind sie nicht nachgebaut."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Help Get-Process",
+        "help Get-Process",
+        "Get-Help -Name Get-Process",
+        "Get-Process -?"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "NAME",
+            "    Get-Process",
+            "",
+            "SYNOPSIS",
+            "    Gets the processes that are running on the local computer or a remote computer.",
+            "",
+            "",
+            "SYNTAX",
+            "    Get-Process [[-Name] <System.String[]>] [-ComputerName <System.String[]>] [-FileVersionInfo] [-Module] [<CommonParameters>]"
+          ],
+          "notiz": "Gekürzt: Es folgen weitere Aufrufformen, DESCRIPTION und REMARKS."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Command *-Service",
+        "Get-Command -Noun Service",
+        "Get-Command -Name *-Service"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "CommandType     Name                                               Version    Source",
+            "-----------     ----                                               -------    ------",
+            "Cmdlet          Get-Service                                        3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          New-Service                                        3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Restart-Service                                    3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Resume-Service                                     3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Set-Service                                        3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Start-Service                                      3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Stop-Service                                       3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Suspend-Service                                    3.1.0.0    Microsoft.PowerShell.Management",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Command *-Process",
+        "Get-Command -Noun Process",
+        "Get-Command -Name *-Process"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "CommandType     Name                                               Version    Source",
+            "-----------     ----                                               -------    ------",
+            "Cmdlet          Debug-Process                                      3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Get-Process                                        3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Start-Process                                      3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Stop-Process                                       3.1.0.0    Microsoft.PowerShell.Management",
+            "Cmdlet          Wait-Process                                       3.1.0.0    Microsoft.PowerShell.Management",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Command *service*",
+        "Get-Command *process*"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Mit *service* (Stern vorn und hinten) wird die Liste im echten System sehr lang: Auch Programme und Funktionen, deren Name das Wort nur enthält, tauchen auf. Genauer sucht *-Service bzw. -Noun Service."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ipconfig /?",
+        "ping /?"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Hier zeigt das echte Windows die eingebaute Hilfe des Programms: wie man es aufruft und welche Schalter es gibt (bei ipconfig z. B. /all, /release, /renew, /flushdns, bei ping z. B. -n Anzahl, -t Dauerping). In der Simulation ist der lange Text nicht nachgebaut."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Lass dir einen Befehl erklären: Get-Help Get-Service",
+      "eingabe": "Get-Help Get-Service",
+      "danach": "Get-Help erklärt einen Befehl. NAME: wie er heißt. SYNOPSIS: was er tut („holt die Dienste“). SYNTAX: wie man ihn aufruft. Was in eckigen Klammern [ ] steht, darf man weglassen. Die echte Hilfe ist länger – hier ist sie gekürzt. (Fehlen die Hilfedateien, bietet die PowerShell an, sie mit Update-Help zu laden.)"
+    },
+    {
+      "text": "Nur die Beispiele: Get-Help Get-Service -Examples",
+      "eingabe": "Get-Help Get-Service -Examples",
+      "danach": "Mit -Examples zeigt die Hilfe nur Beispiele. Das ist oft der schnellste Weg: Beispiel abschauen, anpassen, ausprobieren. Beispiel 1 der echten Hilfe ist einfach „Get-Service“ – zeigt alle Dienste. (In der Simulation stehen die Beispiele nicht drin.)"
+    },
+    {
+      "text": "Befehle suchen: Get-Command *-Service",
+      "eingabe": "Get-Command *-Service",
+      "danach": "Get-Command sucht Befehle. Der Stern (*) ist ein Platzhalter: *-Service heißt „alles, was auf -Service endet“. So siehst du alle Befehle rund um Dienste – an den Verben erkennst du sofort, was sie tun."
+    },
+    {
+      "text": "Hilfe bei älteren Programmen: ipconfig /?",
+      "eingabe": "ipconfig /?",
+      "danach": "Ältere Windows-Programme (ipconfig, ping, tasklist …) kennen Get-Help nicht. Bei ihnen zeigt /? die eingebaute Hilfe."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Lass dir die Hilfe zu Get-Process anzeigen.",
+      "eingabe": [
+        "Get-Help Get-Process",
+        "help Get-Process",
+        "Get-Help -Name Get-Process",
+        "Get-Process -?"
+      ],
+      "hinweise": [
+        "Der Befehl für Hilfe beginnt mit Get-.",
+        "Get-Help und dahinter der Name des Befehls.",
+        "Tippe: Get-Help Get-Process"
+      ],
+      "danach": "Richtig. Get-Process holt die laufenden Programme (Prozesse) – das lernst du in Lektion 6."
+    },
+    {
+      "aufgabe": "Finde mit einem Platzhalter alle Befehle, die mit Prozessen (Process) zu tun haben.",
+      "eingabe": [
+        "Get-Command *-Process",
+        "Get-Command -Noun Process",
+        "Get-Command -Name *-Process"
+      ],
+      "hinweise": [
+        "Befehle sucht Get-Command.",
+        "Der Platzhalter ist der Stern. Gesucht: alles, was auf -Process endet.",
+        "Tippe: Get-Command *-Process"
+      ],
+      "danach": "Gut! Debug, Get, Start, Stop, Wait – an den Verben siehst du, was jeder Befehl tut."
+    },
+    {
+      "aufgabe": "Zeig die eingebaute Hilfe des Programms ping an.",
+      "eingabe": [
+        "ping /?"
+      ],
+      "hinweise": [
+        "ping ist ein älteres Programm – Get-Help kennt es nicht.",
+        "Ältere Programme zeigen ihre Hilfe mit Schrägstrich und Fragezeichen.",
+        "Tippe: ping /?"
+      ],
+      "danach": "Genau – /? funktioniert bei fast allen älteren Windows-Programmen."
+    }
+  ],
+  "fertig": [
+    "PowerShell-Befehle heißen Verb-Nomen – am Verb erkennst du, was passiert.",
+    "Get-Help <Befehl> erklärt einen Befehl, -Examples zeigt Beispiele.",
+    "Get-Command *-Service findet Befehle mit dem Platzhalter *.",
+    "Ältere Programme erklären sich mit /?."
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "id": "gk-win-prozesse",
+  "system": "windows",
+  "titel": "Programme und Prozesse: was läuft, was hängt?",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-process?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/stop-process?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/tasklist",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "win-programm-haengt",
+  "shell": "powershell",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger"
+  },
+  "erklaeren": [
+    "Jedes laufende Programm ist ein Prozess. Er hat einen Namen (z. B. EXCEL) und eine Nummer, die PID",
+    "(Prozess-ID). Hängt ein Programm, kannst du es aus der Konsole beenden – erst höflich, dann erzwungen.",
+    "Was nicht gespeichert war, geht dabei verloren. In diesem Computer hängt gerade Excel."
+  ],
+  "begriffe": {
+    "Prozess": "Ein laufendes Programm. Ein Programm kann auch mehrere Prozesse haben.",
+    "PID": "Prozess-ID: die Nummer, unter der Windows einen Prozess führt.",
+    "Reagiert nicht": "Das Programm nimmt keine Eingaben mehr an (im Task-Manager: „Keine Rückmeldung“)."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Process"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "tasklist"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Process -Name EXCEL",
+        "Stop-Process -Id 6420",
+        "Stop-Process EXCEL"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "setze": {
+            "excel_laeuft": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Stop-Process : Cannot find a process with the name \"EXCEL\". Verify the process name and call the cmdlet again."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Was läuft gerade? Get-Process",
+      "eingabe": "Get-Process",
+      "danach": "Jede Zeile ist ein Prozess. Wichtig sind ProcessName (Name), Id (die PID) und WS(K) – der Arbeitsspeicher in Kilobyte. EXCEL braucht auffällig viel. (Gekürzt: Im echten System stehen hier über hundert Prozesse.)"
+    },
+    {
+      "text": "Nur Excel: Get-Process EXCEL",
+      "eingabe": "Get-Process EXCEL",
+      "danach": "Mit dem Namen dahinter zeigt Get-Process nur diesen Prozess. Die PID von Excel ist 6420."
+    },
+    {
+      "text": "Dasselbe auf die alte Art: tasklist",
+      "eingabe": "tasklist",
+      "danach": "tasklist ist ein älteres Programm mit derselben Information: Name, PID, Speicher. Es geht in der PowerShell und in der cmd. (Gekürzt.)"
+    },
+    {
+      "text": "Wer reagiert nicht? tasklist /FI \"STATUS eq NOT RESPONDING\"",
+      "eingabe": "tasklist /FI \"STATUS eq NOT RESPONDING\"",
+      "danach": "/FI heißt Filter. „STATUS eq NOT RESPONDING“ heißt: nur Prozesse, deren Status „reagiert nicht“ ist (eq = equals, gleich). Die Anführungszeichen halten den Filter zusammen."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Bitte Excel höflich, sich zu beenden – ohne Zwang.",
+      "eingabe": [
+        "taskkill /IM EXCEL.EXE"
+      ],
+      "hinweise": [
+        "Das Programm zum Beenden heißt wie „Task töten“.",
+        "taskkill mit /IM (Image, der Programmname).",
+        "Tippe: taskkill /IM EXCEL.EXE"
+      ],
+      "danach": "taskkill ohne /F schickt Excel die Bitte „schließ dich“ – wie ein Klick aufs X. Ein hängendes Programm reagiert darauf nicht. Darum: als Nächstes mit Zwang."
+    },
+    {
+      "aufgabe": "Excel reagiert nicht. Beende es jetzt erzwungen.",
+      "ziel": {
+        "excel_laeuft": false
+      },
+      "hinweise": [
+        "Dem höflichen Befehl fehlt nur ein Zusatz für „Zwang“ (force).",
+        "Bei taskkill heißt der Zusatz /F, in der PowerShell geht auch Stop-Process -Name EXCEL.",
+        "Tippe: taskkill /IM EXCEL.EXE /F"
+      ],
+      "loesung": [
+        "taskkill /IM EXCEL.EXE /F"
+      ],
+      "danach": "Excel ist beendet. Erzwungen geht mit taskkill /IM EXCEL.EXE /F oder Stop-Process -Name EXCEL. Nicht gespeicherte Arbeit ist dabei verloren."
+    },
+    {
+      "aufgabe": "Prüfe nach, dass Excel nicht mehr läuft.",
+      "eingabe": [
+        "Get-Process EXCEL",
+        "Get-Process -Name EXCEL",
+        "tasklist /FI \"IMAGENAME eq EXCEL.EXE\"",
+        "tasklist",
+        "Get-Process"
+      ],
+      "wenn": {
+        "excel_laeuft": false
+      },
+      "hinweise": [
+        "Mit welchem Befehl hast du vorhin nur Excel angezeigt?",
+        "Get-Process mit dem Namen dahinter.",
+        "Tippe: Get-Process EXCEL"
+      ],
+      "danach": "Gut – nachprüfen gehört immer dazu. Die rote Meldung „Cannot find a process“ heißt hier: Erfolg."
+    }
+  ],
+  "fertig": [
+    "Get-Process und tasklist zeigen die laufenden Prozesse mit PID.",
+    "tasklist /FI \"STATUS eq NOT RESPONDING\" findet hängende Programme.",
+    "taskkill /IM name bittet höflich, /F erzwingt; Stop-Process beendet sofort.",
+    "Danach prüfst du nach, ob es geklappt hat."
+  ]
+}

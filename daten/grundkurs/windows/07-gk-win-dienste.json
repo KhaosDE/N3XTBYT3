@@ -1,0 +1,235 @@
+{
+  "id": "gk-win-dienste",
+  "system": "windows",
+  "titel": "Dienste: Programme im Hintergrund",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-service?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-service?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/stop-service?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/restart-service?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-service?view=powershell-5.1"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "win-dienst-deaktiviert",
+  "shell": "powershell",
+  "zustand": {
+    "pfad": "C:\\Windows\\system32",
+    "admin": true
+  },
+  "erklaeren": [
+    "Ein Dienst ist ein Programm, das ohne Fenster im Hintergrund läuft: der Druckdienst (Spooler),",
+    "der Ton (Audiosrv), die Uhrzeit (W32Time). Fällt ein Dienst aus, geht etwas nicht mehr – oft ohne",
+    "klare Fehlermeldung. Jeder Dienst hat einen Status (läuft/gestoppt) und einen Starttyp: Automatic",
+    "(startet mit Windows), Manual (nur bei Bedarf) oder Disabled (deaktiviert, startet gar nicht).",
+    "Dienste steuern braucht Adminrechte – dieses Fenster hat sie (siehe Titel oben)."
+  ],
+  "begriffe": {
+    "Dienst": "Programm ohne Fenster, das im Hintergrund läuft (englisch: Service).",
+    "Status": "Running = läuft, Stopped = gestoppt.",
+    "Starttyp": "Automatic = startet mit Windows, Manual = bei Bedarf, Disabled = deaktiviert.",
+    "Dienstname": "Kurzer Name für Befehle (Audiosrv). Der Anzeigename (DisplayName) ist der lange (Windows Audio).",
+    "Pipe (|)": "Gibt das Ergebnis eines Befehls an den nächsten weiter, z. B. an Select-Object."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Service"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "dienst_audio": "Running"
+          },
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  Appinfo            Application Information",
+            "Running  Audiosrv           Windows Audio",
+            "Running  Dhcp               DHCP Client",
+            "Running  Dnscache           DNS Client",
+            "Running  EventLog           Windows Event Log",
+            "Running  Spooler            Print Spooler",
+            "Running  W32Time            Windows Time",
+            "Stopped  wuauserv           Windows Update",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System sind es über 200 Dienste."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  Appinfo            Application Information",
+            "Stopped  Audiosrv           Windows Audio",
+            "Running  Dhcp               DHCP Client",
+            "Running  Dnscache           DNS Client",
+            "Running  EventLog           Windows Event Log",
+            "Running  Spooler            Print Spooler",
+            "Running  W32Time            Windows Time",
+            "Stopped  wuauserv           Windows Update",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System sind es über 200 Dienste."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Service Spooler",
+        "Get-Service -Name Spooler"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Status   Name               DisplayName",
+            "------   ----               -----------",
+            "Running  Spooler            Print Spooler",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Service Spooler | Select-Object Name, Status, StartType",
+        "Get-Service Spooler | Select-Object Name,Status,StartType",
+        "Get-Service -Name Spooler | Select-Object Name, Status, StartType"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Name     Status StartType",
+            "----     ------ ---------",
+            "Spooler Running Automatic",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Service Audiosrv",
+        "Stop-Service -Name Audiosrv"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "dienst_audio": "Stopped"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Restart-Service Audiosrv",
+        "Restart-Service -Name Audiosrv",
+        "Restart-Service -Name Audiosrv -Force"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "starttyp_audio": "Disabled"
+          },
+          "fehler": true,
+          "ausgabe": "Restart-Service : Service 'Windows Audio (Audiosrv)' cannot be started due to the following error: Cannot start service Audiosrv on computer '.'."
+        },
+        {
+          "setze": {
+            "dienst_audio": "Running"
+          }
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Alle Dienste: Get-Service",
+      "eingabe": "Get-Service",
+      "danach": "Status, Name und DisplayName (Anzeigename) jedes Dienstes. Windows Audio (Audiosrv) ist gestoppt – deshalb kommt kein Ton. (Gekürzt: Im echten System sind es über 200 Dienste.)"
+    },
+    {
+      "text": "Genauer hinsehen: Get-Service Audiosrv | Select-Object Name, Status, StartType",
+      "eingabe": "Get-Service Audiosrv | Select-Object Name, Status, StartType",
+      "danach": "Der senkrechte Strich | heißt Pipe: Er reicht das Ergebnis an Select-Object weiter, das nur die gewünschten Spalten zeigt. Hier steht: Starttyp Disabled – der Dienst ist deaktiviert."
+    },
+    {
+      "text": "Versuch ihn zu starten: Start-Service Audiosrv",
+      "eingabe": "Start-Service Audiosrv",
+      "danach": "Rote Meldung: Ein deaktivierter Dienst lässt sich nicht starten („cannot be started“). Erst den Starttyp ändern."
+    },
+    {
+      "text": "Starttyp ändern: Set-Service -Name Audiosrv -StartupType Automatic",
+      "eingabe": "Set-Service -Name Audiosrv -StartupType Automatic",
+      "ziel": {
+        "starttyp_audio": "Automatic"
+      },
+      "danach": "Set-Service stellt einen Dienst ein. Automatic heißt: startet ab jetzt mit Windows. Keine Ausgabe = hat geklappt."
+    },
+    {
+      "text": "Jetzt starten: Start-Service Audiosrv",
+      "eingabe": "Start-Service Audiosrv",
+      "ziel": {
+        "dienst_audio": "Running"
+      },
+      "danach": "Diesmal ohne Fehler – der Dienst läuft."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Prüfe nach, dass Windows Audio jetzt läuft.",
+      "eingabe": [
+        "Get-Service Audiosrv",
+        "Get-Service -Name Audiosrv",
+        "Get-Service"
+      ],
+      "wenn": {
+        "dienst_audio": "Running"
+      },
+      "hinweise": [
+        "Anzeigen heißt in der PowerShell Get-…",
+        "Get-Service und der Dienstname.",
+        "Tippe: Get-Service Audiosrv"
+      ],
+      "danach": "Running – passt. Nachprüfen nicht vergessen!"
+    },
+    {
+      "aufgabe": "Starte den Dienst Windows Audio neu (anhalten und wieder starten in einem Befehl).",
+      "eingabe": [
+        "Restart-Service Audiosrv",
+        "Restart-Service -Name Audiosrv",
+        "Restart-Service -Name Audiosrv -Force"
+      ],
+      "hinweise": [
+        "Neu starten heißt auf Englisch restart.",
+        "Das Verb ist Restart, das Nomen Service.",
+        "Tippe: Restart-Service Audiosrv"
+      ],
+      "danach": "Restart-Service hält an und startet wieder – praktisch, wenn ein Dienst „klemmt“."
+    },
+    {
+      "aufgabe": "Finde heraus, welchen Starttyp der Druckdienst (Spooler) hat.",
+      "eingabe": [
+        "Get-Service Spooler | Select-Object Name, Status, StartType",
+        "Get-Service Spooler | Select-Object Name,Status,StartType",
+        "Get-Service -Name Spooler | Select-Object Name, Status, StartType"
+      ],
+      "hinweise": [
+        "Wie hast du den Starttyp von Audiosrv angezeigt?",
+        "Get-Service … | Select-Object Name, Status, StartType",
+        "Tippe: Get-Service Spooler | Select-Object Name, Status, StartType"
+      ],
+      "danach": "Automatic – der Druckdienst startet mit Windows."
+    }
+  ],
+  "fertig": [
+    "Ein Dienst läuft im Hintergrund; er hat Status und Starttyp.",
+    "Get-Service zeigt Dienste, | Select-Object … zeigt den Starttyp.",
+    "Start-Service, Stop-Service, Restart-Service steuern Dienste.",
+    "Ein deaktivierter Dienst braucht erst Set-Service -StartupType."
+  ]
+}

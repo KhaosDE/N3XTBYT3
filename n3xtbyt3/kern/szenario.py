@@ -29,7 +29,7 @@ PFLICHTFELDER = (
     "datum", "ausgangslage", "zustand", "befehle", "ziel", "hinweise", "erklaerung",
     "begriffe", "loesung",
 )
-FREIE_FELDER = ("shell", "dateien", "rechner", "ticket")
+FREIE_FELDER = ("shell", "dateien", "rechner", "ticket", "voraussetzung")
 DRINGLICHKEIT = ("niedrig", "mittel", "hoch", "kritisch")
 
 
@@ -51,6 +51,7 @@ class Fall:
     fehler: bool = False
     aktion: str | None = None
     sim: bool = False  # Ausgabe ist eine Meldung der Simulation, kein echter Systemtext
+    notiz: str | None = None  # Meldung der Simulation nach der Ausgabe, z. B. „gekürzt“
 
 
 @dataclass
@@ -126,6 +127,7 @@ class Szenario:
     rechner: dict[str, RechnerDef] = field(default_factory=dict)
     hauptrechner: str = ""
     ticket: dict[str, Any] | None = None
+    voraussetzung: str | None = None  # id einer Grundkurs-Lektion (nur Hinweis, keine Sperre)
 
     @property
     def bestaetigt(self) -> bool:
@@ -251,7 +253,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
                 fehler.append(f"{fstelle}: muss ein Objekt sein.")
                 continue
             for k in f:
-                if k not in {"wenn", "ausgabe", "setze", "fehler", "aktion", "sim"} and not k.startswith("_"):
+                if k not in {"wenn", "ausgabe", "setze", "fehler", "aktion", "sim", "notiz"} and not k.startswith("_"):
                     fehler.append(f"{fstelle}: unbekanntes Feld „{k}“.")
             ausgabe = _text(f.get("ausgabe", ""))
             if ausgabe is None:
@@ -271,6 +273,9 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
             if not isinstance(ist_sim, bool):
                 fehler.append(f"{fstelle}.sim: muss true oder false sein.")
                 ist_sim = False
+            notiz = _text(f["notiz"]) if "notiz" in f else None
+            if "notiz" in f and not notiz:
+                fehler.append(f"{fstelle}.notiz: muss Text sein.")
             aktion = f.get("aktion")
             if aktion is not None:
                 gueltig = isinstance(aktion, str) and (
@@ -283,7 +288,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
                     )
                     aktion = None
             faelle.append(Fall(ausgabe=ausgabe, wenn=wenn, setze=setze, fehler=ist_fehler,
-                               aktion=aktion, sim=ist_sim))
+                               aktion=aktion, sim=ist_sim, notiz=notiz))
         vorbereitet = [vergleicher.vorbereiten(m) for m in muster]
         namen = frozenset(v[0].name for v in vorbereitet if v)
         befehle.append(Befehl(
@@ -500,9 +505,10 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
             ticket = {**ticket, "text": text or ""}
 
     befehle = _lies_befehle(roh.get("befehle", []), system, bekannte, "befehle", fehler)
-    if "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids:
-        fehler.append("„befehle“: mindestens ein Befehl (nur unter Linux darf die Liste leer sein, "
-                      "wenn die eingebauten Dateibefehle reichen).")
+    if "befehle" in roh and not befehle and not fehler and "bash" not in system.shell_ids \
+            and not roh.get("dateien"):
+        fehler.append("„befehle“: mindestens ein Befehl (leer darf die Liste nur sein, wenn das Szenario "
+                      "Dateien hat und die eingebauten Dateibefehle reichen).")
 
     ziel = roh.get("ziel")
     if isinstance(ziel, dict):
@@ -554,6 +560,11 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         loesung = [s if isinstance(s, str) else {"speichern": s["speichern"], "inhalt": _text(s["inhalt"])}
                    for s in (loesung or [])]
 
+    voraussetzung = roh.get("voraussetzung")
+    if voraussetzung is not None and (not isinstance(voraussetzung, str) or not _ID.match(voraussetzung)):
+        fehler.append("„voraussetzung“: id einer Grundkurs-Lektion, z. B. „gk-win-dienste“.")
+        voraussetzung = None
+
     shell = roh.get("shell", system.start_shell)
     if shell not in system.shell_ids:
         fehler.append(f"„shell“: erlaubt sind {', '.join(system.shell_ids)}.")
@@ -567,6 +578,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         datum=datum, ausgangslage=ausgangslage or "", zustand=zustand, befehle=befehle,
         ziel=ziel, hinweise=hinweise, erklaerung=erklaerung or "", begriffe=dict(begriffe),
         loesung=list(loesung), shell=shell, rechner=rechner, hauptrechner=hauptrechner, ticket=ticket,
+        voraussetzung=voraussetzung,
     ), []
 
 

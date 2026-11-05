@@ -35,7 +35,8 @@ Felder, die mit `_` beginnen (z. B. `"_notiz"`), sind Kommentare und werden nich
 | Feld | Inhalt |
 |---|---|
 | `shell` | Womit das Szenario startet. Windows: `powershell` (Standard) oder `cmd`. Linux: `bash`. |
-| `dateien` | Nur Linux: simulierte Dateien (siehe „Dateien (Linux)“). |
+| `dateien` | Simulierte Dateien (siehe „Dateien (Linux)“ und „Dateien (Windows)“). |
+| `voraussetzung` | id einer Grundkurs-Lektion, die zu diesem Szenario passt, z. B. `gk-win-dienste`. Die Liste zeigt dann „braucht: Lektion 7“, solange die Lektion nicht fertig ist – nur ein Hinweis, keine Sperre. |
 | `rechner` | Weitere Rechner, die man per `ssh` bzw. `Enter-PSSession` erreicht (siehe „Mehrere Rechner“). |
 | `ticket` | Das Szenario erscheint auch im Ticket-Modus (siehe „Tickets“). |
 
@@ -95,8 +96,31 @@ mit F3 und einer kurzen Lösungsnotiz; die Notiz kommt in den Spielstand.
 * Eingebaut (müssen nicht ins Szenario): `pwd`, `cd`, `ls` (-l -a -h), `cat`, `less`, `head`, `tail`,
   `grep` (-i -n -v -c), `chmod`, `chown`, `nano` (Editor), `sudo` (auch `sudo -i`), Filter hinter Pipes
   (`… | grep`, `head`, `tail`, `sort`, `wc -l`). Ein Befehl im Szenario mit gleichem Muster hat Vorrang.
+* Eingebaut sind außerdem `mkdir` (-p), `touch`, `cp` (-r), `mv` und `rm` (-r -f). Neue Dateien bekommen wie
+  unter Ubuntu für normale Benutzer die Rechte `rw-rw-r--` (Ordner `rwxrwxr-x`), für root `rw-r--r--`.
 * Der Zustand `root` ist `true`, während ein Befehl mit `sudo` läuft – so kann ein Fall
   `{"wenn": {"root": false}, …}` die Fehlermeldung ohne sudo zeigen.
+
+## Dateien (Windows)
+
+```json
+"dateien": {
+  "C:\\Users\\mberger\\Documents\\": {"modus": "d-r---", "zeit": "11/2/2026 17:41"},
+  "C:\\Users\\mberger\\Documents\\notiz.txt": ["Zeile 1", "Zeile 2"],
+  "C:\\Users\\mberger\\Documents\\neu.txt": null
+}
+```
+
+* Pfade beginnen mit dem Laufwerk. Ein `\` am Ende heißt Ordner. Groß-/Kleinschreibung zählt beim Suchen
+  nicht; angezeigt wird die Schreibweise aus den Daten.
+* Wert: Text, Liste von Zeilen oder Objekt mit `inhalt`, `zeit` (`M/T/JJJJ HH:MM`, wie im Beispiel von
+  Get-ChildItem in der Microsoft-Doku) und `modus` (Spalte Mode, z. B. `-a----`, `d-r---`).
+* Sobald ein Szenario Windows-Dateien hat, gehen in der PowerShell: `Get-Location` (pwd), `Set-Location`
+  (cd, auch `cd..`), `Get-ChildItem` (dir, ls; -Name, -File, -Directory, -Filter, `*.txt`), `Get-Content`
+  (type, cat; -TotalCount, -Tail), `New-Item` (-Name, -ItemType File/Directory, -Value), `mkdir`,
+  `Copy-Item` (-Recurse), `Move-Item`, `Remove-Item` (-Recurse). In der cmd sind sie nicht nachgebaut.
+* Im Zustand: `datei:C:\\…` (Inhalt, `null` = gibt es nicht), `verzeichnis:C:\\…` (`true`/`false`). Einen
+  Ordner, der erst entstehen soll, trägt man in den `zustand` ein: `"verzeichnis:C:\\…\\Archiv": false`.
 
 ## Zustand
 
@@ -141,6 +165,7 @@ In Ausgaben wird `{schluessel}` durch den aktuellen Wert ersetzt, z. B. `{hostna
 | `wenn` | Bedingung (siehe unten). Ohne Angabe passt der Fall immer. |
 | `ausgabe` | Was das System ausgibt. Text oder Liste von Zeilen. Leer lassen, wenn der echte Befehl nichts ausgibt (viele PowerShell-Befehle). |
 | `fehler` | `true`, wenn die Ausgabe eine Fehlermeldung ist (wird rot angezeigt). |
+| `notiz` | Meldung der Simulation (blau) **nach** einer echten Ausgabe, z. B. „Gekürzt: Im echten System stehen hier über 100 Prozesse.“ |
 | `sim` | `true`, wenn die Ausgabe eine Meldung der Simulation ist und kein echter Systemtext (blau, mit `[N3XTBYT3]`). Für Fälle, in denen die echte Ausgabe nicht sicher bekannt ist, ein Fenster aufgehen würde oder eine Rückfrage nicht nachgebaut ist. |
 | `setze` | Änderungen am Zustand, z. B. `{"dienst_spooler": "Stopped"}`. Mit `{"+": 1}` oder `{"-": 1}` wird gerechnet. Die Änderung gilt schon für `{…}`-Platzhalter in der Ausgabe dieses Falls. |
 | `aktion` | Nur für allgemeine Befehle: `leeren` (Bildschirm), `hilfe`, `exit`, `wechsel:<shell>`. |

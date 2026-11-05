@@ -141,6 +141,22 @@ class WinDateisystem:
             index.setdefault(pfad.casefold(), (pfad, "ordner"))
         return index
 
+    def _schreibweise(self, pfad: str) -> str:
+        """Schreibweise aus den Daten – auch für Angelegtes, das es (noch) nicht gibt (Wert null/false)."""
+        treffer = self._index().get(pfad.casefold())
+        if treffer:
+            return treffer[0]
+        for k in self.z.werte:
+            art, _, rest = k.partition(":")
+            if art in ("datei", "verzeichnis") and rest.casefold() == pfad.casefold():
+                return rest
+        eltern, name = ntpath.split(pfad)
+        if eltern and eltern != pfad and name:
+            treffer = self._index().get(eltern.casefold())
+            if treffer:
+                return ntpath.join(treffer[0], name)
+        return pfad
+
     def absolut(self, pfad: str) -> str:
         pfad = pfad.replace("/", "\\")
         if pfad == "~" or pfad.startswith("~\\"):
@@ -154,8 +170,7 @@ class WinDateisystem:
         pfad = ntpath.normpath(pfad)
         if re.match(r"^[a-z]:", pfad):
             pfad = pfad[0].upper() + pfad[1:]
-        treffer = self._index().get(pfad.casefold())
-        return treffer[0] if treffer else pfad
+        return self._schreibweise(pfad)
 
     def art(self, pfad: str) -> str | None:
         treffer = self._index().get(pfad.casefold())

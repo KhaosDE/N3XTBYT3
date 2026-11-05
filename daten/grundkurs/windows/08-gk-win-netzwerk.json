@@ -1,0 +1,187 @@
+{
+  "id": "gk-win-netzwerk",
+  "system": "windows",
+  "titel": "Netzwerk: IP-Adresse, Gateway, DNS",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ping",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/nslookup",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/test-connection?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "win-dns-cache",
+  "shell": "powershell",
+  "erklaeren": [
+    "Jeder Computer im Netz hat eine IP-Adresse (hier 192.168.10.57) – wie eine Hausnummer.",
+    "Ins Internet und in andere Netze geht es über das Gateway (den Router, hier 192.168.10.1).",
+    "Namen wie intranet.firma.internal übersetzt der DNS-Server in IP-Adressen. Die Adresse bekommt der",
+    "PC meist automatisch per DHCP. Windows merkt sich DNS-Antworten eine Weile (DNS-Cache) –",
+    "ist eine gemerkte Antwort veraltet, landet man an der falschen Adresse. Genau das passiert hier gleich."
+  ],
+  "begriffe": {
+    "IP-Adresse": "Adresse eines Geräts im Netz, z. B. 192.168.10.57.",
+    "Subnetzmaske": "Sagt, welche Adressen im eigenen Netz liegen (255.255.255.0: alle 192.168.10.x).",
+    "Gateway": "Der Router, über den es in andere Netze und ins Internet geht.",
+    "DNS": "Übersetzt Namen (intranet.firma.internal) in IP-Adressen.",
+    "DHCP": "Verteilt IP-Adressen automatisch an die Geräte im Netz.",
+    "DNS-Cache": "Windows merkt sich DNS-Antworten eine Zeit lang. ipconfig /flushdns leert ihn.",
+    "ping": "Schickt kleine Testpakete und misst, ob und wie schnell eine Antwort kommt."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "ping 192.168.10.1"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Pinging 192.168.10.1 with 32 bytes of data:",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "Reply from 192.168.10.1: bytes=32 time<1ms TTL=64",
+            "",
+            "Ping statistics for 192.168.10.1:",
+            "    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),",
+            "Approximate round trip times in milli-seconds:",
+            "    Minimum = 0ms, Maximum = 0ms, Average = 0ms"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Test-Connection 192.168.10.1",
+        "Test-Connection -ComputerName 192.168.10.1"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Source        Destination     IPV4Address     IPV6Address  Bytes    Time(ms)",
+            "------        -----------     -----------     -----------  -----    --------",
+            "PC-BUERO-07   192.168.10.1     192.168.10.1                32       0",
+            "PC-BUERO-07   192.168.10.1     192.168.10.1                32       0",
+            "PC-BUERO-07   192.168.10.1     192.168.10.1                32       0",
+            "PC-BUERO-07   192.168.10.1     192.168.10.1                32       0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Resolve-DnsName intranet.firma.internal",
+        "Resolve-DnsName -Name intranet.firma.internal"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "dns_cache_alt": true
+          },
+          "sim": true,
+          "ausgabe": "Was Resolve-DnsName bei einem veralteten Cache-Eintrag zeigt, ist hier nicht nachgebaut. Leere zuerst den Cache (ipconfig /flushdns) und frag dann noch einmal."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "intranet.firma.internal                        A      1200  Answer     192.168.10.25",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Die eigene Adresse: ipconfig",
+      "eingabe": "ipconfig",
+      "danach": "IPv4 Address ist die Adresse dieses PCs (192.168.10.57), Subnet Mask zeigt das eigene Netz, Default Gateway ist der Router (192.168.10.1)."
+    },
+    {
+      "text": "Alle Details: ipconfig /all",
+      "eingabe": "ipconfig /all",
+      "danach": "Zusätzlich: DHCP Enabled (Adresse kommt automatisch), DNS Servers (wer Namen übersetzt) und die Physical Address (MAC-Adresse der Netzwerkkarte)."
+    },
+    {
+      "text": "Ist der Router erreichbar? ping 192.168.10.1",
+      "eingabe": "ping 192.168.10.1",
+      "danach": "4 Pakete gesendet, 4 Antworten (Reply), 0 % Verlust: Die Verbindung zum Router steht."
+    },
+    {
+      "text": "Jetzt das Intranet: ping intranet.firma.internal",
+      "eingabe": "ping intranet.firma.internal",
+      "danach": "Request timed out – keine Antwort. Achte auf die Adresse in eckigen Klammern: 192.168.10.20."
+    },
+    {
+      "text": "Was sagt der DNS-Server? nslookup intranet.firma.internal",
+      "eingabe": "nslookup intranet.firma.internal",
+      "danach": "nslookup fragt direkt den DNS-Server: Das Intranet hat die Adresse 192.168.10.25 – nicht .20! Windows hat sich eine alte Antwort gemerkt."
+    },
+    {
+      "text": "Den Cache leeren: ipconfig /flushdns",
+      "eingabe": "ipconfig /flushdns",
+      "ziel": {
+        "dns_cache_alt": false
+      },
+      "danach": "„Successfully flushed“: Der DNS-Cache ist leer. Beim nächsten Mal fragt Windows neu."
+    },
+    {
+      "text": "Noch einmal: ping intranet.firma.internal",
+      "eingabe": "ping intranet.firma.internal",
+      "danach": "Jetzt antwortet 192.168.10.25. Gefunden, behoben, nachgeprüft."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Prüfe mit der PowerShell (nicht mit ping), ob der Router 192.168.10.1 antwortet.",
+      "eingabe": [
+        "Test-Connection 192.168.10.1",
+        "Test-Connection -ComputerName 192.168.10.1"
+      ],
+      "hinweise": [
+        "Der PowerShell-Befehl heißt Test-… – er testet eine Verbindung.",
+        "Test-Connection und die Adresse.",
+        "Tippe: Test-Connection 192.168.10.1"
+      ],
+      "danach": "Test-Connection ist der PowerShell-Bruder von ping: gleiche Pakete, Ergebnis als Tabelle."
+    },
+    {
+      "aufgabe": "Lass dir mit der PowerShell anzeigen, welche Adresse zum Namen intranet.firma.internal gehört.",
+      "eingabe": [
+        "Resolve-DnsName intranet.firma.internal",
+        "Resolve-DnsName -Name intranet.firma.internal",
+        "nslookup intranet.firma.internal"
+      ],
+      "hinweise": [
+        "Namen auflösen heißt auf Englisch resolve.",
+        "Resolve-DnsName und der Name.",
+        "Tippe: Resolve-DnsName intranet.firma.internal"
+      ],
+      "danach": "Richtig: 192.168.10.25. Resolve-DnsName ist das PowerShell-Gegenstück zu nslookup."
+    },
+    {
+      "aufgabe": "Zeig an, welcher DNS-Server eingetragen ist.",
+      "eingabe": [
+        "ipconfig /all"
+      ],
+      "hinweise": [
+        "ipconfig allein zeigt ihn nicht.",
+        "Du brauchst die ausführliche Ansicht von ipconfig.",
+        "Tippe: ipconfig /all"
+      ],
+      "danach": "Bei DNS Servers steht der DNS-Server (in der Firma meist der Domänencontroller)."
+    }
+  ],
+  "fertig": [
+    "IP-Adresse, Subnetzmaske, Gateway und DNS-Server findest du mit ipconfig (/all).",
+    "ping und Test-Connection prüfen, ob ein Gerät antwortet.",
+    "nslookup und Resolve-DnsName fragen den DNS-Server nach einer Adresse.",
+    "ipconfig /flushdns leert einen veralteten DNS-Cache."
+  ]
+}

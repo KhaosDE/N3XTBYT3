@@ -70,14 +70,12 @@
           },
           "ausgabe": [
             "",
-            "",
             "    Directory: C:\\Windows\\System32\\spool\\PRINTERS",
             "",
-            "",
-            "Mode                 LastWriteTime         Length Name",
-            "----                 -------------         ------ ----",
-            "-a----        11/4/2026   8:47 AM          12288 00017.SHD",
-            "-a----        11/4/2026   8:47 AM        2097152 00017.SPL",
+            "Mode                LastWriteTime         Length Name",
+            "----                -------------         ------ ----",
+            "-a----        11/4/2026     08:47          12288 00017.SHD",
+            "-a----        11/4/2026     08:47        2097152 00017.SPL",
             ""
           ]
         },

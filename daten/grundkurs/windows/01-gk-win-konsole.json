@@ -1,0 +1,130 @@
+{
+  "id": "gk-win-konsole",
+  "system": "windows",
+  "titel": "Die Konsole: Prompt, Enter, frühere Befehle",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/01-getting-started",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/hostname",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami",
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cls"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger"
+  },
+  "erklaeren": [
+    "Die Konsole (auch Terminal oder Befehlszeile) ist ein Fenster, in das du Befehle tippst, statt zu klicken.",
+    "Links in der Zeile steht der Prompt (die Eingabeaufforderung): hier „PS C:\\Users\\mberger>“.",
+    "PS heißt PowerShell – so heißt die Befehlszeile von Windows. Dahinter steht der Ordner, in dem du gerade bist.",
+    "Du tippst einen Befehl und drückst Enter. Der Computer antwortet mit Text darunter.",
+    "Groß- und Kleinschreibung ist unter Windows egal. Kaputt machen kannst du hier nichts: Es ist eine Simulation."
+  ],
+  "begriffe": {
+    "Konsole": "Fenster für Befehle in Textform (auch Terminal oder Befehlszeile).",
+    "Prompt": "Der Text vor dem Cursor, z. B. „PS C:\\Users\\mberger>“. Er zeigt: Die Konsole wartet auf einen Befehl.",
+    "PowerShell": "Die moderne Befehlszeile von Windows. Daneben gibt es die ältere Eingabeaufforderung (cmd).",
+    "Befehl": "Ein Wort (oft mit Zusätzen), das dem Computer sagt, was er tun soll – z. B. hostname."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Get-Kaffee"
+      ],
+      "faelle": [
+        {
+          "fehler": true,
+          "ausgabe": [
+            "Get-Kaffee : The term 'Get-Kaffee' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.",
+            "At line:1 char:1",
+            "+ Get-Kaffee",
+            "+ ~~~~~~~~~~",
+            "    + CategoryInfo          : ObjectNotFound: (Get-Kaffee:String) [], CommandNotFoundException",
+            "    + FullyQualifiedErrorId : CommandNotFoundException"
+          ]
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Tippe hostname und drück Enter.",
+      "eingabe": "hostname",
+      "danach": "PC-BUERO-07 ist der Name dieses Computers. Jeder Computer im Netzwerk hat einen eigenen Namen – den brauchst du oft, wenn du jemandem hilfst."
+    },
+    {
+      "text": "Tippe whoami (sprich: „who am I“ – wer bin ich?) und drück Enter.",
+      "eingabe": "whoami",
+      "danach": "pc-buero-07\\mberger heißt: Benutzer mberger auf dem Computer pc-buero-07. Vor dem Backslash (\\) steht, woher das Konto kommt, dahinter der Benutzername."
+    },
+    {
+      "text": "Drück zweimal Pfeil hoch (↑). Jetzt steht wieder hostname in der Zeile. Drück Enter.",
+      "eingabe": "hostname",
+      "danach": "Mit ↑ und ↓ blätterst du durch deine früheren Befehle. Das spart Tipparbeit, vor allem bei langen Befehlen."
+    },
+    {
+      "text": "Tippe einen Befehl, den es nicht gibt: Get-Kaffee",
+      "eingabe": "Get-Kaffee",
+      "danach": "So sieht eine echte Fehlermeldung der PowerShell aus: rot und auf Englisch. Wichtig ist die erste Zeile: „is not recognized“ heißt „gibt es nicht“ – meist ein Tippfehler. Ein falscher Befehl macht nichts kaputt."
+    },
+    {
+      "text": "Tippe cls und drück Enter.",
+      "eingabe": "cls",
+      "danach": "cls (clear screen) leert das Fenster. Deine Befehle sind nicht weg – ↑ holt sie weiter zurück."
+    },
+    {
+      "text": "Tippe help und drück Enter.",
+      "eingabe": "help",
+      "danach": "Blaue Zeilen mit [N3XTBYT3] kommen von der Simulation, nicht von Windows. help zeigt hier die Tasten: F1 Hinweis, F4 Befehlsbuch, F5 Lexikon, Esc zurück. Im echten Windows zeigt help die Hilfe der PowerShell – die lernst du in Lektion 3."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Finde heraus, wie dieser Computer heißt.",
+      "eingabe": [
+        "hostname",
+        "$env:COMPUTERNAME"
+      ],
+      "hinweise": [
+        "Es gibt einen Befehl, der fast genauso heißt wie das, was du suchst – auf Englisch.",
+        "Name des Computers auf Englisch: host name.",
+        "Tippe: hostname"
+      ],
+      "danach": "Genau: hostname zeigt den Namen des Computers."
+    },
+    {
+      "aufgabe": "Zeig an, mit welchem Benutzer du angemeldet bist.",
+      "eingabe": [
+        "whoami"
+      ],
+      "hinweise": [
+        "Frag den Computer auf Englisch: Wer bin ich?",
+        "Who am I – alles zusammengeschrieben.",
+        "Tippe: whoami"
+      ],
+      "danach": "Richtig: whoami zeigt Computer (oder Domäne) und Benutzername."
+    },
+    {
+      "aufgabe": "Mach das Fenster leer.",
+      "eingabe": [
+        "cls",
+        "Clear-Host",
+        "clear"
+      ],
+      "hinweise": [
+        "Es gibt einen kurzen Befehl aus drei Buchstaben.",
+        "clear screen – abgekürzt.",
+        "Tippe: cls"
+      ],
+      "danach": "Gut! cls leert das Fenster. In der PowerShell gehen auch Clear-Host und clear."
+    }
+  ],
+  "fertig": [
+    "Du weißt, was Konsole und Prompt sind.",
+    "Du tippst Befehle und schickst sie mit Enter ab.",
+    "Mit ↑ holst du frühere Befehle zurück.",
+    "hostname, whoami und cls kennst du.",
+    "Du erkennst eine echte Fehlermeldung – und Meldungen der Simulation ([N3XTBYT3], blau)."
+  ]
+}

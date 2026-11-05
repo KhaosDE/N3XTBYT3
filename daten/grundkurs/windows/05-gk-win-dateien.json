@@ -1,0 +1,181 @@
+{
+  "id": "gk-win-dateien",
+  "system": "windows",
+  "titel": "Dateien: anzeigen, anlegen, kopieren, verschieben, löschen",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/copy-item?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/move-item?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/remove-item?view=powershell-5.1"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger",
+    "verzeichnis:C:\\Users\\mberger\\Documents\\Projekt": false,
+    "verzeichnis:C:\\Users\\mberger\\Documents\\Archiv": false
+  },
+  "dateien": {
+    "C:\\Users\\mberger\\Desktop\\": {
+      "modus": "d-r---",
+      "zeit": "10/12/2026 08:03"
+    },
+    "C:\\Users\\mberger\\Documents\\": {
+      "modus": "d-r---",
+      "zeit": "11/2/2026 17:41"
+    },
+    "C:\\Users\\mberger\\Downloads\\": {
+      "modus": "d-r---",
+      "zeit": "11/3/2026 12:20"
+    },
+    "C:\\Users\\mberger\\Documents\\Einkaufsliste.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot",
+        "Kaffee",
+        "Druckerpapier"
+      ],
+      "zeit": "11/2/2026 17:41"
+    },
+    "C:\\Users\\mberger\\Documents\\Rezepte\\": {
+      "zeit": "10/30/2026 19:05"
+    },
+    "C:\\Users\\mberger\\Documents\\Rezepte\\Pfannkuchen.txt": {
+      "inhalt": [
+        "Pfannkuchen für 4 Personen",
+        "250 g Mehl",
+        "3 Eier",
+        "500 ml Milch",
+        "1 Prise Salz"
+      ],
+      "zeit": "10/30/2026 19:05"
+    },
+    "C:\\Users\\mberger\\Downloads\\Anleitung-Drucker.txt": {
+      "inhalt": [
+        "Drucker im Büro: Drucker-Buero",
+        "Toner wechseln: vordere Klappe öffnen."
+      ],
+      "zeit": "11/3/2026 12:20"
+    },
+    "C:\\Users\\mberger\\Documents\\Projekt\\Einkaufsliste.txt": null,
+    "C:\\Users\\mberger\\Documents\\Archiv\\Pfannkuchen.txt": null
+  },
+  "erklaeren": [
+    "Mit Dateien arbeitest du in der Konsole genauso wie im Explorer – nur mit Befehlen:",
+    "Inhalt anzeigen, neu anlegen, kopieren, verschieben (auch: umbenennen) und löschen.",
+    "Wichtig: Was du in der Konsole löschst, landet nicht im Papierkorb. Es ist sofort weg."
+  ],
+  "begriffe": {
+    "Datei": "Ein Stück gespeicherter Inhalt mit Namen, z. B. Einkaufsliste.txt.",
+    "Dateiendung": "Der Teil nach dem Punkt (.txt, .pdf). Er sagt, welches Programm die Datei öffnet.",
+    "Papierkorb": "Gibt es nur im Explorer. Remove-Item löscht ohne Papierkorb."
+  },
+  "mitmachen": [
+    {
+      "text": "Geh in den Ordner Documents: cd Documents",
+      "eingabe": "cd Documents",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger\\Documents"
+      },
+      "danach": "Du bist in Documents."
+    },
+    {
+      "text": "Zeig den Inhalt einer Datei: Get-Content Einkaufsliste.txt",
+      "eingabe": "Get-Content Einkaufsliste.txt",
+      "danach": "Get-Content zeigt, was in einer Textdatei steht. Kurz: type oder cat."
+    },
+    {
+      "text": "Leg einen Ordner an: New-Item -Name Projekt -ItemType Directory",
+      "eingabe": "New-Item -Name Projekt -ItemType Directory",
+      "ziel": {
+        "verzeichnis:C:\\Users\\mberger\\Documents\\Projekt": true
+      },
+      "danach": "New-Item legt Neues an. -ItemType Directory heißt Ordner, -ItemType File wäre eine Datei. Kürzer für Ordner: mkdir Projekt."
+    },
+    {
+      "text": "Kopiere die Einkaufsliste hinein: Copy-Item Einkaufsliste.txt Projekt",
+      "eingabe": "Copy-Item Einkaufsliste.txt Projekt",
+      "ziel": {
+        "datei:C:\\Users\\mberger\\Documents\\Projekt\\Einkaufsliste.txt": {
+          "nicht": null
+        }
+      },
+      "danach": "Copy-Item kopiert: erst was (Quelle), dann wohin (Ziel). Die Datei gibt es jetzt zweimal. Keine Ausgabe heißt in der Konsole: hat geklappt."
+    },
+    {
+      "text": "Benenne die Kopie um: Move-Item Projekt\\Einkaufsliste.txt Projekt\\Liste-alt.txt",
+      "eingabe": "Move-Item Projekt\\Einkaufsliste.txt Projekt\\Liste-alt.txt",
+      "danach": "Move-Item verschiebt – bleibt der Ordner gleich und ändert sich nur der Name, ist das Umbenennen."
+    },
+    {
+      "text": "Sieh nach: Get-ChildItem Projekt",
+      "eingabe": "Get-ChildItem Projekt",
+      "danach": "Im Ordner Projekt liegt jetzt Liste-alt.txt."
+    },
+    {
+      "text": "Lösch die Datei: Remove-Item Projekt\\Liste-alt.txt",
+      "eingabe": "Remove-Item Projekt\\Liste-alt.txt",
+      "danach": "Weg – ohne Rückfrage und ohne Papierkorb. Darum vor dem Löschen immer erst nachsehen (Get-ChildItem), was genau gelöscht wird."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Leg im Ordner Documents einen Ordner Archiv an.",
+      "ziel": {
+        "verzeichnis:C:\\Users\\mberger\\Documents\\Archiv": true
+      },
+      "hinweise": [
+        "Neues legst du mit New-… an.",
+        "New-Item mit -Name und -ItemType Directory (oder kurz: mkdir).",
+        "Tippe (in Documents): mkdir Archiv"
+      ],
+      "loesung": [
+        "cd C:\\Users\\mberger\\Documents",
+        "mkdir Archiv"
+      ],
+      "danach": "Gut! New-Item -ItemType Directory oder mkdir."
+    },
+    {
+      "aufgabe": "Kopiere die Datei Pfannkuchen.txt aus dem Ordner Rezepte in den Ordner Archiv.",
+      "ziel": {
+        "datei:C:\\Users\\mberger\\Documents\\Archiv\\Pfannkuchen.txt": {
+          "nicht": null
+        }
+      },
+      "hinweise": [
+        "Kopieren heißt auf Englisch copy.",
+        "Copy-Item, dann die Quelle (Rezepte\\Pfannkuchen.txt), dann das Ziel (Archiv).",
+        "Tippe (in Documents): Copy-Item Rezepte\\Pfannkuchen.txt Archiv"
+      ],
+      "loesung": [
+        "cd C:\\Users\\mberger\\Documents",
+        "Copy-Item Rezepte\\Pfannkuchen.txt Archiv"
+      ],
+      "danach": "Richtig: Copy-Item Quelle Ziel."
+    },
+    {
+      "aufgabe": "Lösch den Ordner Projekt.",
+      "ziel": {
+        "verzeichnis:C:\\Users\\mberger\\Documents\\Projekt": false
+      },
+      "hinweise": [
+        "Löschen: Remove-…",
+        "Remove-Item und der Name des Ordners. Ist er nicht leer, kommt -Recurse dazu.",
+        "Tippe (in Documents): Remove-Item Projekt"
+      ],
+      "loesung": [
+        "cd C:\\Users\\mberger\\Documents",
+        "Remove-Item Projekt"
+      ],
+      "danach": "Erledigt. Ein Ordner mit Inhalt braucht -Recurse – ohne fragt die echte PowerShell vorher nach."
+    }
+  ],
+  "fertig": [
+    "Get-Content zeigt den Inhalt einer Datei.",
+    "New-Item (oder mkdir) legt Dateien und Ordner an.",
+    "Copy-Item kopiert, Move-Item verschiebt oder benennt um.",
+    "Remove-Item löscht – sofort und ohne Papierkorb."
+  ]
+}

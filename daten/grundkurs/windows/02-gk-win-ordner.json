@@ -1,0 +1,201 @@
+{
+  "id": "gk-win-ordner",
+  "system": "windows",
+  "titel": "Ordner und Pfade: wo bin ich, was liegt hier?",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-location?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-location?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-childitem?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/scripting/learn/shell/tab-completion"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "admin": false,
+    "pfad": "C:\\Users\\mberger"
+  },
+  "dateien": {
+    "C:\\Users\\mberger\\Desktop\\": {
+      "modus": "d-r---",
+      "zeit": "10/12/2026 08:03"
+    },
+    "C:\\Users\\mberger\\Documents\\": {
+      "modus": "d-r---",
+      "zeit": "11/2/2026 17:41"
+    },
+    "C:\\Users\\mberger\\Downloads\\": {
+      "modus": "d-r---",
+      "zeit": "11/3/2026 12:20"
+    },
+    "C:\\Users\\mberger\\Documents\\Einkaufsliste.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot",
+        "Kaffee",
+        "Druckerpapier"
+      ],
+      "zeit": "11/2/2026 17:41"
+    },
+    "C:\\Users\\mberger\\Documents\\Rezepte\\": {
+      "zeit": "10/30/2026 19:05"
+    },
+    "C:\\Users\\mberger\\Documents\\Rezepte\\Pfannkuchen.txt": {
+      "inhalt": [
+        "Pfannkuchen für 4 Personen",
+        "250 g Mehl",
+        "3 Eier",
+        "500 ml Milch",
+        "1 Prise Salz"
+      ],
+      "zeit": "10/30/2026 19:05"
+    },
+    "C:\\Users\\mberger\\Downloads\\Anleitung-Drucker.txt": {
+      "inhalt": [
+        "Drucker im Büro: Drucker-Buero",
+        "Toner wechseln: vordere Klappe öffnen."
+      ],
+      "zeit": "11/3/2026 12:20"
+    }
+  },
+  "erklaeren": [
+    "Dateien liegen in Ordnern, Ordner liegen in Ordnern – wie Schubladen in Schubladen.",
+    "Der Weg zu einer Datei heißt Pfad, z. B. C:\\Users\\mberger\\Documents. C: ist das Laufwerk,",
+    "die einzelnen Ordner trennt ein Backslash (\\). Die Konsole steht immer in einem Ordner,",
+    "dem aktuellen Ordner – er steht im Prompt. Befehle wie „zeig, was hier liegt“ beziehen sich auf ihn."
+  ],
+  "begriffe": {
+    "Pfad": "Der Weg zu einer Datei oder einem Ordner, z. B. C:\\Users\\mberger\\Documents.",
+    "Aktueller Ordner": "Der Ordner, in dem die Konsole gerade steht. Er steht im Prompt.",
+    "Absoluter Pfad": "Beginnt mit dem Laufwerk (C:\\…) und funktioniert von überall.",
+    "Relativer Pfad": "Geht vom aktuellen Ordner aus, z. B. Documents oder .. (eine Ebene höher).",
+    "Alias": "Ein Zweitname für einen Befehl, z. B. dir oder ls für Get-ChildItem.",
+    "Benutzerordner": "Dein persönlicher Ordner C:\\Users\\<Name> mit Documents, Desktop, Downloads."
+  },
+  "mitmachen": [
+    {
+      "text": "Wo bist du gerade? Tippe Get-Location",
+      "eingabe": "Get-Location",
+      "danach": "Get-Location zeigt den aktuellen Ordner: C:\\Users\\mberger – dein Benutzerordner. Kürzer geht pwd."
+    },
+    {
+      "text": "Was liegt hier? Tippe Get-ChildItem",
+      "eingabe": "Get-ChildItem",
+      "danach": "Get-ChildItem listet den Inhalt. In der Spalte Mode steht d für Ordner (directory), a für Datei. Length ist die Größe in Bytes, LastWriteTime die letzte Änderung."
+    },
+    {
+      "text": "Wechsle in den Ordner Documents: Set-Location Documents",
+      "eingabe": [
+        "Set-Location Documents",
+        "cd Documents"
+      ],
+      "ziel": {
+        "pfad": "C:\\Users\\mberger\\Documents"
+      },
+      "danach": "Sieh auf den Prompt: Jetzt bist du in Documents. „Documents“ ist ein relativer Pfad – er geht von dort aus, wo du gerade bist."
+    },
+    {
+      "text": "Tippe dir",
+      "eingabe": "dir",
+      "danach": "dir ist ein Alias (Zweitname) für Get-ChildItem – ls geht auch. Hier liegen ein Ordner und eine Datei."
+    },
+    {
+      "text": "Eine Ebene zurück nach oben: cd ..",
+      "eingabe": "cd ..",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger"
+      },
+      "danach": "cd ist der Alias für Set-Location. Zwei Punkte (..) stehen immer für den Ordner darüber. Achte auf das Leerzeichen zwischen cd und den Punkten."
+    },
+    {
+      "text": "Jetzt mit einem absoluten Pfad: cd C:\\Users\\mberger\\Documents\\Rezepte",
+      "eingabe": "cd C:\\Users\\mberger\\Documents\\Rezepte",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger\\Documents\\Rezepte"
+      },
+      "danach": "Ein absoluter Pfad beginnt mit dem Laufwerk und funktioniert von überall. Tipp fürs echte Windows: Tippe den Anfang (cd Doc) und drück die Tab-Taste – die PowerShell ergänzt den Namen. Das spart Tippfehler. In dieser Simulation ist Tab nicht nachgebaut."
+    },
+    {
+      "text": "Zurück nach Hause: cd ~",
+      "eingabe": "cd ~",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger"
+      },
+      "danach": "Die Tilde (~) steht für deinen Benutzerordner. So kommst du von überall schnell zurück."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Wechsle in den Ordner Downloads und zeig dort an, was darin liegt.",
+      "eingabe": [
+        "Get-ChildItem",
+        "dir",
+        "ls",
+        "gci"
+      ],
+      "wenn": {
+        "pfad": "C:\\Users\\mberger\\Downloads"
+      },
+      "hinweise": [
+        "Zwei Schritte: erst hineingehen, dann nachsehen.",
+        "Hineingehen mit Set-Location bzw. cd, nachsehen mit Get-ChildItem bzw. dir.",
+        "Tippe: cd Downloads – und danach: dir"
+      ],
+      "loesung": [
+        "cd Downloads",
+        "dir"
+      ],
+      "danach": "Richtig. Erst den Ordner wechseln (cd Downloads), dann anzeigen (dir)."
+    },
+    {
+      "aufgabe": "Zeig an, in welchem Ordner du gerade bist.",
+      "eingabe": [
+        "Get-Location",
+        "pwd",
+        "gl"
+      ],
+      "hinweise": [
+        "Den Befehl hast du ganz am Anfang benutzt.",
+        "Get-… und dann das englische Wort für Ort.",
+        "Tippe: Get-Location"
+      ],
+      "danach": "Genau. Get-Location (oder pwd) – und der Prompt verrät es auch."
+    },
+    {
+      "aufgabe": "Geh mit einem einzigen Befehl in den Ordner Rezepte – egal, wo du gerade bist.",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger\\Documents\\Rezepte"
+      },
+      "hinweise": [
+        "Ein Pfad, der von überall funktioniert, beginnt mit dem Laufwerk.",
+        "Der Ordner Rezepte liegt in C:\\Users\\mberger\\Documents.",
+        "Tippe: cd C:\\Users\\mberger\\Documents\\Rezepte"
+      ],
+      "loesung": [
+        "cd C:\\Users\\mberger\\Documents\\Rezepte"
+      ],
+      "danach": "Gut! Mit dem absoluten Pfad kommst du von überall hin."
+    },
+    {
+      "aufgabe": "Geh zurück in deinen Benutzerordner.",
+      "ziel": {
+        "pfad": "C:\\Users\\mberger"
+      },
+      "hinweise": [
+        "Es gibt ein Zeichen, das für deinen Benutzerordner steht.",
+        "Das Zeichen sieht aus wie eine kleine Welle.",
+        "Tippe: cd ~"
+      ],
+      "loesung": [
+        "cd ~"
+      ],
+      "danach": "Prima – cd ~ ist der schnellste Weg nach Hause."
+    }
+  ],
+  "fertig": [
+    "Du weißt, was ein Pfad ist – absolut (C:\\…) und relativ (Documents, ..).",
+    "Get-Location (pwd) zeigt, wo du bist.",
+    "Get-ChildItem (dir, ls) zeigt, was im Ordner liegt.",
+    "Set-Location (cd) wechselt den Ordner; cd .. geht nach oben, cd ~ nach Hause.",
+    "Im echten Windows ergänzt die Tab-Taste Namen."
+  ]
+}

@@ -350,6 +350,8 @@ class Sitzung:
         elif fall.ausgabe:
             art = FEHLER if fall.fehler else AUSGABE
             antwort.zeilen = [Zeile(z, art) for z in self.zustand.fuelle(fall.ausgabe).split("\n")]
+        if fall.notiz:
+            antwort.zeilen += _sim(self.zustand.fuelle(fall.notiz))
 
         if fall.aktion and fall.aktion.startswith("wechsel:"):
             self.shell_stapel.append(fall.aktion.split(":", 1)[1])

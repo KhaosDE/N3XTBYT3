@@ -124,16 +124,14 @@
           },
           "ausgabe": [
             "",
-            "",
             "    Directory: C:\\Users\\mberger\\AppData\\Local\\Temp",
             "",
-            "",
-            "Mode                 LastWriteTime         Length Name",
-            "----                 -------------         ------ ----",
-            "d-----        9/12/2026   2:03 PM                OfficeSetup_8F21",
-            "d-----       10/28/2026  11:40 AM                VideoKonverter_Cache",
-            "-a----       10/28/2026  11:52 AM     1932735283 export_tmp_0042.mp4",
-            "-a----        11/3/2026   4:15 PM         524288 wct3A7F.tmp",
+            "Mode                LastWriteTime         Length Name",
+            "----                -------------         ------ ----",
+            "d-----        9/12/2026     14:03                OfficeSetup_8F21",
+            "d-----       10/28/2026     11:40                VideoKonverter_Cache",
+            "-a----       10/28/2026     11:52     1932735283 export_tmp_0042.mp4",
+            "-a----        11/3/2026     16:15         524288 wct3A7F.tmp",
             ""
           ]
         },

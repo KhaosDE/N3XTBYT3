@@ -10,6 +10,7 @@ from __future__ import annotations
 import copy
 from typing import Any, Iterable
 
+from . import pfade
 from .dateien import lies_json, schreibe_json
 from .lernkartei import Lernkartei
 
@@ -30,8 +31,25 @@ LEERER_EINTRAG: dict[str, Any] = {
 }
 
 
+LEERE_LEKTION: dict[str, Any] = {
+    "fertig": False,
+    "durchgaenge": 0,
+    "hinweise": 0,
+    "zuletzt": None,
+}
+
+
 def dateiname(system_id: str) -> str:
     return f"spielstand_{system_id}.json"
+
+
+def erster_start() -> bool:
+    """Noch kein Spielstand für irgendein System – dann zeigt das Programm das Willkommensbild."""
+    try:
+        ordner = pfade.datenordner()
+        return not any(ordner.glob("spielstand_*.json"))
+    except OSError:
+        return True
 
 
 class Spielstand:
@@ -98,4 +116,31 @@ class Spielstand:
         e["verlauf"] = (e["verlauf"] + [dict(ergebnis)])[-VERLAUF_MAX:]
         self.daten["szenarien"][szenario_id] = e
         self.kartei.szenario_ergebnis(szenario_id, ergebnis)
+        return True
+
+    # ------------------------------------------------------------------ Grundkurs
+
+    def lektion(self, lektion_id: str) -> dict[str, Any]:
+        roh = self.daten.get("grundkurs", {}).get(lektion_id) if isinstance(self.daten.get("grundkurs"), dict) else None
+        eintrag = dict(LEERE_LEKTION)
+        if isinstance(roh, dict):
+            eintrag.update(roh)
+        return eintrag
+
+    def lektion_eintragen(self, lektion_id: str, ergebnis: dict[str, Any]) -> bool:
+        """Trägt einen Durchgang durch eine Lektion ein. Ohne einen Befehl zählt er nicht.
+
+        „fertig“ bleibt true, wenn die Lektion einmal geschafft ist.
+        """
+        if not ergebnis.get("fertig") and not ergebnis.get("befehle"):
+            return False
+        e = self.lektion(lektion_id)
+        if ergebnis.get("fertig"):
+            e["fertig"] = True
+            e["durchgaenge"] += 1
+        e["hinweise"] = int(ergebnis.get("hinweise", 0))
+        e["zuletzt"] = ergebnis.get("datum")
+        if not isinstance(self.daten.get("grundkurs"), dict):
+            self.daten["grundkurs"] = {}
+        self.daten["grundkurs"][lektion_id] = e
         return True
