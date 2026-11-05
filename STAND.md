@@ -9,8 +9,8 @@ Stand: 05.11.2026.
 (10 + 8 + 10 + 7 Lektionen), ein Befehlsbuch (F4) und ein Lexikon (F5).
 
 **Neu: Selbst-Update der `.exe`** (dein Wunsch vom 05.11.2026, Ausnahme zu Regel 1 in `CLAUDE.md`).
-**Dafür musst du das Repository öffentlich machen** (siehe „Offene Punkte“), sonst findet die `.exe`
-kein Update und startet einfach die vorhandene Version.
+Das Repository ist seit 05.11.2026 öffentlich; der feste Download-Link und der echte Update-Ablauf
+(Release laden, Prüfsumme, Austausch) sind von außen geprüft.
 
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
@@ -162,15 +162,12 @@ die vom echten System abweichen, korrigieren.
 - Versionsnummer unten im Hauptmenü. Abschalten mit `"auto_update": false` oder `--kein-update`.
 - Tests: Update-Ablauf mit nachgebautem GitHub (Austausch, Prüfsumme falsch, nichts zu tun), nur die
   erlaubten Adressen im Update-Paket, das Lernprogramm kennt das Update-Paket nicht.
+- 05.11.2026: Repository öffentlich (Tobi). Geprüft ohne Anmeldung: Repository-Seite erreichbar, fester
+  Download-Link liefert die `.exe`, der echte Ablauf gegen Release `build-22` lädt, prüft die Prüfsumme,
+  tauscht und startet (unter Linux mit Platzhalter-Datei; unter Windows noch offen).
 
 ## Offene Punkte
 
-- **Repository öffentlich machen (nur du kannst das)**, laut GitHub-Doku: Repository-Seite → **Settings** →
-  ganz unten Abschnitt „Danger Zone“ → neben „Change repository visibility“ auf **Change visibility** →
-  Public wählen → bestätigen („I have read and understand these effects“) → **Make this repository public**.
-  Ich habe vorher geprüft: In den Commits steht nur „Claude <noreply@anthropic.com>“, im Inhalt keine
-  Geheimnisse und keine echten Namen oder Adressen (Regel 4). Öffentlich heißt aber: Jeder kann Code,
-  Szenarien, Stand-Dateien und die Actions-Protokolle lesen.
 - Selbst-Update nicht unter echtem Windows getestet (hier gibt es kein Windows): Umbenennen der laufenden
   `.exe` und Neustart folgen der Windows- und PyInstaller-Doku, sind aber erst bei dir wirklich erprobt.
   Virenscanner können ein Programm, das sich selbst austauscht, misstrauisch beäugen.
@@ -304,12 +301,15 @@ die vom echten System abweichen, korrigieren.
 
 ## Für Tobi zum Testen
 
-**Neu: Selbst-Update** (erst nachdem das Repository öffentlich ist)
+**Neu: Selbst-Update**
 
-1. Neueste `.exe` über den festen Link aus dem README laden und starten. Unten im Hauptmenü steht „Build n“.
-2. Nach meinem nächsten Push (oder wenn du bei GitHub unter Actions einen Lauf neu startest) die `.exe` erneut
-   öffnen: Es sollte kurz ein Fenster „Neue Version wird geladen“ erscheinen, danach startet N3XTBYT3 mit
-   höherer Build-Nummer. Klappt es nicht: `update.log` im Datenordner ansehen und mir schicken.
+1. Absichtlich die ältere Version laden: <https://github.com/KhaosDE/N3XTBYT3/releases/download/build-22/N3XTBYT3.exe>
+   – in einen Ordner, in dem du schreiben darfst (z. B. Dokumente). Windows-Warnung: „Weitere Informationen“
+   → „Trotzdem ausführen“.
+2. Starten: Es sollte kurz ein Fenster „Neue Version wird geladen: Build 22 → Build 23“ erscheinen, danach
+   startet N3XTBYT3 neu. Unten im Hauptmenü steht dann „Build 23“ (oder höher).
+3. Programm schließen, Ordner ansehen: Nur noch `N3XTBYT3.exe` (die `.alt`-Datei wird beim Start gelöscht).
+4. Klappt es nicht: `update.log` im Datenordner (`%APPDATA%\N3XTBYT3`) ansehen und mir den Inhalt schicken.
 
 **Neu: Grundkurs**
 
