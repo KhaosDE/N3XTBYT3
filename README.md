@@ -11,8 +11,10 @@ Fortschritt: `STAND.md` · Plan: `PLAN.md` · Regeln: `CLAUDE.md`
 ### Windows-Programm (.exe)
 
 1. Auf GitHub im Repository oben auf **Actions** klicken.
-2. Den neuesten grünen Lauf „Tests und Windows-Programm“ öffnen.
-3. Unten bei **Artifacts** auf **N3XTBYT3-Windows** klicken. Es kommt eine ZIP-Datei.
+2. Den neuesten grünen Lauf „Tests und Windows-Programm“ öffnen. Bist du in einem Job gelandet
+   (Liste mit Schritten), links ganz oben auf **Summary** klicken.
+3. Auf der Summary-Seite ganz nach unten scrollen zum Abschnitt **Artifacts** und auf
+   **N3XTBYT3-Windows** klicken. Es kommt eine ZIP-Datei (rund 16 MB). Artefakte bleiben 30 Tage.
    (Das zweite Artefakt **N3XTBYT3-MCP-Windows** brauchst du nur für Claude Desktop.)
 4. ZIP entpacken, `N3XTBYT3.exe` doppelklicken.
 5. Windows warnt beim ersten Start („Der Computer wurde durch Windows geschützt“), weil die
