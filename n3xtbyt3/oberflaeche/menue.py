@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pygame
 
 from ..kern import auswahl
+from ..kern import grundkurs as gk
 from ..kern import pfade
 from ..kern.spielstand import Spielstand
 from ..kern.systeme import REIHENFOLGE, SYSTEME
@@ -49,6 +50,7 @@ class Hauptmenue(Ansicht):
         super().__init__(app)
         self.auswahl = 0
         self.daten = {sid: lade_alles(sid) for sid in REIHENFOLGE}
+        self.kurse = {sid: gk.lade_kurs(sid) for sid in REIHENFOLGE}
         self.tickets = sum(1 for sid in REIHENFOLGE for sz in self.daten[sid][0].szenarien if sz.ticket)
         self.eintraege = list(REIHENFOLGE) + ["tickets"]
         self.rects: list[pygame.Rect] = []
@@ -146,6 +148,10 @@ class Hauptmenue(Ansicht):
             if spielbar:
                 ids = [sz.id for sz in ergebnis.szenarien]
                 info = f"{len(ids)} Szenarien · {stand.anzahl_geloest(ids)} gelöst"
+                lektionen = self.kurse[sid].lektionen
+                if lektionen:
+                    fertig, _ = gk.fortschritt(stand, lektionen)
+                    info += f" · Grundkurs {fertig}/{len(lektionen)}"
                 info_farbe = FARBE["text"]
             elif ergebnis.fehler:
                 info = "Szenario-Dateien fehlerhaft – Enter für Details"
@@ -185,7 +191,7 @@ class Hauptmenue(Ansicht):
 
 
 SONDER = (
-    ("zufall", "»  Zufälliges Szenario (empfohlen: Fälliges und Schwaches zuerst)"),
+    ("zufall", "»  Zufälliges Szenario (Fälliges und Schwaches kommen öfter)"),
     ("training", "»  Befehls-Training: Welcher Befehl …?"),
     ("auswertung", "»  Auswertung ansehen: Stärken, Schwächen, Empfehlung"),
 )
@@ -201,12 +207,41 @@ class Szenarioliste(Ansicht):
         self.allgemein = allgemein
         self.stand = stand
         self.szenarien = sorted(ergebnis.szenarien, key=lambda s: (s.kategorie, s.schwierigkeit, s.titel))
+        self.kurs = gk.lade_kurs(system_id)
+        self.sonder: list[tuple[str, str]] = list(SONDER)
         self.auswahl = 0
+        if self.kurs.lektionen:
+            fertig, offen = gk.fortschritt(stand, self.kurs.lektionen)
+            n = len(self.kurs.lektionen)
+            if offen:
+                text = (f"»  Grundkurs: Lektion {offen.nr} von {n} ist dran  ·  "
+                        + ("Empfohlen: zuerst den Grundkurs" if fertig < n else ""))
+            else:
+                text = f"»  Grundkurs: alle {n} Lektionen geschafft – zum Wiederholen"
+            self.sonder.insert(0, ("grundkurs", text))
+            if not offen:
+                self.auswahl = 1  # Grundkurs fertig: Zufall vorgewählt
         self.oben = 0
         self.rects: list[tuple[pygame.Rect, int]] = []
+        self._kurse: dict | None = None
+        self._staende: dict[str, Spielstand] = {system_id: stand}
 
     def _anzahl(self) -> int:
-        return len(self.szenarien) + len(SONDER)
+        return len(self.szenarien) + len(self.sonder)
+
+    def braucht(self, sz) -> str | None:
+        """„braucht: Lektion 6“, solange die passende Lektion des Grundkurses nicht fertig ist."""
+        if not sz.voraussetzung:
+            return None
+        if self._kurse is None:
+            self._kurse = gk.alle_kurse()
+        lektion = gk.finde_lektion(self._kurse, sz.voraussetzung)
+        if lektion is None:
+            return None
+        stand = self._staende.setdefault(lektion.system_id, Spielstand.lade(lektion.system_id))
+        if stand.lektion(lektion.id)["fertig"]:
+            return None
+        return "braucht: " + gk.lektion_name(lektion, self.system_id)
 
     def ereignis(self, e):
         if e.type == pygame.KEYDOWN:
@@ -236,8 +271,12 @@ class Szenarioliste(Ansicht):
     def _starten(self, index: int) -> None:
         if not self.szenarien or self.allgemein is None:
             return
-        if index < len(SONDER):
-            art = SONDER[index][0]
+        if index < len(self.sonder):
+            art = self.sonder[index][0]
+            if art == "grundkurs":
+                from .grundkurs_ansicht import Grundkursliste
+                self.app.wechsle(Grundkursliste(self.app, self.system_id, self.kurs, self.stand))
+                return
             if art == "training":
                 from .training_ansicht import Trainingsansicht
                 self.app.wechsle(Trainingsansicht(self.app, self.system_id, self.ergebnis,
@@ -250,7 +289,7 @@ class Szenarioliste(Ansicht):
                 return
             szenario = auswahl.waehle(self.szenarien, self.stand)
         else:
-            szenario = self.szenarien[index - len(SONDER)]
+            szenario = self.szenarien[index - len(self.sonder)]
         from .spiel import Spielansicht
         self.app.wechsle(Spielansicht(self.app, self.system_id, szenario, self.szenarien,
                                       self.allgemein, self.stand))
@@ -306,10 +345,11 @@ class Szenarioliste(Ansicht):
                 pygame.draw.rect(f, FARBE["linie"], rect, width=2, border_radius=4)
             ty = rect.top + (rect.height - s.text.get_linesize()) // 2
             x = rect.left + s.zeichen_breite
-            if i < len(SONDER):
-                f.blit(s.text_fett.render(SONDER[i][1], True, FARBE["gruen_hell"]), (x, ty))
+            if i < len(self.sonder):
+                farbe = FARBE["erfolg"] if self.sonder[i][0] == "grundkurs" else FARBE["gruen_hell"]
+                f.blit(s.text_fett.render(self.sonder[i][1], True, farbe), (x, ty))
             else:
-                sz = self.szenarien[i - len(SONDER)]
+                sz = self.szenarien[i - len(self.sonder)]
                 e = self.stand.eintrag(sz.id)
                 if e["geloest"]:
                     punkt = FARBE["gruen"]
@@ -336,6 +376,11 @@ class Szenarioliste(Ansicht):
                     eigen = s.klein.render(" eigen ", True, FARBE["warnung_text"], FARBE["sim"])
                     rx -= eigen.get_width() + s.zeichen_breite
                     f.blit(eigen, (rx, rect.centery - eigen.get_height() // 2))
+                braucht = self.braucht(sz)
+                if braucht:
+                    tag = s.klein.render(f" {braucht} ", True, FARBE["sim"])
+                    rx -= tag.get_width() + s.zeichen_breite
+                    f.blit(tag, (rx, rect.centery - tag.get_height() // 2))
                 if e["versuche"]:
                     karte = self.stand.kartei.szenario(sz.id)
                     faellig = self.stand.kartei.ist_faellig(karte)

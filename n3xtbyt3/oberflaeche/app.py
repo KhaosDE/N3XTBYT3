@@ -30,8 +30,13 @@ class App:
         self.schriften = Schriften(self.einstellungen["schriftgroesse"])
         self.uhr = pygame.time.Clock()
         self.laufend = True
-        from .menue import Hauptmenue
-        self.ansicht: Ansicht = Hauptmenue(self)
+        from ..kern.spielstand import erster_start
+        if erster_start():
+            from .grundkurs_ansicht import Willkommen
+            self.ansicht: Ansicht = Willkommen(self)
+        else:
+            from .menue import Hauptmenue
+            self.ansicht = Hauptmenue(self)
 
     # ------------------------------------------------------------------ Fenster
 

@@ -30,7 +30,10 @@ class OberflaecheTest(unittest.TestCase):
         self._daten = Datenordner()
         self.ordner = self._daten.__enter__()
         from n3xtbyt3.oberflaeche.app import App
+        from n3xtbyt3.oberflaeche.grundkurs_ansicht import Willkommen
         self.app = App(groesse=(1280, 720))
+        self.assertIsInstance(self.app.ansicht, Willkommen)  # erster Start: noch kein Spielstand
+        self.app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)  # → Hauptmenü
 
     def tearDown(self):
         self.app.ansicht.verlassen()
@@ -47,7 +50,9 @@ class OberflaecheTest(unittest.TestCase):
         self.assertIsInstance(app.ansicht, Hauptmenue)
         app.schritt([taste(pygame.K_RETURN)], dt=0.05)
         self.assertIsInstance(app.ansicht, Szenarioliste)
-        app.schritt([taste(pygame.K_RETURN)], dt=0.05)  # Zufällig
+        self.assertEqual(app.ansicht.sonder[0][0], "grundkurs")  # Grundkurs zuerst, vorgewählt
+        self.assertEqual(app.ansicht.auswahl, 0)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)  # Zufällig
         self.assertIsInstance(app.ansicht, Spielansicht)
         spiel = app.ansicht
         app.schritt([taste(pygame.K_F1)], dt=0.05)
@@ -65,7 +70,7 @@ class OberflaecheTest(unittest.TestCase):
     def test_verlauf_und_schriftgroesse(self):
         app = self.app
         app.schritt([taste(pygame.K_RETURN)], dt=0.05)
-        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
         spiel = app.ansicht
         app.schritt(tippe("hostname"), dt=0.05)
         app.schritt([taste(pygame.K_UP)], dt=0.05)
@@ -79,7 +84,7 @@ class OberflaecheTest(unittest.TestCase):
         from n3xtbyt3.kern.spielstand import Spielstand
         app = self.app
         app.schritt([taste(pygame.K_RETURN)], dt=0.05)
-        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
         app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
         self.assertEqual(Spielstand.lade("windows").daten["szenarien"], {})
 
@@ -91,7 +96,7 @@ class OberflaecheTest(unittest.TestCase):
 
         app = self.app
         app.schritt([taste(pygame.K_RETURN)], dt=0.05)
-        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
+        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
         self.assertIsInstance(app.ansicht, Trainingsansicht)
         training = app.ansicht
         karte = training.karte
@@ -102,7 +107,7 @@ class OberflaecheTest(unittest.TestCase):
         app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
         self.assertIsInstance(app.ansicht, Szenarioliste)
         self.assertTrue(Spielstand.lade("windows").kartei.befehle)
-        app.schritt([taste(pygame.K_DOWN), taste(pygame.K_DOWN), taste(pygame.K_RETURN)], dt=0.05)
+        app.schritt([taste(pygame.K_DOWN)] * 3 + [taste(pygame.K_RETURN)], dt=0.05)
         self.assertIsInstance(app.ansicht, Auswertungsansicht)
         app.schritt([taste(pygame.K_PAGEDOWN)], dt=0.05)
         self.assertTrue(os.path.exists(os.path.join(self.ordner, "auswertung_windows.md")))
@@ -117,6 +122,7 @@ class TicketOberflaecheTest(unittest.TestCase):
         self.ordner = self._daten.__enter__()
         from n3xtbyt3.oberflaeche.app import App
         self.app = App(groesse=(1280, 720))
+        self.app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)  # Willkommensbild → Hauptmenü
 
     def tearDown(self):
         self.app.ansicht.verlassen()
@@ -153,6 +159,58 @@ class TicketOberflaecheTest(unittest.TestCase):
         self.assertIsInstance(app.ansicht, Ticketliste)
         verlauf = Spielstand.lade("windows").eintrag("tk-shop-502")["verlauf"]
         self.assertTrue(verlauf[-1]["ticket_geschlossen"])
+
+
+@unittest.skipIf(pygame is None, "pygame-ce nicht installiert")
+class GrundkursOberflaecheTest(unittest.TestCase):
+    def setUp(self):
+        self._daten = Datenordner()
+        self.ordner = self._daten.__enter__()
+        from n3xtbyt3.oberflaeche.app import App
+        self.app = App(groesse=(1280, 720))
+
+    def tearDown(self):
+        self.app.ansicht.verlassen()
+        pygame.quit()
+        self._daten.__exit__(None, None, None)
+
+    def test_erster_start_bis_lektion_2(self):
+        """Abnahme G: Erster Start zeigt das Willkommensbild, „Grundkurs starten“ führt in Windows-Lektion 1."""
+        from n3xtbyt3.kern.spielstand import Spielstand
+        from n3xtbyt3.oberflaeche.grundkurs_ansicht import Grundkursliste, Lektionsansicht, Willkommen
+        from n3xtbyt3.oberflaeche.menue import Szenarioliste
+
+        app = self.app
+        self.assertIsInstance(app.ansicht, Willkommen)
+        self.assertEqual(app.ansicht.auswahl, 0)  # „Grundkurs starten“ vorgewählt
+        app.schritt([], dt=0.05)
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        lektion = app.ansicht
+        self.assertIsInstance(lektion, Lektionsansicht)
+        self.assertEqual(lektion.lektion.id, "gk-win-konsole")
+        app.schritt(tippe("hostnme"), dt=0.05)  # Tippfehler: freundlicher Hinweis, Schritt bleibt
+        self.assertEqual(lektion.lauf.index, 0)
+        self.assertIn("Fast!", lektion.lauf.letzter_tipp)
+        for schritt in lektion.lektion.mitmachen:
+            app.schritt(tippe(schritt.eingabe[0]), dt=0.05)
+        self.assertEqual(lektion.lauf.teil, "aufgaben")
+        app.schritt([taste(pygame.K_F1)], dt=0.05)
+        self.assertEqual(lektion.lauf.hinweis_stufe, 1)
+        for aufgabe in lektion.lektion.aufgaben:
+            for befehl in aufgabe.loesung:
+                app.schritt(tippe(befehl), dt=0.05)
+        self.assertTrue(lektion.lauf.fertig)
+        self.assertTrue(Spielstand.lade("windows").lektion("gk-win-konsole")["fertig"])
+        app.schritt([taste(pygame.K_F2)], dt=0.05)
+        self.assertEqual(app.ansicht.lektion.id, "gk-win-ordner")
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Grundkursliste)
+        self.assertEqual(app.ansicht.auswahl, 1)  # Lektion 2 ist dran
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Szenarioliste)
+        self.assertIn("Lektion 2 von 10", app.ansicht.sonder[0][1])
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        self.assertIsInstance(app.ansicht, Grundkursliste)
 
 
 if __name__ == "__main__":
