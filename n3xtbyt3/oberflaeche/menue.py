@@ -170,7 +170,10 @@ class Hauptmenue(Ansicht):
                 "Strg +/−: Schrift  ·  F11: Vollbild")
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 1.6)))
-        ort = s.klein.render(f"Spielstand und eigene Szenarien: {pfade.datenordner()}", True, FARBE["text_schwach"])
+        from .. import _version
+        version = f"Build {_version.BUILD}" if _version.BUILD else "Entwicklerversion"
+        ort = s.klein.render(f"{version}  ·  Spielstand und eigene Szenarien: {pfade.datenordner()}", True,
+                             FARBE["text_schwach"])
         f.blit(ort, ort.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 0.5)))
 
     def _ticket_kachel(self, f, rect, i):

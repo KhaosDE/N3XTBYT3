@@ -2,6 +2,9 @@
 
 In den Paketen n3xtbyt3 und n3xtbyt3_mcp dürfen keine Werkzeuge vorkommen, mit denen echte Befehle
 ausgeführt oder Netzwerkverbindungen aufgebaut werden.
+
+Einzige Ausnahme (Entscheidung Tobi, 05.11.2026): das Selbst-Update im eigenen Paket n3xtbyt3_update.
+Es darf nur die Releases dieses Repositorys abfragen – das prüft tests/test_update.py.
 """
 
 import re

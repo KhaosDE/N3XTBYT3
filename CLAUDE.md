@@ -22,6 +22,12 @@ den Fortschritt je System.
    `subprocess`, kein `os.system`, kein Schreiben außerhalb des eigenen Datenordners,
    kein Netzwerkzugriff. Jede Ausgabe kommt aus den Szenario-Daten. Ein Test prüft das
    (siehe PLAN.md, M1).
+   **Einzige Ausnahme (Entscheidung Tobi, 05.11.2026): Selbst-Update der `.exe`.** Das Paket
+   `n3xtbyt3_update` darf beim Start der `.exe` bei GitHub nach einem neueren Release *dieses*
+   Repositorys fragen, die neue `.exe` samt Prüfsumme laden, sie nach Prüfung gegen die laufende
+   Datei tauschen und starten. Sonst nichts – keine anderen Adressen, keine anderen Befehle. Das
+   Lernprogramm (`n3xtbyt3`) und der MCP-Server bleiben ohne Netz und ohne Systemaufrufe; Tests
+   prüfen beides. Das Repository muss dafür öffentlich sein, die `.exe` enthält keinen Schlüssel.
 2. **Nichts Falsches lehren.** Jede Befehlsausgabe und jede Lösung muss zur offiziellen
    Dokumentation passen (Microsoft Learn, man-Pages, Doku der Distribution).
    Szenarien, die du selbst schreibst, bekommen `"pruefstatus": "ungeprueft"` und eine
@@ -95,7 +101,8 @@ Fassung landet in `IDEEN.md` mit einem Status:
 - **Spielstand:** lesbares JSON. Windows: `%APPDATA%\N3XTBYT3\`, sonst
   `~/.local/share/n3xtbyt3/`. Je System eine Datei.
 - **Windows-Programmdatei:** GitHub Actions baut bei jedem Push nach `main` eine `.exe`
-  (PyInstaller) und testet unter Windows.
+  (PyInstaller), testet unter Windows und veröffentlicht sie als Release `build-<Laufnummer>`.
+  Aus dem neuesten Release aktualisiert sich die `.exe` beim Start selbst (Ausnahme zu Regel 1).
 
 ## Aussehen
 

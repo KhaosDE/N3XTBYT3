@@ -8,6 +8,10 @@ Stand: 05.11.2026.
 (bis auf deine Abnahmetests, siehe unten). Alle vier Systeme haben jetzt einen Grundkurs
 (10 + 8 + 10 + 7 Lektionen), ein Befehlsbuch (F4) und ein Lexikon (F5).
 
+**Neu: Selbst-Update der `.exe`** (dein Wunsch vom 05.11.2026, Ausnahme zu Regel 1 in `CLAUDE.md`).
+**Dafür musst du das Repository öffentlich machen** (siehe „Offene Punkte“), sonst findet die `.exe`
+kein Update und startet einfach die vorhandene Version.
+
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
 die vom echten System abweichen, korrigieren.
@@ -146,7 +150,30 @@ die vom echten System abweichen, korrigieren.
 - [x] Jede `voraussetzung` zeigt auf eine vorhandene Lektion (automatischer Test)
 - [ ] **Tobi:** ohne Vorwissen durch die Windows-Lektionen 1–10 kommen, ohne woanders nachzusehen
 
+### Selbst-Update der .exe (Wunsch Tobi, 05.11.2026)
+
+- Paket `n3xtbyt3_update`: Beim Start der `.exe` fragt es GitHub nach dem neuesten Release dieses
+  Repositorys (`build-<n>`). Ist es neuer als die eigene Version, lädt es `N3XTBYT3.exe` und
+  `N3XTBYT3.exe.sha256` mit Fortschrittsfenster, prüft die Prüfsumme, benennt die laufende Datei in
+  `N3XTBYT3.exe.alt` um, legt die neue an ihren Platz und startet sie. Die neue Version löscht beim Start
+  die alte Datei. Jeder Fehler landet in `update.log`; dann startet die alte Version ganz normal.
+- GitHub Actions trägt die Laufnummer als Version ein, veröffentlicht bei jedem Push nach `main` ein
+  Release `build-<n>` (mit der `.exe`, der Prüfsumme und der MCP-.exe) und behält die neuesten 10.
+- Versionsnummer unten im Hauptmenü. Abschalten mit `"auto_update": false` oder `--kein-update`.
+- Tests: Update-Ablauf mit nachgebautem GitHub (Austausch, Prüfsumme falsch, nichts zu tun), nur die
+  erlaubten Adressen im Update-Paket, das Lernprogramm kennt das Update-Paket nicht.
+
 ## Offene Punkte
+
+- **Repository öffentlich machen (nur du kannst das)**, laut GitHub-Doku: Repository-Seite → **Settings** →
+  ganz unten Abschnitt „Danger Zone“ → neben „Change repository visibility“ auf **Change visibility** →
+  Public wählen → bestätigen („I have read and understand these effects“) → **Make this repository public**.
+  Ich habe vorher geprüft: In den Commits steht nur „Claude <noreply@anthropic.com>“, im Inhalt keine
+  Geheimnisse und keine echten Namen oder Adressen (Regel 4). Öffentlich heißt aber: Jeder kann Code,
+  Szenarien, Stand-Dateien und die Actions-Protokolle lesen.
+- Selbst-Update nicht unter echtem Windows getestet (hier gibt es kein Windows): Umbenennen der laufenden
+  `.exe` und Neustart folgen der Windows- und PyInstaller-Doku, sind aber erst bei dir wirklich erprobt.
+  Virenscanner können ein Programm, das sich selbst austauscht, misstrauisch beäugen.
 
 - Szenario-Ausgaben sind „ungeprüft“. Bitte beim Spielen auf Abweichungen zum echten Windows achten.
   Besonders unsicher (bewusst so markiert oder gekürzt):
@@ -267,8 +294,22 @@ die vom echten System abweichen, korrigieren.
 - 05.11.2026: Tab-Ergänzung wird in Windows-Lektion 2 nur erklärt, nicht nachgebaut (die Idee sagt „erklären“).
 - 05.11.2026: Neue Dateien unter Linux (mkdir, touch, cp) bekommen die Ubuntu-Standardrechte: normale
   Benutzer `rw-rw-r--`/`rwxrwxr-x` (umask 002), root `rw-r--r--`/`rwxr-xr-x`.
+- 05.11.2026 (Tobi): **Selbst-Update** der `.exe` als einzige Ausnahme von Regel 1; Repository wird dafür
+  öffentlich (macht Tobi). Umgesetzt als eigenes Paket `n3xtbyt3_update` in derselben `.exe` statt eines
+  zweiten Startprogramms. Grund: Tobi behält eine einzige Datei; die Trennung vom Lernprogramm sichern
+  eigene Pakete und Tests.
+- 05.11.2026: Version = Laufnummer von GitHub Actions (Release `build-<n>`), Vergleich als Zahl. Die frisch
+  gestartete neue Version prüft nicht gleich noch einmal (kein Endlos-Neustart). Ein Update lädt ohne
+  Rückfrage (Wunsch: „sollte sich selbst aktualisieren“); Esc im Fortschrittsfenster bricht ab.
 
 ## Für Tobi zum Testen
+
+**Neu: Selbst-Update** (erst nachdem das Repository öffentlich ist)
+
+1. Neueste `.exe` über den festen Link aus dem README laden und starten. Unten im Hauptmenü steht „Build n“.
+2. Nach meinem nächsten Push (oder wenn du bei GitHub unter Actions einen Lauf neu startest) die `.exe` erneut
+   öffnen: Es sollte kurz ein Fenster „Neue Version wird geladen“ erscheinen, danach startet N3XTBYT3 mit
+   höherer Build-Nummer. Klappt es nicht: `update.log` im Datenordner ansehen und mir schicken.
 
 **Neu: Grundkurs**
 

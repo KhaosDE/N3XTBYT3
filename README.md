@@ -10,6 +10,26 @@ Fortschritt: `STAND.md` · Plan: `PLAN.md` · Regeln: `CLAUDE.md`
 
 ### Windows-Programm (.exe)
 
+**Einfachster Weg:** die neueste Version direkt laden –
+<https://github.com/KhaosDE/N3XTBYT3/releases/latest/download/N3XTBYT3.exe>
+(geht, sobald das Repository öffentlich ist). Speichern, doppelklicken. Windows warnt beim ersten Start
+(„Der Computer wurde durch Windows geschützt“), weil die Datei nicht signiert ist: **Weitere Informationen**
+→ **Trotzdem ausführen**.
+
+**Selbst-Update:** Danach aktualisiert sich die `.exe` bei jedem Start selbst. Sie fragt kurz bei GitHub nach
+(nur bei den Releases dieses Repositorys), lädt eine neuere Version mit Fortschrittsbalken, prüft die
+Prüfsumme, tauscht sich aus und startet neu. Ohne Internet startet sie einfach die vorhandene Version.
+Spielstand und Einstellungen bleiben unberührt (sie liegen im Datenordner, nicht neben der `.exe`).
+
+- Die `.exe` muss in einem Ordner liegen, in dem du schreiben darfst (z. B. Downloads oder Dokumente,
+  nicht „Programme“).
+- Die Versionsnummer (Build n) steht unten im Hauptmenü. Was beim letzten Start passiert ist, steht in
+  `update.log` im Datenordner.
+- Abschalten: in `einstellungen.json` im Datenordner `"auto_update": false` setzen – oder die `.exe` mit
+  `--kein-update` starten. Das Lernprogramm selbst geht nie ins Netz; nur dieser Update-Schritt beim Start.
+
+**Älterer Weg über Actions** (falls das Repository privat ist):
+
 1. Auf GitHub im Repository oben auf **Actions** klicken.
 2. Den neuesten grünen Lauf „Tests und Windows-Programm“ öffnen. Bist du in einem Job gelandet
    (Liste mit Schritten), links ganz oben auf **Summary** klicken.
