@@ -1,0 +1,120 @@
+{
+  "id": "gk-lin-nano",
+  "system": "linux",
+  "titel": "Dateien bearbeiten mit nano",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html",
+    "https://man7.org/linux/man-pages/man1/cat.1.html"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "pfad": "/home/anna"
+  },
+  "dateien": {
+    "/home/anna/einkauf.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--"
+    },
+    "/home/anna/notizen.txt": null
+  },
+  "erklaeren": [
+    "Einstellungen stehen unter Linux in Textdateien. Zum Bearbeiten im Terminal gibt es den Editor nano:",
+    "nano datei öffnet die Datei. Du bewegst dich mit den Pfeiltasten und tippst einfach. Unten stehen die",
+    "Tasten: ^O heißt Strg+O (speichern), ^X heißt Strg+X (beenden), ^K schneidet eine Zeile aus.",
+    "Der Editor in der Simulation ist ein vereinfachter Ersatz für nano – die Tasten sind dieselben."
+  ],
+  "begriffe": {
+    "Editor": "Programm zum Bearbeiten von Textdateien, z. B. nano.",
+    "^ (Zirkumflex)": "In nano steht ^ für die Strg-Taste: ^O = Strg+O."
+  },
+  "mitmachen": [
+    {
+      "text": "Öffne die Einkaufsliste: nano einkauf.txt",
+      "eingabe": "nano einkauf.txt",
+      "danach": "Der Editor ist offen. Probier die Pfeiltasten. Schließen mit Strg+X – danach geht es hier weiter."
+    },
+    {
+      "text": "Öffne eine Systemdatei: nano /etc/hostname",
+      "eingabe": "nano /etc/hostname",
+      "danach": "Oben steht „schreibgeschützt“: Die Datei gehört root, du darfst sie nur lesen. Zum Ändern bräuchtest du sudo nano /etc/hostname – mehr dazu in Lektion 6. Schließen mit Strg+X."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Schreib in einkauf.txt eine neue Zeile „Käse“ und speichere.",
+      "ziel": {
+        "datei:/home/anna/einkauf.txt": {
+          "zeile_enthaelt": "Käse"
+        }
+      },
+      "hinweise": [
+        "Erst die Datei öffnen.",
+        "nano einkauf.txt, ans Ende gehen, Käse tippen, Strg+O speichern.",
+        "Tippe: nano einkauf.txt – dann unten „Käse“ ergänzen und Strg+O drücken."
+      ],
+      "loesung": [
+        "nano einkauf.txt",
+        {
+          "speichern": "/home/anna/einkauf.txt",
+          "inhalt": [
+            "Milch",
+            "Brot",
+            "Käse"
+          ]
+        }
+      ],
+      "danach": "Gespeichert. Mit cat einkauf.txt kannst du nachsehen."
+    },
+    {
+      "aufgabe": "Leg mit nano die neue Datei notizen.txt an, schreib „Drucker anrufen“ hinein und speichere.",
+      "ziel": {
+        "datei:/home/anna/notizen.txt": {
+          "zeile_enthaelt": "Drucker"
+        }
+      },
+      "hinweise": [
+        "nano öffnet auch Dateien, die es noch nicht gibt.",
+        "nano notizen.txt, Text tippen, Strg+O.",
+        "Tippe: nano notizen.txt – dann „Drucker anrufen“ tippen und Strg+O drücken."
+      ],
+      "loesung": [
+        "nano notizen.txt",
+        {
+          "speichern": "/home/anna/notizen.txt",
+          "inhalt": "Drucker anrufen"
+        }
+      ],
+      "danach": "Neu angelegt. nano legt eine Datei beim ersten Speichern an."
+    },
+    {
+      "aufgabe": "Zeig an, was jetzt in notizen.txt steht – ohne Editor.",
+      "eingabe": [
+        "cat notizen.txt",
+        "cat ~/notizen.txt",
+        "cat /home/anna/notizen.txt",
+        "less notizen.txt"
+      ],
+      "wenn": {
+        "datei:/home/anna/notizen.txt": {
+          "zeile_enthaelt": "Drucker"
+        }
+      },
+      "hinweise": [
+        "Den Befehl zum Anzeigen kennst du aus Lektion 4.",
+        "cat und der Dateiname.",
+        "Tippe: cat notizen.txt"
+      ],
+      "danach": "Genau: cat."
+    }
+  ],
+  "fertig": [
+    "nano datei öffnet den Editor (auch für neue Dateien).",
+    "Strg+O speichert, Strg+X beendet, Strg+K schneidet eine Zeile aus.",
+    "Systemdateien sind schreibgeschützt – zum Ändern braucht es sudo."
+  ]
+}

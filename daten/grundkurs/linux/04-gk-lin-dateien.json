@@ -1,0 +1,176 @@
+{
+  "id": "gk-lin-dateien",
+  "system": "linux",
+  "titel": "Dateien: anzeigen, anlegen, kopieren, verschieben, löschen",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/cat.1.html",
+    "https://man7.org/linux/man-pages/man1/less.1.html",
+    "https://man7.org/linux/man-pages/man1/mkdir.1.html",
+    "https://man7.org/linux/man-pages/man1/cp.1.html",
+    "https://man7.org/linux/man-pages/man1/mv.1.html",
+    "https://man7.org/linux/man-pages/man1/rm.1.html",
+    "https://man7.org/linux/man-pages/man1/touch.1.html"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "pfad": "/home/anna",
+    "verzeichnis:/home/anna/Dokumente/projekt": false,
+    "verzeichnis:/home/anna/Dokumente/archiv": false
+  },
+  "dateien": {
+    "/home/anna/Dokumente/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Bilder/": {
+      "besitzer": "anna:anna",
+      "zeit": "Oct 12 08:03"
+    },
+    "/home/anna/Downloads/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  3 12:20"
+    },
+    "/home/anna/Dokumente/einkauf.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot",
+        "Kaffee",
+        "Etiketten"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Dokumente/rezepte/pfannkuchen.txt": {
+      "inhalt": [
+        "Pfannkuchen für 4 Personen",
+        "250 g Mehl",
+        "3 Eier",
+        "500 ml Milch"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Oct 30 19:05"
+    },
+    "/home/anna/Downloads/anleitung-scanner.txt": {
+      "inhalt": [
+        "Scanner im Lager: Handscanner LS-2",
+        "Akku laden: Station hinten links."
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  3 12:20"
+    },
+    "/home/anna/Dokumente/archiv/pfannkuchen.txt": null
+  },
+  "erklaeren": [
+    "Mit Dateien arbeitest du im Terminal mit kurzen Befehlen: cat zeigt den Inhalt, mkdir legt einen Ordner an,",
+    "cp kopiert, mv verschiebt (oder benennt um), rm löscht. Achtung: rm löscht sofort und endgültig – unter",
+    "Linux gibt es im Terminal keinen Papierkorb und keine Rückfrage."
+  ],
+  "begriffe": {
+    "cat": "Zeigt den Inhalt einer Datei (eigentlich: concatenate, aneinanderhängen).",
+    "rm -r": "Löscht einen Ordner samt Inhalt (r = rekursiv, also mit allem darunter)."
+  },
+  "mitmachen": [
+    {
+      "text": "Geh in Dokumente: cd Dokumente",
+      "eingabe": "cd Dokumente",
+      "ziel": {
+        "pfad": "/home/anna/Dokumente"
+      },
+      "danach": "Du bist in ~/Dokumente."
+    },
+    {
+      "text": "Zeig die Einkaufsliste: cat einkauf.txt",
+      "eingabe": "cat einkauf.txt",
+      "danach": "cat zeigt den ganzen Inhalt. Für lange Dateien nimmt man less (blättern, q beendet)."
+    },
+    {
+      "text": "Leg einen Ordner an: mkdir projekt",
+      "eingabe": "mkdir projekt",
+      "ziel": {
+        "verzeichnis:/home/anna/Dokumente/projekt": true
+      },
+      "danach": "mkdir (make directory) legt einen Ordner an. Keine Ausgabe heißt: hat geklappt."
+    },
+    {
+      "text": "Kopiere die Liste hinein: cp einkauf.txt projekt/",
+      "eingabe": "cp einkauf.txt projekt/",
+      "danach": "cp Quelle Ziel. Der Schrägstrich hinten macht klar: projekt ist ein Ordner."
+    },
+    {
+      "text": "Benenne die Kopie um: mv projekt/einkauf.txt projekt/liste-alt.txt",
+      "eingabe": "mv projekt/einkauf.txt projekt/liste-alt.txt",
+      "danach": "mv verschiebt – im selben Ordner heißt das: umbenennen."
+    },
+    {
+      "text": "Sieh nach: ls -l projekt",
+      "eingabe": "ls -l projekt",
+      "danach": "Darin liegt jetzt liste-alt.txt."
+    },
+    {
+      "text": "Lösch die Datei: rm projekt/liste-alt.txt",
+      "eingabe": "rm projekt/liste-alt.txt",
+      "danach": "Weg – ohne Rückfrage. Darum vorher immer mit ls nachsehen, was du löschst."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Leg in ~/Dokumente einen Ordner archiv an.",
+      "ziel": {
+        "verzeichnis:/home/anna/Dokumente/archiv": true
+      },
+      "hinweise": [
+        "Ordner anlegen: make directory.",
+        "mkdir und der Name.",
+        "Tippe (in Dokumente): mkdir archiv"
+      ],
+      "loesung": [
+        "cd ~/Dokumente",
+        "mkdir archiv"
+      ],
+      "danach": "Angelegt."
+    },
+    {
+      "aufgabe": "Kopiere rezepte/pfannkuchen.txt in den Ordner archiv.",
+      "ziel": {
+        "datei:/home/anna/Dokumente/archiv/pfannkuchen.txt": {
+          "nicht": null
+        }
+      },
+      "hinweise": [
+        "Kopieren: copy, abgekürzt.",
+        "cp, dann die Quelle, dann das Ziel.",
+        "Tippe (in Dokumente): cp rezepte/pfannkuchen.txt archiv/"
+      ],
+      "loesung": [
+        "cd ~/Dokumente",
+        "cp rezepte/pfannkuchen.txt archiv/"
+      ],
+      "danach": "Kopiert."
+    },
+    {
+      "aufgabe": "Lösch den Ordner projekt.",
+      "ziel": {
+        "verzeichnis:/home/anna/Dokumente/projekt": false
+      },
+      "hinweise": [
+        "Löschen: remove, abgekürzt.",
+        "rm braucht für Ordner -r.",
+        "Tippe (in Dokumente): rm -r projekt"
+      ],
+      "loesung": [
+        "cd ~/Dokumente",
+        "rm -r projekt"
+      ],
+      "danach": "Gelöscht. Für Ordner braucht rm die Option -r (bei einem leeren Ordner ginge auch rmdir)."
+    }
+  ],
+  "fertig": [
+    "cat zeigt Dateien, mkdir legt Ordner an.",
+    "cp kopiert (-r für Ordner), mv verschiebt oder benennt um.",
+    "rm löscht sofort und endgültig (-r für Ordner)."
+  ]
+}

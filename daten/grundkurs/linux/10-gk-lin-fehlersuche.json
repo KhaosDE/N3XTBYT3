@@ -1,0 +1,101 @@
+{
+  "id": "gk-lin-fehlersuche",
+  "system": "linux",
+  "titel": "Fehlersuche mit Methode: das Intranet geht nur hier nicht",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man5/hosts.5.html",
+    "https://man7.org/linux/man-pages/man1/getent.1.html",
+    "https://man7.org/linux/man-pages/man1/grep.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "lin-hosts-eintrag",
+  "erklaeren": [
+    "Die fünf Schritte kennst du: beschreiben, Infos sammeln, vermuten, gezielt beheben, nachprüfen und notieren.",
+    "Der Fall: Auf Annas Laptop lädt das Intranet nicht, bei allen anderen schon. Linux schaut bei Namen zuerst in",
+    "die Datei /etc/hosts und fragt erst dann DNS. Ein alter Eintrag dort kann also alles umleiten."
+  ],
+  "begriffe": {
+    "/etc/hosts": "Datei mit festen Zuordnungen Name → Adresse. Sie gilt vor DNS.",
+    "getent hosts": "Zeigt, welche Adresse das System für einen Namen wirklich benutzt (inklusive /etc/hosts)."
+  },
+  "mitmachen": [
+    {
+      "text": "Infos sammeln: ping -c 4 intranet.firma.internal",
+      "eingabe": "ping -c 4 intranet.firma.internal",
+      "danach": "Achte auf die Adresse in Klammern: 192.168.10.20 – und keine Antwort."
+    },
+    {
+      "text": "Welche Adresse benutzt das System? getent hosts intranet.firma.internal",
+      "eingabe": "getent hosts intranet.firma.internal",
+      "danach": "Auch hier .20."
+    },
+    {
+      "text": "Was sagt DNS? host intranet.firma.internal",
+      "eingabe": "host intranet.firma.internal",
+      "danach": "DNS sagt 192.168.10.25. Vermutung: Etwas auf diesem PC leitet den Namen um."
+    },
+    {
+      "text": "Steht der Name in /etc/hosts? grep intranet /etc/hosts",
+      "eingabe": "grep intranet /etc/hosts",
+      "danach": "Ja: ein alter Testeintrag mit .20. Er gilt vor DNS – das ist die Ursache."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Beheben: Entferne die Zeile mit 192.168.10.20 aus /etc/hosts (mit Root-Rechten bearbeiten) und speichere.",
+      "ziel": {
+        "datei:/etc/hosts": {
+          "keine_zeile_enthaelt": "192.168.10.20"
+        }
+      },
+      "hinweise": [
+        "Die Datei gehört root – zum Bearbeiten braucht es sudo.",
+        "sudo nano /etc/hosts, Zeile mit Strg+K ausschneiden, Strg+O speichern.",
+        "Tippe: sudo nano /etc/hosts – dann die Zeile mit 192.168.10.20 per Strg+K entfernen und Strg+O."
+      ],
+      "loesung": [
+        "sudo nano /etc/hosts",
+        {
+          "speichern": "/etc/hosts",
+          "inhalt": [
+            "127.0.0.1 localhost",
+            "127.0.1.1 pc-lager02",
+            "",
+            "# The following lines are desirable for IPv6 capable hosts",
+            "::1     ip6-localhost ip6-loopback",
+            "ff02::1 ip6-allnodes",
+            "ff02::2 ip6-allrouters"
+          ]
+        }
+      ],
+      "danach": "Die Zeile ist weg."
+    },
+    {
+      "aufgabe": "Nachprüfen: Antwortet das Intranet jetzt?",
+      "eingabe": [
+        "ping -c 4 intranet.firma.internal",
+        "ping intranet.firma.internal",
+        "getent hosts intranet.firma.internal"
+      ],
+      "wenn": {
+        "datei:/etc/hosts": {
+          "keine_zeile_enthaelt": "192.168.10.20"
+        }
+      },
+      "hinweise": [
+        "Wie hast du am Anfang getestet?",
+        "ping mit -c 4 und dem Namen.",
+        "Tippe: ping -c 4 intranet.firma.internal"
+      ],
+      "danach": "192.168.10.25 antwortet. Notiz: „Alter Testeintrag in /etc/hosts leitete das Intranet um; Zeile entfernt.“"
+    }
+  ],
+  "fertig": [
+    "Die fünf Schritte führen auch unter Linux zum Ziel.",
+    "grep wort datei findet Zeilen in Dateien.",
+    "/etc/hosts gilt vor DNS – alte Einträge dort können Namen umleiten.",
+    "Ab jetzt kannst du die Linux-Szenarien allein lösen."
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "id": "gk-lin-rechte",
+  "system": "linux",
+  "titel": "Rechte: rwx, chmod, chown und sudo",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/chmod.1.html",
+    "https://man7.org/linux/man-pages/man1/chown.1.html",
+    "https://man7.org/linux/man-pages/man8/sudo.8.html",
+    "https://man7.org/linux/man-pages/man1/ls.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "lin-skript-ausfuehrbar",
+  "dateien": {
+    "/etc/lagerscan/lizenz.conf": {
+      "inhalt": [
+        "# Lizenz Lagerscan",
+        "kunde=Lager Nord",
+        "plaetze=5"
+      ],
+      "rechte": "640",
+      "besitzer": "root:root"
+    },
+    "/home/anna/Dokumente/bericht.txt": {
+      "inhalt": "Quartalsbericht (Entwurf)",
+      "rechte": "rw-rw-r--",
+      "besitzer": "anna:anna"
+    }
+  },
+  "erklaeren": [
+    "Jede Datei gehört einem Benutzer und einer Gruppe. ls -l zeigt die Rechte als neun Zeichen, z. B. rw-r--r--:",
+    "drei für den Besitzer, drei für die Gruppe, drei für alle anderen. r = lesen, w = schreiben, x = ausführen",
+    "(bei Ordnern: hineingehen). chmod ändert die Rechte, chown den Besitzer. Was nur root darf, erledigst du",
+    "mit sudo davor – sudo fragt nach deinem Passwort."
+  ],
+  "begriffe": {
+    "Rechte (rwx)": "r = lesen, w = schreiben, x = ausführen – je für Besitzer, Gruppe, andere.",
+    "chmod": "Ändert Rechte, z. B. chmod u+x datei (Besitzer darf ausführen) oder chmod 600 datei.",
+    "Oktalzahl (z. B. 640)": "Rechte als Zahl: r = 4, w = 2, x = 1, zusammengezählt je Gruppe. 6 = rw-, 4 = r--.",
+    "root": "Der Administrator unter Linux. Darf alles.",
+    "sudo": "Führt einen Befehl als root aus (nach Passwort). Nur für Benutzer in der Gruppe sudo."
+  },
+  "mitmachen": [
+    {
+      "text": "Sieh dir das Sicherungsskript an: ls -l backup.sh",
+      "eingabe": "ls -l backup.sh",
+      "danach": "-rw-r--r-- anna anna: Anna darf lesen und schreiben, alle anderen nur lesen. Ein x fehlt überall – niemand darf es ausführen."
+    },
+    {
+      "text": "Starte es: ./backup.sh",
+      "eingabe": "./backup.sh",
+      "danach": "Permission denied – ohne x-Recht geht es nicht. ./ heißt: die Datei hier im aktuellen Ordner."
+    },
+    {
+      "text": "Gib dir das Ausführrecht: chmod u+x backup.sh",
+      "eingabe": "chmod u+x backup.sh",
+      "danach": "u = user (Besitzer), + = dazu, x = ausführen."
+    },
+    {
+      "text": "Noch einmal: ./backup.sh",
+      "eingabe": "./backup.sh",
+      "danach": "Jetzt läuft das Skript."
+    },
+    {
+      "text": "Lies eine Systemdatei: cat /etc/lagerscan/lizenz.conf",
+      "eingabe": "cat /etc/lagerscan/lizenz.conf",
+      "danach": "Permission denied: Die Datei gehört root und ist für andere nicht lesbar (640)."
+    },
+    {
+      "text": "Mit Root-Rechten: sudo cat /etc/lagerscan/lizenz.conf",
+      "eingabe": "sudo cat /etc/lagerscan/lizenz.conf",
+      "danach": "sudo fragt einmal nach Annas Passwort und führt den Befehl als root aus."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Mach die Datei Dokumente/bericht.txt nur für dich lesbar und schreibbar (rw-------).",
+      "ziel": {
+        "rechte:/home/anna/Dokumente/bericht.txt": "rw-------"
+      },
+      "hinweise": [
+        "Rechte ändert chmod. Als Zahl: r = 4, w = 2.",
+        "rw- = 6, nichts = 0. Also 600.",
+        "Tippe: chmod 600 Dokumente/bericht.txt"
+      ],
+      "loesung": [
+        "chmod 600 ~/Dokumente/bericht.txt"
+      ],
+      "danach": "Richtig: chmod 600 – 6 (rw-) für dich, 0 für Gruppe und andere."
+    },
+    {
+      "aufgabe": "Die Lizenzdatei soll Anna gehören: Ändere den Besitzer von /etc/lagerscan/lizenz.conf auf anna (Benutzer und Gruppe).",
+      "ziel": {
+        "besitzer:/etc/lagerscan/lizenz.conf": "anna:anna"
+      },
+      "hinweise": [
+        "Besitzer ändert chown – aber nur root darf das.",
+        "sudo chown benutzer:gruppe datei",
+        "Tippe: sudo chown anna:anna /etc/lagerscan/lizenz.conf"
+      ],
+      "loesung": [
+        "sudo chown anna:anna /etc/lagerscan/lizenz.conf"
+      ],
+      "danach": "Besitzer geändert. chown geht nur als root – darum sudo."
+    }
+  ],
+  "fertig": [
+    "ls -l zeigt Rechte (rwx für Besitzer, Gruppe, andere) und Besitzer.",
+    "chmod ändert Rechte (u+x oder als Zahl 600, 644, 755).",
+    "chown ändert den Besitzer – nur mit sudo.",
+    "sudo führt einen Befehl als root aus."
+  ]
+}

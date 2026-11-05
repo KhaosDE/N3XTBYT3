@@ -1,0 +1,183 @@
+{
+  "id": "gk-lin-ordner",
+  "system": "linux",
+  "titel": "Ordner und Pfade: pwd, ls, cd",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/pwd.1.html",
+    "https://man7.org/linux/man-pages/man1/ls.1.html",
+    "https://man7.org/linux/man-pages/man1/cd.1p.html",
+    "https://ubuntu.com/tutorials/command-line-for-beginners"
+  ],
+  "datum": "2026-11-05",
+  "zustand": {
+    "pfad": "/home/anna"
+  },
+  "dateien": {
+    "/home/anna/Dokumente/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Bilder/": {
+      "besitzer": "anna:anna",
+      "zeit": "Oct 12 08:03"
+    },
+    "/home/anna/Downloads/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  3 12:20"
+    },
+    "/home/anna/Dokumente/einkauf.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot",
+        "Kaffee",
+        "Etiketten"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Dokumente/rezepte/pfannkuchen.txt": {
+      "inhalt": [
+        "Pfannkuchen für 4 Personen",
+        "250 g Mehl",
+        "3 Eier",
+        "500 ml Milch"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Oct 30 19:05"
+    },
+    "/home/anna/Downloads/anleitung-scanner.txt": {
+      "inhalt": [
+        "Scanner im Lager: Handscanner LS-2",
+        "Akku laden: Station hinten links."
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  3 12:20"
+    }
+  },
+  "erklaeren": [
+    "Unter Linux gibt es keine Laufwerksbuchstaben. Alles hängt an einem einzigen Wurzelordner: / (Slash).",
+    "Ein Pfad wie /home/anna/Dokumente geht von dort aus; die Ordner trennt ein normaler Schrägstrich /.",
+    "Dein Home-Ordner ist /home/anna, kurz ~. Das Terminal steht immer in einem Ordner – er steht im Prompt."
+  ],
+  "begriffe": {
+    "Wurzelverzeichnis (/)": "Der oberste Ordner unter Linux. Alles andere liegt darunter.",
+    "Verzeichnis": "Anderes Wort für Ordner.",
+    "Absoluter Pfad": "Beginnt mit / und funktioniert von überall, z. B. /etc.",
+    "Relativer Pfad": "Geht vom aktuellen Ordner aus, z. B. Dokumente oder .. (eine Ebene höher).",
+    "Versteckte Datei": "Name beginnt mit einem Punkt, z. B. .bashrc. ls zeigt sie nur mit -a."
+  },
+  "mitmachen": [
+    {
+      "text": "Wo bist du? pwd",
+      "eingabe": "pwd",
+      "danach": "pwd (print working directory) zeigt den aktuellen Ordner: /home/anna."
+    },
+    {
+      "text": "Was liegt hier? ls",
+      "eingabe": "ls",
+      "danach": "ls listet den Inhalt: drei Ordner."
+    },
+    {
+      "text": "Ausführlich: ls -l",
+      "eingabe": "ls -l",
+      "danach": "-l heißt lang: Rechte, Besitzer, Größe, Datum. Das d ganz vorn heißt directory (Ordner). Die Rechte lernst du in Lektion 6."
+    },
+    {
+      "text": "Auch versteckte Dateien: ls -a",
+      "eingabe": "ls -a",
+      "danach": "Dateien mit Punkt am Anfang (.bashrc) sind versteckt – meist Einstellungen. . ist der aktuelle Ordner, .. der darüber."
+    },
+    {
+      "text": "In den Ordner Dokumente: cd Dokumente",
+      "eingabe": "cd Dokumente",
+      "ziel": {
+        "pfad": "/home/anna/Dokumente"
+      },
+      "danach": "Sieh auf den Prompt: ~/Dokumente. Achtung: Dokumente mit großem D – genau so, wie ls es zeigt."
+    },
+    {
+      "text": "Eine Ebene hoch: cd ..",
+      "eingabe": "cd ..",
+      "ziel": {
+        "pfad": "/home/anna"
+      },
+      "danach": "Zurück in /home/anna. Leerzeichen zwischen cd und .. nicht vergessen."
+    },
+    {
+      "text": "Absolut in die Einstellungen des Systems: cd /etc",
+      "eingabe": "cd /etc",
+      "ziel": {
+        "pfad": "/etc"
+      },
+      "danach": "/etc beginnt mit / – ein absoluter Pfad. In /etc liegen die Einstellungen (Konfiguration) des Systems."
+    },
+    {
+      "text": "Nach Hause: cd",
+      "eingabe": "cd",
+      "ziel": {
+        "pfad": "/home/anna"
+      },
+      "danach": "cd ohne Ziel bringt dich in deinen Home-Ordner. cd ~ geht genauso."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Wechsle in den Ordner Downloads und zeig an, was darin liegt.",
+      "eingabe": [
+        "ls",
+        "ls -l",
+        "ls -la",
+        "ls -a"
+      ],
+      "wenn": {
+        "pfad": "/home/anna/Downloads"
+      },
+      "hinweise": [
+        "Zwei Schritte: hineingehen, nachsehen.",
+        "cd und ls.",
+        "Tippe: cd Downloads – und danach: ls"
+      ],
+      "loesung": [
+        "cd Downloads",
+        "ls"
+      ],
+      "danach": "Richtig: erst cd Downloads, dann ls."
+    },
+    {
+      "aufgabe": "Zeig an, in welchem Ordner du gerade bist.",
+      "eingabe": [
+        "pwd"
+      ],
+      "hinweise": [
+        "Drei Buchstaben: print working directory.",
+        "p, w, d.",
+        "Tippe: pwd"
+      ],
+      "danach": "Genau: pwd."
+    },
+    {
+      "aufgabe": "Geh mit einem einzigen Befehl in den Ordner rezepte (er liegt in ~/Dokumente) – egal, wo du bist.",
+      "ziel": {
+        "pfad": "/home/anna/Dokumente/rezepte"
+      },
+      "hinweise": [
+        "Ein Pfad, der von überall geht, beginnt mit / oder ~.",
+        "~/Dokumente/rezepte",
+        "Tippe: cd ~/Dokumente/rezepte"
+      ],
+      "loesung": [
+        "cd ~/Dokumente/rezepte"
+      ],
+      "danach": "Gut! Mit ~/Dokumente/rezepte oder /home/anna/Dokumente/rezepte kommst du von überall hin."
+    }
+  ],
+  "fertig": [
+    "Unter Linux beginnt alles bei / – Ordner trennt der Schrägstrich.",
+    "pwd zeigt, wo du bist; ls (-l, -a) zeigt, was da liegt.",
+    "cd wechselt den Ordner: cd .., cd /etc, cd (nach Hause)."
+  ]
+}

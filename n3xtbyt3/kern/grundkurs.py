@@ -155,9 +155,14 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
                 hinweise = [_text(h) or "" for h in hinweise]
             loesung = r.get("loesung", eingabe[:1])
             if not isinstance(loesung, list) or not loesung or not all(
-                    isinstance(x, str) or (isinstance(x, dict) and set(x) <= {"speichern", "inhalt"}) for x in loesung):
-                fehler.append(f"{stelle}.loesung: Liste der Befehle, die die Aufgabe lösen.")
+                    isinstance(x, str) or (isinstance(x, dict) and set(x) == {"speichern", "inhalt"}
+                                           and isinstance(x["speichern"], str) and _text(x["inhalt"]) is not None)
+                    for x in loesung):
+                fehler.append(f"{stelle}.loesung: Liste der Befehle, die die Aufgabe lösen (Linux auch "
+                              "{\"speichern\": \"/pfad\", \"inhalt\": …}).")
                 loesung = []
+            loesung = [x if isinstance(x, str) else {"speichern": x["speichern"], "inhalt": _text(x["inhalt"])}
+                       for x in loesung]
         schritte.append(Schritt(text=text or "", eingabe=list(eingabe), danach=danach or "", ziel=ziel, wenn=wenn,
                                 hinweise=hinweise, loesung=list(loesung),
                                 vorbereitet=[vergleicher.vorbereiten(e) for e in eingabe]))

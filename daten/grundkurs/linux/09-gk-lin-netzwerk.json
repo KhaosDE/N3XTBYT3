@@ -1,0 +1,95 @@
+{
+  "id": "gk-lin-netzwerk",
+  "system": "linux",
+  "titel": "Netzwerk: ip a, ping",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man8/ip-address.8.html",
+    "https://man7.org/linux/man-pages/man8/ip-link.8.html",
+    "https://man7.org/linux/man-pages/man8/ping.8.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "lin-netzwerk-down",
+  "erklaeren": [
+    "ip a zeigt alle Netzwerkkarten (Interfaces) mit ihrer Adresse. lo ist die interne Schleife (immer da),",
+    "die echte Karte heißt hier enp0s31f6. ping -c 4 adresse schickt vier Testpakete (ohne -c pingt Linux",
+    "endlos, bis Strg+C). Hier steckt das Kabel – aber der PC hat keine Adresse."
+  ],
+  "begriffe": {
+    "Interface": "Netzwerkanschluss, z. B. enp0s31f6 (Kabel) oder wlp2s0 (WLAN).",
+    "state UP / DOWN": "Interface eingeschaltet bzw. ausgeschaltet.",
+    "inet": "Die IPv4-Adresse eines Interfaces in der Ausgabe von ip a."
+  },
+  "mitmachen": [
+    {
+      "text": "Netzwerkkarten zeigen: ip a",
+      "eingabe": "ip a",
+      "danach": "Bei enp0s31f6 steht state DOWN und keine inet-Zeile: Die Karte ist ausgeschaltet."
+    },
+    {
+      "text": "Router testen: ping -c 4 192.168.10.1",
+      "eingabe": "ping -c 4 192.168.10.1",
+      "danach": "Network is unreachable – ohne aktive Karte gibt es keinen Weg ins Netz."
+    },
+    {
+      "text": "Karte einschalten – erst ohne sudo: ip link set enp0s31f6 up",
+      "eingabe": "ip link set enp0s31f6 up",
+      "danach": "Operation not permitted: Das darf nur root."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Schalte die Netzwerkkarte enp0s31f6 mit Root-Rechten ein.",
+      "ziel": {
+        "link_up": true
+      },
+      "hinweise": [
+        "Der Befehl ist richtig – es fehlen nur die Rechte.",
+        "sudo davor.",
+        "Tippe: sudo ip link set enp0s31f6 up"
+      ],
+      "loesung": [
+        "sudo ip link set enp0s31f6 up"
+      ],
+      "danach": "Die Karte ist an."
+    },
+    {
+      "aufgabe": "Prüf nach, ob die Karte jetzt eine Adresse hat.",
+      "eingabe": [
+        "ip a",
+        "ip addr",
+        "ip address",
+        "ip addr show"
+      ],
+      "wenn": {
+        "link_up": true
+      },
+      "hinweise": [
+        "Wie hast du am Anfang nachgesehen?",
+        "ip und a.",
+        "Tippe: ip a"
+      ],
+      "danach": "state UP und eine inet-Zeile – die Adresse kam per DHCP."
+    },
+    {
+      "aufgabe": "Teste den Router mit vier Paketen.",
+      "eingabe": [
+        "ping -c 4 192.168.10.1"
+      ],
+      "wenn": {
+        "link_up": true
+      },
+      "hinweise": [
+        "ping mit Anzahl.",
+        "-c 4 und die Adresse des Routers.",
+        "Tippe: ping -c 4 192.168.10.1"
+      ],
+      "danach": "Antworten kommen – das Netz geht."
+    }
+  ],
+  "fertig": [
+    "ip a zeigt Interfaces, Zustand (UP/DOWN) und Adressen.",
+    "ping -c 4 adresse testet die Verbindung.",
+    "sudo ip link set <interface> up schaltet eine Karte ein."
+  ]
+}

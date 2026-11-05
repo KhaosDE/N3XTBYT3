@@ -1,0 +1,174 @@
+{
+  "id": "gk-lin-hilfe",
+  "system": "linux",
+  "titel": "Hilfe finden: man, --help, whatis",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/man.1.html",
+    "https://man7.org/linux/man-pages/man1/whatis.1.html",
+    "https://man7.org/linux/man-pages/man1/ls.1.html",
+    "https://man7.org/linux/man-pages/man1/cp.1.html"
+  ],
+  "datum": "2026-11-05",
+  "erklaeren": [
+    "Zu fast jedem Linux-Befehl gibt es eine Handbuchseite (man page): man ls. Sie ist ausführlich und englisch.",
+    "Schneller geht oft befehl --help: eine Kurzhilfe direkt im Terminal. Und whatis befehl sagt in einer",
+    "Zeile, was ein Befehl tut. Optionen beginnen unter Linux mit - (kurz, z. B. -l) oder -- (lang, z. B. --help)."
+  ],
+  "begriffe": {
+    "man page": "Handbuchseite zu einem Befehl. Öffnen mit man, blättern mit Leertaste, beenden mit q.",
+    "Option": "Zusatz zum Befehl: kurz mit einem Strich (-l), lang mit zwei (--help).",
+    "Pager": "Programm, das langen Text seitenweise zeigt (z. B. less). man benutzt einen Pager."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "man ls"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "NAME",
+            "       ls - list directory contents",
+            "",
+            "SYNOPSIS",
+            "       ls [OPTION]... [FILE]...",
+            ""
+          ],
+          "notiz": "Gekürzt: man zeigt die ganze Handbuchseite seitenweise (Leertaste blättert, q beendet). Danach folgt DESCRIPTION mit allen Optionen."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "man cp"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "NAME",
+            "       cp - copy files and directories",
+            "",
+            "SYNOPSIS",
+            "       cp [OPTION]... [-T] SOURCE DEST",
+            "       cp [OPTION]... SOURCE... DIRECTORY",
+            "       cp [OPTION]... -t DIRECTORY SOURCE...",
+            ""
+          ],
+          "notiz": "Gekürzt: Danach folgt DESCRIPTION mit allen Optionen."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "ls --help"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "Usage: ls [OPTION]... [FILE]...",
+            "List information about the FILEs (the current directory by default).",
+            "Sort entries alphabetically if none of -cftuvSUX nor --sort is specified."
+          ],
+          "notiz": "Gekürzt: Danach folgen alle Optionen, z. B. -a, -l, -h."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "cp --help"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "Usage: cp [OPTION]... [-T] SOURCE DEST",
+            "  or:  cp [OPTION]... SOURCE... DIRECTORY",
+            "  or:  cp [OPTION]... -t DIRECTORY SOURCE...",
+            "Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY."
+          ],
+          "notiz": "Gekürzt: Danach folgen alle Optionen, z. B. -r für Verzeichnisse."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "whatis ls"
+      ],
+      "faelle": [
+        {
+          "ausgabe": "ls (1)               - list directory contents"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "whatis cp"
+      ],
+      "faelle": [
+        {
+          "ausgabe": "cp (1)               - copy files and directories"
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Was macht ls? whatis ls",
+      "eingabe": "whatis ls",
+      "danach": "Eine Zeile: list directory contents – zeigt den Inhalt von Verzeichnissen. (1) ist der Abschnitt des Handbuchs: 1 = Befehle für alle Benutzer."
+    },
+    {
+      "text": "Die Kurzhilfe: ls --help",
+      "eingabe": "ls --help",
+      "danach": "Usage zeigt den Aufbau: ls, dann Optionen, dann Dateien. [ ] heißt: darf man weglassen, ... heißt: es dürfen mehrere sein."
+    },
+    {
+      "text": "Das Handbuch: man ls",
+      "eingabe": "man ls",
+      "danach": "NAME und SYNOPSIS (Aufbau) stehen oben. Im echten Terminal blätterst du mit der Leertaste und beendest mit q. Suchen geht mit / und dem Suchwort."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Finde in einer Zeile heraus, was der Befehl cp tut.",
+      "eingabe": [
+        "whatis cp"
+      ],
+      "hinweise": [
+        "Der Befehl für die Ein-Zeilen-Erklärung fragt: Was ist das?",
+        "whatis und der Befehl.",
+        "Tippe: whatis cp"
+      ],
+      "danach": "copy files and directories – kopiert Dateien und Verzeichnisse."
+    },
+    {
+      "aufgabe": "Zeig die Kurzhilfe von cp an.",
+      "eingabe": [
+        "cp --help"
+      ],
+      "hinweise": [
+        "Die Kurzhilfe ist eine lange Option.",
+        "Zwei Striche und das englische Wort für Hilfe.",
+        "Tippe: cp --help"
+      ],
+      "danach": "Richtig: --help mit zwei Strichen."
+    },
+    {
+      "aufgabe": "Öffne die Handbuchseite von cp.",
+      "eingabe": [
+        "man cp"
+      ],
+      "hinweise": [
+        "Handbuch auf Englisch: manual – abgekürzt.",
+        "man und der Befehl.",
+        "Tippe: man cp"
+      ],
+      "danach": "Genau: man cp."
+    }
+  ],
+  "fertig": [
+    "whatis befehl erklärt in einer Zeile, befehl --help kurz, man befehl ausführlich.",
+    "Optionen: -l (kurz) oder --help (lang).",
+    "In man: Leertaste blättert, / sucht, q beendet."
+  ]
+}

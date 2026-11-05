@@ -1,0 +1,448 @@
+{
+  "_info": "Befehlsbuch Linux: aus den Lektionen des Grundkurses. Ein Test prüft jedes Beispiel in der genannten Lektion.",
+  "system": "linux",
+  "befehle": [
+    {
+      "befehl": "whoami",
+      "was": "Zeigt den angemeldeten Benutzer.",
+      "beispiel": "whoami",
+      "wann": "Bei Rechte-Problemen: Wer bin ich gerade?",
+      "lektion": "gk-lin-terminal",
+      "quelle": "https://man7.org/linux/man-pages/man1/whoami.1.html"
+    },
+    {
+      "befehl": "hostname",
+      "was": "Zeigt den Namen des Computers.",
+      "beispiel": "hostname",
+      "wann": "Um sicherzugehen, auf welchem Rechner du bist.",
+      "lektion": "gk-lin-terminal",
+      "quelle": "https://man7.org/linux/man-pages/man1/hostname.1.html"
+    },
+    {
+      "befehl": "clear",
+      "was": "Leert das Terminal.",
+      "beispiel": "clear",
+      "wann": "Wenn das Fenster voll ist.",
+      "lektion": "gk-lin-terminal",
+      "quelle": "https://man7.org/linux/man-pages/man1/clear.1.html"
+    },
+    {
+      "befehl": "pwd",
+      "was": "Zeigt den aktuellen Ordner.",
+      "beispiel": "pwd",
+      "wann": "Wenn du nicht weißt, wo du bist.",
+      "lektion": "gk-lin-ordner",
+      "quelle": "https://man7.org/linux/man-pages/man1/pwd.1.html"
+    },
+    {
+      "befehl": "ls",
+      "was": "Zeigt, was in einem Ordner liegt.",
+      "beispiel": "ls -l",
+      "auch": [
+        "ls",
+        "ls -la",
+        "ls -a"
+      ],
+      "parameter": {
+        "-l": "Lang: Rechte, Besitzer, Größe, Datum.",
+        "-a": "Auch versteckte Dateien (mit Punkt).",
+        "-h": "Größen lesbar (K, M, G) – zusammen mit -l."
+      },
+      "wann": "Um nachzusehen – vor dem Löschen immer.",
+      "lektion": "gk-lin-ordner",
+      "quelle": "https://man7.org/linux/man-pages/man1/ls.1.html"
+    },
+    {
+      "befehl": "cd",
+      "was": "Wechselt den Ordner.",
+      "beispiel": "cd Dokumente",
+      "auch": [
+        "cd ..",
+        "cd ~",
+        "cd /etc"
+      ],
+      "parameter": {
+        "..": "Eine Ebene hoch.",
+        "~ (oder nichts)": "In deinen Home-Ordner.",
+        "-": "Zurück in den Ordner davor."
+      },
+      "wann": "Um in einen Ordner zu gehen.",
+      "lektion": "gk-lin-ordner",
+      "quelle": "https://man7.org/linux/man-pages/man1/cd.1p.html"
+    },
+    {
+      "befehl": "man",
+      "was": "Zeigt die Handbuchseite eines Befehls.",
+      "beispiel": "man ls",
+      "auch": [
+        "man cp"
+      ],
+      "wann": "Wenn du alle Optionen eines Befehls brauchst. Leertaste blättert, q beendet.",
+      "lektion": "gk-lin-hilfe",
+      "quelle": "https://man7.org/linux/man-pages/man1/man.1.html"
+    },
+    {
+      "befehl": "--help",
+      "was": "Zeigt die Kurzhilfe eines Befehls.",
+      "beispiel": "ls --help",
+      "auch": [
+        "cp --help"
+      ],
+      "wann": "Für einen schnellen Blick auf Aufbau und Optionen.",
+      "lektion": "gk-lin-hilfe",
+      "quelle": "https://man7.org/linux/man-pages/man1/ls.1.html"
+    },
+    {
+      "befehl": "whatis",
+      "was": "Erklärt einen Befehl in einer Zeile.",
+      "beispiel": "whatis ls",
+      "auch": [
+        "whatis cp"
+      ],
+      "wann": "Wenn du nur wissen willst, wofür ein Befehl ist.",
+      "lektion": "gk-lin-hilfe",
+      "quelle": "https://man7.org/linux/man-pages/man1/whatis.1.html"
+    },
+    {
+      "befehl": "cat",
+      "was": "Zeigt den Inhalt einer Datei.",
+      "beispiel": "cat Dokumente/einkauf.txt",
+      "parameter": {
+        "-n": "Mit Zeilennummern."
+      },
+      "wann": "Für kurze Textdateien.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/cat.1.html"
+    },
+    {
+      "befehl": "less",
+      "was": "Zeigt eine Datei seitenweise.",
+      "beispiel": "less Dokumente/einkauf.txt",
+      "wann": "Für lange Dateien (Logs). Leertaste blättert, / sucht, q beendet.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/less.1.html"
+    },
+    {
+      "befehl": "mkdir",
+      "was": "Legt einen Ordner an.",
+      "beispiel": "mkdir Dokumente/projekt",
+      "parameter": {
+        "-p": "Auch fehlende Ordner davor anlegen."
+      },
+      "wann": "Um Ordnung zu schaffen.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/mkdir.1.html"
+    },
+    {
+      "befehl": "touch",
+      "was": "Legt eine leere Datei an (oder aktualisiert die Zeit).",
+      "beispiel": "touch neu.txt",
+      "wann": "Um schnell eine leere Datei zu erzeugen.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/touch.1.html"
+    },
+    {
+      "befehl": "cp",
+      "was": "Kopiert Dateien und Ordner.",
+      "beispiel": "cp Dokumente/einkauf.txt Downloads/",
+      "parameter": {
+        "-r": "Ordner samt Inhalt kopieren."
+      },
+      "wann": "Für eine Sicherheitskopie, bevor du etwas änderst.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/cp.1.html"
+    },
+    {
+      "befehl": "mv",
+      "was": "Verschiebt oder benennt um.",
+      "beispiel": "mv Dokumente/einkauf.txt Downloads/",
+      "wann": "Zum Aufräumen und Umbenennen.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/mv.1.html"
+    },
+    {
+      "befehl": "rm",
+      "was": "Löscht Dateien – sofort und endgültig.",
+      "beispiel": "rm Dokumente/einkauf.txt",
+      "parameter": {
+        "-r": "Ordner samt Inhalt.",
+        "-f": "Ohne Meldung, auch wenn es die Datei nicht gibt."
+      },
+      "wann": "Nur, wenn du sicher bist. Vorher mit ls nachsehen.",
+      "lektion": "gk-lin-dateien",
+      "quelle": "https://man7.org/linux/man-pages/man1/rm.1.html"
+    },
+    {
+      "befehl": "nano",
+      "was": "Öffnet eine Textdatei im Editor.",
+      "beispiel": "nano einkauf.txt",
+      "auch": [
+        "sudo nano /etc/hostname"
+      ],
+      "wann": "Um Einstellungen oder Notizen zu ändern. Strg+O speichert, Strg+X beendet.",
+      "lektion": "gk-lin-nano",
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html"
+    },
+    {
+      "befehl": "chmod",
+      "was": "Ändert die Rechte einer Datei.",
+      "beispiel": "chmod u+x backup.sh",
+      "auch": [
+        "chmod 755 backup.sh"
+      ],
+      "parameter": {
+        "u+x": "Besitzer darf ausführen (u/g/o/a, +/-, r/w/x).",
+        "644 / 600 / 755": "Als Zahl: r = 4, w = 2, x = 1 je Besitzer, Gruppe, andere."
+      },
+      "wann": "Wenn ein Skript „Permission denied“ meldet oder eine Datei zu offen ist.",
+      "lektion": "gk-lin-rechte",
+      "quelle": "https://man7.org/linux/man-pages/man1/chmod.1.html"
+    },
+    {
+      "befehl": "chown",
+      "was": "Ändert Besitzer und Gruppe einer Datei (nur root).",
+      "beispiel": "sudo chown anna:anna /etc/lagerscan/lizenz.conf",
+      "parameter": {
+        "benutzer:gruppe": "Neuer Besitzer und neue Gruppe.",
+        "-R": "Auch alles darunter."
+      },
+      "wann": "Wenn eine Datei dem falschen Benutzer gehört.",
+      "lektion": "gk-lin-rechte",
+      "quelle": "https://man7.org/linux/man-pages/man1/chown.1.html"
+    },
+    {
+      "befehl": "sudo",
+      "was": "Führt einen Befehl mit Root-Rechten aus.",
+      "beispiel": "sudo cat /etc/lagerscan/lizenz.conf",
+      "parameter": {
+        "-i": "Eine root-Shell öffnen (zurück mit exit)."
+      },
+      "wann": "Wenn „Permission denied“ oder „Operation not permitted“ kommt und die Änderung gewollt ist.",
+      "lektion": "gk-lin-rechte",
+      "quelle": "https://man7.org/linux/man-pages/man8/sudo.8.html"
+    },
+    {
+      "befehl": "apt update",
+      "was": "Holt die aktuelle Paketliste.",
+      "beispiel": "sudo apt update",
+      "wann": "Vor jeder Installation.",
+      "lektion": "gk-lin-pakete",
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html"
+    },
+    {
+      "befehl": "apt install",
+      "was": "Installiert ein Paket.",
+      "beispiel": "sudo apt install htop",
+      "parameter": {
+        "-y": "Ohne Rückfrage."
+      },
+      "wann": "Wenn ein Programm fehlt („command not found“).",
+      "lektion": "gk-lin-pakete",
+      "vorher": [
+        "sudo apt update"
+      ],
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html"
+    },
+    {
+      "befehl": "ps",
+      "was": "Zeigt laufende Prozesse.",
+      "beispiel": "ps aux",
+      "auch": [
+        "ps aux | grep soffice"
+      ],
+      "parameter": {
+        "aux": "Alle Prozesse aller Benutzer mit Details."
+      },
+      "wann": "Wenn ein Programm hängt oder der Rechner langsam ist.",
+      "lektion": "gk-lin-prozesse",
+      "quelle": "https://man7.org/linux/man-pages/man1/ps.1.html"
+    },
+    {
+      "befehl": "pgrep",
+      "was": "Zeigt die PID zu einem Prozessnamen.",
+      "beispiel": "pgrep soffice",
+      "wann": "Um die PID schnell zu finden.",
+      "lektion": "gk-lin-prozesse",
+      "quelle": "https://man7.org/linux/man-pages/man1/pgrep.1.html"
+    },
+    {
+      "befehl": "kill",
+      "was": "Schickt einem Prozess ein Signal (beenden).",
+      "beispiel": "kill -9 4711",
+      "auch": [
+        "kill 4711"
+      ],
+      "parameter": {
+        "(ohne)": "TERM: höflich beenden.",
+        "-9": "KILL: sofort beenden."
+      },
+      "wann": "Wenn ein Programm hängt: erst kill PID, dann kill -9 PID.",
+      "lektion": "gk-lin-prozesse",
+      "quelle": "https://man7.org/linux/man-pages/man1/kill.1.html"
+    },
+    {
+      "befehl": "grep",
+      "was": "Findet Zeilen mit einem Suchwort – in Dateien oder hinter einer Pipe.",
+      "beispiel": "grep intranet /etc/hosts",
+      "parameter": {
+        "-i": "Groß-/Kleinschreibung egal.",
+        "-n": "Mit Zeilennummer.",
+        "-v": "Nur Zeilen ohne das Wort."
+      },
+      "wann": "Um in Logs und Einstellungen das Wichtige zu finden.",
+      "lektion": "gk-lin-fehlersuche",
+      "quelle": "https://man7.org/linux/man-pages/man1/grep.1.html"
+    },
+    {
+      "befehl": "ip a",
+      "was": "Zeigt Netzwerkkarten und ihre Adressen.",
+      "beispiel": "ip a",
+      "auch": [
+        "ip addr"
+      ],
+      "wann": "Bei jedem Netzwerkproblem als Erstes.",
+      "lektion": "gk-lin-netzwerk",
+      "quelle": "https://man7.org/linux/man-pages/man8/ip-address.8.html"
+    },
+    {
+      "befehl": "ip link set",
+      "was": "Schaltet eine Netzwerkkarte ein oder aus.",
+      "beispiel": "sudo ip link set enp0s31f6 up",
+      "wann": "Wenn eine Karte DOWN ist.",
+      "lektion": "gk-lin-netzwerk",
+      "quelle": "https://man7.org/linux/man-pages/man8/ip-link.8.html"
+    },
+    {
+      "befehl": "ping",
+      "was": "Prüft, ob ein Gerät antwortet.",
+      "beispiel": "ping -c 4 192.168.10.1",
+      "parameter": {
+        "-c": "Anzahl der Pakete."
+      },
+      "wann": "Um die Verbindung zu testen. Ohne -c läuft ping endlos (Strg+C).",
+      "lektion": "gk-lin-netzwerk",
+      "vorher": [
+        "sudo ip link set enp0s31f6 up"
+      ],
+      "quelle": "https://man7.org/linux/man-pages/man8/ping.8.html"
+    },
+    {
+      "befehl": "getent hosts",
+      "was": "Zeigt, welche Adresse das System für einen Namen benutzt.",
+      "beispiel": "getent hosts intranet.firma.internal",
+      "wann": "Wenn ein Name zur falschen Adresse führt (prüft auch /etc/hosts).",
+      "lektion": "gk-lin-fehlersuche",
+      "quelle": "https://man7.org/linux/man-pages/man1/getent.1.html"
+    },
+    {
+      "befehl": "host",
+      "was": "Fragt DNS nach der Adresse zu einem Namen.",
+      "beispiel": "host intranet.firma.internal",
+      "wann": "Um zu sehen, was der DNS-Server sagt.",
+      "lektion": "gk-lin-fehlersuche",
+      "quelle": "https://manpages.ubuntu.com/manpages/noble/man1/host.1.html"
+    }
+  ],
+  "situationen": [
+    {
+      "wenn": "… ich wissen will, in welchem Ordner ich bin?",
+      "befehle": [
+        "pwd"
+      ],
+      "lektion": "gk-lin-ordner"
+    },
+    {
+      "wenn": "… ich sehen will, was in einem Ordner liegt – auch versteckte Dateien?",
+      "befehle": [
+        "ls -la"
+      ],
+      "lektion": "gk-lin-ordner"
+    },
+    {
+      "wenn": "… ich nicht weiß, was ein Befehl tut oder wie er geht?",
+      "befehle": [
+        "whatis cp",
+        "cp --help"
+      ],
+      "lektion": "gk-lin-hilfe",
+      "erklaerung": "Ausführlich: man cp (q beendet)."
+    },
+    {
+      "wenn": "… ich eine Textdatei lesen will?",
+      "befehle": [
+        "cat Dokumente/einkauf.txt"
+      ],
+      "lektion": "gk-lin-dateien"
+    },
+    {
+      "wenn": "… ich einen Ordner samt Inhalt löschen will?",
+      "befehle": [
+        "ls -l Dokumente/rezepte",
+        "rm -r Dokumente/rezepte"
+      ],
+      "lektion": "gk-lin-dateien",
+      "erklaerung": "Erst nachsehen, dann löschen – es gibt keinen Papierkorb."
+    },
+    {
+      "wenn": "… ich eine Einstellungsdatei ändern muss?",
+      "befehle": [
+        "sudo nano /etc/hostname"
+      ],
+      "lektion": "gk-lin-nano",
+      "erklaerung": "Systemdateien gehören root – darum sudo. Strg+O speichert, Strg+X beendet."
+    },
+    {
+      "wenn": "… ein Skript „Permission denied“ meldet?",
+      "befehle": [
+        "ls -l backup.sh",
+        "chmod u+x backup.sh"
+      ],
+      "lektion": "gk-lin-rechte",
+      "erklaerung": "Fehlt das x-Recht, darf niemand die Datei ausführen."
+    },
+    {
+      "wenn": "… ich etwas mit Root-Rechten tun muss?",
+      "befehle": [
+        "sudo cat /etc/lagerscan/lizenz.conf"
+      ],
+      "lektion": "gk-lin-rechte"
+    },
+    {
+      "wenn": "… ein Programm fehlt („command not found“)?",
+      "befehle": [
+        "sudo apt update",
+        "sudo apt install htop"
+      ],
+      "lektion": "gk-lin-pakete"
+    },
+    {
+      "wenn": "… ein Programm hängt?",
+      "befehle": [
+        "ps aux | grep soffice",
+        "kill 4711",
+        "kill -9 4711"
+      ],
+      "lektion": "gk-lin-prozesse",
+      "erklaerung": "PID finden, höflich beenden, wenn nötig mit -9 erzwingen."
+    },
+    {
+      "wenn": "… der PC kein Netzwerk hat?",
+      "befehle": [
+        "ip a",
+        "ping -c 4 192.168.10.1"
+      ],
+      "lektion": "gk-lin-netzwerk",
+      "erklaerung": "Steht bei der Karte state DOWN: sudo ip link set <karte> up."
+    },
+    {
+      "wenn": "… ein Name zur falschen Adresse führt?",
+      "befehle": [
+        "getent hosts intranet.firma.internal",
+        "host intranet.firma.internal",
+        "grep intranet /etc/hosts"
+      ],
+      "lektion": "gk-lin-fehlersuche",
+      "erklaerung": "Unterscheiden sich getent und host, steht oft ein alter Eintrag in /etc/hosts."
+    }
+  ]
+}

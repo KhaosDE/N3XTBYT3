@@ -1,0 +1,115 @@
+{
+  "id": "gk-lin-terminal",
+  "system": "linux",
+  "titel": "Das Terminal: Prompt, Befehle, Groß und klein",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://ubuntu.com/tutorials/command-line-for-beginners",
+    "https://man7.org/linux/man-pages/man1/whoami.1.html",
+    "https://man7.org/linux/man-pages/man1/hostname.1.html",
+    "https://man7.org/linux/man-pages/man1/clear.1.html"
+  ],
+  "datum": "2026-11-05",
+  "erklaeren": [
+    "Unter Linux heißt die Befehlszeile Terminal; darin läuft eine Shell namens Bash. Der Prompt sieht so aus:",
+    "anna@pc-lager02:~$ – Benutzer anna auf dem Computer pc-lager02, im Ordner ~ (ihr Home-Ordner), und $",
+    "heißt: normale Rechte. Du tippst einen Befehl und drückst Enter. Wichtig: Linux unterscheidet Groß- und",
+    "Kleinschreibung – whoami und Whoami sind zwei verschiedene Dinge. Die meisten Befehle sind klein geschrieben."
+  ],
+  "begriffe": {
+    "Terminal": "Fenster für Befehle in Textform unter Linux.",
+    "Shell": "Das Programm im Terminal, das Befehle annimmt. Unter Ubuntu: Bash.",
+    "Home-Ordner": "Dein persönlicher Ordner, z. B. /home/anna. Kurzform: ~ (Tilde).",
+    "$ und #": "Ende des Prompts: $ = normaler Benutzer, # = root (Administrator)."
+  },
+  "befehle": [
+    {
+      "muster": [
+        "Whoami"
+      ],
+      "faelle": [
+        {
+          "fehler": true,
+          "ausgabe": "Command 'Whoami' not found, did you mean:",
+          "notiz": "Gekürzt: Darunter schlägt Ubuntu den passenden Befehl vor (hier whoami)."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Tippe whoami und drück Enter.",
+      "eingabe": "whoami",
+      "danach": "anna – so heißt der angemeldete Benutzer."
+    },
+    {
+      "text": "Tippe hostname.",
+      "eingabe": "hostname",
+      "danach": "pc-lager02 – der Name dieses Computers. Er steht auch im Prompt."
+    },
+    {
+      "text": "Jetzt mit großem W: Whoami",
+      "eingabe": "Whoami",
+      "danach": "„not found“: Mit großem W gibt es den Befehl nicht. Linux nimmt Groß- und Kleinschreibung genau – das ist die häufigste Fehlerquelle am Anfang."
+    },
+    {
+      "text": "Drück zweimal Pfeil hoch (↑), bis hostname dasteht, und dann Enter.",
+      "eingabe": "hostname",
+      "danach": "Mit ↑ und ↓ holst du frühere Befehle zurück."
+    },
+    {
+      "text": "Leer das Fenster: clear",
+      "eingabe": "clear",
+      "danach": "clear leert das Terminal. (Im echten Terminal geht auch Strg+L.)"
+    },
+    {
+      "text": "Tippe help.",
+      "eingabe": "help",
+      "danach": "Blaue Zeilen mit [N3XTBYT3] kommen von der Simulation: help zeigt hier die Tasten und Grundbefehle. In der echten Bash zeigt help die eingebauten Befehle der Shell."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Finde heraus, mit welchem Benutzer du angemeldet bist.",
+      "eingabe": [
+        "whoami"
+      ],
+      "hinweise": [
+        "Frag auf Englisch: Wer bin ich?",
+        "who am I – zusammengeschrieben und klein.",
+        "Tippe: whoami"
+      ],
+      "danach": "Genau: whoami."
+    },
+    {
+      "aufgabe": "Zeig den Namen des Computers an.",
+      "eingabe": [
+        "hostname"
+      ],
+      "hinweise": [
+        "Name des Computers auf Englisch: host name.",
+        "Klein und zusammengeschrieben.",
+        "Tippe: hostname"
+      ],
+      "danach": "Richtig: hostname."
+    },
+    {
+      "aufgabe": "Mach das Terminal leer.",
+      "eingabe": [
+        "clear"
+      ],
+      "hinweise": [
+        "Auf Englisch: aufräumen, leeren.",
+        "Ein Wort mit fünf Buchstaben.",
+        "Tippe: clear"
+      ],
+      "danach": "Gut!"
+    }
+  ],
+  "fertig": [
+    "Du liest den Prompt: benutzer@computer:ordner$.",
+    "whoami, hostname und clear kennst du.",
+    "Linux unterscheidet Groß- und Kleinschreibung.",
+    "Mit ↑ holst du frühere Befehle zurück."
+  ]
+}

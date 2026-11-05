@@ -1,0 +1,96 @@
+{
+  "id": "gk-lin-prozesse",
+  "system": "linux",
+  "titel": "Prozesse: ps, grep, kill",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://man7.org/linux/man-pages/man1/ps.1.html",
+    "https://man7.org/linux/man-pages/man1/kill.1.html",
+    "https://man7.org/linux/man-pages/man7/signal.7.html",
+    "https://man7.org/linux/man-pages/man1/grep.1.html"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "lin-prozess-haengt",
+  "erklaeren": [
+    "Jedes laufende Programm ist ein Prozess mit einer Nummer (PID). ps aux zeigt alle. Die Liste ist lang –",
+    "mit einer Pipe (|) gibst du sie an grep weiter, das nur passende Zeilen durchlässt. Hängt ein Programm,",
+    "beendest du es mit kill PID (höflich) oder kill -9 PID (erzwungen). Hier friert LibreOffice ein (soffice)."
+  ],
+  "begriffe": {
+    "PID": "Prozess-ID: die Nummer eines Prozesses.",
+    "Pipe (|)": "Gibt die Ausgabe eines Befehls an den nächsten weiter, z. B. ps aux | grep soffice.",
+    "grep": "Lässt nur Zeilen durch, die ein Suchwort enthalten.",
+    "Signal": "Nachricht an einen Prozess: TERM (15) = bitte beenden, KILL (9) = sofort beenden."
+  },
+  "mitmachen": [
+    {
+      "text": "Alle Prozesse: ps aux",
+      "eingabe": "ps aux",
+      "danach": "USER = wem er gehört, PID = Nummer, %CPU und %MEM = Last, COMMAND = Programm. soffice.bin braucht viel CPU."
+    },
+    {
+      "text": "Nur LibreOffice: ps aux | grep soffice",
+      "eingabe": "ps aux | grep soffice",
+      "danach": "Der senkrechte Strich | ist die Pipe: ps aux liefert, grep filtert. Die PID von soffice ist 4711."
+    },
+    {
+      "text": "Nur die PID: pgrep soffice",
+      "eingabe": "pgrep soffice",
+      "danach": "pgrep sucht Prozesse nach Namen und zeigt die PID."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Bitte LibreOffice höflich, sich zu beenden (Signal TERM).",
+      "eingabe": [
+        "kill 4711",
+        "kill -15 4711",
+        "kill -TERM 4711"
+      ],
+      "hinweise": [
+        "Der Befehl heißt wie „töten“ – auf Englisch.",
+        "kill und die PID.",
+        "Tippe: kill 4711"
+      ],
+      "danach": "kill ohne Zusatz schickt TERM – die höfliche Bitte. Ein hängender Prozess reagiert oft nicht darauf."
+    },
+    {
+      "aufgabe": "LibreOffice hängt weiter. Beende es erzwungen.",
+      "ziel": {
+        "haengt": false
+      },
+      "hinweise": [
+        "Es gibt ein Signal, das sofort beendet.",
+        "kill -9 und die PID.",
+        "Tippe: kill -9 4711"
+      ],
+      "loesung": [
+        "kill -9 4711"
+      ],
+      "danach": "Beendet. -9 (KILL) kann ein Prozess nicht ignorieren – nicht Gespeichertes ist dabei verloren."
+    },
+    {
+      "aufgabe": "Prüf nach, dass soffice nicht mehr läuft.",
+      "eingabe": [
+        "ps aux | grep soffice",
+        "pgrep soffice",
+        "ps aux",
+        "pgrep -a soffice"
+      ],
+      "wenn": {
+        "haengt": false
+      },
+      "hinweise": [
+        "Wie hast du den Prozess am Anfang gefunden?",
+        "ps aux mit Pipe und grep.",
+        "Tippe: ps aux | grep soffice"
+      ],
+      "danach": "Weg. Nachprüfen gehört immer dazu."
+    }
+  ],
+  "fertig": [
+    "ps aux zeigt alle Prozesse, | grep filtert die Ausgabe.",
+    "pgrep name zeigt die PID.",
+    "kill PID bittet höflich, kill -9 PID beendet sofort."
+  ]
+}

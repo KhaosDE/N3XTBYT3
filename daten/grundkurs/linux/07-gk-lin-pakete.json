@@ -1,0 +1,76 @@
+{
+  "id": "gk-lin-pakete",
+  "system": "linux",
+  "titel": "Programme installieren mit apt",
+  "pruefstatus": "ungeprueft",
+  "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html",
+    "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+  ],
+  "datum": "2026-11-05",
+  "szenario": "lin-paket-installieren",
+  "erklaeren": [
+    "Unter Ubuntu installiert man Programme aus Paketquellen mit apt. Zuerst holt apt update die aktuelle",
+    "Liste der Pakete, dann installiert apt install paket das Programm samt allem, was es braucht.",
+    "Beides ändert das System – darum mit sudo. Hier fehlt das Programm htop (zeigt laufende Prozesse)."
+  ],
+  "begriffe": {
+    "Paket": "Ein Programm (oder Teil davon) zum Installieren, z. B. htop.",
+    "Paketquelle": "Server, von dem apt die Pakete lädt (Repository).",
+    "apt": "Paketverwaltung von Ubuntu/Debian: update, install, upgrade, remove."
+  },
+  "mitmachen": [
+    {
+      "text": "Starte das Programm: htop",
+      "eingabe": "htop",
+      "danach": "„not found, but can be installed“ – Ubuntu schlägt gleich vor, wie man es installiert."
+    },
+    {
+      "text": "Paketliste holen – erst ohne sudo: apt update",
+      "eingabe": "apt update",
+      "danach": "Ohne Root-Rechte geht es nicht. Paketverwaltung ändert das System."
+    },
+    {
+      "text": "Jetzt richtig: sudo apt update",
+      "eingabe": "sudo apt update",
+      "danach": "Hit/Get: apt fragt die Paketquellen ab. „All packages are up to date“ – die Liste ist aktuell."
+    }
+  ],
+  "aufgaben": [
+    {
+      "aufgabe": "Installiere htop.",
+      "ziel": {
+        "htop": true
+      },
+      "hinweise": [
+        "Installieren heißt install – mit Root-Rechten.",
+        "sudo apt install und der Paketname.",
+        "Tippe: sudo apt install htop"
+      ],
+      "loesung": [
+        "sudo apt install htop"
+      ],
+      "danach": "Installiert."
+    },
+    {
+      "aufgabe": "Starte htop.",
+      "eingabe": [
+        "htop"
+      ],
+      "wenn": {
+        "htop": true
+      },
+      "hinweise": [
+        "So wie am Anfang.",
+        "Einfach der Programmname.",
+        "Tippe: htop"
+      ],
+      "danach": "htop startet (in der Simulation nur als Meldung)."
+    }
+  ],
+  "fertig": [
+    "sudo apt update holt die aktuelle Paketliste.",
+    "sudo apt install paket installiert ein Programm.",
+    "„Command not found, but can be installed with“ verrät den Paketnamen."
+  ]
+}
