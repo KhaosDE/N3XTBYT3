@@ -1,0 +1,597 @@
+{
+  "_info": "Befehlsbuch Windows: aus den Lektionen des Grundkurses. Ein Test prüft jedes Beispiel in der genannten Lektion.",
+  "system": "windows",
+  "befehle": [
+    {
+      "befehl": "hostname",
+      "was": "Zeigt den Namen des Computers.",
+      "beispiel": "hostname",
+      "auch": [
+        "$env:COMPUTERNAME"
+      ],
+      "wann": "Am Anfang jeder Hilfe: Um welchen Computer geht es? Den Namen brauchst du für Fernzugriff und Tickets.",
+      "lektion": "gk-win-konsole",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/hostname"
+    },
+    {
+      "befehl": "whoami",
+      "was": "Zeigt, wer angemeldet ist (Computer bzw. Domäne\\Benutzer).",
+      "beispiel": "whoami",
+      "wann": "Bei Rechte-Problemen: Ist wirklich der Benutzer angemeldet, der sich meldet?",
+      "lektion": "gk-win-konsole",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami"
+    },
+    {
+      "befehl": "cls",
+      "was": "Leert das Fenster.",
+      "beispiel": "cls",
+      "auch": [
+        "Clear-Host",
+        "clear"
+      ],
+      "wann": "Wenn das Fenster voll ist und du den Überblick verlierst.",
+      "lektion": "gk-win-konsole",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cls"
+    },
+    {
+      "befehl": "Get-Location",
+      "was": "Zeigt den aktuellen Ordner.",
+      "beispiel": "Get-Location",
+      "auch": [
+        "pwd",
+        "gl"
+      ],
+      "wann": "Wenn du nicht weißt, wo du gerade bist (steht auch im Prompt).",
+      "lektion": "gk-win-ordner",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-location?view=powershell-5.1"
+    },
+    {
+      "befehl": "Set-Location",
+      "was": "Wechselt den Ordner.",
+      "beispiel": "Set-Location Documents",
+      "auch": [
+        "cd Documents",
+        "sl Documents",
+        "chdir Documents"
+      ],
+      "parameter": {
+        "-Path": "Wohin (darf man weglassen: cd Documents).",
+        "..": "Der Ordner darüber.",
+        "~": "Dein Benutzerordner."
+      },
+      "wann": "Um in einen Ordner zu gehen: cd Ordner, eine Ebene hoch: cd .., nach Hause: cd ~.",
+      "lektion": "gk-win-ordner",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-location?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-ChildItem",
+      "was": "Zeigt, was in einem Ordner liegt.",
+      "beispiel": "Get-ChildItem",
+      "auch": [
+        "dir",
+        "ls",
+        "gci"
+      ],
+      "parameter": {
+        "-Path": "Welcher Ordner (Standard: der aktuelle).",
+        "-Filter": "Nur passende Namen, z. B. *.txt.",
+        "-Name": "Nur die Namen.",
+        "-File / -Directory": "Nur Dateien / nur Ordner.",
+        "-Recurse": "Auch alle Unterordner (in der Simulation nicht nachgebaut)."
+      },
+      "wann": "Um nachzusehen, welche Dateien und Ordner da sind – vor dem Löschen immer!",
+      "lektion": "gk-win-ordner",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-childitem?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-Help",
+      "was": "Erklärt einen PowerShell-Befehl.",
+      "beispiel": "Get-Help Get-Service",
+      "auch": [
+        "help Get-Service",
+        "Get-Service -?"
+      ],
+      "parameter": {
+        "-Examples": "Nur die Beispiele.",
+        "-Full": "Alles, auch alle Parameter.",
+        "-Online": "Die Hilfeseite im Browser."
+      },
+      "wann": "Wenn du nicht weißt, wie ein Befehl geht oder welche Parameter er hat.",
+      "lektion": "gk-win-hilfe",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/get-help?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-Command",
+      "was": "Sucht Befehle, z. B. alle, die auf -Service enden.",
+      "beispiel": "Get-Command *-Service",
+      "auch": [
+        "Get-Command -Noun Service"
+      ],
+      "parameter": {
+        "-Noun": "Nur Befehle mit diesem Nomen, z. B. Service.",
+        "-Verb": "Nur Befehle mit diesem Verb, z. B. Get."
+      },
+      "wann": "Wenn du den Namen eines Befehls nicht kennst – nur ungefähr, worum es geht.",
+      "lektion": "gk-win-hilfe",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/get-command?view=powershell-5.1"
+    },
+    {
+      "befehl": "/?",
+      "was": "Zeigt die eingebaute Hilfe älterer Programme (ipconfig, ping, tasklist …).",
+      "beispiel": "ipconfig /?",
+      "auch": [
+        "ping /?"
+      ],
+      "wann": "Bei Programmen, die Get-Help nicht kennt.",
+      "lektion": "gk-win-hilfe",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig"
+    },
+    {
+      "befehl": "Get-Date",
+      "was": "Zeigt Datum und Uhrzeit des Computers.",
+      "beispiel": "Get-Date",
+      "wann": "Wenn Anmeldungen oder sichere Webseiten scheitern – oft geht die Uhr falsch.",
+      "lektion": "gk-win-infos",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-ComputerInfo",
+      "was": "Zeigt Infos über Windows und die Hardware.",
+      "beispiel": "Get-ComputerInfo -Property OsName, OsVersion, CsName",
+      "auch": [
+        "Get-ComputerInfo -Property OsName,OsVersion,CsName"
+      ],
+      "parameter": {
+        "-Property": "Nur diese Einträge, mit Komma getrennt."
+      },
+      "wann": "Um Windows-Ausgabe und Version herauszufinden (mit -Property gezielt).",
+      "lektion": "gk-win-infos",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-computerinfo?view=powershell-5.1"
+    },
+    {
+      "befehl": "systeminfo",
+      "was": "Zeigt alles Wichtige über den Computer auf einmal (Windows-Version, Domäne, Speicher, Updates).",
+      "beispiel": "systeminfo",
+      "wann": "Für einen schnellen Gesamtüberblick, z. B. für ein Ticket.",
+      "lektion": "gk-win-infos",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/systeminfo"
+    },
+    {
+      "befehl": "Get-Content",
+      "was": "Zeigt den Inhalt einer Textdatei.",
+      "beispiel": "Get-Content Documents\\Einkaufsliste.txt",
+      "auch": [
+        "type Documents\\Einkaufsliste.txt",
+        "cat Documents\\Einkaufsliste.txt",
+        "gc Documents\\Einkaufsliste.txt"
+      ],
+      "parameter": {
+        "-Tail": "Nur die letzten Zeilen, z. B. -Tail 20.",
+        "-TotalCount": "Nur die ersten Zeilen."
+      },
+      "wann": "Um Text- und Logdateien zu lesen.",
+      "lektion": "gk-win-dateien",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content?view=powershell-5.1"
+    },
+    {
+      "befehl": "New-Item",
+      "was": "Legt eine Datei oder einen Ordner an.",
+      "beispiel": "New-Item -Name Projekt -ItemType Directory",
+      "auch": [
+        "mkdir Projekt",
+        "md Projekt"
+      ],
+      "parameter": {
+        "-Name": "Name des Neuen.",
+        "-ItemType": "File (Datei) oder Directory (Ordner).",
+        "-Value": "Inhalt einer neuen Datei.",
+        "-Path": "Wo (Standard: aktueller Ordner)."
+      },
+      "wann": "Um Ordner oder leere Dateien anzulegen.",
+      "lektion": "gk-win-dateien",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1"
+    },
+    {
+      "befehl": "Copy-Item",
+      "was": "Kopiert Dateien oder Ordner.",
+      "beispiel": "Copy-Item Documents\\Einkaufsliste.txt Downloads",
+      "auch": [
+        "copy Documents\\Einkaufsliste.txt Downloads",
+        "cp Documents\\Einkaufsliste.txt Downloads"
+      ],
+      "parameter": {
+        "-Destination": "Wohin (darf man weglassen: zweites Wort).",
+        "-Recurse": "Ordner samt Inhalt."
+      },
+      "wann": "Um eine Sicherheitskopie zu machen, bevor du etwas änderst.",
+      "lektion": "gk-win-dateien",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/copy-item?view=powershell-5.1"
+    },
+    {
+      "befehl": "Move-Item",
+      "was": "Verschiebt oder benennt um.",
+      "beispiel": "Move-Item Documents\\Einkaufsliste.txt Downloads",
+      "auch": [
+        "move Documents\\Einkaufsliste.txt Downloads",
+        "mv Documents\\Einkaufsliste.txt Downloads"
+      ],
+      "parameter": {
+        "-Destination": "Wohin bzw. neuer Name."
+      },
+      "wann": "Um Dateien aufzuräumen oder umzubenennen.",
+      "lektion": "gk-win-dateien",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/move-item?view=powershell-5.1"
+    },
+    {
+      "befehl": "Remove-Item",
+      "was": "Löscht Dateien oder Ordner – ohne Papierkorb!",
+      "beispiel": "Remove-Item Documents\\Einkaufsliste.txt",
+      "auch": [
+        "del Documents\\Einkaufsliste.txt",
+        "rm Documents\\Einkaufsliste.txt"
+      ],
+      "parameter": {
+        "-Recurse": "Ordner samt Inhalt.",
+        "-Force": "Auch schreibgeschützte und versteckte Dateien."
+      },
+      "wann": "Nur, wenn du sicher bist. Vorher mit Get-ChildItem nachsehen, was genau gelöscht wird.",
+      "lektion": "gk-win-dateien",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/remove-item?view=powershell-5.1"
+    },
+    {
+      "befehl": "Get-Process",
+      "was": "Zeigt laufende Prozesse (Programme) mit PID und Speicher.",
+      "beispiel": "Get-Process EXCEL",
+      "auch": [
+        "Get-Process -Name EXCEL"
+      ],
+      "parameter": {
+        "-Name": "Nur dieser Prozess (Name ohne .exe).",
+        "-Id": "Nur der Prozess mit dieser PID."
+      },
+      "wann": "Wenn ein Programm hängt oder der PC langsam ist: Wer braucht viel Speicher?",
+      "lektion": "gk-win-prozesse",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-process?view=powershell-5.1"
+    },
+    {
+      "befehl": "Stop-Process",
+      "was": "Beendet einen Prozess sofort.",
+      "beispiel": "Stop-Process -Name EXCEL",
+      "auch": [
+        "Stop-Process -Name EXCEL -Force",
+        "Stop-Process -Id 6420"
+      ],
+      "parameter": {
+        "-Name": "Prozessname.",
+        "-Id": "Prozess-ID (PID).",
+        "-Force": "Ohne Rückfrage, auch fremde Prozesse."
+      },
+      "wann": "Wenn ein Programm nicht mehr reagiert. Ungespeicherte Arbeit geht verloren.",
+      "lektion": "gk-win-prozesse",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/stop-process?view=powershell-5.1"
+    },
+    {
+      "befehl": "tasklist",
+      "was": "Zeigt laufende Prozesse (älteres Programm, geht auch in der cmd).",
+      "beispiel": "tasklist /FI \"STATUS eq NOT RESPONDING\"",
+      "parameter": {
+        "/FI": "Filter, z. B. \"STATUS eq NOT RESPONDING\" oder \"IMAGENAME eq EXCEL.EXE\"."
+      },
+      "wann": "Um hängende Programme zu finden.",
+      "lektion": "gk-win-prozesse",
+      "frage": "Welcher Befehl zeigt nur die Programme, die nicht mehr reagieren?",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/tasklist"
+    },
+    {
+      "befehl": "taskkill",
+      "was": "Beendet einen Prozess (älteres Programm).",
+      "beispiel": "taskkill /IM EXCEL.EXE /F",
+      "auch": [
+        "taskkill /F /IM EXCEL.EXE"
+      ],
+      "parameter": {
+        "/IM": "Programmname, z. B. EXCEL.EXE.",
+        "/PID": "Prozess-ID.",
+        "/F": "Erzwingen."
+      },
+      "wann": "Wenn ein Programm hängt: erst ohne /F (höflich), dann mit /F (erzwungen).",
+      "lektion": "gk-win-prozesse",
+      "frage": "Welcher Befehl beendet das hängende Excel erzwungen (älteres Programm)?",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/taskkill"
+    },
+    {
+      "befehl": "Get-Service",
+      "was": "Zeigt Dienste mit Status.",
+      "beispiel": "Get-Service Audiosrv",
+      "auch": [
+        "Get-Service -Name Audiosrv"
+      ],
+      "parameter": {
+        "-Name": "Dienstname (kurz), z. B. Spooler.",
+        "-DisplayName": "Anzeigename, z. B. \"Print Spooler\"."
+      },
+      "wann": "Wenn etwas im Hintergrund nicht geht: kein Ton, kein Druck, keine Uhrzeit.",
+      "lektion": "gk-win-dienste",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-service?view=powershell-5.1"
+    },
+    {
+      "befehl": "Select-Object",
+      "was": "Zeigt nur bestimmte Eigenschaften – z. B. den Starttyp eines Dienstes.",
+      "beispiel": "Get-Service Audiosrv | Select-Object Name, Status, StartType",
+      "auch": [
+        "Get-Service Audiosrv | Select-Object Name,Status,StartType"
+      ],
+      "wann": "Wenn du mehr sehen willst als die Standardspalten.",
+      "lektion": "gk-win-dienste",
+      "frage": "Welcher Befehl zeigt Name, Status und Starttyp des Dienstes Audiosrv?",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/select-object?view=powershell-5.1"
+    },
+    {
+      "befehl": "Start-Service",
+      "was": "Startet einen Dienst (braucht Adminrechte).",
+      "beispiel": "Start-Service Audiosrv",
+      "auch": [
+        "Start-Service -Name Audiosrv"
+      ],
+      "wann": "Wenn ein Dienst gestoppt ist.",
+      "lektion": "gk-win-dienste",
+      "vorher": [
+        "Set-Service -Name Audiosrv -StartupType Automatic"
+      ],
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-service?view=powershell-5.1"
+    },
+    {
+      "befehl": "Stop-Service",
+      "was": "Hält einen Dienst an (braucht Adminrechte).",
+      "beispiel": "Stop-Service Audiosrv",
+      "auch": [
+        "Stop-Service -Name Audiosrv"
+      ],
+      "wann": "Z. B. bevor du Dateien eines Dienstes löschst (Druckwarteschlange).",
+      "lektion": "gk-win-dienste",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/stop-service?view=powershell-5.1"
+    },
+    {
+      "befehl": "Restart-Service",
+      "was": "Hält einen Dienst an und startet ihn wieder.",
+      "beispiel": "Restart-Service Audiosrv",
+      "auch": [
+        "Restart-Service -Name Audiosrv"
+      ],
+      "wann": "Wenn ein Dienst läuft, aber „klemmt“.",
+      "lektion": "gk-win-dienste",
+      "vorher": [
+        "Set-Service -Name Audiosrv -StartupType Automatic"
+      ],
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/restart-service?view=powershell-5.1"
+    },
+    {
+      "befehl": "Set-Service",
+      "was": "Ändert Einstellungen eines Dienstes, z. B. den Starttyp.",
+      "beispiel": "Set-Service -Name Audiosrv -StartupType Automatic",
+      "auch": [
+        "Set-Service Audiosrv -StartupType Automatic"
+      ],
+      "parameter": {
+        "-StartupType": "Automatic, Manual oder Disabled."
+      },
+      "wann": "Wenn ein Dienst deaktiviert ist (Disabled) und sich nicht starten lässt.",
+      "lektion": "gk-win-dienste",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-service?view=powershell-5.1"
+    },
+    {
+      "befehl": "ipconfig",
+      "was": "Zeigt IP-Adresse, Subnetzmaske und Gateway.",
+      "beispiel": "ipconfig",
+      "parameter": {
+        "/all": "Alle Details: DNS-Server, DHCP, MAC-Adresse.",
+        "/flushdns": "DNS-Cache leeren.",
+        "/release, /renew": "Adresse vom DHCP abgeben bzw. neu holen."
+      },
+      "wann": "Bei jedem Netzwerkproblem als Erstes.",
+      "lektion": "gk-win-netzwerk",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig"
+    },
+    {
+      "befehl": "ipconfig /flushdns",
+      "was": "Leert den DNS-Cache.",
+      "beispiel": "ipconfig /flushdns",
+      "auch": [
+        "Clear-DnsClientCache"
+      ],
+      "wann": "Wenn ein Name zur alten Adresse führt (z. B. nach einem Serverumzug).",
+      "lektion": "gk-win-netzwerk",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig"
+    },
+    {
+      "befehl": "ping",
+      "was": "Prüft, ob ein Gerät antwortet.",
+      "beispiel": "ping 192.168.10.1",
+      "parameter": {
+        "-n": "Anzahl der Pakete (Standard 4).",
+        "-t": "Dauerping bis Strg+C."
+      },
+      "wann": "Um zu sehen, ob die Verbindung steht – erst zum Router, dann weiter weg.",
+      "lektion": "gk-win-netzwerk",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ping"
+    },
+    {
+      "befehl": "Test-Connection",
+      "was": "PowerShell-Gegenstück zu ping.",
+      "beispiel": "Test-Connection 192.168.10.1",
+      "auch": [
+        "Test-Connection -ComputerName 192.168.10.1"
+      ],
+      "parameter": {
+        "-ComputerName": "Ziel (Name oder Adresse).",
+        "-Count": "Anzahl der Pakete."
+      },
+      "wann": "Wie ping; das Ergebnis lässt sich in der PowerShell weiterverarbeiten.",
+      "lektion": "gk-win-netzwerk",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/test-connection?view=powershell-5.1"
+    },
+    {
+      "befehl": "nslookup",
+      "was": "Fragt den DNS-Server nach der Adresse zu einem Namen.",
+      "beispiel": "nslookup intranet.firma.internal",
+      "wann": "Wenn ein Name nicht geht, die IP-Adresse aber schon.",
+      "lektion": "gk-win-netzwerk",
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/nslookup"
+    },
+    {
+      "befehl": "Resolve-DnsName",
+      "was": "PowerShell-Gegenstück zu nslookup.",
+      "beispiel": "Resolve-DnsName intranet.firma.internal",
+      "auch": [
+        "Resolve-DnsName -Name intranet.firma.internal"
+      ],
+      "parameter": {
+        "-Name": "Der Name.",
+        "-Type": "Art des Eintrags, z. B. A oder MX.",
+        "-Server": "Einen bestimmten DNS-Server fragen."
+      },
+      "wann": "Wie nslookup.",
+      "lektion": "gk-win-netzwerk",
+      "vorher": [
+        "ipconfig /flushdns"
+      ],
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname"
+    },
+    {
+      "befehl": "Start-Process -Verb RunAs",
+      "was": "Startet ein Programm als Administrator (mit UAC-Rückfrage).",
+      "beispiel": "Start-Process powershell -Verb RunAs",
+      "auch": [
+        "Start-Process -FilePath powershell -Verb RunAs"
+      ],
+      "wann": "Wenn eine Meldung sagt, dass Adminrechte fehlen.",
+      "lektion": "gk-win-admin",
+      "frage": "Welcher Befehl öffnet eine PowerShell mit Adminrechten?",
+      "quelle": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-5.1"
+    },
+    {
+      "befehl": "sfc /scannow",
+      "was": "Prüft die Windows-Systemdateien und repariert beschädigte (braucht Adminrechte).",
+      "beispiel": "sfc /scannow",
+      "wann": "Wenn Windows sich seltsam verhält und Systemdateien kaputt sein könnten.",
+      "lektion": "gk-win-admin",
+      "vorher": [
+        "Start-Process powershell -Verb RunAs"
+      ],
+      "quelle": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sfc"
+    }
+  ],
+  "situationen": [
+    {
+      "wenn": "… ich wissen will, wie der Computer heißt?",
+      "befehle": [
+        "hostname"
+      ],
+      "lektion": "gk-win-konsole"
+    },
+    {
+      "wenn": "… ich wissen will, wer angemeldet ist?",
+      "befehle": [
+        "whoami"
+      ],
+      "lektion": "gk-win-konsole"
+    },
+    {
+      "wenn": "… ich nicht weiß, in welchem Ordner ich gerade bin?",
+      "befehle": [
+        "Get-Location"
+      ],
+      "lektion": "gk-win-ordner"
+    },
+    {
+      "wenn": "… ich sehen will, was in einem Ordner liegt?",
+      "befehle": [
+        "Get-ChildItem"
+      ],
+      "lektion": "gk-win-ordner"
+    },
+    {
+      "wenn": "… ich einen Befehl nicht kenne oder vergessen habe, wie er geht?",
+      "befehle": [
+        "Get-Command *-Service",
+        "Get-Help Get-Service -Examples"
+      ],
+      "lektion": "gk-win-hilfe",
+      "erklaerung": "Erst den Befehl finden (Get-Command mit *), dann Beispiele ansehen (Get-Help … -Examples)."
+    },
+    {
+      "wenn": "… ich die Windows-Version wissen muss?",
+      "befehle": [
+        "systeminfo"
+      ],
+      "lektion": "gk-win-infos"
+    },
+    {
+      "wenn": "… ein Programm nicht mehr reagiert?",
+      "befehle": [
+        "tasklist /FI \"STATUS eq NOT RESPONDING\"",
+        "taskkill /IM EXCEL.EXE",
+        "taskkill /IM EXCEL.EXE /F"
+      ],
+      "lektion": "gk-win-prozesse",
+      "erklaerung": "Erst finden, dann höflich beenden, wenn nötig erzwingen (/F). Ungespeichertes geht verloren."
+    },
+    {
+      "wenn": "… etwas im Hintergrund nicht geht (kein Ton, kein Druck)?",
+      "befehle": [
+        "Get-Service Audiosrv",
+        "Get-Service Audiosrv | Select-Object Name, Status, StartType"
+      ],
+      "lektion": "gk-win-dienste",
+      "erklaerung": "Dienst prüfen: Läuft er? Welcher Starttyp? Gestoppt → Start-Service, deaktiviert → Set-Service."
+    },
+    {
+      "wenn": "… sich ein Dienst nicht starten lässt (deaktiviert)?",
+      "befehle": [
+        "Set-Service -Name Audiosrv -StartupType Automatic",
+        "Start-Service Audiosrv"
+      ],
+      "lektion": "gk-win-dienste"
+    },
+    {
+      "wenn": "… ich meine IP-Adresse oder das Gateway brauche?",
+      "befehle": [
+        "ipconfig"
+      ],
+      "lektion": "gk-win-netzwerk"
+    },
+    {
+      "wenn": "… ich prüfen will, ob ein Gerät im Netz antwortet?",
+      "befehle": [
+        "ping 192.168.10.1"
+      ],
+      "lektion": "gk-win-netzwerk"
+    },
+    {
+      "wenn": "… ein Name (z. B. das Intranet) nicht geht, obwohl der Server läuft?",
+      "befehle": [
+        "nslookup intranet.firma.internal",
+        "ipconfig /flushdns"
+      ],
+      "lektion": "gk-win-netzwerk",
+      "erklaerung": "Zeigt nslookup eine andere Adresse als ping, ist der DNS-Cache veraltet: leeren."
+    },
+    {
+      "wenn": "… eine Meldung sagt, dass Adminrechte fehlen („must be an administrator“, „cannot open … service“)?",
+      "befehle": [
+        "Start-Process powershell -Verb RunAs"
+      ],
+      "lektion": "gk-win-admin"
+    },
+    {
+      "wenn": "… der Drucker nichts mehr druckt, weil ein Auftrag hängt?",
+      "befehle": [
+        "Stop-Service Spooler",
+        "Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*",
+        "Start-Service Spooler"
+      ],
+      "lektion": "gk-win-fehlersuche",
+      "erklaerung": "Druckdienst anhalten, Spool-Ordner leeren, Druckdienst starten – und nachprüfen."
+    }
+  ]
+}

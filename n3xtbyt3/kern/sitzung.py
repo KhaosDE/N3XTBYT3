@@ -529,7 +529,7 @@ class Sitzung:
     def hilfetext(self) -> str:
         zeilen = [
             "Hilfe der Simulation (im echten System zeigt „help“ etwas anderes).",
-            "Tasten: F1 Hinweis · F2 nächstes Szenario · Esc Menü · Pfeil hoch/runter Verlauf",
+            "Tasten: F1 Hinweis · F2 weiter · F4 Befehlsbuch · F5 Lexikon · Esc zurück · Pfeil hoch/runter Verlauf",
             "        Bild hoch/runter blättern · Strg+Plus/Minus Schriftgröße · F11 Vollbild",
             "Grundbefehle, die überall gehen:",
         ]

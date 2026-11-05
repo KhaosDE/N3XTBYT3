@@ -166,7 +166,8 @@ class Hauptmenue(Ansicht):
                 f.blit(warn, (rect.right - warn.get_width() - s.zeichen_breite * 2, rect.bottom - warn.get_height() - kachel_h // 6))
             y += kachel_h + s.zeilen_hoehe // 2
 
-        fuss = "Pfeiltasten oder 1–5 + Enter: wählen  ·  Esc: Beenden  ·  Strg +/−: Schriftgröße  ·  F11: Vollbild"
+        fuss = ("Pfeiltasten oder 1–5 + Enter: wählen  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: Beenden  ·  "
+                "Strg +/−: Schrift  ·  F11: Vollbild")
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 1.6)))
         ort = s.klein.render(f"Spielstand und eigene Szenarien: {pfade.datenordner()}", True, FARBE["text_schwach"])
@@ -393,6 +394,7 @@ class Szenarioliste(Ansicht):
                     f.blit(v, (rx, rect.centery - v.get_height() // 2))
             y += zeile_h
 
-        fuss = "Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  grün = gelöst, orange = versucht, grau = neu  ·  Fach 1–5 = Lernkartei"
+        fuss = ("Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  "
+                "grün = gelöst, orange = versucht, grau = neu  ·  Fach 1–5 = Lernkartei")
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))

@@ -30,6 +30,7 @@ class App:
         self.schriften = Schriften(self.einstellungen["schriftgroesse"])
         self.uhr = pygame.time.Clock()
         self.laufend = True
+        self.overlay: Ansicht | None = None  # Befehlsbuch (F4) oder Lexikon (F5) über der Ansicht
         from ..kern.spielstand import erster_start
         if erster_start():
             from .grundkurs_ansicht import Willkommen
@@ -80,6 +81,28 @@ class App:
             self.ansicht.verlassen()
         self.ansicht = ansicht
 
+    def aktuelles_system(self) -> str:
+        """Das System der aktuellen Ansicht (im Hauptmenü: die gewählte Kachel)."""
+        from ..kern.systeme import SYSTEME
+        sid = getattr(self.ansicht, "system_id", None)
+        if sid in SYSTEME:
+            return sid
+        eintraege = getattr(self.ansicht, "eintraege", None)
+        auswahl = getattr(self.ansicht, "auswahl", None)
+        if isinstance(eintraege, list) and isinstance(auswahl, int) and 0 <= auswahl < len(eintraege) \
+                and eintraege[auswahl] in SYSTEME:
+            return eintraege[auswahl]
+        return "windows"
+
+    def nachschlagen(self, art: str) -> None:
+        """Befehlsbuch bzw. Lexikon ein- oder ausblenden."""
+        if self.overlay is not None and getattr(self.overlay, "art", "") == art:
+            self.overlay = None
+            return
+        from .nachschlagen import Befehlsbuchansicht, Lexikonansicht
+        klasse = Befehlsbuchansicht if art == "befehlsbuch" else Lexikonansicht
+        self.overlay = klasse(self, self.aktuelles_system())
+
     def beenden(self) -> None:
         self.laufend = False
 
@@ -89,6 +112,12 @@ class App:
         strg = bool(e.mod & pygame.KMOD_CTRL)
         if e.key == pygame.K_F11:
             self.vollbild_umschalten()
+            return True
+        if e.key == pygame.K_F4:
+            self.nachschlagen("befehlsbuch")
+            return True
+        if e.key == pygame.K_F5:
+            self.nachschlagen("lexikon")
             return True
         if strg and e.key in (pygame.K_PLUS, pygame.K_KP_PLUS, pygame.K_EQUALS):
             self.schriftgroesse_aendern(+2)
@@ -115,9 +144,11 @@ class App:
             if e.type == pygame.TEXTINPUT and pygame.key.get_mods() & pygame.KMOD_CTRL \
                     and not pygame.key.get_mods() & pygame.KMOD_ALT:
                 continue
-            self.ansicht.ereignis(e)
+            (self.overlay or self.ansicht).ereignis(e)
         self.ansicht.update(dt)
         self.ansicht.zeichnen(self.fenster)
+        if self.overlay is not None:
+            self.overlay.zeichnen(self.fenster)
         pygame.display.flip()
 
     def lauf(self) -> None:

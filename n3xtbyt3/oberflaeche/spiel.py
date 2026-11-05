@@ -252,8 +252,8 @@ class Spielansicht(Ansicht):
         pygame.draw.rect(f, FARBE["kopf"], rect)
         pygame.draw.line(f, FARBE["linie_dunkel"], rect.topleft, rect.topright, 1)
         text = (("F3 Ticket schließen  ·  " if self.szenario.ticket else "") +
-                "F1 Hinweis  ·  F2 Nächstes Szenario  ·  Esc Liste  ·  ↑↓ Befehlsverlauf  ·  "
-                "Bild ↑↓ blättern  ·  Strg +/− Schrift  ·  F11 Vollbild")
+                "F1 Hinweis  ·  F2 Nächstes Szenario  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc Liste  ·  "
+                "↑↓ Befehlsverlauf  ·  Bild ↑↓ blättern  ·  Strg +/− Schrift")
         bild = s.klein.render(text, True, FARBE["text_schwach"])
         f.blit(bild, (s.zeichen_breite, rect.centery - bild.get_height() // 2))
 

@@ -252,7 +252,7 @@ class Grundkursliste(Ansicht):
                 rx -= s.zeichen_breite
             y += zeile_h
 
-        fuss = "Pfeiltasten + Enter: Lektion starten  ·  Esc: zurück zur Szenarioliste"
+        fuss = "Pfeiltasten + Enter: Lektion starten  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: zurück zur Szenarioliste"
         bild = s.klein.render(fuss, True, FARBE["text_schwach"])
         f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))
 

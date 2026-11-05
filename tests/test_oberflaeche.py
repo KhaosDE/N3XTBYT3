@@ -213,5 +213,43 @@ class GrundkursOberflaecheTest(unittest.TestCase):
         self.assertIsInstance(app.ansicht, Grundkursliste)
 
 
+@unittest.skipIf(pygame is None, "pygame-ce nicht installiert")
+class NachschlagenOberflaecheTest(unittest.TestCase):
+    def setUp(self):
+        self._daten = Datenordner()
+        self._daten.__enter__()
+        from n3xtbyt3.oberflaeche.app import App
+        self.app = App(groesse=(1280, 720))
+
+    def tearDown(self):
+        self.app.ansicht.verlassen()
+        pygame.quit()
+        self._daten.__exit__(None, None, None)
+
+    def test_befehlsbuch_und_lexikon_ueberall(self):
+        from n3xtbyt3.oberflaeche.nachschlagen import Befehlsbuchansicht, Lexikonansicht
+        from n3xtbyt3.oberflaeche.grundkurs_ansicht import Lektionsansicht
+        app = self.app
+        app.schritt([taste(pygame.K_F4)], dt=0.05)  # schon im Willkommensbild
+        self.assertIsInstance(app.overlay, Befehlsbuchansicht)
+        app.schritt([pygame.event.Event(pygame.TEXTINPUT, text=c) for c in "dir"], dt=0.05)
+        self.assertEqual(app.overlay.eintraege()[0].befehl, "Get-ChildItem")
+        app.schritt([taste(pygame.K_TAB)], dt=0.05)  # Was tippe ich, wenn …?
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)  # Suche leeren
+        self.assertGreaterEqual(len(app.overlay.eintraege()), 10)
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)  # schließen
+        self.assertIsNone(app.overlay)
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)  # Grundkurs starten
+        self.assertIsInstance(app.ansicht, Lektionsansicht)
+        app.schritt([taste(pygame.K_F5)], dt=0.05)
+        self.assertIsInstance(app.overlay, Lexikonansicht)
+        app.schritt(tippe("hostname"), dt=0.05)  # geht in die Suche, nicht ins Terminal
+        self.assertEqual(app.ansicht.lauf.index, 0)
+        app.schritt([taste(pygame.K_F4)], dt=0.05)  # direkt umschalten
+        self.assertIsInstance(app.overlay, Befehlsbuchansicht)
+        app.schritt([taste(pygame.K_F4)], dt=0.05)  # und wieder zu
+        self.assertIsNone(app.overlay)
+
+
 if __name__ == "__main__":
     unittest.main()
