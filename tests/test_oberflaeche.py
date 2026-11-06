@@ -5,6 +5,7 @@ Wird übersprungen, wenn pygame-ce nicht installiert ist.
 
 import os
 import unittest
+from pathlib import Path
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
@@ -209,6 +210,9 @@ class GrundkursOberflaecheTest(unittest.TestCase):
                 app.schritt(tippe(befehl), dt=0.05)
         self.assertTrue(lektion.lauf.fertig)
         self.assertTrue(Spielstand.lade("windows").lektion("gk-win-konsole")["fertig"])
+        protokoll = Path(self.ordner, "grundkurs_protokoll.txt").read_text(encoding="utf-8")
+        self.assertIn("gk-win-konsole  mitmachen 1  shell=powershell  eingabe='hostnme'  offen", protokoll)
+        self.assertIn("aufgaben 2  shell=powershell  eingabe='whoami'  geschafft", protokoll)
         app.schritt([taste(pygame.K_F2)], dt=0.05)
         self.assertEqual(app.ansicht.lektion.id, "gk-win-ordner")
         app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)

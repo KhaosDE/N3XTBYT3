@@ -284,6 +284,8 @@ class Lektionsansicht(Ansicht):
         self.letzte_erklaerung: str | None = None
         self.hinweis_mitmachen: str | None = None
         self._gespeichert = False
+        self._protokoll_alt: list[str] | None = None
+        self._protokoll: list[str] = []
 
     # ------------------------------------------------------------------ Aktionen
 
@@ -353,8 +355,25 @@ class Lektionsansicht(Ansicht):
         elif la.tipp:
             self.terminal.schreibe("[N3XTBYT3] " + la.tipp, "sim")
 
+    def _protokollieren(self, zeile: str) -> None:
+        """Jede Eingabe in grundkurs_protokoll.txt (Datenordner) – damit sich Fehler nachvollziehen lassen."""
+        try:
+            from ..kern.dateien import schreibe_text
+            from ..kern import pfade
+            if self._protokoll_alt is None:
+                datei = pfade.im_datenordner(gk.PROTOKOLL)
+                self._protokoll_alt = datei.read_text(encoding="utf-8").splitlines() if datei.exists() else []
+            self._protokoll.append(zeile)
+            alle = (self._protokoll_alt + self._protokoll)[-gk.PROTOKOLL_ZEILEN:]
+            schreibe_text(gk.PROTOKOLL, "\n".join(alle) + "\n")
+        except (OSError, ValueError):
+            pass  # das Protokoll darf die Lektion nie stören
+
     def ausfuehren(self, befehl: str) -> None:
+        teil, index = self.lauf.teil, self.lauf.index
         la = self.lauf.eingabe(befehl)
+        if befehl.strip():
+            self._protokollieren(gk.protokoll_zeile(self.lauf, teil, index, befehl, la))
         self._antwort_zeigen(la)
         antwort = la.antwort
         if antwort.aktion == "editor" and antwort.editor:

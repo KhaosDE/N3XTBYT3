@@ -148,6 +148,14 @@ die vom echten System abweichen, korrigieren.
   `tipp` für Lektionsschritte. Alle Lektionen habe ich zusätzlich mit einem Prüfskript durchsucht (jede
   erlaubte Schreibweise, jede Zielbedingung, jeder letzte Hinweis) – keine weiteren Fehler gefunden.
 
+- 06.11.2026, zweite Meldung von Tobi: In Windows-Lektion 1, Selbst probieren, Aufgabe 2 („Zeig an, mit welchem
+  Benutzer du angemeldet bist“) blieb die Aufgabe nach `whoami` stehen. **Nicht nachstellbar:** 3000 zufällige
+  Eingabefolgen im Kern und 150 in der Oberfläche (Tippfehler, cmd/exit, Hinweise, F4/F5, Schriftgröße, Knöpfe)
+  – `whoami` wurde jedes Mal erkannt. Wahrscheinlich kam eine leicht andere Eingabe an, und die alte Version
+  sagte dazu beim Selbst-Probieren nichts. Jetzt: „Fast! Prüf die Schreibweise …“ bei fast richtiger Eingabe,
+  „Der Befehl passt – aber nicht mit diesen Zusätzen“ bei falschen Zusätzen. Neu: `grundkurs_protokoll.txt` im
+  Datenordner mit jeder Eingabe einer Lektion (genau so, wie sie ankam), Schritt und Ergebnis.
+
 ### Abnahme G (IDEEN.md / PLAN.md)
 
 - [x] Erster Start zeigt das Willkommensbild, „Grundkurs starten“ führt in Windows-Lektion 1
@@ -186,6 +194,8 @@ die vom echten System abweichen, korrigieren.
   - `net user jschulz`: Ausgabe gekürzt (Passwort- und Anmeldezeilen weggelassen).
   - Wo die echte Ausgabe nicht sicher bekannt ist oder ein Fenster aufgehen würde, zeigt die
     Simulation eine blaue `[N3XTBYT3]`-Meldung statt eines erfundenen Textes.
+- Tobis Meldung „whoami bei Aufgabe 2 nicht erkannt“ (06.11.2026) ließ sich nicht nachstellen. Kommt es wieder
+  vor: `grundkurs_protokoll.txt` aus `%APPDATA%\N3XTBYT3` schicken – darin steht die Eingabe genau, wie sie ankam.
 - Grundkurs: Lektionen, Befehlsbuch und Lexikon sind „ungeprüft“. Besonders unsicher:
   - `Get-ChildItem`: Spalten und Datumsformat nach dem Beispiel der Microsoft-Doku (Uhrzeit 24 Stunden,
     z. B. `08:29`). Ein echtes englisches Windows zeigt die Uhrzeit vermutlich als `8:29 AM`.
@@ -307,6 +317,8 @@ die vom echten System abweichen, korrigieren.
   Rückfrage (Wunsch: „sollte sich selbst aktualisieren“); Esc im Fortschrittsfenster bricht ab.
 - 06.11.2026: Beim Selbst-Probieren kommt bei einem falschen Befehl eine allgemeine Rückmeldung, aber nie die
   Lösung. Grund: Tobi soll merken, dass die Aufgabe noch offen ist, die Hinweise holt er sich selbst mit F1.
+- 06.11.2026: Lektionen schreiben ein Protokoll (`grundkurs_protokoll.txt`, die letzten 400 Eingaben) in den
+  Datenordner. Grund: Fehler, die Tobi meldet, lassen sich sonst nicht nachvollziehen. Nur im Datenordner (Regel 1).
 
 ## Für Tobi zum Testen
 

@@ -209,6 +209,41 @@ class RueckmeldungTest(unittest.TestCase):
         self.assertTrue(lauf.eingabe("hostname").geschafft)
         self.assertIsNone(lauf.letzter_tipp)
 
+    def test_fast_richtig_und_falsche_zusaetze(self):
+        l, lauf = self._lauf("gk-win-konsole")
+        for s in l.mitmachen:
+            lauf.eingabe(s.eingabe[0])
+        lauf.eingabe("hostname")
+        self.assertIn("Fast!", lauf.eingabe("whoaml").tipp)
+        self.assertIn("nicht mit diesen Zusätzen", lauf.eingabe("whoami /user").tipp)
+        self.assertTrue(lauf.eingabe("whoami").geschafft)
+
+    def test_teilschritt_vor_schreibweise(self):
+        """Start-Service ähnelt Get-Service – der richtige erste Schritt darf nicht als Tippfehler gelten."""
+        l = next(x for x in gk.lade_kurs("windows").lektionen if x.id == "gk-win-admin")
+        lauf = gk.Lektionslauf(l, lade_allgemein("windows"))
+        for s in l.mitmachen:
+            lauf.eingabe(s.eingabe[0])
+        lauf.eingabe("Stop-Service -Name W32Time")
+        self.assertIn("Guter erster Schritt", lauf.eingabe("Start-Service -Name W32Time").tipp)
+        self.assertTrue(lauf.eingabe("Get-Service W32Time").geschafft)
+
+    def test_kein_teilschritt_bekommt_einen_falschen_hinweis(self):
+        """Alle Lektionen: Jeder Lösungs-Teilschritt bekommt das Lob, keinen Fehlerhinweis."""
+        for sid in REIHENFOLGE:
+            allgemein = lade_allgemein(sid)
+            for l in gk.lade_kurs(sid).lektionen:
+                lauf = gk.Lektionslauf(l, allgemein)
+                for s in l.mitmachen:
+                    lauf.eingabe(s.eingabe[0])
+                for nr, a in enumerate(l.aufgaben, start=1):
+                    for x in a.loesung[:-1]:
+                        r = lauf.loesungsschritt(x)
+                        if isinstance(x, str) and not r.geschafft:
+                            with self.subTest(lektion=l.id, aufgabe=nr, schritt=x):
+                                self.assertIn("Guter erster Schritt", r.tipp or "")
+                    lauf.loesungsschritt(a.loesung[-1])
+
     def test_erster_teilschritt_wird_gelobt(self):
         l, lauf = self._lauf("gk-win-ordner")
         for s in l.mitmachen:

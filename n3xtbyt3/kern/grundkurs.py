@@ -443,12 +443,21 @@ class Lektionslauf:
             return schritt.tipp.replace("{eingabe}", text.strip())
         if self.teil == "mitmachen":
             return tipp(text, schritt.eingabe[0], self.sitzung.vergleicher)
+        v = self.sitzung.vergleicher
+        vorbereitet = v.vorbereiten(text)
+        # Reihenfolge wichtig: Ein richtiger erster Teilschritt (Start-Service …) ähnelt oft dem letzten
+        # (Get-Service …) – er darf nicht als Tippfehler gelten.
+        teilschritte = [v.vorbereiten(x) for x in schritt.loesung[:-1] if isinstance(x, str)]
+        if antwort.art == "treffer" and any(v.passt(m, vorbereitet) for m in teilschritte):
+            return "Guter erster Schritt – die Aufgabe ist aber noch nicht ganz erledigt. Lies sie rechts noch einmal."
+        namen = {m[0].name for m in schritt.vorbereitet if m}
+        if vorbereitet and vorbereitet[0].name in namen and not self._passt(schritt, text):
+            return ("Der Befehl passt – aber nicht mit diesen Zusätzen. Probier ihn so, wie du ihn beim Mitmachen "
+                    "getippt hast (oder F1 für einen Hinweis).")
+        if any(difflib.SequenceMatcher(None, v.norm(text.strip()), v.norm(e)).ratio() >= 0.75 for e in schritt.eingabe):
+            return "Fast! Prüf die Schreibweise Zeichen für Zeichen – du bist ganz nah dran."
         if antwort.art != "treffer":
             return None  # die blaue Meldung der Simulation erklärt schon, was los ist
-        vorbereitet = self.sitzung.vergleicher.vorbereiten(text)
-        teilschritte = [self.sitzung.vergleicher.vorbereiten(x) for x in schritt.loesung[:-1] if isinstance(x, str)]
-        if any(self.sitzung.vergleicher.passt(m, vorbereitet) for m in teilschritte):
-            return "Guter erster Schritt – die Aufgabe ist aber noch nicht ganz erledigt. Lies sie rechts noch einmal."
         return (f"Das löst Aufgabe {self.index + 1} noch nicht. Lies die Aufgabe rechts noch einmal – "
                 "oder hol dir mit F1 einen Hinweis.")
 
@@ -494,6 +503,22 @@ class Lektionslauf:
             "befehle": self.sitzung.anzahl_befehle,
             "sekunden": self.sitzung.sekunden(),
         }
+
+
+# --------------------------------------------------------------------------- Protokoll
+
+PROTOKOLL = "grundkurs_protokoll.txt"
+PROTOKOLL_ZEILEN = 400
+
+
+def protokoll_zeile(lauf: "Lektionslauf", teil: str, index: int, text: str, la: LektionsAntwort) -> str:
+    """Eine Zeile fürs Protokoll: Lektion, Schritt, Eingabe genau so, wie sie ankam (repr), Ergebnis."""
+    import datetime as _dt
+    zeit = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ort = f"{teil} {index + 1}" if teil != "fertig" else "fertig"
+    ergebnis = "geschafft" if la.geschafft else f"offen ({la.antwort.art})"
+    return (f"{zeit}  {lauf.lektion.id}  {ort}  shell={lauf.sitzung.shell}  eingabe={text!r}  {ergebnis}"
+            + (f"  tipp={la.tipp!r}" if la.tipp else ""))
 
 
 # --------------------------------------------------------------------------- Fortschritt
