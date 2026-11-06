@@ -1,6 +1,6 @@
 # STAND — N3XTBYT3
 
-Stand: 05.11.2026.
+Stand: 06.11.2026.
 
 ## Aktuell
 
@@ -138,6 +138,15 @@ die vom echten System abweichen, korrigieren.
 - Lexikon (F5, überall): alle Begriffe aus Lektionen und Szenarien, alphabetisch, mit Suche und Fundstellen.
 - Befehle geschaffter Lektionen kommen ins Befehls-Training; die Auswertung zeigt den Kursstand und
   empfiehlt die nächste Lektion. Der Selbsttest der `.exe` spielt auch alle Lektionen durch.
+
+- 06.11.2026, Fehler von Tobi behoben: Im Wiederholungsschritt von Lektion 1 („Pfeil hoch“) blieb man nach
+  einmal ↑ bei `whoami` hängen, ohne zu erfahren, warum. Jetzt: klarere Anleitung („jeder Druck geht einen
+  Befehl weiter zurück“) und ein eigener Hinweis („Das war „whoami“ … Drück ↑ noch einmal“). Außerdem
+  gibt es beim Selbst-Probieren immer eine Rückmeldung, wenn ein Befehl die Aufgabe nicht löst („Das löst
+  Aufgabe n noch nicht … F1“; bei einem richtigen ersten Teilschritt „Guter erster Schritt …“), ohne die
+  Lösung zu verraten. `help` sagt in Lektionen, dass die nächste Aufgabe rechts steht. Neues freies Feld
+  `tipp` für Lektionsschritte. Alle Lektionen habe ich zusätzlich mit einem Prüfskript durchsucht (jede
+  erlaubte Schreibweise, jede Zielbedingung, jeder letzte Hinweis) – keine weiteren Fehler gefunden.
 
 ### Abnahme G (IDEEN.md / PLAN.md)
 
@@ -296,6 +305,8 @@ die vom echten System abweichen, korrigieren.
 - 05.11.2026: Version = Laufnummer von GitHub Actions (Release `build-<n>`), Vergleich als Zahl. Die frisch
   gestartete neue Version prüft nicht gleich noch einmal (kein Endlos-Neustart). Ein Update lädt ohne
   Rückfrage (Wunsch: „sollte sich selbst aktualisieren“); Esc im Fortschrittsfenster bricht ab.
+- 06.11.2026: Beim Selbst-Probieren kommt bei einem falschen Befehl eine allgemeine Rückmeldung, aber nie die
+  Lösung. Grund: Tobi soll merken, dass die Aufgabe noch offen ist, die Hinweise holt er sich selbst mit F1.
 
 ## Für Tobi zum Testen
 

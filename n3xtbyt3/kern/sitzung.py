@@ -543,7 +543,10 @@ class Sitzung:
             for name, bedeutung in ds.BEDEUTUNG.items():
                 zeilen.append(f"  {name:<20} {bedeutung}")
             zeilen.append("  sudo <befehl>        Befehl als root ausführen · Pipes: … | grep, head, tail, sort, wc -l")
-        zeilen.append("Welche Befehle das Problem lösen, findest du selbst heraus – dafür ist das Szenario da.")
+        if self.szenario.kategorie == "Grundkurs":
+            zeilen.append("Was als Nächstes dran ist, steht rechts in der Lektion.")
+        else:
+            zeilen.append("Welche Befehle das Problem lösen, findest du selbst heraus – dafür ist das Szenario da.")
         return "\n".join(zeilen)
 
     # ------------------------------------------------------------------ Ergebnis

@@ -107,7 +107,9 @@ class AblaufTest(unittest.TestCase):
         self.lauf.eingabe("cd Documents")
         self.assertEqual(self.lauf.naechster_hinweis(), "a")
         self.assertEqual(self.lauf.naechster_hinweis(), "b")
-        self.assertIsNone(self.lauf.eingabe("hostname").tipp)  # bei Aufgaben kein Vorsagen
+        tipp = self.lauf.eingabe("hostname").tipp  # bei Aufgaben: Rückmeldung, aber kein Vorsagen
+        self.assertIn("noch nicht", tipp)
+        self.assertNotIn("Set-Zahl", tipp)
         self.assertTrue(self.lauf.eingabe("Set-Zahl").geschafft)
         self.assertEqual(self.lauf.hinweis_stufe, 0)
         self.lauf.eingabe("cd ..")
@@ -177,6 +179,43 @@ class AlleLektionenSpielbarTest(unittest.TestCase):
                             self.assertEqual(a.antwort.art, "treffer", f"Aufgabe {nr}: „{s}“ läuft so nicht")
                         self.assertTrue(ergebnisse[-1].geschafft, f"Aufgabe {nr} wird mit der Lösung nicht geschafft")
                     self.assertTrue(lauf.fertig)
+
+
+class RueckmeldungTest(unittest.TestCase):
+    """Fehler von Tobi (06.11.2026): Nach whoami ging es nicht weiter – und es kam keine Erklärung."""
+
+    def _lauf(self, lektion_id):
+        l = next(x for x in gk.lade_kurs("windows").lektionen if x.id == lektion_id)
+        return l, gk.Lektionslauf(l, lade_allgemein("windows"))
+
+    def test_wiederholungsschritt_erklaert_den_pfeil(self):
+        l, lauf = self._lauf("gk-win-konsole")
+        lauf.eingabe("hostname")
+        lauf.eingabe("whoami")
+        a = lauf.eingabe("whoami")  # nur einmal ↑ gedrückt
+        self.assertFalse(a.geschafft)
+        self.assertIn("„whoami“", a.tipp)
+        self.assertIn("↑ noch einmal", a.tipp)
+        self.assertTrue(lauf.eingabe("hostname").geschafft)
+
+    def test_selbst_probieren_gibt_immer_rueckmeldung(self):
+        l, lauf = self._lauf("gk-win-konsole")
+        for s in l.mitmachen:
+            lauf.eingabe(s.eingabe[0])
+        a = lauf.eingabe("whoami")  # Aufgabe 1 fragt nach dem Computernamen
+        self.assertFalse(a.geschafft)
+        self.assertIn("Das löst Aufgabe 1 noch nicht", a.tipp)
+        self.assertIsNone(lauf.eingabe("Get-Kaffeee").tipp)  # unbekannt: die blaue Meldung erklärt es schon
+        self.assertTrue(lauf.eingabe("hostname").geschafft)
+        self.assertIsNone(lauf.letzter_tipp)
+
+    def test_erster_teilschritt_wird_gelobt(self):
+        l, lauf = self._lauf("gk-win-ordner")
+        for s in l.mitmachen:
+            lauf.eingabe(s.eingabe[0])
+        a = lauf.eingabe("cd Downloads")  # Aufgabe 1: wechseln und anzeigen
+        self.assertIn("Guter erster Schritt", a.tipp)
+        self.assertTrue(lauf.eingabe("dir").geschafft)
 
 
 if __name__ == "__main__":

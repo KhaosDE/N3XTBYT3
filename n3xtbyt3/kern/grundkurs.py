@@ -46,6 +46,7 @@ class Schritt:
     danach: str                    # Erklärung, nachdem der Schritt geschafft ist
     ziel: dict[str, Any] | None = None   # erfüllt den Schritt ebenfalls (z. B. Ordner gewechselt)
     wenn: dict[str, Any] | None = None   # muss zusätzlich zur Eingabe gelten (z. B. im richtigen Ordner)
+    tipp: str | None = None              # eigener Hinweis, wenn etwas anderes kam ({eingabe} = das Getippte)
     hinweise: list[str] = field(default_factory=list)   # nur Aufgaben: genau 3
     loesung: list[Any] = field(default_factory=list)    # nur Aufgaben (für den Test); Standard: eingabe[0]
     vorbereitet: list = field(default_factory=list, repr=False)
@@ -111,7 +112,7 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
         return []
     schritte: list[Schritt] = []
     textfeld = "aufgabe" if aufgaben else "text"
-    erlaubt = {textfeld, "eingabe", "danach", "ziel", "wenn"} | ({"hinweise", "loesung"} if aufgaben else set())
+    erlaubt = {textfeld, "eingabe", "danach", "ziel", "wenn", "tipp"} | ({"hinweise", "loesung"} if aufgaben else set())
     for nr, r in enumerate(roh, start=1):
         stelle = f"{ort}[{nr}]"
         if not isinstance(r, dict):
@@ -141,6 +142,9 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
             fehler.append(f"{stelle}: braucht „eingabe“ oder „ziel“ (woran man erkennt, dass er geschafft ist).")
         if not aufgaben and not eingabe:
             fehler.append(f"{stelle}.eingabe: Beim Mitmachen muss feststehen, was getippt wird.")
+        eigener_tipp = _fliesstext(r.get("tipp")) if "tipp" in r else None
+        if "tipp" in r and not eigener_tipp:
+            fehler.append(f"{stelle}.tipp: muss Text sein.")
         danach = _fliesstext(r.get("danach"))
         if not danach:
             fehler.append(f"{stelle}.danach: Erklärung nach dem Schritt fehlt.")
@@ -164,6 +168,7 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
             loesung = [x if isinstance(x, str) else {"speichern": x["speichern"], "inhalt": _text(x["inhalt"])}
                        for x in loesung]
         schritte.append(Schritt(text=text or "", eingabe=list(eingabe), danach=danach or "", ziel=ziel, wenn=wenn,
+                                tipp=eigener_tipp,
                                 hinweise=hinweise, loesung=list(loesung),
                                 vorbereitet=[vergleicher.vorbereiten(e) for e in eingabe]))
     return schritte
@@ -349,7 +354,7 @@ def tipp(eingabe: str, erwartet: str, vergleicher: Vergleicher) -> str:
         return f"Fast! Linux unterscheidet Groß- und Kleinschreibung. Richtig ist: {erwartet}"
     if difflib.SequenceMatcher(None, vergleicher.norm(getippt), vergleicher.norm(erwartet)).ratio() >= 0.7:
         return f"Fast! Vergleiche Zeichen für Zeichen – du hast „{getippt}“ getippt. Richtig ist: {erwartet}"
-    return f"Das war ein anderer Befehl. Für diesen Schritt tippe: {erwartet}"
+    return f"„{getippt}“ ist ein anderer Befehl. Für diesen Schritt tippe: {erwartet}"
 
 
 # --------------------------------------------------------------------------- Ablauf
@@ -424,15 +429,28 @@ class Lektionslauf:
             self.erledigt.append((schritt, schritt.danach))
             neu = self._weiter()
             return LektionsAntwort(antwort, geschafft=True, erklaerung=schritt.danach, teil_neu=neu)
-        hinweis = None
-        if self._passt(schritt, text) and antwort.art != "treffer":
-            hinweis = "Richtig getippt – aber so geht es hier nicht. Lies die blaue Meldung im Terminal."
-        elif self._passt(schritt, text) and schritt.wenn is not None:
-            hinweis = "Der Befehl stimmt – aber noch nicht am richtigen Ort. Lies die Aufgabe noch einmal genau."
-        elif self.teil == "mitmachen":
-            hinweis = tipp(text, schritt.eingabe[0], self.sitzung.vergleicher)
+        hinweis = self._tipp(schritt, text, antwort)
         self.letzter_tipp = hinweis
         return LektionsAntwort(antwort, tipp=hinweis)
+
+    def _tipp(self, schritt: Schritt, text: str, antwort: Antwort) -> str | None:
+        """Warum es noch nicht weitergeht – damit nie „nichts passiert“."""
+        if self._passt(schritt, text) and antwort.art != "treffer":
+            return "Richtig getippt – aber so geht es hier nicht. Lies die blaue Meldung im Terminal."
+        if self._passt(schritt, text) and schritt.wenn is not None:
+            return "Der Befehl stimmt – aber noch nicht am richtigen Ort. Lies die Aufgabe noch einmal genau."
+        if schritt.tipp:
+            return schritt.tipp.replace("{eingabe}", text.strip())
+        if self.teil == "mitmachen":
+            return tipp(text, schritt.eingabe[0], self.sitzung.vergleicher)
+        if antwort.art != "treffer":
+            return None  # die blaue Meldung der Simulation erklärt schon, was los ist
+        vorbereitet = self.sitzung.vergleicher.vorbereiten(text)
+        teilschritte = [self.sitzung.vergleicher.vorbereiten(x) for x in schritt.loesung[:-1] if isinstance(x, str)]
+        if any(self.sitzung.vergleicher.passt(m, vorbereitet) for m in teilschritte):
+            return "Guter erster Schritt – die Aufgabe ist aber noch nicht ganz erledigt. Lies sie rechts noch einmal."
+        return (f"Das löst Aufgabe {self.index + 1} noch nicht. Lies die Aufgabe rechts noch einmal – "
+                "oder hol dir mit F1 einen Hinweis.")
 
     def datei_speichern(self, pfad: str, inhalt: str) -> LektionsAntwort:
         antwort = self.sitzung.datei_speichern(pfad, inhalt)

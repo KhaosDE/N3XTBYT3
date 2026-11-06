@@ -191,7 +191,15 @@ class GrundkursOberflaecheTest(unittest.TestCase):
         app.schritt(tippe("hostnme"), dt=0.05)  # Tippfehler: freundlicher Hinweis, Schritt bleibt
         self.assertEqual(lektion.lauf.index, 0)
         self.assertIn("Fast!", lektion.lauf.letzter_tipp)
-        for schritt in lektion.lektion.mitmachen:
+        app.schritt(tippe("hostname"), dt=0.05)
+        app.schritt(tippe("whoami"), dt=0.05)
+        # Wiederholungsschritt: nur einmal ↑ → whoami statt hostname; der Hinweis steht auch im Terminal
+        app.schritt([taste(pygame.K_UP), taste(pygame.K_RETURN)], dt=0.05)
+        self.assertEqual(lektion.lauf.index, 2)
+        self.assertIn("↑ noch einmal", lektion.terminal.zeilen[-1].text)
+        app.schritt([taste(pygame.K_UP), taste(pygame.K_UP), taste(pygame.K_RETURN)], dt=0.05)
+        self.assertEqual(lektion.lauf.index, 3)
+        for schritt in lektion.lektion.mitmachen[3:]:
             app.schritt(tippe(schritt.eingabe[0]), dt=0.05)
         self.assertEqual(lektion.lauf.teil, "aufgaben")
         app.schritt([taste(pygame.K_F1)], dt=0.05)

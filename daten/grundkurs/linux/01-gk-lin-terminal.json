@@ -53,8 +53,9 @@
       "danach": "„not found“: Mit großem W gibt es den Befehl nicht. Linux nimmt Groß- und Kleinschreibung genau – das ist die häufigste Fehlerquelle am Anfang."
     },
     {
-      "text": "Drück zweimal Pfeil hoch (↑), bis hostname dasteht, und dann Enter.",
+      "text": "Hol hostname zurück, ohne es neu zu tippen: Drück Pfeil hoch (↑) – jeder Druck geht einen Befehl weiter zurück. Steht hostname in der Zeile, drück Enter.",
       "eingabe": "hostname",
+      "tipp": "Das war „{eingabe}“, nicht hostname. Drück ↑ noch einmal (oder öfter), bis hostname in der Zeile steht – mit ↓ geht es wieder vorwärts. Dann Enter.",
       "danach": "Mit ↑ und ↓ holst du frühere Befehle zurück."
     },
     {

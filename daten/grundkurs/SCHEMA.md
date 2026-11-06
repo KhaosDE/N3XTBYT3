@@ -47,6 +47,9 @@ Eine Lektion läuft auf derselben Befehlsauswertung wie die Szenarien. Ablauf:
 * `ziel` (frei): Bedingung auf den Zustand; ist sie nach irgendeinem Befehl erfüllt, ist der Schritt
   auch geschafft (z. B. `cd .\documents` statt `cd Documents`).
 * `wenn` (frei): Bedingung, die **zusätzlich** zur Eingabe gelten muss (z. B. im richtigen Ordner).
+* `tipp` (frei): eigener Hinweis, wenn etwas anderes getippt wurde; `{eingabe}` steht für das Getippte.
+  Ohne `tipp` gibt es beim Mitmachen einen Tippfehler-Hinweis und beim Selbst-Probieren „Das löst Aufgabe n
+  noch nicht …“ – es bleibt also nie ohne Rückmeldung.
 
 ## Aufgaben
 

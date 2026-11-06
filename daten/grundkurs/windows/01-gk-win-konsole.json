@@ -59,8 +59,9 @@
       "danach": "pc-buero-07\\mberger heißt: Benutzer mberger auf dem Computer pc-buero-07. Vor dem Backslash (\\) steht, woher das Konto kommt, dahinter der Benutzername."
     },
     {
-      "text": "Drück zweimal Pfeil hoch (↑). Jetzt steht wieder hostname in der Zeile. Drück Enter.",
+      "text": "Hol hostname zurück, ohne es neu zu tippen: Drück Pfeil hoch (↑). Jeder Druck geht einen Befehl weiter zurück (erst whoami, dann hostname). Steht hostname in der Zeile, drück Enter.",
       "eingabe": "hostname",
+      "tipp": "Das war „{eingabe}“, nicht hostname. Drück ↑ noch einmal (oder öfter), bis hostname in der Zeile steht – mit ↓ geht es wieder vorwärts. Dann Enter.",
       "danach": "Mit ↑ und ↓ blätterst du durch deine früheren Befehle. Das spart Tipparbeit, vor allem bei langen Befehlen."
     },
     {
