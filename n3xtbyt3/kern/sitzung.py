@@ -221,8 +221,10 @@ class Sitzung:
         """(Treffer in der aktuellen Shell, Treffer nur in einer anderen Shell)."""
         andere: Befehl | None = None
         for b in [*self.aktiv.befehle, *self.allgemein.befehle]:
-            if any(self.vergleicher.passt(v, abschnitte) for v in b.vorbereitet):
-                if self.shell in b.shells:
+            for i, v in enumerate(b.vorbereitet):
+                if not self.vergleicher.passt(v, abschnitte):
+                    continue
+                if self.shell in b.shells_fuer(i):
                     return b, None
                 andere = andere or b
         return None, andere
@@ -253,7 +255,7 @@ class Sitzung:
             self.unbekannte.append(text)
             return Antwort(_sim("Diese Eingabe ist unvollständig."), "unbekannt")
 
-        wechsel = self._rechnerwechsel(abschnitte)
+        wechsel = self._rechnerwechsel(abschnitte, text)
         if wechsel is not None:
             return wechsel
 
@@ -321,18 +323,30 @@ class Sitzung:
         meldung += f"\nWechseln mit: {wechsel}"
         return Antwort(_sim(meldung), "falsch", warum=meldung)
 
-    def _rechnerwechsel(self, abschnitte) -> Antwort | None:
+    def _rechnerwechsel(self, abschnitte, text: str) -> Antwort | None:
         """ssh bzw. Enter-PSSession zu einem anderen Rechner des Szenarios."""
         for lauf in self.rechner.values():
-            if lauf is self.aktiv or not lauf.zugang:
+            if not lauf.zugang_text:
                 continue
-            if not any(self.vergleicher.passt(z, abschnitte) for z in lauf.zugang):
+            # Verglichen wird nach den Regeln der Shell, in der getippt wird (hier), nicht
+            # nach denen des Zielrechners.
+            treffer = None
+            for z in lauf.zugang_text:
+                vorbereitet = self.vergleicher.vorbereiten(z)
+                if self.vergleicher.passt(vorbereitet, abschnitte):
+                    treffer = vorbereitet
+                    break
+            if treffer is None:
                 continue
+            if lauf is self.aktiv:
+                return Antwort(_sim(f"Du bist schon auf {lauf.name}."), "treffer")
             if lauf in self.rechner_stapel:
                 return Antwort(_sim(f"Du bist schon über {lauf.name} verbunden. Zurück mit exit."), "treffer")
-            ist_ps = "Enter-PSSession" in lauf.zugang_text[0] or "enter-pssession" in lauf.zugang_text[0].lower()
+            ist_ps = bool(treffer) and treffer[0].name.casefold() == "enter-pssession"
             if ist_ps and self.shell != "powershell":
-                return Antwort(_sim("Enter-PSSession ist ein PowerShell-Befehl. Wechsle mit „powershell“."), "falsch")
+                self.falsche.append(text)
+                meldung = "Enter-PSSession ist ein PowerShell-Befehl. Wechsle mit „powershell“."
+                return Antwort(_sim(meldung), "falsch", warum=meldung)
             self.rechner_stapel.append(lauf)
             zeilen = _sim(f"Verbunden mit {lauf.name} ({lauf.system.name}). Zurück mit exit.")
             return self._ziel_pruefen(Antwort(zeilen, "treffer"))
@@ -444,7 +458,7 @@ class Sitzung:
             links, rechts = _an_letzter_pipe(text)
             filter_woerter = zerlege(rechts)[0] if zerlege(rechts) and zerlege(rechts)[0] else []
             if filter_woerter and filter_woerter[0] in ds.FILTER:
-                return self._pipe(links, filter_woerter)
+                return self._pipe(links, filter_woerter, text)
             self.nicht_erkannt.append(text)
             return Antwort(_sim(f"„{rechts}“ hinter einer Pipe ist hier nicht nachgebaut. "
                                 "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
@@ -467,6 +481,10 @@ class Sitzung:
 
     def _sudo(self, text: str, woerter: list[str]) -> Antwort:
         rest = text.strip()[4:].strip()
+        # „sudo sudo -i“ ist dasselbe wie „sudo -i“.
+        while woerter[1:2] == ["sudo"]:
+            woerter = woerter[1:]
+            rest = rest[4:].strip()
         if not self.zustand.get("sudo_erlaubt"):
             return Antwort(_sim(f"{self.zustand.get('benutzer')} hat keine sudo-Rechte (nicht in der Gruppe sudo "
                                 "bzw. nicht in der sudoers-Datei)."), "treffer")
@@ -486,29 +504,42 @@ class Sitzung:
             if woerter[1:] in (["-i"], ["su", "-"]):
                 self.zustand.werte["pfad"] = "/root"
             return Antwort(zeilen + _sim("Du bist jetzt root (Prompt endet auf #). Zurück mit: exit"), "treffer")
-        war_root = bool(self.zustand.get("root"))
-        self.zustand.werte["root"] = True
+        if woerter[1] in _SHELL_EINGEBAUT:
+            # Eingebaute Befehle der Shell sind keine Programme – sudo findet sie nicht.
+            return Antwort(zeilen + [Zeile(f"sudo: {woerter[1]}: command not found", FEHLER)], "treffer")
+        # Merken, auf welchem Rechner root gesetzt wird: „sudo ssh …“ wechselt den Rechner.
+        zustand = self.zustand
+        war_root = bool(zustand.get("root"))
+        zustand.werte["root"] = True
         try:
             antwort = self._auswerten(rest)
         finally:
             if not war_root:
-                self.zustand.werte["root"] = False
+                zustand.werte["root"] = False
         antwort.zeilen = zeilen + antwort.zeilen
         return antwort
 
-    def _pipe(self, links: str, filter_woerter: list[str]) -> Antwort:
+    def _pipe(self, links: str, filter_woerter: list[str], text: str) -> Antwort:
+        # Erst prüfen, ob der Filter in dieser Form nachgebaut ist – sonst gar nichts ausführen.
+        _, probe = ds.filter_anwenden(filter_woerter[0], filter_woerter[1:], [])
+        if probe == "nicht":
+            self.nicht_erkannt.append(text)
+            return Antwort(_sim(f"„{' '.join(filter_woerter)}“ hinter einer Pipe ist hier nicht nachgebaut. "
+                                "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
         antwort = self._auswerten(links)
         if antwort.art not in ("treffer",) or antwort.aktion:
             return antwort
-        ausgabe = [z for z in antwort.zeilen if z.art in (AUSGABE, FEHLER)]
+        # Nur die normale Ausgabe (stdout) geht durch die Pipe. Fehlermeldungen (stderr)
+        # erscheinen trotzdem im Terminal.
+        ausgabe = [z.text for z in antwort.zeilen if z.art == AUSGABE]
+        fehlerzeilen = [z for z in antwort.zeilen if z.art == FEHLER]
         rest = [z for z in antwort.zeilen if z.art not in (AUSGABE, FEHLER)]
-        gefiltert, fehler = ds.filter_anwenden(filter_woerter[0], filter_woerter[1:], [z.text for z in ausgabe])
-        if fehler == "nicht":
-            return Antwort(_sim(f"„{' '.join(filter_woerter)}“ hinter einer Pipe ist hier nicht nachgebaut. "
-                                "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
+        gefiltert, fehler = ds.filter_anwenden(filter_woerter[0], filter_woerter[1:], ausgabe)
         if fehler:
-            return Antwort([Zeile(fehler, FEHLER)], "treffer")
-        antwort.zeilen = [Zeile(t, AUSGABE) for t in gefiltert] + [z for z in rest if z.art != ERFOLG]
+            neu = fehlerzeilen + [Zeile(fehler, FEHLER)]
+        else:
+            neu = fehlerzeilen + [Zeile(t, AUSGABE) for t in gefiltert]
+        antwort.zeilen = neu + [z for z in rest if z.art != ERFOLG]
         if any(z.art == ERFOLG for z in rest):
             antwort.zeilen += [Zeile("", AUSGABE)] + [z for z in rest if z.art == ERFOLG]
         return antwort
@@ -566,6 +597,10 @@ class Sitzung:
             **({"ticket_geschlossen": self.ticket_geschlossen, "ticket_notiz": self.ticket_notiz}
                if self.szenario.ticket else {}),
         }
+
+
+# In die Bash eingebaute Befehle: kein eigenes Programm, darum geht „sudo cd …“ nicht.
+_SHELL_EINGEBAUT = frozenset({"cd", "exit", "logout", "export", "source", "alias", "history", "umask"})
 
 
 def _an_letzter_pipe(text: str) -> tuple[str, str]:

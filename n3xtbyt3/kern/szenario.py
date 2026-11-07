@@ -65,6 +65,12 @@ class Befehl:
     bedeutung: str | None = None
     frage: str | None = None
     vorbereitet: list = field(default_factory=list, repr=False)
+    muster_shells: list = field(default_factory=list, repr=False)  # je Muster: erlaubte Shells
+
+    def shells_fuer(self, index: int) -> tuple[str, ...]:
+        if index < len(self.muster_shells):
+            return self.muster_shells[index]
+        return self.shells
 
 
 @dataclass
@@ -176,12 +182,33 @@ def _lies_json(datei: Path) -> Any:
         ) from None
 
 
-def _standard_shells(system: System, muster: list[str]) -> tuple[str, ...]:
-    if "powershell" in system.shell_ids:
-        namen = [zerlege(m)[0][0] for m in muster if zerlege(m) and zerlege(m)[0]]
-        if any(ist_cmdlet_name(n) for n in namen):
-            return ("powershell",)
-    return system.shell_ids
+# Kurznamen, die es nur in der PowerShell gibt (bzw. die in der cmd etwas anderes tun).
+# Stehen sie neben Cmdlets im selben Eintrag, gelten sie wie diese nur in der PowerShell.
+_PS_KURZNAMEN = frozenset({
+    "tnc", "gci", "gc", "gsv", "gps", "gcm", "gm", "sls", "select", "where", "ft", "fl",
+    "iwr", "irm", "ni", "ri", "ls", "cat", "sasv", "spsv", "spps", "kill", "help", "man",
+})
+
+
+def _standard_shells(system: System, muster: list[str]) -> list[tuple[str, ...]]:
+    """Shells je Muster, wenn der Eintrag kein „shell“ hat.
+
+    Ein Cmdlet (Verb-Nomen) geht nur in der PowerShell. Klassische Programme wie
+    taskkill, net oder netsh gehen in beiden Shells – auch wenn sie im selben Eintrag
+    wie ein Cmdlet stehen. PowerShell-Kurznamen (tnc, gci …) neben Cmdlets: nur PowerShell.
+    """
+    alle = system.shell_ids
+    if "powershell" not in alle:
+        return [alle for _ in muster]
+    namen = [zerlege(m)[0][0] if zerlege(m) and zerlege(m)[0] else "" for m in muster]
+    mit_cmdlet = any(ist_cmdlet_name(n) for n in namen)
+    ergebnis = []
+    for n in namen:
+        if ist_cmdlet_name(n) or (mit_cmdlet and n.casefold() in _PS_KURZNAMEN):
+            ergebnis.append(("powershell",))
+        else:
+            ergebnis.append(alle)
+    return ergebnis
 
 
 def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
@@ -211,8 +238,10 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
             if any(not abschnitt for abschnitt in zerlege(m)):
                 fehler.append(f"{stelle}.muster: „{m}“ hat einen leeren Abschnitt (|).")
         shells = eintrag.get("shell")
+        je_muster: list[tuple[str, ...]] | None = None
         if shells is None:
-            shells_t = _standard_shells(system, muster)
+            je_muster = _standard_shells(system, muster)
+            shells_t = tuple(s for s in system.shell_ids if any(s in j for j in je_muster))
         else:
             if isinstance(shells, str):
                 shells = [shells]
@@ -294,6 +323,7 @@ def _lies_befehle(roh: Any, system: System, bekannte: set[str], ort: str,
         befehle.append(Befehl(
             muster=muster, faelle=faelle, shells=shells_t, namen=namen, falsch=falsch,
             warum=warum, bedeutung=bedeutung, frage=frage, vorbereitet=vorbereitet,
+            muster_shells=je_muster or [shells_t for _ in muster],
         ))
     return befehle
 
@@ -416,6 +446,8 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
     datum = roh.get("datum")
     if "datum" in roh:
         try:
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", datum):  # type: ignore[arg-type]
+                raise ValueError(datum)
             _dt.date.fromisoformat(datum)  # type: ignore[arg-type]
         except (TypeError, ValueError):
             fehler.append("„datum“: Format JJJJ-MM-TT, z. B. 2026-11-04.")
@@ -440,7 +472,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         rechner_roh = {}
     for name, r in rechner_roh.items():
         stelle = f"rechner[{name}]"
-        if not isinstance(name, str) or not re.match(r"^[a-z0-9][a-z0-9-]*$", name):
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
             fehler.append(f"{stelle}: Name nur Kleinbuchstaben, Ziffern, Bindestrich (wie ein Rechnername).")
             continue
         if name == hauptrechner:

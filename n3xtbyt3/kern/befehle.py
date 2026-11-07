@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from .systeme import System
 
 PLATZHALTER = "*"
-_VERB_NOMEN = re.compile(r"^[A-Za-z]+-[A-Za-z]+$")
+_VERB_NOMEN = re.compile(r"[A-Za-z]+-[A-Za-z][A-Za-z0-9]*")
 
 
 def zerlege(text: str) -> list[list[str]]:
@@ -71,7 +71,7 @@ def befehlsname(text: str) -> str:
 
 def ist_cmdlet_name(name: str) -> bool:
     """PowerShell-Befehle heißen Verb-Nomen, z. B. Get-Service."""
-    return bool(_VERB_NOMEN.match(name))
+    return bool(_VERB_NOMEN.fullmatch(name))
 
 
 @dataclass(frozen=True)
