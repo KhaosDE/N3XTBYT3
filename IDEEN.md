@@ -125,6 +125,36 @@ PowerShell zuerst; cmd nur dort, wo man es im Alltag noch braucht.
   mindestens 10 Situationen je System.
 - Grundkurse für alle vier Systeme vorhanden.
 
+## Fehler: Tippfehler im Parameter wird als „falsche Form“ gemeldet
+Status: freigegeben
+Datum: 07.11.2026
+Was: Hat ein Befehl einen Tippfehler in einem Parameter, soll die Simulation den Tippfehler
+zeigen, statt zu behaupten, der Befehl passe „nicht in dieser Form“.
+Warum: Tobi hat in Grundkurs Windows, Lektion 3, Aufgabe 2 `get-command *-prcoess` getippt
+(c und o vertauscht). Die Simulation meldete zweimal „kennt diese Simulation, aber nicht in
+dieser Form“ und „Der Befehl passt – aber nicht mit diesen Zusätzen“. Für einen Einsteiger
+klingt das, als sei `Get-Command` falsch – der Fehler ist aber nur das Wort „prcoess“.
+Umfang:
+- `n3xtbyt3/kern/grundkurs.py`, `_tipp()`: Die Prüfung auf Tippfehler („Fast! …“) kommt
+  **vor** der Meldung „Der Befehl passt – aber nicht mit diesen Zusätzen“. Verglichen wird
+  nicht nur mit `schritt.eingabe` (beim Selbst-Probieren leer oder unpassend), sondern auch
+  mit den Mustern aus `schritt.loesung`/den Befehlsmustern der Aufgabe.
+- Der Tipp nennt die Stelle: „Fast! Schau dir das Wort ‚prcoess‘ an – gemeint ist
+  ‚process‘.“ (Wortweise vergleichen; nur das abweichende Wort nennen, nicht die ganze Lösung.)
+- `n3xtbyt3/kern/sitzung.py`, Meldung „kennt diese Simulation, aber nicht in dieser Form“:
+  dieselbe Wortprüfung gegen die bekannten Muster dieses Befehls; bei einem ähnlichen Muster
+  „Meintest du …?“ mit dem abweichenden Wort. Gilt für Grundkurs und Szenarien in allen
+  Systemen.
+- Echtes Verhalten nachbilden, wo es sicher belegt ist: `Get-Command` mit Platzhalter, auf den
+  nichts passt, gibt in der echten PowerShell keine Ausgabe und keinen Fehler (vor dem Einbau
+  in der Microsoft-Doku zu Get-Command prüfen; ist das nicht belegt, weglassen). Dann zeigt
+  das Terminal eine leere Ausgabe und darunter die blaue Meldung „Kein Befehl passt zu diesem
+  Muster – prüf die Schreibweise.“
+- Dieselbe Meldung nicht doppelt ausgeben (Terminal und Seitenbereich dürfen sich ergänzen,
+  im Terminal steht sie nur einmal).
+- Test: `get-command *-prcoess` in Lektion 3, Aufgabe 2 ergibt einen Tipp, der „prcoess“
+  nennt; `Get-Command *-Process` löst die Aufgabe weiterhin.
+
 ## Szenarien aus gelösten Problemen in Tobis Notizen
 Status: offen
 Datum: 04.11.2026
