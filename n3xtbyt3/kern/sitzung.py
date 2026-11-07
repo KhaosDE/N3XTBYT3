@@ -99,6 +99,7 @@ class Sitzung:
         self.nicht_erkannt: list[str] = []
         self.unbekannte: list[str] = []
         self.anzahl_befehle = 0
+        self._editor_als_root = False
         self.begonnen = _dt.datetime.now().replace(microsecond=0)
         self._uhr = uhr
         self._start = uhr()
@@ -441,8 +442,8 @@ class Sitzung:
         if ergebnis is None:
             return None
         antwort = Antwort(art="treffer")
-        art = FEHLER if ergebnis.fehler else AUSGABE
-        antwort.zeilen = [Zeile(z, art) for z in ergebnis.zeilen]
+        antwort.zeilen = [Zeile(z, FEHLER if f else AUSGABE)
+                          for z, f in zip(ergebnis.zeilen, ergebnis.arten())]
         if ergebnis.sim:
             antwort.zeilen += _sim(ergebnis.sim)
         return self._ziel_pruefen(antwort)
@@ -454,6 +455,7 @@ class Sitzung:
         woerter = zerlege(text)[0]
         if roh_name == "sudo":
             return self._sudo(text, woerter)
+        woerter = ds.erweitere(self.fs, text)  # ~ und * wie in der Bash
         if len(abschnitte) >= 2:
             links, rechts = _an_letzter_pipe(text)
             filter_woerter = zerlege(rechts)[0] if zerlege(rechts) and zerlege(rechts)[0] else []
@@ -470,13 +472,14 @@ class Sitzung:
             return None
         ergebnis = befehl(self.fs, woerter[1:])
         antwort = Antwort(art="treffer")
-        art = FEHLER if ergebnis.fehler else AUSGABE
-        antwort.zeilen = [Zeile(z, art) for z in ergebnis.zeilen]
+        antwort.zeilen = [Zeile(z, FEHLER if f else AUSGABE)
+                          for z, f in zip(ergebnis.zeilen, ergebnis.arten())]
         if ergebnis.sim:
             antwort.zeilen += _sim(ergebnis.sim)
         if ergebnis.editor:
             antwort.aktion = "editor"
             antwort.editor = ergebnis.editor
+            self._editor_als_root = bool(self.zustand.get("root"))
         return self._ziel_pruefen(antwort)
 
     def _sudo(self, text: str, woerter: list[str]) -> Antwort:
@@ -504,7 +507,7 @@ class Sitzung:
             if woerter[1:] in (["-i"], ["su", "-"]):
                 self.zustand.werte["pfad"] = "/root"
             return Antwort(zeilen + _sim("Du bist jetzt root (Prompt endet auf #). Zurück mit: exit"), "treffer")
-        if woerter[1] in _SHELL_EINGEBAUT:
+        if len(woerter) > 1 and woerter[1] in _SHELL_EINGEBAUT:
             # Eingebaute Befehle der Shell sind keine Programme – sudo findet sie nicht.
             return Antwort(zeilen + [Zeile(f"sudo: {woerter[1]}: command not found", FEHLER)], "treffer")
         # Merken, auf welchem Rechner root gesetzt wird: „sudo ssh …“ wechselt den Rechner.
@@ -526,7 +529,12 @@ class Sitzung:
             self.nicht_erkannt.append(text)
             return Antwort(_sim(f"„{' '.join(filter_woerter)}“ hinter einer Pipe ist hier nicht nachgebaut. "
                                 "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
-        antwort = self._auswerten(links)
+        fs = self.fs
+        fs.in_pipe = True
+        try:
+            antwort = self._auswerten(links)
+        finally:
+            fs.in_pipe = False
         if antwort.art not in ("treffer",) or antwort.aktion:
             return antwort
         # Nur die normale Ausgabe (stdout) geht durch die Pipe. Fehlermeldungen (stderr)
@@ -551,8 +559,24 @@ class Sitzung:
         return self.eingabe(schritt)
 
     def datei_speichern(self, pfad: str, inhalt: str) -> Antwort:
-        """Speichert eine Datei aus dem Editor in den simulierten Zustand."""
+        """Speichert eine Datei aus dem Editor in den simulierten Zustand.
+
+        Im Zustand steht der Text ohne den Zeilenumbruch am Ende (den setzt nano selbst).
+        Eine neue Datei gehört dem, der den Editor geöffnet hat (mit sudo: root).
+        """
+        if inhalt.endswith("\n"):
+            inhalt = inhalt[:-1]
+        neu = not self.fs.ist_datei(pfad)
         self.fs.schreibe(pfad, inhalt)
+        war_root = self.zustand.get("root")
+        self.zustand.werte["root"] = bool(war_root) or self._editor_als_root
+        try:
+            if neu:
+                ds._neu_angelegt(self.fs, pfad, ordner=False)
+            else:
+                self.zustand.werte[f"zeit:{pfad}"] = ds._jetzt_ls()
+        finally:
+            self.zustand.werte["root"] = war_root
         anzahl = len(inhalt.split("\n")) if inhalt else 0
         antwort = Antwort([Zeile(f"[ Wrote {anzahl} line{'s' if anzahl != 1 else ''} ]", AUSGABE)], "treffer")
         return self._ziel_pruefen(antwort)

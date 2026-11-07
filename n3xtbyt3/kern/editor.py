@@ -12,6 +12,7 @@ class EditorPuffer:
         self.nur_lesen = nur_lesen
         self.neu = neu
         self.geaendert = False
+        self._wunsch_spalte: int | None = None  # wie nano: Spalte merken beim Hoch/Runter
 
     @property
     def text(self) -> str:
@@ -24,6 +25,7 @@ class EditorPuffer:
     # ------------------------------------------------------------------ Bewegen
 
     def links(self) -> None:
+        self._wunsch_spalte = None
         if self.spalte > 0:
             self.spalte -= 1
         elif self.zeile > 0:
@@ -31,29 +33,38 @@ class EditorPuffer:
             self.spalte = len(self.zeilen[self.zeile])
 
     def rechts(self) -> None:
+        self._wunsch_spalte = None
         if self.spalte < len(self.zeilen[self.zeile]):
             self.spalte += 1
         elif self.zeile < len(self.zeilen) - 1:
             self.zeile += 1
             self.spalte = 0
 
+    def _senkrecht(self, schritt: int) -> None:
+        if self._wunsch_spalte is None:
+            self._wunsch_spalte = self.spalte
+        self.zeile += schritt
+        self.zeile = max(0, min(self.zeile, len(self.zeilen) - 1))
+        self.spalte = min(self._wunsch_spalte, len(self.zeilen[self.zeile]))
+
     def hoch(self, n: int = 1) -> None:
-        self.zeile -= n
-        self._begrenzen()
+        self._senkrecht(-n)
 
     def runter(self, n: int = 1) -> None:
-        self.zeile += n
-        self._begrenzen()
+        self._senkrecht(n)
 
     def zeilenanfang(self) -> None:
+        self._wunsch_spalte = None
         self.spalte = 0
 
     def zeilenende(self) -> None:
+        self._wunsch_spalte = None
         self.spalte = len(self.zeilen[self.zeile])
 
     # ------------------------------------------------------------------ Ändern
 
     def einfuegen(self, text: str) -> None:
+        self._wunsch_spalte = None
         if self.nur_lesen:
             return
         for i, teil in enumerate(text.replace("\r", "").split("\n")):
@@ -65,6 +76,7 @@ class EditorPuffer:
         self.geaendert = True
 
     def neue_zeile(self) -> None:
+        self._wunsch_spalte = None
         if self.nur_lesen:
             return
         z = self.zeilen[self.zeile]
@@ -75,6 +87,7 @@ class EditorPuffer:
         self.geaendert = True
 
     def rueckschritt(self) -> None:
+        self._wunsch_spalte = None
         if self.nur_lesen:
             return
         if self.spalte > 0:
@@ -91,6 +104,7 @@ class EditorPuffer:
         self.geaendert = True
 
     def entfernen(self) -> None:
+        self._wunsch_spalte = None
         if self.nur_lesen:
             return
         z = self.zeilen[self.zeile]
@@ -104,10 +118,13 @@ class EditorPuffer:
 
     def zeile_ausschneiden(self) -> None:
         """Wie Strg+K in nano: aktuelle Zeile entfernen."""
+        self._wunsch_spalte = None
         if self.nur_lesen:
             return
         if len(self.zeilen) > 1:
             self.zeilen.pop(self.zeile)
+        elif self.zeilen == [""]:
+            return  # nichts auszuschneiden
         else:
             self.zeilen = [""]
         self._begrenzen()

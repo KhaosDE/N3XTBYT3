@@ -179,3 +179,194 @@ class SudoUndPipeTest(unittest.TestCase):
         s = self._linux()
         a = s.eingabe("sudo systemctl start app | grep -x")  # grep-Fehler hinter erfolgreichem Befehl
         self.assertTrue(a.geloest_jetzt)
+
+
+def _lx(**dateien):
+    from n3xtbyt3.kern.sitzung import Sitzung
+    from n3xtbyt3.kern.szenario import lade_allgemein
+    from tests.test_kern_linux import linux_szenario
+    basis = {
+        "/etc/app.conf": {"inhalt": ["port=8080", "debug=true"], "rechte": "644", "besitzer": "root:root"},
+        "/home/anna/d/": {}, "/home/anna/d/a.txt": "A", "/home/anna/d/sub/b.txt": "B",
+        "/home/anna/f.txt": "F", "/home/anna/z.txt": [f"Z{i}" for i in range(1, 13)],
+        "/home/anna/skript.sh": {"inhalt": "#!/bin/bash", "rechte": "755", "besitzer": "anna:anna"},
+        "/tmp/fremd.txt": {"inhalt": "x", "besitzer": "root:root"},
+        "/root/offen.txt": {"inhalt": "x", "rechte": "644"},
+    }
+    basis.update(dateien)
+    return Sitzung(linux_szenario(dateien=basis), lade_allgemein("linux"))
+
+
+def _t(s, befehl):
+    return [z.text for z in s.eingabe(befehl).zeilen]
+
+
+class LinuxDateisystemTest(unittest.TestCase):
+    """Funde aus der Durchsicht von dateisystem.py (jeweils mit echtem GNU-Verhalten verglichen)."""
+
+    def test_cp_ohne_schreibrecht(self):
+        s = _lx()
+        self.assertEqual(_t(s, "cp f.txt /etc/app.conf"),
+                         ["cp: cannot create regular file '/etc/app.conf': Permission denied"])
+        self.assertEqual(s.fs.besitzer("/etc/app.conf"), ("root", "root"))
+
+    def test_cp_rechte_und_selbstkopie(self):
+        s = _lx()
+        _t(s, "cp skript.sh neu.sh")
+        self.assertEqual(s.fs.rechte("/home/anna/neu.sh"), "rwxr-xr-x")  # 755 ohne umask 002
+        self.assertEqual(_t(s, "cp f.txt f.txt"), ["cp: 'f.txt' and 'f.txt' are the same file"])
+        self.assertEqual(_t(s, "cp -r d d"), ["cp: cannot copy a directory, 'd', into itself, 'd/d'"])
+
+    def test_mv_in_sich_selbst_und_ueberschreiben(self):
+        s = _lx(**{"/home/anna/ziel.txt": {"inhalt": "Z", "rechte": "600", "zeit": "Jan  1 00:00"}})
+        self.assertEqual(_t(s, "mv d d/sub"), ["mv: cannot move 'd' to a subdirectory of itself, 'd/sub/d'"])
+        self.assertTrue(s.fs.ist_datei("/home/anna/d/a.txt"))
+        _t(s, "mv f.txt ziel.txt")
+        self.assertEqual(s.fs.rechte("/home/anna/ziel.txt"), "rw-r--r--")
+        self.assertEqual(s.fs.inhalt("/home/anna/ziel.txt"), "F")
+        self.assertEqual(_t(s, "mv d ziel.txt"), ["mv: cannot overwrite non-directory 'ziel.txt' with directory 'd'"])
+
+    def test_ls_d_und_mehrere(self):
+        s = _lx()
+        self.assertEqual(_t(s, "ls -ld /tmp"), ["drwxrwxrwt 2 root root 4096 Nov  4 09:12 /tmp"])
+        self.assertEqual(_t(s, "ls d | wc -l"), ["2"])
+        self.assertEqual(_t(s, "ls -1 d"), ["a.txt", "sub"])
+
+    def test_chmod_chown_rekursiv_und_sonderbits(self):
+        s = _lx()
+        _t(s, "chmod -R 700 d")
+        self.assertEqual(s.fs.rechte("/home/anna/d/sub/b.txt"), "rwx------")
+        _t(s, "chmod 1777 d")
+        self.assertEqual(s.fs.rechte("/home/anna/d"), "rwxrwxrwt")
+        _t(s, "chmod u=rw,go= f.txt")
+        self.assertEqual(s.fs.rechte("/home/anna/f.txt"), "rw-------")
+        self.assertEqual(_t(s, "chmod u5x f.txt")[0], "chmod: invalid mode: 'u5x'")
+        _t(s, "sudo chown -R root:root d")
+        self.assertEqual(s.fs.besitzer("/home/anna/d/sub/b.txt"), ("root", "root"))
+
+    def test_head_tail_vorzeichen(self):
+        s = _lx()
+        self.assertEqual(_t(s, "tail -n +11 z.txt"), ["Z11", "Z12"])
+        self.assertEqual(_t(s, "head -n -10 z.txt"), ["Z1", "Z2"])
+        self.assertEqual(_t(s, "cat z.txt | tail -n +12"), ["Z12"])
+        self.assertEqual(_t(s, "head -n 1 f.txt z.txt"), ["==> f.txt <==", "F", "", "==> z.txt <==", "Z1"])
+
+    def test_rechte_auf_dem_weg_und_sticky_bit(self):
+        s = _lx()
+        self.assertEqual(_t(s, "cat /root/offen.txt"), ["cat: /root/offen.txt: Permission denied"])
+        self.assertEqual(_t(s, "rm /tmp/fremd.txt"), ["rm: cannot remove '/tmp/fremd.txt': Operation not permitted"])
+        self.assertEqual(_t(s, "sudo cat /root/offen.txt")[-1], "x")
+
+    def test_mkdir_durch_datei_und_ordner_bleiben(self):
+        s = _lx()
+        self.assertEqual(_t(s, "mkdir -p f.txt/sub"), ["mkdir: cannot create directory 'f.txt/sub': Not a directory"])
+        self.assertTrue(s.fs.ist_datei("/home/anna/f.txt"))
+        _t(s, "rm d/sub/b.txt")
+        self.assertTrue(s.fs.ist_verzeichnis("/home/anna/d/sub"))
+
+    def test_grep_optionen(self):
+        s = _lx(**{"/home/anna/p.txt": ["a.b", "axb", "port 80", "Port=1"]})
+        self.assertEqual(_t(s, "grep -E 'port|Port' p.txt"), ["port 80", "Port=1"])
+        self.assertEqual(_t(s, "grep 'a\\|port' p.txt"), ["a.b", "axb", "port 80"])
+        self.assertEqual(_t(s, "grep -A 1 axb p.txt"), ["axb", "port 80"])
+        self.assertEqual(_t(s, "grep -c a f.txt p.txt"), ["f.txt:0", "p.txt:2"])
+        # /etc/shadow ist 640 root:shadow – wie im echten System meldet grep -r das
+        self.assertEqual(_t(s, "grep -r port /etc"),
+                         ["/etc/app.conf:port=8080", "grep: /etc/shadow: Permission denied"])
+
+    def test_sort_und_wc(self):
+        s = _lx(**{"/home/anna/n.txt": ["10", "9", "100", "9", "2"]})
+        self.assertEqual(_t(s, "cat n.txt | sort -n"), ["2", "9", "9", "10", "100"])
+        self.assertEqual(_t(s, "cat n.txt | sort -rnu"), ["100", "10", "9", "2"])
+        self.assertEqual(_t(s, "cat n.txt | wc"), ["      5       5      13"])
+
+    def test_platzhalter_und_tilde(self):
+        s = _lx()
+        self.assertEqual(_t(s, "ls d/*.txt"), ["d/a.txt"])
+        self.assertEqual(_t(s, "cat ~/nix"), ["cat: /home/anna/nix: No such file or directory"])
+        self.assertEqual(_t(s, "rm *.log"), ["rm: cannot remove '*.log': No such file or directory"])
+        self.assertEqual(_t(s, "cat 'd/*.txt'"), ["cat: d/*.txt: No such file or directory"])
+
+    def test_wurzel_rekursiv_haengt_nicht(self):
+        s = _lx()
+        s.eingabe("sudo -i")
+        self.assertEqual(_t(s, "chmod -R 755 /"), [])  # lief vorher endlos
+
+    def test_nano_speichern(self):
+        s = _lx()
+        a = s.eingabe("nano /tmp/notiz.txt")
+        antwort = s.datei_speichern(a.editor["pfad"], "zeile1\n")
+        self.assertEqual([z.text for z in antwort.zeilen], ["[ Wrote 1 line ]"])
+        self.assertEqual(_t(s, "cat /tmp/notiz.txt | wc -l"), ["1"])
+        self.assertEqual(s.fs.besitzer("/tmp/notiz.txt"), ("anna", "anna"))
+        a = s.eingabe("sudo nano /etc/neu.conf")
+        s.datei_speichern(a.editor["pfad"], "x")
+        self.assertEqual(s.fs.besitzer("/etc/neu.conf"), ("root", "root"))
+
+    def test_menschlich_grenzen(self):
+        from n3xtbyt3.kern.dateisystem import menschlich
+        self.assertEqual(menschlich(10239), "10K")
+        self.assertEqual(menschlich(1048575), "1.0M")
+
+
+class WindowsDateisystemTest(unittest.TestCase):
+    def _s(self):
+        from tests.test_kern_dateien import HOME
+        sz, fehler = pruefe_daten(mini(zustand={"dienst": "Stopped", "pfad": HOME}, dateien={
+            HOME + "\\Doc\\": None, HOME + "\\Documents\\": {"modus": "d-r---"},
+            HOME + "\\Documents\\Sub\\tief.txt": "tief",
+            HOME + "\\AppData\\": {"modus": "d--h--"},
+            HOME + "\\liste.txt": {"inhalt": "abc", "zeit": "11/3/2026 14:05"},
+            HOME + "\\Desktop\\": None}))
+        self.assertEqual(fehler, [])
+        from n3xtbyt3.kern.sitzung import Sitzung
+        from n3xtbyt3.kern.szenario import lade_allgemein
+        return Sitzung(sz, lade_allgemein("windows")), HOME
+
+    def test_ordner_bleibt_und_move_behaelt_zeit(self):
+        s, home = self._s()
+        s.eingabe("rm Documents\\Sub\\tief.txt")
+        self.assertEqual(s.eingabe("cd Documents\\Sub").zeilen, [])
+        s.eingabe("cd " + home)
+        s.eingabe("Move-Item liste.txt Desktop")
+        self.assertEqual(s.aktiv.wfs.zeit(home + "\\Desktop\\liste.txt"), "11/3/2026 14:05")
+
+    def test_move_item_aktueller_ordner(self):
+        s, home = self._s()
+        s.eingabe("cd Documents")
+        s.eingabe("Move-Item ..\\Doc ..\\Archiv")
+        self.assertEqual(s.prompt(), f"PS {home}\\Documents> ")
+
+    def test_versteckt_nur_mit_force(self):
+        s, _ = self._s()
+        self.assertNotIn("AppData", "\n".join(_t(s, "Get-ChildItem")))
+        self.assertIn("AppData", "\n".join(_t(s, "Get-ChildItem -Force")))
+
+    def test_mkdir_mit_elternordnern_und_datei_vorhanden(self):
+        s, home = self._s()
+        s.eingabe("mkdir x\\y\\z")
+        self.assertEqual(s.aktiv.wfs.art(home + "\\x\\y\\z"), "ordner")
+        self.assertIn("already exists", _t(s, "mkdir liste.txt -Force")[0])
+        self.assertEqual(s.aktiv.wfs.art(home + "\\liste.txt"), "datei")
+
+    def test_copy_in_sich_selbst_und_get_content(self):
+        s, _ = self._s()
+        self.assertIn("in sich selbst", _t(s, "Copy-Item Documents Documents\\Sub -Recurse")[0])
+        self.assertEqual(_t(s, "Get-Content liste.txt -TotalCount -1"), ["abc"])
+        self.assertEqual(_t(s, "Get-Content *.txt"), ["abc"])
+
+
+class EditorTest(unittest.TestCase):
+    def test_spalte_bleibt_beim_hoch_runter(self):
+        from n3xtbyt3.kern.editor import EditorPuffer
+        p = EditorPuffer("/x", "lange zeile hier\nkurz\nnoch eine lange zeile")
+        p.zeilenende()
+        p.runter()
+        p.runter()
+        self.assertEqual((p.zeile, p.spalte), (2, 16))
+
+    def test_leeren_puffer_ausschneiden_aendert_nichts(self):
+        from n3xtbyt3.kern.editor import EditorPuffer
+        p = EditorPuffer("/y", "")
+        p.zeile_ausschneiden()
+        self.assertFalse(p.geaendert)

@@ -162,7 +162,8 @@ class WinDateisystem:
         if pfad == "~" or pfad.startswith("~\\"):
             pfad = self.home + pfad[1:]
         if re.match(r"^[A-Za-z]:$", pfad):
-            pfad += "\\"
+            # „C:“ ohne \ heißt: der aktuelle Ordner auf diesem Laufwerk
+            pfad = self.cwd if self.cwd[:2].casefold() == pfad.casefold() else pfad + "\\"
         if pfad.startswith("\\"):
             pfad = self.cwd[:2] + pfad
         elif not _LAUFWERK.match(pfad):
@@ -221,6 +222,10 @@ class WinDateisystem:
         self.z.werte[f"zeit:{pfad}"] = _jetzt()
 
     def entferne(self, pfad: str) -> None:
+        eltern = ntpath.dirname(pfad)
+        if eltern != pfad and self.art(eltern) == "ordner":
+            # Der Ordner darüber bleibt, auch wenn er nur durch diesen Eintrag bestand.
+            self.z.werte[f"verzeichnis:{eltern}"] = True
         for k in self._alle_unter(pfad):
             art = k.split(":", 1)[0]
             if art == "datei":
@@ -230,29 +235,49 @@ class WinDateisystem:
             else:
                 self.z.werte.pop(k, None)
 
+    def _kopiere_datei(self, quelle: str, ziel: str) -> None:
+        # Wie File.Copy: Inhalt, Änderungszeit und Attribute bleiben.
+        self.z.werte[f"datei:{ziel}"] = self.inhalt(quelle)
+        self.z.werte[f"zeit:{ziel}"] = self.zeit(quelle)
+        modus = self.z.get(f"modus:{quelle}")
+        if modus:
+            self.z.werte[f"modus:{ziel}"] = modus
+        else:
+            self.z.werte.pop(f"modus:{ziel}", None)
+
     def kopiere(self, quelle: str, ziel: str, rekursiv: bool = True) -> None:
         if self.art(quelle) == "datei":
-            self.schreibe(ziel, self.inhalt(quelle))
+            self._kopiere_datei(quelle, ziel)
             return
+        unter = [(p, a) for k, (p, a) in self._index().items()
+                 if k.startswith(quelle.rstrip("\\").casefold() + "\\")] if rekursiv else []
         self.neuer_ordner(ziel)
-        if not rekursiv:
-            return
-        for k in self._alle_unter(quelle):
-            art, rest = k.split(":", 1)
-            if rest.casefold() == quelle.casefold() or art not in ("datei", "verzeichnis"):
-                continue
-            neu = ziel + rest[len(quelle):]
-            if art == "datei" and self.z.werte[k] is not None:
-                self.schreibe(neu, self.z.werte[k])
-            elif art == "verzeichnis" and self.z.werte[k]:
+        for p, a in sorted(unter, key=lambda e: len(e[0])):
+            neu = ziel + p[len(quelle.rstrip("\\")):]
+            if a == "ordner":
                 self.neuer_ordner(neu)
+            else:
+                self._kopiere_datei(p, neu)
 
     def verschiebe(self, quelle: str, ziel: str) -> None:
+        """Umbenennen/Verschieben: alles zieht mit um (auch Zeit und Attribute)."""
         war_ordner = self.art(quelle) == "ordner"
-        self.kopiere(quelle, ziel)
+        index = self._index()
+        alte = {k: self.z.werte[k] for k in self._alle_unter(quelle)}
+        # Ordner, die es nur durch ihre Dateien gibt, ausdrücklich mitnehmen
+        for k, (p, a) in index.items():
+            if a == "ordner" and (k == quelle.casefold() or k.startswith(quelle.rstrip("\\").casefold() + "\\")):
+                alte.setdefault(f"verzeichnis:{p}", True)
+        if self.art(ziel) is not None:
+            self.entferne(ziel)
         self.entferne(quelle)
-        if war_ordner and self.cwd.casefold().startswith(quelle.casefold()):
-            self.z.werte["pfad"] = ziel + self.cwd[len(quelle):]
+        laenge = len(quelle.rstrip("\\"))
+        for k, v in alte.items():
+            art, rest = k.split(":", 1)
+            self.z.werte[f"{art}:{ziel}{rest[laenge:]}"] = v
+        cwd = self.cwd.casefold()
+        if war_ordner and (cwd == quelle.casefold() or cwd.startswith(quelle.rstrip("\\").casefold() + "\\")):
+            self.z.werte["pfad"] = ziel + self.cwd[laenge:]
 
 
 # ---------------------------------------------------------------------- Befehle
@@ -262,6 +287,10 @@ class Ergebnis:
         self.zeilen = zeilen or []
         self.fehler = fehler
         self.sim = sim
+        self.fehler_an: list[bool] | None = None  # je Zeile, wenn Fehler und Ausgabe gemischt sind
+
+    def arten(self) -> list[bool]:
+        return list(self.fehler_an) if self.fehler_an is not None else [self.fehler] * len(self.zeilen)
 
 
 def _parameter(woerter: list[str], bekannte: dict[str, bool]) -> tuple[dict[str, Any], list[str], str | None]:
@@ -361,6 +390,9 @@ def get_childitem(fs: WinDateisystem, aufruf: str, woerter: list[str]) -> Ergebn
         eintraege, ordner = fs.kinder(pfad), pfad
     if muster:
         eintraege = [e for e in eintraege if fnmatch.fnmatch(ntpath.basename(e[0]).casefold(), muster.casefold())]
+    if art != "datei" and not benannt.get("Force"):
+        # Versteckte (h) und Systemdateien (s) zeigt Get-ChildItem nur mit -Force.
+        eintraege = [e for e in eintraege if fs.modus(e[0])[3] != "h" and fs.modus(e[0])[4] != "s"]
     if benannt.get("File"):
         eintraege = [e for e in eintraege if e[1] == "datei"]
     if benannt.get("Directory"):
@@ -380,40 +412,72 @@ def get_content(fs: WinDateisystem, aufruf: str, woerter: list[str]) -> Ergebnis
     ziel = benannt.get("Path") or (pos[0] if pos else None)
     if ziel is None:
         return Ergebnis(sim="Get-Content braucht den Namen der Datei, z. B. Get-Content notiz.txt.")
-    pfad = fs.absolut(ziel)
-    art = fs.art(pfad)
-    if art is None:
-        return _nicht_gefunden(aufruf, pfad)
-    if art == "ordner":
-        return Ergebnis(sim=f"„{ntpath.basename(pfad)}“ ist ein Ordner. Get-Content liest nur Dateien; "
-                            "was im Ordner liegt, zeigt Get-ChildItem.")
-    inhalt = fs.inhalt(pfad)
-    zeilen = inhalt.split("\n") if inhalt else []
     anzahl = benannt.get("TotalCount") or benannt.get("Head") or benannt.get("First")
     ende = benannt.get("Tail") or benannt.get("Last")
     try:
-        if anzahl is not None:
-            zeilen = zeilen[: int(anzahl)]
-        if ende is not None:
-            zeilen = zeilen[-int(ende):] if int(ende) else []
+        anzahl = int(anzahl) if anzahl is not None else None
+        ende = int(ende) if ende is not None else None
     except ValueError:
         return Ergebnis(sim="Hinter -TotalCount bzw. -Tail gehört eine Zahl, z. B. -Tail 5.")
-    return Ergebnis(zeilen)
+    # In der Reihenfolge der Pfade: Inhalt bzw. Fehlermeldung (Get-Content a.txt,b.txt oder *.txt)
+    eintraege: list[tuple[str, str | None]] = []  # (Pfad, Fehlertext)
+    for teil in [t for t in ziel.split(",") if t]:
+        pfad = fs.absolut(teil)
+        if fs.art(pfad) is None and any(c in ntpath.basename(pfad) for c in "*?"):
+            ordner, muster = ntpath.dirname(pfad), ntpath.basename(pfad).casefold()
+            eintraege += [(p, None) for p, a in fs.kinder(ordner)
+                          if a == "datei" and fnmatch.fnmatch(ntpath.basename(p).casefold(), muster)]
+            continue
+        art = fs.art(pfad)
+        if art is None:
+            eintraege.append((pfad, _nicht_gefunden(aufruf, pfad).zeilen[0]))
+        elif art == "ordner":
+            return Ergebnis(sim=f"„{ntpath.basename(pfad)}“ ist ein Ordner. Get-Content liest nur Dateien; "
+                                "was im Ordner liegt, zeigt Get-ChildItem.")
+        else:
+            eintraege.append((pfad, None))
+    erg = Ergebnis()
+    erg.fehler_an = []
+    for pfad, fehlertext in eintraege:
+        if fehlertext:
+            erg.zeilen.append(fehlertext)
+            erg.fehler_an.append(True)
+            continue
+        inhalt = fs.inhalt(pfad)
+        teil = inhalt.split("\n") if inhalt else []
+        if anzahl is not None and anzahl >= 0:  # -TotalCount -1 heißt: alle Zeilen
+            teil = teil[:anzahl]
+        if ende is not None:
+            teil = teil[-ende:] if ende > 0 else ([] if ende == 0 else teil)
+        erg.zeilen += teil
+        erg.fehler_an += [False] * len(teil)
+    erg.fehler = bool(erg.fehler_an) and all(erg.fehler_an)
+    return erg
 
 
 def _neu(fs: WinDateisystem, aufruf: str, pfad: str, ordner: bool, wert: str | None, force: bool) -> Ergebnis:
     eltern = ntpath.dirname(pfad)
-    if fs.art(eltern) != "ordner":
-        return Ergebnis(sim=f"Den Ordner „{eltern}“ gibt es nicht. Leg ihn zuerst an oder prüf den Pfad "
-                            "(Get-ChildItem zeigt, was da ist).")
+    fehlend = []
+    while fs.art(eltern) is None and ntpath.dirname(eltern) != eltern:
+        fehlend.append(eltern)
+        eltern = ntpath.dirname(eltern)
+    if fs.art(eltern) == "datei" or (fehlend and not ordner):
+        return Ergebnis(sim=f"Den Ordner „{ntpath.dirname(pfad)}“ gibt es nicht. Leg ihn zuerst an oder prüf "
+                            "den Pfad (Get-ChildItem zeigt, was da ist).")
     vorhanden = fs.art(pfad)
     if vorhanden == "ordner":
         if ordner and force:
-            return Ergebnis(_tabelle(fs, eltern, [(pfad, "ordner")]))
+            return Ergebnis(_tabelle(fs, ntpath.dirname(pfad), [(pfad, "ordner")]))
+        return Ergebnis([f"{aufruf} : An item with the specified name {pfad} already exists."], fehler=True)
+    if vorhanden == "datei" and ordner:
         return Ergebnis([f"{aufruf} : An item with the specified name {pfad} already exists."], fehler=True)
     if vorhanden == "datei" and not force:
         return Ergebnis([f"{aufruf} : The file '{pfad}' already exists."], fehler=True)
+    eltern = ntpath.dirname(pfad)
     if ordner:
+        # New-Item -ItemType Directory (und mkdir) legen fehlende Ordner davor mit an.
+        for f in reversed(fehlend):
+            fs.neuer_ordner(f)
         fs.neuer_ordner(pfad)
     else:
         fs.schreibe(pfad, wert or "")
@@ -475,6 +539,8 @@ def copy_item(fs: WinDateisystem, aufruf: str, woerter: list[str]) -> Ergebnis:
         return fehler
     if q.casefold() == z.casefold():
         return Ergebnis(sim="Quelle und Ziel sind dieselbe Datei.")
+    if fs.art(q) == "ordner" and z.casefold().startswith(q.rstrip("\\").casefold() + "\\"):
+        return Ergebnis(sim="Ein Ordner kann nicht in sich selbst kopiert werden.")
     rekursiv = bool(benannt.get("Recurse"))
     fs.kopiere(q, z, rekursiv=rekursiv)
     if fs.art(q) == "ordner" and not rekursiv and fs.kinder(q):
