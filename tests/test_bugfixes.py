@@ -370,3 +370,13 @@ class EditorTest(unittest.TestCase):
         p = EditorPuffer("/y", "")
         p.zeile_ausschneiden()
         self.assertFalse(p.geaendert)
+
+
+class MusterZuordnungTest(unittest.TestCase):
+    def test_platzhalter_nimmt_keine_option_weg(self):
+        from n3xtbyt3.kern.befehle import Vergleicher
+        from n3xtbyt3.kern.systeme import SYSTEME
+        v = Vergleicher(SYSTEME["windows"])
+        self.assertTrue(v.passt(v.vorbereiten("cmd -a * -a x"), v.vorbereiten("cmd -a x -a y")))
+        self.assertTrue(v.passt(v.vorbereiten("cmd -a x -a *"), v.vorbereiten("cmd -a y -a x")))
+        self.assertFalse(v.passt(v.vorbereiten("cmd -a x -a x"), v.vorbereiten("cmd -a x -a y")))

@@ -136,15 +136,21 @@ class Vergleicher:
             return False
         if len(muster.einheiten) != len(eingabe.einheiten):
             return False
-        frei = list(eingabe.einheiten)
-        for einheit in muster.einheiten:
-            for i, kandidat in enumerate(frei):
-                if self._folge_passt(einheit, kandidat):
-                    del frei[i]
-                    break
-            else:
-                return False
-        return True
+        return self._zuordnen(muster.einheiten, eingabe.einheiten)
+
+    def _zuordnen(self, einheiten: tuple, frei: tuple) -> bool:
+        """Jede Option des Musters bekommt eine eigene Option der Eingabe.
+
+        Mit Rückschritt: Ein Platzhalter (*) darf nicht die Option „wegnehmen“, die ein
+        genaueres Muster braucht (z. B. -a * und -a x gegen -a x -a y).
+        """
+        if not einheiten:
+            return True
+        erste, rest = einheiten[0], einheiten[1:]
+        for i, kandidat in enumerate(frei):
+            if self._folge_passt(erste, kandidat) and self._zuordnen(rest, frei[:i] + frei[i + 1:]):
+                return True
+        return False
 
     def passt(self, muster: tuple[_Abschnitt, ...], eingabe: tuple[_Abschnitt, ...]) -> bool:
         if len(muster) != len(eingabe):

@@ -8,3 +8,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 05.11.2026 — Selbst-Update der .exe (Wunsch Tobi, Ausnahme zu Regel 1): Paket n3xtbyt3_update, Releases build-<n> per GitHub Actions, Prüfsumme, Versionsanzeige; Repository muss Tobi öffentlich machen.
 - 06.11.2026 — Fehler im Grundkurs behoben (Wiederholungsschritt „Pfeil hoch“ blieb ohne Erklärung hängen; Selbst-Probieren ohne Rückmeldung bei falschem Befehl); alle Lektionen per Prüfskript durchsucht.
 - 06.11.2026 — Zweite Grundkurs-Meldung (whoami bei Aufgabe 2 nicht erkannt) untersucht, nicht nachstellbar; genauere Rückmeldungen beim Selbst-Probieren und Eingabe-Protokoll für die Fehlersuche ergänzt.
+- 07.11.2026 — Große Bugsuche (Claude Code): Code-Durchsicht durch vier Prüfer plus Fuzzing; rund 60 Fehler behoben (Shell-Zuordnung, sudo/Pipes, Linux- und Windows-Dateisystem, Editor, Absturz F4/F5 in der Ticketliste, Editor-Antwort im Terminal, Notizmodus, Darstellung bei großer Schrift), alle mit Tests.

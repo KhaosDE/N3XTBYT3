@@ -1,6 +1,6 @@
 # STAND — N3XTBYT3
 
-Stand: 06.11.2026.
+Stand: 07.11.2026.
 
 ## Aktuell
 
@@ -11,6 +11,11 @@ Stand: 06.11.2026.
 **Neu: Selbst-Update der `.exe`** (dein Wunsch vom 05.11.2026, Ausnahme zu Regel 1 in `CLAUDE.md`).
 Das Repository ist seit 05.11.2026 öffentlich; der feste Download-Link und der echte Update-Ablauf
 (Release laden, Prüfsumme, Austausch) sind von außen geprüft.
+
+**Neu (07.11.2026): Große Bugsuche.** Vier Prüfer haben Befehlsauswertung, Linux- und Windows-Dateisystem,
+Editor und Oberfläche durchgesehen, dazu Fuzzing (Zufallseingaben) von Kern und Oberfläche. Rund 60 echte Fehler
+sind behoben, jeder mit Test (`tests/test_bugfixes.py`, `tests/test_oberflaeche.py`). Einzelheiten unten unter
+„Bugsuche 07.11.2026“.
 
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
@@ -185,6 +190,32 @@ die vom echten System abweichen, korrigieren.
 - 05.11.2026: **Unter Windows von Tobi bestätigt:** Build 22 hat sich beim Start selbst auf Build 23
   aktualisiert und läuft.
 
+### Bugsuche 07.11.2026
+
+Gefunden durch Code-Durchsicht (vier Prüfer), Fuzzing und Nachstellen; Linux-Ausgaben mit echtem
+GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesichert:
+
+- **Befehlsauswertung:** `taskkill`, `net`, `netsh` gingen in der cmd nicht, wenn sie im selben Eintrag wie ein
+  Cmdlet standen (jetzt Shell je Muster). Cmdlets mit Ziffern (`Get-DhcpServerv4Scope`) erkannt. Nach
+  `sudo ssh …` blieb man root. `sudo cd` meldet wie echt `command not found`. Fehlerzeilen gingen durch Pipes.
+  Lösung mit Pipe wurde nicht als gelöst gezählt. `ssh` zum eigenen Rechner, `Enter-PSSession` in der cmd.
+  Platzhalter `*` nahm einer genaueren Option den Platz weg. Strengere Prüfung von `datum` und Rechnernamen.
+- **Linux-Dateisystem:** `cp` überschrieb Systemdateien ohne Schreibrecht; `cp -r d d` stürzte ab; `mv d d/sub`
+  zerstörte Ordner; `chmod -R`/`chown -R` wirkten nicht rekursiv; `chmod -R 755 /` lief endlos; `tail -n +3`
+  und `head -n -3` falsch; `ls -d`, `-A`, `-1`, mehrere Ordner; `ls | wc -l`; Rechte auf dem Weg (x),
+  `/root` 700, Home 750, Sticky-Bit in `/tmp`; `mkdir` durch eine Datei; leere Ordner verschwanden nach `rm`;
+  grep `-E -F -w -x -o -l -r -A -B -C -m -e`, BRE `\|`; `sort -n -u`, `wc`; Bash-Platzhalter `*`, `?`, `~`;
+  nano: Zeilenumbruch am Ende und Besitzer neuer Dateien; `ls -h`-Grenzen (10K, 1.0M).
+- **Windows-Dateisystem:** `Move-Item` verlor Zeit und Attribute und schrieb den aktuellen Ordner falsch um
+  (`Doc` ↔ `Documents`); leere Ordner verschwanden; `mkdir a\b\c` legt Elternordner an; `mkdir datei -Force`
+  machte aus einer Datei einen Ordner; versteckte Einträge nur mit `-Force`; `Copy-Item` in sich selbst;
+  `Get-Content *.txt`, `a,b`, `-TotalCount -1`; `cd C:` bleibt im aktuellen Ordner.
+- **Oberfläche:** F4/F5 in der Ticketliste stürzte ab. J/N beim Beenden des Editors landete als Zeichen im
+  Terminal (im nano-Kurs kam dann „jnano …“ an). Strg+C ließ den Verlauf hängen. Lösungsnotiz teilte sich
+  Eingabezeile und Verlauf mit den Befehlen. Leertaste als Enter rutschte als Leerzeichen in die nächste Ansicht.
+  Lektionsliste konnte nicht blättern (große Schrift). Abgeschnittene Überschriften, Knöpfe, Fußzeilen,
+  Hauptmenü-Kacheln, Listen-Titel und Tabellen.
+
 ## Offene Punkte
 
 - Szenario-Ausgaben sind „ungeprüft“. Bitte beim Spielen auf Abweichungen zum echten Windows achten.
@@ -320,7 +351,40 @@ die vom echten System abweichen, korrigieren.
 - 06.11.2026: Lektionen schreiben ein Protokoll (`grundkurs_protokoll.txt`, die letzten 400 Eingaben) in den
   Datenordner. Grund: Fehler, die Tobi meldet, lassen sich sonst nicht nachvollziehen. Nur im Datenordner (Regel 1).
 
+- 07.11.2026: Klassische Programme (`taskkill`, `net`, `netsh` …) gelten in beiden Shells, auch wenn im selben
+  Eintrag ein Cmdlet steht; PowerShell-Kurznamen daneben (`tnc`, `gci`, `help` …) nur in der PowerShell. Grund:
+  so ist es in Windows, und Tobi sollte nicht lernen, dass `taskkill` in der cmd fehlt.
+- 07.11.2026: Bash-Platzhalter (`*`, `?`, `~`) werden nur bei den eingebauten Dateibefehlen aufgelöst, nicht in
+  Mustern der Szenarien. Wörter in Anführungszeichen bleiben stehen. Grund: Szenario-Muster sollen so bleiben,
+  wie sie geschrieben sind.
+- 07.11.2026: Home-Ordner unter Linux sind ohne Angabe 750 (`drwxr-x---`), `/root` 700. Grund: Standard von
+  Ubuntu ab 21.04 (HOME_MODE 0750). Szenarien können das mit `rechte` überschreiben.
+- 07.11.2026: Nicht nachgebaute Optionen (z. B. `ls -t`, `ls -R`, seltene grep-Optionen) bekommen eine blaue
+  `[N3XTBYT3]`-Meldung statt einer erfundenen Fehlermeldung (Regel 3).
+- 07.11.2026: `rm` auf eine schreibgeschützte Datei: Die echte Rückfrage wird gezeigt, die Simulation antwortet
+  mit „y“ (blaue Meldung). `rm` des Ordners, in dem man steht, setzt den Prompt eine Ebene höher (die echte Bash
+  bliebe im gelöschten Ordner) – bewusst vereinfacht.
+- 07.11.2026: F2 und die Knöpfe „Nächstes“/„Liste“ wirken nicht, solange der Editor offen ist; der Editor
+  zeigt „Erst den Editor schließen: Strg+X“. Grund: sonst gingen ungespeicherte Änderungen still verloren.
+- 07.11.2026: Befehle nach dem Lösen zählen bei Tickets weiter (bis F3), auch falsche. Grund: Nachprüfen gehört
+  zum Ticket; die normalen Szenarien speichern ohnehin sofort beim Lösen.
+- 07.11.2026: Zu lange Knopftexte werden bis 70 % verkleinert, sonst mit „…“ gekürzt; Tastenleisten brechen an
+  den „·“ um; Titel in Listen werden vor den Etiketten gekürzt.
+
 ## Für Tobi zum Testen
+
+**Neu: nach der Bugsuche (07.11.2026)** – die `.exe` aktualisiert sich beim nächsten Start selbst.
+
+1. Linux-Kurs, Lektion mit nano: Datei ändern, Strg+X, mit J antworten. Kommt danach im Terminal kein
+   „j“ mehr an?
+2. Tickets (Kachel 5): F4 und F5 drücken – kein Absturz mehr. Im Ticket halb einen Befehl tippen, F3,
+   Esc: Ist der halbe Befehl wieder da?
+3. Schrift groß stellen (Strg + mehrmals): Passt das Hauptmenü, kann man in der Lektionsliste bis
+   Lektion 10 blättern, passen die Knöpfe rechts?
+4. Windows-Szenario „Excel reagiert nicht mehr“: in der cmd `taskkill /IM EXCEL.EXE /F` – geht jetzt.
+5. Linux: `ls -l /home`, `cat /root/...`, `cp` auf eine Datei in `/etc` ohne sudo – stimmen die
+   Meldungen mit deinem Ubuntu überein?
+
 
 **Neu: Grundkurs**
 
