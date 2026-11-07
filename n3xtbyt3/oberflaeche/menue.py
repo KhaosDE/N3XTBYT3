@@ -14,7 +14,7 @@ from ..kern.systeme import REIHENFOLGE, SYSTEME
 from ..kern.szenario import Ladeergebnis, SzenarioFehler, lade_allgemein, lade_system
 from .basis import Ansicht, MatrixRegen
 from .stil import FARBE, glow_text
-from .text import umbrechen
+from .text import fuss_zeilen, kuerzen, umbrechen, zeichne_fuss
 
 if TYPE_CHECKING:
     from .app import App
@@ -112,22 +112,41 @@ class Hauptmenue(Ansicht):
         schleier.fill((0, 0, 0, 150))
         f.blit(schleier, (0, 0))
 
-        y = int(h * 0.08)
+        fuss = ("Pfeiltasten oder 1–5 + Enter: wählen  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: Beenden  ·  "
+                "Strg +/−: Schrift  ·  F11: Vollbild")
+        rand_x = s.zeichen_breite * 2
+        fuss_h = len(fuss_zeilen(fuss, s.klein, w - 2 * rand_x)) * s.klein.get_linesize()
+        frei_unten = h - s.zeilen_hoehe * 1.6 - fuss_h - s.zeilen_hoehe // 2
+        n = max(1, len(self.eintraege))
+        abstand = s.zeilen_hoehe // 2
+        kachel_min = s.zwischen.get_linesize() + s.text.get_linesize() + s.zeilen_hoehe // 2
+        kopf_voll = int(h * 0.08) + s.titel.get_linesize() + s.text.get_linesize() + s.zeilen_hoehe * 2
+        # Reicht der Platz nicht, rückt alles nach oben und die Unterzeile entfällt.
+        knapp = frei_unten - kopf_voll < n * kachel_min + (n - 1) * abstand
+
+        y = int(h * 0.02) if knapp else int(h * 0.08)
         glow_text(f, s.titel, "N3XTBYT3", FARBE["gruen"], (w // 2, y), staerke=3, mitte=True)
         y += s.titel.get_linesize()
-        unter = s.text.render("Lern-Simulator für Systemwartung – reine Simulation, dein echtes System bleibt unberührt",
-                              True, FARBE["text"])
-        f.blit(unter, unter.get_rect(midtop=(w // 2, y)))
-        y += unter.get_height() + s.zeilen_hoehe * 2
+        if not knapp:
+            unter_text = kuerzen("Lern-Simulator für Systemwartung – reine Simulation, dein echtes System bleibt "
+                                 "unberührt", s.text, w - 2 * rand_x)
+            unter = s.text.render(unter_text, True, FARBE["text"])
+            f.blit(unter, unter.get_rect(midtop=(w // 2, y)))
+            y += unter.get_height() + s.zeilen_hoehe * 2
+        else:
+            y += s.zeilen_hoehe // 2
 
         kachel_b = min(int(w * 0.6), 60 * s.zeichen_breite)
-        kachel_h = int(s.zeilen_hoehe * 3.1)
+        if kachel_b < 40 * s.zeichen_breite:
+            kachel_b = min(w - 2 * rand_x, 40 * s.zeichen_breite)
+        platz = frei_unten - y - (n - 1) * abstand
+        kachel_h = max(kachel_min, min(int(s.zeilen_hoehe * 3.1), int(platz // n)))
         x = (w - kachel_b) // 2
         self.rects = []
         for i, sid in enumerate(self.eintraege):
             if sid == "tickets":
                 self._ticket_kachel(f, pygame.Rect(x, y, kachel_b, kachel_h), i)
-                y += kachel_h + s.zeilen_hoehe // 2
+                y += kachel_h + abstand
                 continue
             ergebnis, _allg, stand = self.daten[sid]
             rect = pygame.Rect(x, y, kachel_b, kachel_h)
@@ -159,21 +178,20 @@ class Hauptmenue(Ansicht):
             else:
                 info = "kommt noch"
                 info_farbe = FARBE["aus"]
+            info = kuerzen(info, s.text, rect.width - s.zeichen_breite * 4)
             bild = s.text.render(info, True, info_farbe)
             f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.bottom - bild.get_height() - kachel_h // 6))
             if ergebnis.fehler and spielbar:
                 warn = s.klein.render(f"{len(ergebnis.fehler)} Datei(en) fehlerhaft", True, FARBE["fehler"])
                 f.blit(warn, (rect.right - warn.get_width() - s.zeichen_breite * 2, rect.bottom - warn.get_height() - kachel_h // 6))
-            y += kachel_h + s.zeilen_hoehe // 2
+            y += kachel_h + abstand
 
-        fuss = ("Pfeiltasten oder 1–5 + Enter: wählen  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: Beenden  ·  "
-                "Strg +/−: Schrift  ·  F11: Vollbild")
-        bild = s.klein.render(fuss, True, FARBE["text_schwach"])
-        f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 1.6)))
+        zeichne_fuss(f, s.klein, fuss, FARBE["text_schwach"], int(h - s.zeilen_hoehe * 1.6), rand=rand_x)
         from .. import _version
         version = f"Build {_version.BUILD}" if _version.BUILD else "Entwicklerversion"
-        ort = s.klein.render(f"{version}  ·  Spielstand und eigene Szenarien: {pfade.datenordner()}", True,
-                             FARBE["text_schwach"])
+        ort_text = kuerzen(f"{version}  ·  Spielstand und eigene Szenarien: {pfade.datenordner()}", s.klein,
+                           w - 2 * rand_x)
+        ort = s.klein.render(ort_text, True, FARBE["text_schwach"])
         f.blit(ort, ort.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe * 0.5)))
 
     def _ticket_kachel(self, f, rect, i):
@@ -186,10 +204,11 @@ class Hauptmenue(Ansicht):
         f.blit(hinter, rect.topleft)
         rand = FARBE["magenta"] if spielbar else FARBE["aus"]
         pygame.draw.rect(f, rand, rect, width=3 if gewaehlt else 2, border_radius=6)
-        name = f"{i + 1}  Tickets (alle Systeme gemischt)"
+        name = kuerzen(f"{i + 1}  Tickets (alle Systeme gemischt)", s.zwischen, rect.width - s.zeichen_breite * 4)
         farbe = FARBE["magenta"] if spielbar else FARBE["aus"]
         f.blit(s.zwischen.render(name, True, farbe), (rect.left + s.zeichen_breite * 2, rect.top + rect.height // 6))
         info = f"{self.tickets} Tickets · Störungen mit Dringlichkeit, über mehrere Rechner" if spielbar else "kommt noch"
+        info = kuerzen(info, s.text, rect.width - s.zeichen_breite * 4)
         bild = s.text.render(info, True, FARBE["text"] if spielbar else FARBE["aus"])
         f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.bottom - bild.get_height() - rect.height // 6))
 
@@ -333,7 +352,10 @@ class Szenarioliste(Ansicht):
                 fy += s.klein.get_linesize()
 
         zeile_h = int(s.zeilen_hoehe * 1.5)
-        platz = h - y - fehler_hoehe - s.zeilen_hoehe * 3
+        fuss = ("Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  "
+                "grün = gelöst, orange = versucht, grau = neu  ·  Fach 1–5 = Lernkartei")
+        fuss_h = len(fuss_zeilen(fuss, s.klein, w - 2 * rand)) * s.klein.get_linesize()
+        platz = h - y - fehler_hoehe - s.zeilen_hoehe * 2 - fuss_h
         sichtbar = max(3, platz // zeile_h)
         if self.auswahl < self.oben:
             self.oben = self.auswahl
@@ -351,7 +373,8 @@ class Szenarioliste(Ansicht):
             x = rect.left + s.zeichen_breite
             if i < len(self.sonder):
                 farbe = FARBE["erfolg"] if self.sonder[i][0] == "grundkurs" else FARBE["gruen_hell"]
-                f.blit(s.text_fett.render(self.sonder[i][1], True, farbe), (x, ty))
+                text = kuerzen(self.sonder[i][1], s.text_fett, rect.right - x - s.zeichen_breite)
+                f.blit(s.text_fett.render(text, True, farbe), (x, ty))
             else:
                 sz = self.szenarien[i - len(self.sonder)]
                 e = self.stand.eintrag(sz.id)
@@ -368,7 +391,7 @@ class Szenarioliste(Ansicht):
                 x += max(s.text.size(k.kategorie)[0] for k in self.szenarien) + s.zeichen_breite * 2
                 x += schwierigkeit_zeichnen(f, x, rect.centery - s.zeilen_hoehe // 4, sz.schwierigkeit,
                                             s.zeilen_hoehe // 2) + s.zeichen_breite
-                f.blit(s.text.render(sz.titel, True, FARBE["gruen_hell"] if gewaehlt else FARBE["text"]), (x, ty))
+                titel_x = x
                 rx = rect.right - s.zeichen_breite
                 if sz.bestaetigt:
                     tag = s.klein.render(" bestätigt ", True, FARBE["warnung_text"], FARBE["bestaetigt"])
@@ -395,9 +418,8 @@ class Szenarioliste(Ansicht):
                     v = s.klein.render(f"{e['versuche']} Versuch(e) ·", True, FARBE["text_schwach"])
                     rx -= v.get_width() + s.zeichen_breite // 2
                     f.blit(v, (rx, rect.centery - v.get_height() // 2))
+                titel = kuerzen(sz.titel, s.text, rx - titel_x - s.zeichen_breite)
+                f.blit(s.text.render(titel, True, FARBE["gruen_hell"] if gewaehlt else FARBE["text"]), (titel_x, ty))
             y += zeile_h
 
-        fuss = ("Pfeiltasten + Enter: starten  ·  Esc: zurück  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  "
-                "grün = gelöst, orange = versucht, grau = neu  ·  Fach 1–5 = Lernkartei")
-        bild = s.klein.render(fuss, True, FARBE["text_schwach"])
-        f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))
+        zeichne_fuss(f, s.klein, fuss, FARBE["text_schwach"], h - s.zeilen_hoehe // 2, rand=rand)

@@ -11,11 +11,11 @@ from ..kern.sitzung import Sitzung
 from ..kern.systeme import SYSTEME
 from ..kern.editor import EditorPuffer
 from .basis import Ansicht, Knopf, knopf_klick, zeichne_knopf
+from .text import fuss_zeilen, kuerzen, umbrechen
 from .editor_ansicht import EditorFeld
 from .menue import Szenarioliste, etikett, lade_alles, schwierigkeit_zeichnen
 from .stil import FARBE, glow_text
 from .terminal import Terminal
-from .text import umbrechen
 
 if TYPE_CHECKING:
     from .app import App
@@ -67,7 +67,15 @@ class Spielansicht(Ansicht):
             except OSError as e:
                 print(f"Spielstand konnte nicht gespeichert werden: {e}")
 
+    def _editor_offen(self) -> bool:
+        if self.editor is not None:
+            self.editor.meldung = "[ Erst den Editor schließen: Strg+X ]"
+            return True
+        return False
+
     def naechstes(self) -> None:
+        if self._editor_offen():
+            return
         self._speichern()
         if self.ticketmodus:
             from .tickets_ansicht import lade_tickets, starte_ticket, waehle_ticket
@@ -81,6 +89,8 @@ class Spielansicht(Ansicht):
                                           self.allgemein, self.stand))
 
     def zur_liste(self) -> None:
+        if self._editor_offen():
+            return
         self._speichern()
         if self.ticketmodus:
             from .tickets_ansicht import Ticketliste
@@ -133,14 +143,22 @@ class Spielansicht(Ansicht):
             self.terminal.schreibe("[N3XTBYT3] Das Problem besteht noch – erst beheben und prüfen, dann schließen.", "sim")
             return
         self.notiz_modus = True
+        # Halb getippter Befehl wartet, bis die Notiz fertig oder abgebrochen ist.
+        self._befehl_entwurf = (self.terminal.eingabe, self.terminal.cursor)
+        self.terminal.eingabe, self.terminal.cursor = "", 0
         self.terminal.schreibe("[N3XTBYT3] Lösungsnotiz für das Ticket: Was war die Ursache, was hast du getan? "
                                "(Enter = schließen, Esc = abbrechen)", "sim")
+
+    def _notiz_beenden(self) -> None:
+        self.notiz_modus = False
+        self.terminal.eingabe, self.terminal.cursor = getattr(self, "_befehl_entwurf", ("", 0))
+        self._befehl_entwurf = ("", 0)
 
     def _notiz_abschicken(self, text: str) -> None:
         ok, meldung = self.sitzung.ticket_schliessen(text)
         self.terminal.schreibe("[N3XTBYT3] " + meldung, "erfolg" if ok else "sim")
         if ok:
-            self.notiz_modus = False
+            self._notiz_beenden()
             self.terminal.schreibe("[N3XTBYT3] Weiter mit F2 (nächstes Ticket) oder Esc (Ticketliste).", "erfolg")
             self.panel_scroll = 0
             self._speichern()
@@ -153,6 +171,8 @@ class Spielansicht(Ansicht):
         if self.editor is not None:
             if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
                 self.hinweis()
+            elif e.type == pygame.KEYDOWN and e.key == pygame.K_F2:
+                self.editor.meldung = "[ Erst den Editor schließen: Strg+X ]"
             elif e.type == pygame.KEYDOWN:
                 self.editor.taste(e)
             elif e.type == pygame.TEXTINPUT:
@@ -161,10 +181,10 @@ class Spielansicht(Ansicht):
             return
         if e.type == pygame.KEYDOWN and self.notiz_modus:
             if e.key == pygame.K_ESCAPE:
-                self.notiz_modus = False
+                self._notiz_beenden()
                 self.terminal.schreibe("[N3XTBYT3] Schließen abgebrochen.", "sim")
                 return
-            notiz = self.terminal.taste(e, "Lösungsnotiz> ")
+            notiz = self.terminal.taste(e, "Lösungsnotiz> ", merken=False)
             if notiz is not None:
                 self._notiz_abschicken(notiz)
             self.blink = 0.0
@@ -206,7 +226,8 @@ class Spielansicht(Ansicht):
         w, h = f.get_size()
         f.fill(FARBE["hintergrund"])
         kopf_h = int(s.zeilen_hoehe * 2)
-        fuss_h = int(s.zeilen_hoehe * 1.4)
+        fuss_z = fuss_zeilen(self._fuss_text(), s.klein, w - 2 * s.zeichen_breite)
+        fuss_h = max(int(s.zeilen_hoehe * 1.4), len(fuss_z) * s.klein.get_linesize() + s.zeilen_hoehe // 2)
         panel_b = max(int(w * 0.36), 30 * s.zeichen_breite)
         panel_b = min(panel_b, w - 40 * s.zeichen_breite) if w > 70 * s.zeichen_breite else int(w * 0.4)
 
@@ -221,7 +242,7 @@ class Spielansicht(Ansicht):
             self.terminal.zeichnen(f, self.terminal_rect, s, prompt, cursor_an)
         pygame.draw.line(f, FARBE["linie"], self.panel_rect.topleft, self.panel_rect.bottomleft, 2)
         self._panel(f, self.panel_rect)
-        self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h))
+        self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h), fuss_z)
 
     def _kopf(self, f, rect):
         s = self.app.schriften
@@ -233,7 +254,6 @@ class Spielansicht(Ansicht):
         x = r.right + s.zeichen_breite
         rechner = f" // {self.sitzung.aktiv.name}" if len(self.sitzung.rechner) > 1 else ""
         rest = f" // {SYSTEME[self.system_id].name}{rechner} // {self.sitzung.fenstertitel()}"
-        f.blit(s.mono.render(rest, True, FARBE["gruen_hell"]), (x, y))
         sek = self.sitzung.sekunden()
         uhr = s.mono.render(f"{sek // 60:02d}:{sek % 60:02d}", True, FARBE["text_schwach"])
         rx = rect.right - s.zeichen_breite - uhr.get_width()
@@ -246,16 +266,22 @@ class Spielansicht(Ansicht):
             tag = s.text_fett.render("  GELÖST  ", True, FARBE["warnung_text"], FARBE["erfolg"])
             rx -= tag.get_width() + s.zeichen_breite
             f.blit(tag, (rx, rect.centery - tag.get_height() // 2))
+        # Titel zuletzt, gekürzt auf den Platz vor den Etiketten
+        f.blit(s.mono.render(kuerzen(rest, s.mono, rx - x - s.zeichen_breite), True, FARBE["gruen_hell"]), (x, y))
 
-    def _fuss(self, f, rect):
+    def _fuss_text(self) -> str:
+        return (("F3 Ticket schließen  ·  " if self.szenario.ticket else "") +
+                "F1 Hinweis  ·  F2 Nächstes Szenario  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc Liste  ·  "
+                "↑↓ Befehlsverlauf  ·  Bild ↑↓ blättern  ·  Strg +/− Schrift")
+
+    def _fuss(self, f, rect, zeilen):
         s = self.app.schriften
         pygame.draw.rect(f, FARBE["kopf"], rect)
         pygame.draw.line(f, FARBE["linie_dunkel"], rect.topleft, rect.topright, 1)
-        text = (("F3 Ticket schließen  ·  " if self.szenario.ticket else "") +
-                "F1 Hinweis  ·  F2 Nächstes Szenario  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc Liste  ·  "
-                "↑↓ Befehlsverlauf  ·  Bild ↑↓ blättern  ·  Strg +/− Schrift")
-        bild = s.klein.render(text, True, FARBE["text_schwach"])
-        f.blit(bild, (s.zeichen_breite, rect.centery - bild.get_height() // 2))
+        y = rect.centery - len(zeilen) * s.klein.get_linesize() // 2
+        for zeile in zeilen:
+            f.blit(s.klein.render(zeile, True, FARBE["text_schwach"]), (s.zeichen_breite, y))
+            y += s.klein.get_linesize()
 
     def _panel_bloecke(self, breite: int) -> list[tuple]:
         """Inhalt des Seitenbereichs als Liste von (Art, Daten)."""
@@ -270,7 +296,9 @@ class Spielansicht(Ansicht):
 
         def ueberschrift(text, farbe=None):
             bloecke.append(("abstand", s.zeilen_hoehe // 2))
-            bloecke.append(("ueberschrift", text, farbe or FARBE["magenta"]))
+            zeilen = umbrechen(text, s.mono_fett, max(10, breite))
+            for i, zeile in enumerate(zeilen):
+                bloecke.append(("ueberschrift", zeile, farbe or FARBE["magenta"], i == len(zeilen) - 1))
 
         absatz(sz.titel, s.zwischen, FARBE["gruen_hell"])
         bloecke.append(("info", sz))
@@ -349,7 +377,7 @@ class Spielansicht(Ansicht):
             elif b[0] == "abstand":
                 hoehen.append(b[1])
             elif b[0] == "ueberschrift":
-                hoehen.append(s.mono_fett.get_linesize() + 6)
+                hoehen.append(s.mono_fett.get_linesize() + (6 if b[3] else 0))
             elif b[0] == "info":
                 hoehen.append(int(s.text.get_linesize() * 1.4))
         gesamt = sum(hoehen)
@@ -365,10 +393,11 @@ class Spielansicht(Ansicht):
                     if text:
                         f.blit(font.render(text, True, farbe), (inhalt.left + einzug, y))
                 elif b[0] == "ueberschrift":
-                    _, text, farbe = b
+                    _, text, farbe, letzte = b
                     f.blit(s.mono_fett.render(text, True, farbe), (inhalt.left, y))
-                    ly = y + s.mono_fett.get_linesize() + 1
-                    pygame.draw.line(f, FARBE["linie_dunkel"], (inhalt.left, ly), (inhalt.right, ly), 1)
+                    if letzte:
+                        ly = y + s.mono_fett.get_linesize() + 1
+                        pygame.draw.line(f, FARBE["linie_dunkel"], (inhalt.left, ly), (inhalt.right, ly), 1)
                 elif b[0] == "info":
                     sz = b[1]
                     x = inhalt.left

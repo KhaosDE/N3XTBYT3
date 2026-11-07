@@ -69,3 +69,43 @@ def umbrechen_woerter_fest(text: str, spalten: int, einzug: int = 0) -> list[str
         zeilen.append(teil if erste else " " * einzug + teil)
         erste = False
     return zeilen
+
+
+def kuerzen(text: str, font: pygame.font.Font, breite: int) -> str:
+    """Kürzt mit „…“, bis der Text höchstens ``breite`` Pixel breit ist."""
+    if font.size(text)[0] <= breite:
+        return text
+    while text and font.size(text + "…")[0] > breite:
+        text = text[:-1]
+    return text + "…"
+
+
+TRENNER = "  ·  "
+
+
+def fuss_zeilen(text: str, font: pygame.font.Font, breite: int) -> list[str]:
+    """Teilt eine Tastenleiste („F1 …  ·  F2 …“) an den Trennern auf Zeilen, die in ``breite`` passen."""
+    zeilen: list[str] = []
+    aktuell = ""
+    for teil in text.split(TRENNER):
+        versuch = teil if not aktuell else aktuell + TRENNER + teil
+        if not aktuell or font.size(versuch)[0] <= breite:
+            aktuell = versuch
+        else:
+            zeilen.append(aktuell)
+            aktuell = teil
+    zeilen.append(aktuell)
+    return [kuerzen(z, font, breite) for z in zeilen]
+
+
+def zeichne_fuss(flaeche: pygame.Surface, font: pygame.font.Font, text: str, farbe, unten: int,
+                 rand: int = 0, max_zeilen: int = 3) -> int:
+    """Zeichnet eine Tastenleiste mittig, unten bündig bei ``unten``. Gibt die Höhe zurück."""
+    breite = flaeche.get_width()
+    zeilen = fuss_zeilen(text, font, breite - 2 * rand)[:max_zeilen]
+    y = unten
+    for zeile in reversed(zeilen):
+        bild = font.render(zeile, True, farbe)
+        flaeche.blit(bild, bild.get_rect(midbottom=(breite // 2, y)))
+        y -= font.get_linesize()
+    return unten - y

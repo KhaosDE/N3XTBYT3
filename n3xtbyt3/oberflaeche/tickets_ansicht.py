@@ -13,6 +13,7 @@ from ..kern.systeme import REIHENFOLGE, SYSTEME
 from .basis import Ansicht
 from .menue import lade_alles
 from .stil import FARBE, glow_text
+from .text import kuerzen, zeichne_fuss
 
 if TYPE_CHECKING:
     from .app import App
@@ -150,13 +151,14 @@ class Ticketliste(Ansicht):
                 x += s.zeichen_breite * 11
                 f.blit(s.mono.render(t.get("nummer", ""), True, FARBE["text_schwach"]), (x, ty))
                 x += s.zeichen_breite * 13
-                f.blit(s.text.render(t.get("betreff", e.szenario.titel), True, FARBE["text"]), (x, ty))
                 rechts = s.klein.render(("geschlossen · " if e.geschlossen else "offen · ") + SYSTEME[e.system_id].name,
                                         True, FARBE["gruen"] if e.geschlossen else FARBE["text_schwach"])
-                f.blit(rechts, (rect.right - rechts.get_width() - s.zeichen_breite, rect.centery - rechts.get_height() // 2))
+                rx = rect.right - rechts.get_width() - s.zeichen_breite
+                f.blit(rechts, (rx, rect.centery - rechts.get_height() // 2))
+                betreff = kuerzen(t.get("betreff", e.szenario.titel), s.text, rx - x - s.zeichen_breite)
+                f.blit(s.text.render(betreff, True, FARBE["text"]), (x, ty))
             y += zeile_h
         if not self.eintraege:
             f.blit(s.text.render("Noch keine Tickets vorhanden.", True, FARBE["text_schwach"]), (rand, y))
         fuss = "Pfeiltasten + Enter: Ticket öffnen  ·  Esc: zurück  ·  Im Ticket: F3 = Ticket schließen (wenn behoben)"
-        bild = s.klein.render(fuss, True, FARBE["text_schwach"])
-        f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))
+        zeichne_fuss(f, s.klein, fuss, FARBE["text_schwach"], h - s.zeilen_hoehe // 2, rand=s.zeichen_breite * 2)

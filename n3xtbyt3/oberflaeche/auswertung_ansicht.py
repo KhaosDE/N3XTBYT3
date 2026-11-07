@@ -102,6 +102,10 @@ class Auswertungsansicht(Ansicht):
             else:
                 for teil in umbrechen(text, s.text, breite) or [""]:
                     bloecke.append((s.text, teil, FARBE["text"], 0))
+        # Tabellen sind Festbreite: passen sie nicht, werden alle Zeilen gleich stark verkleinert
+        tab = [b[1] for b in bloecke if b[0] is s.klein_mono and b[1]]
+        tab_breite = max((s.klein_mono.size(t)[0] for t in tab), default=0)
+        faktor = min(1.0, breite / tab_breite) if tab_breite else 1.0
         oben = s.zeilen_hoehe
         unten = h - s.zeilen_hoehe * 2
         gesamt = sum(b[0].get_linesize() for b in bloecke)
@@ -113,6 +117,11 @@ class Auswertungsansicht(Ansicht):
             if text and y + hoehe > oben and y < unten:
                 if font is s.zwischen:
                     glow_text(f, font, text, farbe, (rand, y), staerke=1)
+                elif font is s.klein_mono and faktor < 1.0:
+                    bild = font.render(text, True, farbe)
+                    bild = pygame.transform.smoothscale(
+                        bild, (max(1, int(bild.get_width() * faktor)), max(1, int(bild.get_height() * faktor))))
+                    f.blit(bild, (rand, y))
                 else:
                     f.blit(font.render(text, True, farbe), (rand, y))
             y += hoehe

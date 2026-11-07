@@ -51,7 +51,16 @@ def zeichne_knopf(flaeche: pygame.Surface, knopf: Knopf, font: pygame.font.Font,
     pygame.draw.rect(flaeche, FARBE["auswahl"] if ueber else FARBE["panel"], knopf.rect, border_radius=4)
     pygame.draw.rect(flaeche, rand, knopf.rect, width=2, border_radius=4)
     farbe = FARBE["gruen_hell"] if knopf.aktiv else FARBE["aus"]
+    platz = knopf.rect.width - 8
     bild = font.render(knopf.text, True, farbe)
+    if bild.get_width() > platz > 0:
+        faktor = platz / bild.get_width()
+        if faktor >= 0.7:  # etwas kleiner ist noch gut lesbar
+            bild = pygame.transform.smoothscale(
+                bild, (platz, max(1, int(bild.get_height() * faktor))))
+        else:
+            from .text import kuerzen
+            bild = font.render(kuerzen(knopf.text, font, platz), True, farbe)
     flaeche.blit(bild, bild.get_rect(center=knopf.rect.center))
 
 

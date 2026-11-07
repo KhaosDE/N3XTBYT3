@@ -89,9 +89,13 @@ class App:
             return sid
         eintraege = getattr(self.ansicht, "eintraege", None)
         auswahl = getattr(self.ansicht, "auswahl", None)
-        if isinstance(eintraege, list) and isinstance(auswahl, int) and 0 <= auswahl < len(eintraege) \
-                and eintraege[auswahl] in SYSTEME:
-            return eintraege[auswahl]
+        if isinstance(eintraege, list) and isinstance(auswahl, int) and 0 <= auswahl < len(eintraege):
+            eintrag = eintraege[auswahl]
+            if isinstance(eintrag, str) and eintrag in SYSTEME:
+                return eintrag
+            sid = getattr(eintrag, "system_id", None)  # z. B. ein Ticket in der Ticketliste
+            if isinstance(sid, str) and sid in SYSTEME:
+                return sid
         return "windows"
 
     def nachschlagen(self, art: str) -> None:
@@ -134,9 +138,14 @@ class App:
         """Ein Durchlauf der Hauptschleife (auch für Tests nutzbar)."""
         if dt is None:
             dt = self.uhr.tick(60) / 1000.0
+        ansicht_vorher = self.ansicht
         for e in (ereignisse if ereignisse is not None else pygame.event.get()):
             if e.type == pygame.QUIT:
                 self.beenden()
+                continue
+            # Hat eine Taste die Ansicht gewechselt (z. B. Leertaste = Start), gehört das Textzeichen
+            # derselben Taste nicht in die neue Ansicht.
+            if e.type == pygame.TEXTINPUT and self.ansicht is not ansicht_vorher:
                 continue
             if self._globale_taste(e):
                 continue

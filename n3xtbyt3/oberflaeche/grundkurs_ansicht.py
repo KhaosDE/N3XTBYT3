@@ -16,7 +16,7 @@ from .editor_ansicht import EditorFeld
 from .panel import Bloecke
 from .stil import FARBE, glow_text
 from .terminal import Terminal
-from .text import umbrechen
+from .text import fuss_zeilen, kuerzen, umbrechen, zeichne_fuss
 
 if TYPE_CHECKING:
     from .app import App
@@ -124,8 +124,7 @@ class Willkommen(Ansicht):
             f.blit(bild, (rect.left + s.zeichen_breite * 2, rect.centery - bild.get_height() // 2))
             y += kh + s.zeilen_hoehe // 2
         fuss = "Pfeiltasten + Enter: wählen  ·  Esc: Hauptmenü  ·  Strg +/−: Schriftgröße  ·  F11: Vollbild"
-        bild = s.klein.render(fuss, True, FARBE["text_schwach"])
-        f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe)))
+        zeichne_fuss(f, s.klein, fuss, FARBE["text_schwach"], h - s.zeilen_hoehe, rand=s.zeichen_breite)
 
 
 # --------------------------------------------------------------------------- Lektionsliste
@@ -139,6 +138,7 @@ class Grundkursliste(Ansicht):
         _, offen = gk.fortschritt(stand, kurs.lektionen)
         self.auswahl = kurs.lektionen.index(offen) if offen else 0
         self.rects: list[tuple[pygame.Rect, int]] = []
+        self.oben = 0  # erste sichtbare Lektion (Blättern)
         self._kurse: dict | None = None
         self._staende: dict[str, Spielstand] = {system_id: stand}
 
@@ -212,13 +212,23 @@ class Grundkursliste(Ansicht):
                 fy += s.klein.get_linesize()
 
         zeile_h = int(s.zeilen_hoehe * 1.6)
+        fuss = "Pfeiltasten + Enter: Lektion starten  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: zurück zur Szenarioliste"
+        fuss_h = len(fuss_zeilen(fuss, s.klein, w - 2 * rand)) * s.klein.get_linesize()
+        unten = h - s.zeilen_hoehe - fuss_h - len(fehlerzeilen[:6]) * s.klein.get_linesize()
+        sichtbar = max(1, (unten - y) // zeile_h)
+        if self.auswahl < self.oben:
+            self.oben = self.auswahl
+        elif self.auswahl >= self.oben + sichtbar:
+            self.oben = self.auswahl - sichtbar + 1
+        self.oben = max(0, min(self.oben, max(0, len(lektionen) - sichtbar)))
         self.rects = []
         if not lektionen:
             f.blit(s.text.render("Für dieses System gibt es noch keine Lektionen.", True, FARBE["aus"]), (rand, y))
-        for i, l in enumerate(lektionen):
+        if self.oben > 0:
+            mehr = s.klein.render("▲ weitere Lektionen oben", True, FARBE["text_schwach"])
+            f.blit(mehr, (w - rand - mehr.get_width(), y - mehr.get_height()))
+        for i, l in enumerate(lektionen[self.oben:self.oben + sichtbar], start=self.oben):
             rect = pygame.Rect(rand, y, w - 2 * rand, zeile_h - 4)
-            if rect.bottom > h - s.zeilen_hoehe * 2 - len(fehlerzeilen[:6]) * s.klein.get_linesize():
-                break
             self.rects.append((rect, i))
             gewaehlt = i == self.auswahl
             if gewaehlt:
@@ -233,7 +243,7 @@ class Grundkursliste(Ansicht):
             x += s.zeichen_breite * 3
             f.blit(s.text.render(f"Lektion {l.nr}", True, FARBE["text_schwach"]), (x, ty))
             x += s.zeichen_breite * 11
-            f.blit(s.text.render(l.titel, True, FARBE["gruen_hell"] if gewaehlt else FARBE["text"]), (x, ty))
+            titel_x = x
             rx = rect.right - s.zeichen_breite
             tags = []
             if not l.bestaetigt:
@@ -250,11 +260,14 @@ class Grundkursliste(Ansicht):
                 rx -= tag.get_width()
                 f.blit(tag, (rx, rect.centery - tag.get_height() // 2))
                 rx -= s.zeichen_breite
+            titel = kuerzen(l.titel, s.text, rx - titel_x)
+            f.blit(s.text.render(titel, True, FARBE["gruen_hell"] if gewaehlt else FARBE["text"]), (titel_x, ty))
             y += zeile_h
+        if self.oben + sichtbar < len(lektionen):
+            mehr = s.klein.render("▼ weitere Lektionen unten", True, FARBE["text_schwach"])
+            f.blit(mehr, (w - rand - mehr.get_width(), y))
 
-        fuss = "Pfeiltasten + Enter: Lektion starten  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc: zurück zur Szenarioliste"
-        bild = s.klein.render(fuss, True, FARBE["text_schwach"])
-        f.blit(bild, bild.get_rect(midbottom=(w // 2, h - s.zeilen_hoehe // 2)))
+        zeichne_fuss(f, s.klein, fuss, FARBE["text_schwach"], h - s.zeilen_hoehe // 2, rand=rand)
 
 
 # --------------------------------------------------------------------------- Lektion
@@ -321,7 +334,15 @@ class Lektionsansicht(Ansicht):
             self.terminal.schreibe(f"[N3XTBYT3] Hinweis {self.lauf.hinweis_stufe} steht rechts.", "sim")
         self.panel_scroll = 0
 
+    def _editor_offen(self) -> bool:
+        if self.editor is not None:
+            self.editor.meldung = "[ Erst den Editor schließen: Strg+X ]"
+            return True
+        return False
+
     def naechste(self) -> None:
+        if self._editor_offen():
+            return
         self._speichern()
         lektionen = self.kurs.lektionen
         i = lektionen.index(self.lektion) if self.lektion in lektionen else -1
@@ -331,6 +352,8 @@ class Lektionsansicht(Ansicht):
             self.zur_liste()
 
     def zur_liste(self) -> None:
+        if self._editor_offen():
+            return
         self._speichern()
         self.app.wechsle(Grundkursliste(self.app, self.system_id, self.kurs, self.stand))
 
@@ -399,6 +422,8 @@ class Lektionsansicht(Ansicht):
         if self.editor is not None:
             if e.type == pygame.KEYDOWN and e.key == pygame.K_F1:
                 self.hinweis()
+            elif e.type == pygame.KEYDOWN and e.key == pygame.K_F2:
+                self.editor.meldung = "[ Erst den Editor schließen: Strg+X ]"
             elif e.type == pygame.KEYDOWN:
                 self.editor.taste(e)
             elif e.type == pygame.TEXTINPUT:
@@ -439,7 +464,8 @@ class Lektionsansicht(Ansicht):
         w, h = f.get_size()
         f.fill(FARBE["hintergrund"])
         kopf_h = int(s.zeilen_hoehe * 2)
-        fuss_h = int(s.zeilen_hoehe * 1.4)
+        fuss_z = fuss_zeilen(self.FUSS, s.klein, w - 2 * s.zeichen_breite)
+        fuss_h = max(int(s.zeilen_hoehe * 1.4), len(fuss_z) * s.klein.get_linesize() + s.zeilen_hoehe // 2)
         panel_b = max(int(w * 0.38), 32 * s.zeichen_breite)
         panel_b = min(panel_b, w - 40 * s.zeichen_breite) if w > 72 * s.zeichen_breite else int(w * 0.42)
         self._kopf(f, pygame.Rect(0, 0, w, kopf_h))
@@ -452,7 +478,7 @@ class Lektionsansicht(Ansicht):
             self.terminal.zeichnen(f, terminal_rect, s, self.lauf.sitzung.prompt(), cursor_an)
         pygame.draw.line(f, FARBE["linie"], self.panel_rect.topleft, self.panel_rect.bottomleft, 2)
         self._panel(f, self.panel_rect)
-        self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h))
+        self._fuss(f, pygame.Rect(0, h - fuss_h, w, fuss_h), fuss_z)
 
     def _kopf(self, f, rect):
         s = self.app.schriften
@@ -463,16 +489,20 @@ class Lektionsansicht(Ansicht):
         r = glow_text(f, s.mono_fett, "N3XTBYT3", FARBE["gruen"], (x, y), staerke=1)
         rest = (f" // Grundkurs {SYSTEME[self.system_id].name} // Lektion {self.lektion.nr} von "
                 f"{len(self.kurs.lektionen)} // {self.lauf.sitzung.fenstertitel()}")
-        f.blit(s.mono.render(rest, True, FARBE["gruen_hell"]), (r.right + s.zeichen_breite, y))
+        platz = rect.right - r.right - 2 * s.zeichen_breite
+        f.blit(s.mono.render(kuerzen(rest, s.mono, platz), True, FARBE["gruen_hell"]), (r.right + s.zeichen_breite, y))
 
-    def _fuss(self, f, rect):
+    FUSS = ("F1 Hinweis  ·  F2 Nächste Lektion  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc Übersicht  ·  "
+            "↑↓ frühere Befehle  ·  Strg +/− Schrift")
+
+    def _fuss(self, f, rect, zeilen):
         s = self.app.schriften
         pygame.draw.rect(f, FARBE["kopf"], rect)
         pygame.draw.line(f, FARBE["linie_dunkel"], rect.topleft, rect.topright, 1)
-        text = ("F1 Hinweis  ·  F2 Nächste Lektion  ·  F4 Befehlsbuch  ·  F5 Lexikon  ·  Esc Übersicht  ·  "
-                "↑↓ frühere Befehle  ·  Strg +/− Schrift")
-        bild = s.klein.render(text, True, FARBE["text_schwach"])
-        f.blit(bild, (s.zeichen_breite, rect.centery - bild.get_height() // 2))
+        y = rect.centery - len(zeilen) * s.klein.get_linesize() // 2
+        for zeile in zeilen:
+            f.blit(s.klein.render(zeile, True, FARBE["text_schwach"]), (s.zeichen_breite, y))
+            y += s.klein.get_linesize()
 
     def _bloecke(self, breite: int) -> Bloecke:
         s = self.app.schriften

@@ -23,7 +23,9 @@ class Bloecke:
 
     def ueberschrift(self, text: str, farbe=None) -> None:
         self.abstand(self.s.zeilen_hoehe // 2)
-        self.liste.append(("ueberschrift", text, farbe or FARBE["magenta"]))
+        zeilen = umbrechen(text, self.s.mono_fett, max(10, self.breite))
+        for i, zeile in enumerate(zeilen):
+            self.liste.append(("ueberschrift", zeile, farbe or FARBE["magenta"], i == len(zeilen) - 1))
 
     def abstand(self, hoehe: int) -> None:
         self.liste.append(("abstand", hoehe))
@@ -50,7 +52,7 @@ class Bloecke:
         if b[0] == "abstand":
             return b[1]
         if b[0] == "ueberschrift":
-            return s.mono_fett.get_linesize() + 6
+            return s.mono_fett.get_linesize() + (6 if b[3] else 0)
         if b[0] == "etiketten":
             return int(s.klein.get_linesize() * 1.5)
         if b[0] == "kasten":
@@ -76,10 +78,11 @@ class Bloecke:
                     if text:
                         f.blit(font.render(text, True, farbe), (rect.left + einzug, y))
                 elif b[0] == "ueberschrift":
-                    _, text, farbe = b
+                    _, text, farbe, letzte = b
                     f.blit(s.mono_fett.render(text, True, farbe), (rect.left, y))
-                    ly = y + s.mono_fett.get_linesize() + 1
-                    pygame.draw.line(f, FARBE["linie_dunkel"], (rect.left, ly), (rect.right, ly), 1)
+                    if letzte:
+                        ly = y + s.mono_fett.get_linesize() + 1
+                        pygame.draw.line(f, FARBE["linie_dunkel"], (rect.left, ly), (rect.right, ly), 1)
                 elif b[0] == "etiketten":
                     x = rect.left
                     for text, hinter, vorder in b[1]:

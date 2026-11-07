@@ -46,6 +46,15 @@ class EditorFeld:
 
     def text_eingabe(self, text: str) -> None:
         if self.frage_beenden:
+            # Die Antwort kommt als Textzeichen (nach der Taste) – so landet sie nirgends sonst.
+            antwort = text.strip().casefold()
+            if antwort in ("j", "y"):
+                self.frage_beenden = False
+                self.speichern()
+                self._beendet()
+            elif antwort == "n":
+                self.frage_beenden = False
+                self._beendet()
             return
         self.puffer.einfuegen(text)
 
@@ -53,12 +62,7 @@ class EditorFeld:
         strg = bool(e.mod & pygame.KMOD_CTRL)
         k = e.key
         if self.frage_beenden:
-            if k in (pygame.K_j, pygame.K_y):
-                self.speichern()
-                self._beendet()
-            elif k == pygame.K_n:
-                self._beendet()
-            elif k in (pygame.K_ESCAPE, pygame.K_c):
+            if k == pygame.K_ESCAPE or (strg and k == pygame.K_c):
                 self.frage_beenden = False
                 self.meldung = "[ Abgebrochen ]"
             return

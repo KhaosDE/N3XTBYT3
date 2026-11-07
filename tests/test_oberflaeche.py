@@ -265,3 +265,129 @@ class NachschlagenOberflaecheTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def zeichen(c, mod=0):
+    """Wie eine echte Taste: erst KEYDOWN, dann TEXTINPUT."""
+    return [pygame.event.Event(pygame.KEYDOWN, key=pygame.key.key_code(c), mod=mod, unicode=c, scancode=0),
+            pygame.event.Event(pygame.TEXTINPUT, text=c)]
+
+
+@unittest.skipIf(pygame is None, "pygame-ce nicht installiert")
+class BugsucheOberflaecheTest(unittest.TestCase):
+    """Funde aus der Durchsicht der Oberfläche (07.11.2026)."""
+
+    def setUp(self):
+        self._daten = Datenordner()
+        self.ordner = self._daten.__enter__()
+        from n3xtbyt3.oberflaeche.app import App
+        self.app = App(groesse=(1280, 720))
+        self.app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)  # → Hauptmenü
+
+    def tearDown(self):
+        self.app.ansicht.verlassen()
+        pygame.quit()
+        self._daten.__exit__(None, None, None)
+
+    def test_f4_f5_in_der_ticketliste(self):
+        from n3xtbyt3.oberflaeche.tickets_ansicht import Ticketliste
+        self.app.schritt([taste(pygame.K_5)], dt=0.05)
+        self.assertIsInstance(self.app.ansicht, Ticketliste)
+        self.app.ansicht.auswahl = 1  # ein Ticket, kein Text
+        self.app.schritt([taste(pygame.K_F4)], dt=0.05)  # stürzte ab (unhashable TicketEintrag)
+        self.assertIsNotNone(self.app.overlay)
+        self.app.schritt([taste(pygame.K_F5)], dt=0.05)
+        self.assertIsNotNone(self.app.overlay)
+
+    def _linux_lektion_mit_editor(self):
+        from n3xtbyt3.kern import grundkurs as gk
+        from n3xtbyt3.kern.spielstand import Spielstand
+        from n3xtbyt3.oberflaeche.grundkurs_ansicht import starte_lektion
+        kurs = gk.lade_kurs("linux")
+        lektion = next(l for l in kurs.lektionen if any("nano" in e for s in l.mitmachen for e in s.eingabe))
+        starte_lektion(self.app, lektion, kurs, Spielstand.lade("linux"))
+        ansicht = self.app.ansicht
+        self.app.schritt(tippe("nano /tmp/test.txt"), dt=0.05)
+        self.assertIsNotNone(ansicht.editor)
+        return ansicht
+
+    def test_editor_antwort_landet_nicht_im_terminal(self):
+        ansicht = self._linux_lektion_mit_editor()
+        self.app.schritt(zeichen("x"), dt=0.05)
+        self.app.schritt([taste(pygame.K_x, pygame.KMOD_CTRL)], dt=0.05)
+        self.assertTrue(ansicht.editor.frage_beenden)
+        self.app.schritt(zeichen("c"), dt=0.05)  # kein Abbruch ohne Strg
+        self.assertTrue(ansicht.editor.frage_beenden)
+        self.app.schritt(zeichen("j"), dt=0.05)
+        self.assertIsNone(ansicht.editor)
+        self.assertEqual(ansicht.terminal.eingabe, "")
+
+    def test_f2_bei_offenem_editor(self):
+        ansicht = self._linux_lektion_mit_editor()
+        self.app.schritt([taste(pygame.K_F2)], dt=0.05)
+        self.assertIs(self.app.ansicht, ansicht)
+        self.assertIn("Editor schließen", ansicht.editor.meldung)
+
+    def test_strg_c_setzt_verlauf_zurueck(self):
+        from n3xtbyt3.oberflaeche.terminal import Terminal
+        t = Terminal()
+        for befehl in ("a", "b", "c"):
+            t.text_eingabe(befehl)
+            t.taste(taste(pygame.K_RETURN), "> ")
+        t.text_eingabe("entwurf")
+        t.taste(taste(pygame.K_UP), "> ")
+        t.taste(taste(pygame.K_UP), "> ")
+        t.taste(taste(pygame.K_c, pygame.KMOD_CTRL), "> ")
+        t.taste(taste(pygame.K_UP), "> ")
+        self.assertEqual(t.eingabe, "c")
+        t.taste(taste(pygame.K_DOWN), "> ")
+        self.assertEqual(t.eingabe, "")
+
+    def test_leertaste_rutscht_nicht_in_die_naechste_ansicht(self):
+        from n3xtbyt3.oberflaeche.menue import Szenarioliste
+        self.app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        self.assertIsInstance(self.app.ansicht, Szenarioliste)
+        self.app.ansicht.auswahl = 2  # Befehls-Training
+        self.app.schritt([taste(pygame.K_SPACE), pygame.event.Event(pygame.TEXTINPUT, text=" ")], dt=0.05)
+        self.assertEqual(self.app.ansicht.terminal.eingabe, "")
+
+    def test_lektionsliste_blaettert(self):
+        from n3xtbyt3.oberflaeche.grundkurs_ansicht import oeffne_kurs
+        self.app.fenster = pygame.display.set_mode((1280, 720))
+        self.app.schriftgroesse_aendern(40 - self.app.schriften.groesse)
+        oeffne_kurs(self.app, "windows")
+        liste = self.app.ansicht
+        letzte = len(liste.kurs.lektionen) - 1
+        liste.auswahl = letzte
+        self.app.schritt([], dt=0.05)
+        self.assertIn(letzte, [i for _, i in liste.rects])
+        self.assertTrue(all(r.bottom <= 720 for r, _ in liste.rects))
+
+
+@unittest.skipIf(pygame is None, "pygame-ce nicht installiert")
+class NotizOberflaecheTest(TicketOberflaecheTest):
+    def test_ticket_ueber_zwei_rechner(self):  # hier nicht noch einmal
+        pass
+
+    def test_notiz_hat_eigene_eingabezeile(self):
+        from n3xtbyt3.oberflaeche.tickets_ansicht import Ticketliste
+        app = self.app
+        app.schritt([taste(pygame.K_5)], dt=0.05)
+        liste = app.ansicht
+        self.assertIsInstance(liste, Ticketliste)
+        liste.auswahl = 1 + next(i for i, e in enumerate(liste.eintraege) if e.szenario.id == "tk-shop-502")
+        app.schritt([taste(pygame.K_RETURN)], dt=0.05)
+        spiel = app.ansicht
+        for schritt in spiel.szenario.loesung:
+            app.schritt(tippe(schritt), dt=0.05)
+        app.schritt([pygame.event.Event(pygame.TEXTINPUT, text=c) for c in "Get-Ser"], dt=0.05)
+        app.schritt([taste(pygame.K_F3)], dt=0.05)
+        self.assertTrue(spiel.notiz_modus)
+        self.assertEqual(spiel.terminal.eingabe, "")
+        app.schritt([pygame.event.Event(pygame.TEXTINPUT, text=c) for c in "halbe Notiz"], dt=0.05)
+        app.schritt([taste(pygame.K_ESCAPE)], dt=0.05)
+        self.assertEqual(spiel.terminal.eingabe, "Get-Ser")  # Befehl wieder da, Notiz weg
+        app.schritt([taste(pygame.K_F3)], dt=0.05)
+        app.schritt(tippe("Dienst auf srv-web01 gestartet"), dt=0.05)
+        self.assertTrue(spiel.sitzung.ticket_geschlossen)
+        self.assertNotIn("Dienst auf srv-web01 gestartet", spiel.terminal.verlauf)

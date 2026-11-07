@@ -14,17 +14,10 @@ from ..kern.szenario import lade_system
 from .basis import Ansicht
 from .panel import Bloecke
 from .stil import FARBE, glow_text
+from .text import kuerzen as _kuerzen
 
 if TYPE_CHECKING:
     from .app import App
-
-
-def _kuerzen(text: str, font: pygame.font.Font, breite: int) -> str:
-    if font.size(text)[0] <= breite:
-        return text
-    while text and font.size(text + "…")[0] > breite:
-        text = text[:-1]
-    return text + "…"
 
 
 class Nachschlagen(Ansicht):

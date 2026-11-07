@@ -78,14 +78,17 @@ class Terminal:
         self.cursor += len(text)
         self.scroll = 0
 
-    def taste(self, e: pygame.event.Event, prompt: str) -> str | None:
-        """Verarbeitet eine Taste. Gibt den abgeschickten Befehl zurück (oder None)."""
+    def taste(self, e: pygame.event.Event, prompt: str, merken: bool = True) -> str | None:
+        """Verarbeitet eine Taste. Gibt den abgeschickten Befehl zurück (oder None).
+
+        merken=False: die Eingabe kommt nicht in den Verlauf (z. B. eine Lösungsnotiz).
+        """
         strg = bool(e.mod & pygame.KMOD_CTRL)
         k = e.key
         if k in (pygame.K_RETURN, pygame.K_KP_ENTER):
             befehl = self.eingabe
             self.schreibe(prompt + befehl, "eingabe", len(prompt))
-            if befehl.strip() and (not self.verlauf or self.verlauf[-1] != befehl):
+            if merken and befehl.strip() and (not self.verlauf or self.verlauf[-1] != befehl):
                 self.verlauf.append(befehl)
             self.eingabe, self.cursor = "", 0
             self._verlauf_pos = None
@@ -117,6 +120,8 @@ class Terminal:
         elif strg and k == pygame.K_c:
             self.schreibe(prompt + self.eingabe + "^C", "eingabe", len(prompt))
             self.eingabe, self.cursor = "", 0
+            self._verlauf_pos = None
+            self._entwurf = ""
         elif strg and k == pygame.K_v:
             self.text_eingabe(_zwischenablage())
         return None

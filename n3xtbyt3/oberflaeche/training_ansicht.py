@@ -14,7 +14,7 @@ from .basis import Ansicht, Knopf, knopf_klick, zeichne_knopf
 from .menue import Szenarioliste, lade_alles
 from .stil import FARBE, glow_text
 from .terminal import Terminal
-from .text import umbrechen
+from .text import kuerzen, umbrechen
 
 if TYPE_CHECKING:
     from .app import App
@@ -134,8 +134,9 @@ class Trainingsansicht(Ansicht):
         pygame.draw.line(f, FARBE["linie"], kopf.bottomleft, kopf.bottomright, 2)
         y = kopf.centery - s.mono_fett.get_linesize() // 2
         r = glow_text(f, s.mono_fett, "N3XTBYT3", FARBE["gruen"], (s.zeichen_breite, y), staerke=1)
-        f.blit(s.mono.render(f" // {SYSTEME[self.system_id].name} // Befehls-Training", True, FARBE["gruen_hell"]),
-               (r.right + s.zeichen_breite, y))
+        titel = kuerzen(f" // {SYSTEME[self.system_id].name} // Befehls-Training", s.mono,
+                        w - r.right - 2 * s.zeichen_breite)
+        f.blit(s.mono.render(titel, True, FARBE["gruen_hell"]), (r.right + s.zeichen_breite, y))
         term = pygame.Rect(0, kopf_h, w - panel_b, h - kopf_h)
         self.terminal.zeichnen(f, term, s, PROMPT, (self.blink % 1.0) < 0.6, aktiv=self.karte is not None)
 
@@ -145,6 +146,10 @@ class Trainingsansicht(Ansicht):
         rand = s.zeichen_breite * 2
         x, y = panel.left + rand, panel.top + rand
         breite = panel.width - 2 * rand
+        knopf_h = int(s.zeilen_hoehe * 1.7)
+        ky = panel.bottom - 2 * knopf_h - rand
+        # Nichts darf unter die Knöpfe laufen
+        f.set_clip(pygame.Rect(panel.left, panel.top, panel.width, max(0, ky - rand // 2 - panel.top)))
         f.blit(s.mono_fett.render("DIESE RUNDE", True, FARBE["magenta"]), (x, y))
         y += s.mono_fett.get_linesize() + 4
         for name, farbe in (("richtig", "erfolg"), ("halb", "sim"), ("falsch", "fehler")):
@@ -163,12 +168,16 @@ class Trainingsansicht(Ansicht):
         erklaerung = ("Richtig: Befehl und Parameter wie im Szenario → ein Fach weiter. "
                       "Halb: richtiger Befehl, andere Parameter → Fach bleibt. "
                       "Falsch → zurück in Fach 1, die Frage kommt bald wieder.")
-        for zeile in umbrechen(erklaerung, s.klein, breite):
+        zeilen = umbrechen(erklaerung, s.klein, breite)
+        for i, zeile in enumerate(zeilen):
+            if y + 2 * s.klein.get_linesize() > ky - rand // 2 and i < len(zeilen) - 1:
+                # passt nicht mehr ganz: letzte sichtbare Zeile mit „…“
+                f.blit(s.klein.render(kuerzen(zeile + " …", s.klein, breite), True, FARBE["text"]), (x, y))
+                break
             f.blit(s.klein.render(zeile, True, FARBE["text"]), (x, y))
             y += s.klein.get_linesize()
+        f.set_clip(None)
 
-        knopf_h = int(s.zeilen_hoehe * 1.7)
-        ky = panel.bottom - 2 * knopf_h - rand
         self.knoepfe = [
             Knopf(pygame.Rect(x, ky, breite, knopf_h), "Lösung zeigen (F1)", self._loesung, self.karte is not None),
             Knopf(pygame.Rect(x, ky + knopf_h + rand // 2, breite, knopf_h), "Beenden (Esc)", self.zurueck),
