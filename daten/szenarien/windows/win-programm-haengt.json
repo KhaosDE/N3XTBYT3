@@ -202,6 +202,43 @@
           "ausgabe": "Stopp: Das würde ein funktionierendes Programm mit ungespeicherter Arbeit beenden. In der Simulation nicht ausgeführt."
         }
       ]
+    },
+    {
+      "muster": [
+        "tasklist"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "WINWORD.EXE                   7388 Console                    1     98,412 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "WINWORD.EXE                   7388 Console                    1     98,412 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        }
+      ]
     }
   ],
   "ziel": {

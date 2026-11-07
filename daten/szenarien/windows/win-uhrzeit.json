@@ -188,6 +188,49 @@
           "ausgabe": "Die Uhr von Hand stellen ist hier nicht nachgebaut – und löst die Ursache nicht."
         }
       ]
+    },
+    {
+      "muster": [
+        "net start"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "dienst_zeit": "Running"
+          },
+          "ausgabe": [
+            "These Windows services are started:",
+            "",
+            "   Application Information",
+            "   DHCP Client",
+            "   DNS Client",
+            "   Print Spooler",
+            "   Windows Audio",
+            "   Windows Event Log",
+            "   Windows Time",
+            "",
+            "The command completed successfully.",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System sind es viel mehr Dienste."
+        },
+        {
+          "ausgabe": [
+            "These Windows services are started:",
+            "",
+            "   Application Information",
+            "   DHCP Client",
+            "   DNS Client",
+            "   Print Spooler",
+            "   Windows Audio",
+            "   Windows Event Log",
+            "",
+            "The command completed successfully.",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System sind es viel mehr Dienste."
+        }
+      ]
     }
   ],
   "ziel": {
