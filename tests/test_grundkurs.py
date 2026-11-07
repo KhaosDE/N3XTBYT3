@@ -89,7 +89,10 @@ class AblaufTest(unittest.TestCase):
     def test_mitmachen_mit_tippfehler(self):
         a = self.lauf.eingabe("hostnme")
         self.assertFalse(a.geschafft)
-        self.assertIn("Fast!", a.tipp)
+        # Den Tippfehler nennt die Simulation im Terminal; der Tipp wiederholt ihn nicht, sondern sagt,
+        # was zu tippen ist (Logikprüfung 07.11.2026, Punkt 9).
+        self.assertIn("Meintest du „hostname“", " ".join(z.text for z in a.antwort.zeilen))
+        self.assertNotIn("Meintest du", a.tipp)
         self.assertIn("hostname", a.tipp)
         a = self.lauf.eingabe("HOSTNAME")
         self.assertTrue(a.geschafft)
@@ -214,7 +217,9 @@ class RueckmeldungTest(unittest.TestCase):
         for s in l.mitmachen:
             lauf.eingabe(s.eingabe[0])
         lauf.eingabe("hostname")
-        self.assertIn("Fast!", lauf.eingabe("whoaml").tipp)
+        a = lauf.eingabe("whoaml")
+        self.assertIn("Meintest du „whoami“", " ".join(z.text for z in a.antwort.zeilen))
+        self.assertIsNone(a.tipp)  # keine doppelte Meldung
         self.assertIn("nicht mit diesen Zusätzen", lauf.eingabe("whoami /user").tipp)
         self.assertTrue(lauf.eingabe("whoami").geschafft)
 

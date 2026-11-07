@@ -89,9 +89,12 @@ def bewerte(karte: Karte, eingabe: str, vergleicher: Vergleicher) -> str:
     if not eingabe:
         return "falsch"
     vorbereitet = vergleicher.vorbereiten(eingabe)
-    if any(vergleicher.passt(m, vorbereitet) for m in karte.befehl.vorbereitet):
+    # Geht der Befehl in der PowerShell, zählen deren Aliase (gsv, dir, …) wie der volle Name.
+    aliase = "powershell" in karte.shells
+    if any(vergleicher.passt(m, vorbereitet, aliase) for m in karte.befehl.vorbereitet):
         return "richtig"
-    if vorbereitet and vorbereitet[0].name in karte.befehl.namen:
+    namen = {vergleicher.name_mit_alias(n, aliase) for n in karte.befehl.namen}
+    if vorbereitet and vergleicher.name_mit_alias(vorbereitet[0].name, aliase) in namen:
         return "halb"
     return "falsch"
 

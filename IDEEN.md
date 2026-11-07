@@ -126,7 +126,7 @@ PowerShell zuerst; cmd nur dort, wo man es im Alltag noch braucht.
 - Grundkurse für alle vier Systeme vorhanden.
 
 ## Logikprüfung: Tippfehler erkennen, gleichwertige Eingaben annehmen
-Status: freigegeben
+Status: erledigt (07.11.2026)
 Datum: 07.11.2026
 Was: Die Simulation weist bei jedem Tippfehler auf das falsch geschriebene Wort hin – im
 Grundkurs und in allen Szenarien, auf allen vier Systemen. Eingaben, die im echten System

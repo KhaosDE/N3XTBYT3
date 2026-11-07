@@ -150,13 +150,23 @@
     },
     {
       "muster": [
-        "Get-Command *service*",
-        "Get-Command *process*"
+        "Get-Command *service*"
       ],
       "faelle": [
         {
           "sim": true,
           "ausgabe": "Mit *service* (Stern vorn und hinten) wird die Liste im echten System sehr lang: Auch Programme und Funktionen, deren Name das Wort nur enthält, tauchen auf. Genauer sucht *-Service bzw. -Noun Service."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-Command *process*"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Mit *process* (Stern vorn und hinten) findet die echte PowerShell alles, dessen Name „process“ enthält – darunter Debug-Process, Get-Process, Start-Process, Stop-Process und Wait-Process, aber auch weitere Befehle und Programme. Die Liste wird dadurch lang. Genauer sucht *-Process bzw. -Noun Process."
         }
       ]
     },
@@ -216,7 +226,8 @@
       "eingabe": [
         "Get-Command *-Process",
         "Get-Command -Noun Process",
-        "Get-Command -Name *-Process"
+        "Get-Command -Name *-Process",
+        "Get-Command *process*"
       ],
       "hinweise": [
         "Befehle sucht Get-Command.",

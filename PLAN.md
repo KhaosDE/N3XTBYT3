@@ -139,6 +139,22 @@ Tobi kommt ohne Vorwissen durch die Windows-Lektionen 1–10; Befehlsbuch und Le
 erreichbar, „Was tippe ich, wenn …?“ hat mindestens 10 Situationen je System; Grundkurse für alle vier
 Systeme vorhanden.
 
+## L — Logikprüfung: Tippfehler erkennen, gleichwertige Eingaben annehmen (aus IDEEN.md, freigegeben 07.11.2026)
+
+Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Logikprüfung“. Prüfwerkzeug: `werkzeuge/logikpruefung.py`.
+
+- L1 Tippfehler-Abstand (Damerau-Levenshtein) und Meldungen: Befehlsname („Meintest du …?“, auch nach
+  `sudo`), Argument/Option („Fast! Schau dir … an“), Pfade (echte Fehlermeldung plus „Meintest du …?“),
+  Filter hinter Pipes, Rechnername bei ssh/Enter-PSSession.
+- L2 Aliase der Windows PowerShell 5.1 (nur PowerShell) und mit/ohne `-Name` zentral im Vergleicher.
+- L3 Grundkurs: Tippfehler-Prüfung vor den allgemeinen Meldungen, keine doppelten Meldungen;
+  Lektion 3 nimmt `Get-Command *process*` an; `chown` mit unbekanntem Benutzer bzw. unbekannter Gruppe.
+- L4 `tests/test_logik.py` aus dem Prüfwerkzeug.
+
+**Abnahme L:** Jeder erzeugte Tippfehler bekommt eine Meldung, die das falsche Wort nennt (außer er ergibt
+im echten System einen gültigen anderen Befehl); jeder Alias und jede Schreibweise mit/ohne `-Name` löst den
+Schritt; Tobis Fall `get-command *-prcoess` nennt „prcoess“; Bericht: 0 „nur allgemeine Meldung“, 0 „nicht erkannt“.
+
 ---
 
 ## Laufend (nach M1)

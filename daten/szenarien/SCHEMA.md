@@ -196,13 +196,22 @@ allgemein). Tippfehler meldet der Lader.
 * Wörter vor der ersten Option stehen fest in ihrer Reihenfolge.
 * Ein `*` im Muster steht für genau ein beliebiges Wort (`ping *`).
 * Pipes (`|`) trennen Abschnitte, die einzeln verglichen werden.
-* Andere Schreibweisen (z. B. ohne `-Name`, mit Alias) als weiteres Muster angeben.
+* **Von selbst gleichwertig (seit 07.11.2026):** In der PowerShell die Standard-Aliase der Windows
+  PowerShell 5.1 (`gsv`, `sasv`, `spsv`, `gps`, `ps`, `spps`, `kill`, `gcm`, `gci`, `dir`, `ls`, `sl`, `cd`,
+  `chdir`, `gc`, `cat`, `type`, `gl`, `pwd`, `ni`, `cpi`, `copy`, `cp`, `mi`, `move`, `mv`, `ri`, `del`, `rm`,
+  `erase`, `rd`, `rmdir`, `cls`, `clear`, `help`) – nicht in der cmd. Bei Get-Service, Start-Service,
+  Stop-Service, Restart-Service, Get-Process, Get-Command und Get-Help ist `-Name X` dasselbe wie `X`
+  (nicht bei Stop-Process). Diese Formen muss ein Szenario nicht als eigenes Muster angeben.
+* Andere Schreibweisen (z. B. eine andere Option, die dasselbe bewirkt) als weiteres Muster angeben.
 
 ## Was die Simulation bei anderen Eingaben meldet
 
 Alle Meldungen der Simulation beginnen mit `[N3XTBYT3]` und sind keine echten Systemtexte.
 
-* Befehl im Szenario unbekannt: „In dieser Simulation nicht vorhanden“ plus Hinweis.
+* Befehl im Szenario unbekannt: „In dieser Simulation nicht vorhanden“ plus Hinweis; bei einem Tippfehler
+  (bis 5 Zeichen 1 Fehler, länger 2; vertauschte Nachbarbuchstaben zählen als 1) „Meintest du …?“.
+* Bekannter Befehl, ein bis zwei Wörter mit Tippfehler: „Fast! Schau dir „prcoess“ an – gemeint ist
+  vermutlich „Process“.“ (verglichen mit allen Mustern dieses Befehls).
 * Befehlsname bekannt, aber andere Parameter: „kennt diese Simulation, aber nicht in dieser Form“.
 * Befehl gehört in die andere Shell (z. B. `Get-Service` in cmd): Hinweis zum Wechseln.
 

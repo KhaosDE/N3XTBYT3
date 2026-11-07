@@ -151,6 +151,8 @@ class Dateisystem:
     def __init__(self, zustand: Zustand):
         self.z = zustand
         self.in_pipe = False  # True, solange die Ausgabe in eine Pipe geht (ls: ein Name pro Zeile)
+        # (Benutzer, Gruppen), die es auf diesem Rechner gibt – setzt die Sitzung. None: keine Prüfung.
+        self.konten: tuple[set[str], set[str]] | None = None
 
     # ------------------------------------------------------------------ Benutzer
 
@@ -1182,6 +1184,46 @@ def befehl_chmod(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
     return Ergebnis(zeilen, fehler=bool(zeilen))
 
 
+# Benutzer und Gruppen einer frischen Ubuntu-Installation (Paket base-passwd und Systemdienste)
+STANDARD_BENUTZER = frozenset({
+    "root", "daemon", "bin", "sys", "sync", "games", "man", "lp", "mail", "news", "uucp", "proxy",
+    "www-data", "backup", "list", "irc", "nobody", "systemd-network", "systemd-timesync",
+    "messagebus", "syslog", "sshd", "_apt"})
+STANDARD_GRUPPEN = frozenset({
+    "root", "daemon", "bin", "sys", "adm", "tty", "disk", "lp", "mail", "news", "uucp", "man", "proxy",
+    "kmem", "dialout", "fax", "voice", "cdrom", "floppy", "tape", "sudo", "audio", "dip", "www-data",
+    "backup", "operator", "list", "irc", "src", "shadow", "utmp", "video", "sasl", "plugdev", "staff",
+    "games", "users", "nogroup", "systemd-journal", "netdev", "crontab", "syslog", "lpadmin", "sambashare"})
+
+
+def konten_aus_befehl(woerter: list[str]) -> tuple[set[str], set[str]]:
+    """Benutzer und Gruppen, die ein Befehl nennt (chown, chgrp, useradd, usermod, groupadd …)."""
+    benutzer: set[str] = set()
+    gruppen: set[str] = set()
+    while woerter and woerter[0] == "sudo":
+        woerter = woerter[1:]
+    if not woerter:
+        return benutzer, gruppen
+    name, rest = woerter[0], woerter[1:]
+    werte = [w for w in rest if not w.startswith("-")]
+    if name == "chown" and werte:
+        u, _, g = werte[0].partition(":")
+        benutzer.update([u] if u else [])
+        gruppen.update([g] if g else [])
+        if u and werte[0].endswith(":"):
+            gruppen.add(u)
+    elif name == "chgrp" and werte:
+        gruppen.add(werte[0])
+    elif name in ("useradd", "adduser", "usermod") and werte:
+        benutzer.add(werte[-1])
+        for i, w in enumerate(rest[:-1]):
+            if w.startswith("-") and w.lstrip("-")[-1:] in ("g", "G"):
+                gruppen.update(g for g in rest[i + 1].split(",") if g)
+    elif name in ("groupadd", "addgroup") and werte:
+        gruppen.add(werte[-1])
+    return benutzer, gruppen
+
+
 def befehl_chown(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
     optionen, argumente = _optionen(woerter)
     if len(argumente) < 2:
@@ -1190,6 +1232,15 @@ def befehl_chown(fs: Dateisystem, woerter: list[str]) -> Ergebnis:
                          "Try 'chown --help' for more information."], fehler=True)
     neu, dateien = argumente[0], argumente[1:]
     u, doppelpunkt, g = neu.partition(":")
+    if fs.konten is not None:
+        # Wie GNU chown: unbekannter Benutzer oder unbekannte Gruppe → nichts wird geändert.
+        benutzer, gruppen = fs.konten
+        for wert, bekannt, art in ((u, benutzer, "user"), (g, gruppen, "group")):
+            if wert and not wert.isdigit() and wert not in bekannt:
+                from .befehle import vorschlag
+                aehnlich = vorschlag(wert, sorted(bekannt))
+                return Ergebnis([f"chown: invalid {art}: '{neu}'"], fehler=True,
+                                sim=f"Meintest du „{aehnlich}“ (statt „{wert}“)?" if aehnlich else None)
     zeilen: list[str] = []
     for ziel in dateien:
         pfad = fs.absolut(ziel)

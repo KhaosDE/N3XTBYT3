@@ -191,7 +191,7 @@ class GrundkursOberflaecheTest(unittest.TestCase):
         self.assertEqual(lektion.lektion.id, "gk-win-konsole")
         app.schritt(tippe("hostnme"), dt=0.05)  # Tippfehler: freundlicher Hinweis, Schritt bleibt
         self.assertEqual(lektion.lauf.index, 0)
-        self.assertIn("Fast!", lektion.lauf.letzter_tipp)
+        self.assertIn("hostname", lektion.lauf.letzter_tipp)
         app.schritt(tippe("hostname"), dt=0.05)
         app.schritt(tippe("whoami"), dt=0.05)
         # Wiederholungsschritt: nur einmal ↑ → whoami statt hostname; der Hinweis steht auch im Terminal

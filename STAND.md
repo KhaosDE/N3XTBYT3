@@ -17,6 +17,10 @@ Editor und Oberfläche durchgesehen, dazu Fuzzing (Zufallseingaben) von Kern und
 sind behoben, jeder mit Test (`tests/test_bugfixes.py`, `tests/test_oberflaeche.py`). Einzelheiten unten unter
 „Bugsuche 07.11.2026“.
 
+**Neu (07.11.2026): Logikprüfung (L, aus `IDEEN.md`).** Tippfehler werden jetzt beim Namen genannt –
+im Grundkurs und in allen Szenarien, auf allen vier Systemen. Echte PowerShell-Aliase (`gsv`, `dir`, `ri` …)
+und `-Name` werden angenommen. Einzelheiten unten unter „Logikprüfung 07.11.2026“.
+
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
 die vom echten System abweichen, korrigieren.
@@ -190,6 +194,47 @@ die vom echten System abweichen, korrigieren.
 - 05.11.2026: **Unter Windows von Tobi bestätigt:** Build 22 hat sich beim Start selbst auf Build 23
   aktualisiert und läuft.
 
+### Logikprüfung 07.11.2026 (IDEEN.md, freigegeben 07.11.2026)
+
+Bericht von `werkzeuge/logikpruefung.py` (jede Aufgabe bis zum Lösungsschritt gespielt, dann Tippfehler):
+
+| | vorher: erkannt / nur allgemein / nicht erkannt | jetzt |
+|---|---|---|
+| Grundkurs (452 Tippfehler) | 331 / 86 / 35 | **452 / 0 / 0** |
+| Szenarien (575 Tippfehler) | 176 / 286 / 91 (+22 angenommen) | **569 / 0 / 0** (+6 im echten System gültig) |
+
+„Erkannt“ heißt jetzt strenger: Die Meldung sagt „Fast!“ bzw. „Meintest du“ **und** nennt das falsche Wort.
+Die 6 gültigen Fälle sind echte andere Befehle (z. B. `mkdir -p ~/.config/lgaerscan` legt einen anderen Ordner
+an, `ps aux | grep sofice` findet nichts) – sie zeigen die echte Ausgabe. Aliase, mit/ohne `-Name` und
+Kleinschreibung: 0 Ablehnungen (vorher 69 + 6).
+
+- **Punkt 1 – Befehlsname:** „Meintest du „ping“?“ (Damerau-Levenshtein, bis 5 Zeichen 1 Fehler, länger 2),
+  auch nach `sudo` (`sudo nnao` → „nano“), für Szenario-, allgemeine und eingebaute Befehle, Aliase und `ssh`.
+- **Punkt 2 – Argument/Option:** „Fast! Schau dir „prcoess“ an – gemeint ist vermutlich „Process“.“ Nur der
+  falsche Teil wird genannt; `*` im Muster zählt nicht. Optionen dürfen in anderer Reihenfolge stehen.
+- **Punkt 3 – Pfade:** Die echte Fehlermeldung bleibt, darunter „Meintest du „Dokumente“ (statt „Dokuemnte“)?“
+  (Linux und Windows). Ebenso Filter hinter Pipes (`| haed` → „head“) und Rechnernamen bei ssh.
+- **Punkt 4 – Grundkurs:** Die Tippfehler-Prüfung kommt vor „Der Befehl passt – aber nicht mit diesen
+  Zusätzen“ und vor „Das löst Aufgabe … noch nicht“; verglichen mit `eingabe` und `loesung`.
+- **Punkt 5 – Aliase:** Alle Aliase aus der Idee sind auf learn.microsoft.com belegt (Abschnitt „Notes“ der
+  Cmdlets, „Using aliases“); `help` ist dort eine Funktion, die Get-Help aufruft. Gelten nur in der PowerShell.
+  `curl`/`wget` bewusst nicht. Auch im Befehls-Training.
+- **Punkt 6 – `-Name`:** Bei Get-Service, Start-Service, Stop-Service, Restart-Service, Get-Process, Get-Command
+  und Get-Help ist `-Name` laut Syntax (5.1) der erste Positionsparameter – gleichwertig, auch an späterer
+  Stelle (`Restart-Service -Force -Name Spooler`). Nicht bei Stop-Process.
+- **Punkt 7 – Lektion 3, Aufgabe 2:** `Get-Command *process*` löst die Aufgabe; dazu die Erklärung, warum
+  `*-Process` genauer ist. (Aufgabe 1 fragt nicht nach `*service*` – dort nichts zu ändern.)
+- **Punkt 8 – `chown`:** Unbekannter Benutzer bzw. unbekannte Gruppe → `chown: invalid user: '…'` bzw.
+  `chown: invalid group: '…'`, nichts wird geändert (Wortlaut und Verhalten am echten GNU coreutils 9.4
+  geprüft), plus „Meintest du …?“. Bekannt sind: Ubuntu-Standardkonten, Besitzer der Dateien, `/etc/passwd`
+  und `/etc/group` aus den Daten, und was Lösung und Befehle des Szenarios nennen.
+- **Punkt 9 – keine doppelten Meldungen:** Steht „Meintest du“/„Fast!“ schon im Terminal, wiederholt der
+  Grundkurs-Tipp es nicht (beim Mitmachen nur noch „Für diesen Schritt tippe: …“).
+- **Punkt 10 – `Get-Command` ohne Treffer:** **nicht gebaut.** In der Microsoft-Doku fand ich keinen Beleg, dass
+  `Get-Command` mit Platzhalter ohne Treffer still nichts ausgibt. Laut Idee dann weglassen. Wenn du es in
+  deinem Windows prüfst (z. B. `Get-Command *xyz*`), sag mir das Ergebnis – dann baue ich es nach.
+- Test: `tests/test_logik.py` (spielt das Prüfwerkzeug durch, Tobis Fall, Aliase, `-Name`, chown, Pfade).
+
 ### Bugsuche 07.11.2026
 
 Gefunden durch Code-Durchsicht (vier Prüfer), Fuzzing und Nachstellen; Linux-Ausgaben mit echtem
@@ -351,6 +396,12 @@ GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesic
 - 06.11.2026: Lektionen schreiben ein Protokoll (`grundkurs_protokoll.txt`, die letzten 400 Eingaben) in den
   Datenordner. Grund: Fehler, die Tobi meldet, lassen sich sonst nicht nachvollziehen. Nur im Datenordner (Regel 1).
 
+- 07.11.2026: Tippfehler gelten nur bis zu einem Abstand von 1 (bis 5 Zeichen) bzw. 2 (länger); höchstens zwei
+  Wörter dürfen abweichen. Grund: Vorgabe der Idee; mehr Abweichung ist eher ein anderer Befehl als ein Tippfehler.
+- 07.11.2026: Aliase werden erst geprüft, wenn die Eingabe genau so nicht passt; die Hilfe der Simulation
+  (`help`) ist davon ausgenommen. Grund: `help` soll weiter die Hilfe der Simulation zeigen, `Get-Help` nicht.
+- 07.11.2026: `chown` kennt nur Konten, die im Szenario vorkommen oder auf Ubuntu Standard sind. Grund: ein echter
+  Rechner hat eine feste Benutzerliste; ein Tippfehler im Namen soll wie dort `invalid user/group` melden.
 - 07.11.2026: Klassische Programme (`taskkill`, `net`, `netsh` …) gelten in beiden Shells, auch wenn im selben
   Eintrag ein Cmdlet steht; PowerShell-Kurznamen daneben (`tnc`, `gci`, `help` …) nur in der PowerShell. Grund:
   so ist es in Windows, und Tobi sollte nicht lernen, dass `taskkill` in der cmd fehlt.
@@ -373,7 +424,16 @@ GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesic
 
 ## Für Tobi zum Testen
 
-**Neu: nach der Bugsuche (07.11.2026)** – die `.exe` aktualisiert sich beim nächsten Start selbst.
+**Neu: Logikprüfung (07.11.2026)**
+
+1. Grundkurs Windows, Lektion 3, Aufgabe 2: absichtlich `get-command *-prcoess` tippen. Steht im Terminal
+   „Fast! Schau dir „prcoess“ an …“? Dann `gcm *-Process` – löst es die Aufgabe?
+2. In beliebigen Windows-Szenarien Aliase probieren: `gsv`, `dir`, `del`, `ps` … und `Get-Service -Name Spooler`.
+3. Absichtlich vertippen: `pnig …`, `sduo …`, ein falscher Ordnername bei `cd`. Ist der Vorschlag hilfreich?
+4. Linux Server, „Worker darf nicht schreiben“: `sudo chown -R shop:hsop /var/lib/shop` → `invalid group`?
+5. Optional: `Get-Command *xyz*` in deinem echten Windows – kommt nichts oder eine Fehlermeldung?
+
+**Nach der Bugsuche (07.11.2026)** – die `.exe` aktualisiert sich beim nächsten Start selbst.
 
 1. Linux-Kurs, Lektion mit nano: Datei ändern, Strg+X, mit J antworten. Kommt danach im Terminal kein
    „j“ mehr an?

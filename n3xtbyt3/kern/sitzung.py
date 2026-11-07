@@ -8,12 +8,13 @@ echten Befehl aus – jede Ausgabe stammt aus den Szenario-Daten.
 from __future__ import annotations
 
 import datetime as _dt
-import difflib
+import ntpath
+import posixpath
 import time
 from dataclasses import dataclass, field
 from typing import Callable
 
-from .befehle import Vergleicher, ist_cmdlet_name, zerlege
+from .befehle import PS_ALIASE, Vergleicher, ist_cmdlet_name, tippfehler_text, vorschlag, zerlege
 from . import dateisystem as ds
 from . import dateisystem_win as dsw
 from .szenario import Allgemein, Befehl, Szenario
@@ -91,6 +92,7 @@ class Sitzung:
             self.rechner[name] = RechnerLauf(name, r.system, r.allgemein, r.zustand, r.befehle, r.shell, r.zugang)
         self.haupt = haupt
         self.rechner_stapel: list[RechnerLauf] = [haupt]
+        self.konten_ergaenzen([x for x in szenario.loesung if isinstance(x, str)])
         self.ticket_geschlossen = False
         self.ticket_notiz = ""
         self.hinweis_stufe = 0
@@ -104,6 +106,38 @@ class Sitzung:
         self._uhr = uhr
         self._start = uhr()
         self._ende: float | None = None
+
+    def konten_ergaenzen(self, texte: list[str]) -> None:
+        """Welche Benutzer und Gruppen gibt es (für chown)? Standard von Ubuntu, Besitzer der Dateien,
+        /etc/passwd und /etc/group aus den Daten und alles, was Lösung und Befehle des Szenarios nennen."""
+        for lauf in self.rechner.values():
+            fs = lauf.fs
+            if fs is None:
+                continue
+            benutzer, gruppen = fs.konten or (set(ds.STANDARD_BENUTZER), set(ds.STANDARD_GRUPPEN))
+            werte = lauf.zustand.werte
+            for name in (werte.get("benutzer"),):
+                if isinstance(name, str):
+                    benutzer.add(name)
+                    gruppen.add(name)
+            if isinstance(werte.get("gruppen"), str):
+                gruppen.update(g for g in werte["gruppen"].split(",") if g)
+            for k, v in werte.items():
+                if k.startswith("besitzer:") and isinstance(v, str) and ":" in v:
+                    u, g = v.split(":", 1)
+                    benutzer.add(u)
+                    gruppen.add(g)
+            for datei, ziel in (("/etc/passwd", benutzer), ("/etc/group", gruppen)):
+                inhalt = werte.get(f"datei:{datei}")
+                if isinstance(inhalt, str):
+                    ziel.update(z.split(":", 1)[0] for z in inhalt.split("\n") if ":" in z)
+            alle = list(texte) + [m for b in [*lauf.befehle, *lauf.allgemein.befehle] for m in b.muster]
+            for text in alle:
+                for abschnitt in zerlege(text):
+                    u, g = ds.konten_aus_befehl(abschnitt)
+                    benutzer |= u
+                    gruppen |= g
+            fs.konten = (benutzer, gruppen)
 
     # ------------------------------------------------------------------ aktiver Rechner
 
@@ -218,17 +252,39 @@ class Sitzung:
 
     # ------------------------------------------------------------------ Eingabe
 
+    @property
+    def aliase(self) -> bool:
+        """In der PowerShell gelten die Standard-Aliase (gsv, dir, …) wie die vollen Namen."""
+        return self.shell == "powershell"
+
     def _finde(self, abschnitte) -> tuple[Befehl | None, Befehl | None]:
-        """(Treffer in der aktuellen Shell, Treffer nur in einer anderen Shell)."""
+        """(Treffer in der aktuellen Shell, Treffer nur in einer anderen Shell).
+
+        Erst genau so, wie getippt; danach (nur PowerShell) mit Aliasen. Die Hilfe der Simulation
+        („help“) bleibt dabei außen vor – Get-Help ist nicht die Hilfe der Simulation.
+        """
         andere: Befehl | None = None
-        for b in [*self.aktiv.befehle, *self.allgemein.befehle]:
-            for i, v in enumerate(b.vorbereitet):
-                if not self.vergleicher.passt(v, abschnitte):
+        durchgaenge = (False, True) if self.aliase else (False,)
+        for mit_alias in durchgaenge:
+            for b in [*self.aktiv.befehle, *self.allgemein.befehle]:
+                if mit_alias and any(f.aktion == "hilfe" for f in b.faelle):
                     continue
-                if self.shell in b.shells_fuer(i):
-                    return b, None
-                andere = andere or b
+                for i, v in enumerate(b.vorbereitet):
+                    if not self.vergleicher.passt(v, abschnitte, mit_alias):
+                        continue
+                    if self.shell in b.shells_fuer(i):
+                        return b, None
+                    andere = andere or b
         return None, andere
+
+    def _befehle_namens(self, name: str) -> list[Befehl]:
+        """Alle Befehle mit diesem (normierten) Namen – in der PowerShell auch über Aliase."""
+        ziel = PS_ALIASE.get(name, name) if self.aliase else name
+        treffer: list[Befehl] = []
+        for n, befehle in self._bekannte_namen.items():
+            if n == name or (self.aliase and PS_ALIASE.get(n, n) == ziel):
+                treffer += [b for b in befehle if b not in treffer]
+        return treffer
 
     def eingabe(self, text: str) -> Antwort:
         text = text.strip()
@@ -276,8 +332,13 @@ class Sitzung:
                 return windows
 
         name = abschnitte[0].name
-        if name in self._bekannte_namen:
+        befehle = self._befehle_namens(name)
+        if befehle:
             self.nicht_erkannt.append(text)
+            muster = [m for b in befehle for m in b.muster]
+            fast = self.vergleicher.tippfehler(text, muster, self.aliase)
+            if fast:
+                return Antwort(_sim(tippfehler_text(fast)), "nicht_erkannt")
             return Antwort(_sim(
                 f"„{roh_name}“ kennt diese Simulation, aber nicht in dieser Form.\n"
                 "Prüfe Parameter und Schreibweise. Weiter kommst du auch mit einem Hinweis (F1)."
@@ -296,19 +357,49 @@ class Sitzung:
         if self.shell == "cmd" and ist_cmdlet_name(roh_name):
             text += ("\nDer Name sieht aus wie ein PowerShell-Befehl (Verb-Nomen). "
                      "In der cmd gibt es solche Befehle nicht – wechseln mit: powershell")
-        kandidaten = list(self._bekannte_namen) + (list(ds.EINGEBAUT) if self.fs else []) \
-            + (dsw.NAMEN if self.aktiv.wfs else [])
+        kandidaten = self._namen_zum_vorschlagen()
         if not self.system.gross_klein_egal:
             gleich = [n for n in kandidaten if n.casefold() == roh_name.casefold() and n != roh_name]
             if gleich:
                 return (text + f"\nLinux unterscheidet Groß- und Kleinschreibung. "
                         f"Meintest du „{gleich[0]}“?")
-        aehnlich = difflib.get_close_matches(self.vergleicher.norm_name(roh_name),
-                                             kandidaten, n=1, cutoff=0.8)
+        aehnlich = vorschlag(roh_name, kandidaten, self.vergleicher.norm_name)
         if aehnlich:
-            return text + f"\nTippfehler? Meintest du „{aehnlich[0]}“?"
+            return text + f"\nTippfehler? Meintest du „{aehnlich}“?"
+        if self.vergleicher.norm_name(roh_name) in ("ssh", "enter-pssession") and len(self.rechner) == 1:
+            return text + "\nIn diesem Szenario gibt es keinen anderen Rechner, mit dem du dich verbinden kannst."
         return text + ("\nDas Szenario braucht andere Befehle. Überleg, was zum Problem passt, "
                        "oder hol dir einen Hinweis (F1). Liste der Grundbefehle: help")
+
+    def _namen_zum_vorschlagen(self) -> list[str]:
+        """Befehlsnamen in der Schreibweise der Daten: Szenario, allgemeine und eingebaute Befehle."""
+        namen: dict[str, str] = {}
+
+        def dazu(wort: str) -> None:
+            namen.setdefault(self.vergleicher.norm_name(wort), wort)
+
+        for b in [*self.aktiv.befehle, *self.allgemein.befehle]:
+            if self.shell not in b.shells:
+                continue
+            for m in b.muster:
+                for abschnitt in zerlege(m):
+                    if abschnitt:
+                        dazu(abschnitt[0])
+        if self.fs is not None:
+            for n in [*ds.EINGEBAUT, *ds.FILTER, "sudo"]:
+                dazu(n)
+        if self.aktiv.wfs is not None and self.shell == "powershell":
+            for n in dsw.NAMEN:
+                dazu(n)
+        if self.aliase:
+            for n in PS_ALIASE:
+                dazu(n)
+        for lauf in self.rechner.values():
+            for z in lauf.zugang_text:
+                woerter = zerlege(z)[0]
+                if woerter:
+                    dazu(woerter[0])
+        return list(namen.values())
 
     def _andere_shell(self, befehl: Befehl, text: str, roh_name: str) -> Antwort:
         self.falsche.append(text)
@@ -351,6 +442,17 @@ class Sitzung:
             self.rechner_stapel.append(lauf)
             zeilen = _sim(f"Verbunden mit {lauf.name} ({lauf.system.name}). Zurück mit exit.")
             return self._ziel_pruefen(Antwort(zeilen, "treffer"))
+        # Richtiger Befehl (ssh, Enter-PSSession), aber diesen Rechner gibt es nicht
+        zugaenge = [z for lauf in self.rechner.values() if lauf is not self.aktiv for z in lauf.zugang_text]
+        namen = {self.vergleicher.norm_name(zerlege(z)[0][0]) for z in zugaenge if zerlege(z)[0]}
+        if len(abschnitte) == 1 and abschnitte[0].name in namen:
+            self.nicht_erkannt.append(text)
+            fast = self.vergleicher.tippfehler(text, zugaenge)
+            if fast:
+                return Antwort(_sim(tippfehler_text(fast)), "nicht_erkannt")
+            ziele = ", ".join(lauf.name for lauf in self.rechner.values() if lauf.zugang_text and lauf is not self.aktiv)
+            return Antwort(_sim(f"Diesen Rechner gibt es in diesem Szenario nicht. Erreichbar: {ziele}."),
+                           "nicht_erkannt")
         return None
 
     def _ausfuehren(self, befehl: Befehl, text: str) -> Antwort:
@@ -438,7 +540,8 @@ class Sitzung:
             self.nicht_erkannt.append(text)
             return Antwort(_sim("Pipes hinter Dateibefehlen sind in dieser Simulation nicht nachgebaut."),
                            "nicht_erkannt")
-        ergebnis = dsw.ausfuehren(self.aktiv.wfs, zerlege(text)[0])
+        woerter = zerlege(text)[0]
+        ergebnis = dsw.ausfuehren(self.aktiv.wfs, woerter)
         if ergebnis is None:
             return None
         antwort = Antwort(art="treffer")
@@ -446,6 +549,10 @@ class Sitzung:
                           for z, f in zip(ergebnis.zeilen, ergebnis.arten())]
         if ergebnis.sim:
             antwort.zeilen += _sim(ergebnis.sim)
+        elif any(ergebnis.arten()):
+            tipp = self._pfad_vorschlag_windows(woerter[1:])
+            if tipp:
+                antwort.zeilen += _sim(tipp)
         return self._ziel_pruefen(antwort)
 
     # ------------------------------------------------------------------ Linux
@@ -462,8 +569,13 @@ class Sitzung:
             if filter_woerter and filter_woerter[0] in ds.FILTER:
                 return self._pipe(links, filter_woerter, text)
             self.nicht_erkannt.append(text)
-            return Antwort(_sim(f"„{rechts}“ hinter einer Pipe ist hier nicht nachgebaut. "
-                                "Es gehen: grep, head, tail, sort, wc -l, less."), "nicht_erkannt")
+            meldung = (f"„{rechts}“ hinter einer Pipe ist hier nicht nachgebaut. "
+                       "Es gehen: grep, head, tail, sort, wc, less.")
+            if filter_woerter:
+                aehnlich = vorschlag(filter_woerter[0], ds.FILTER)
+                if aehnlich:
+                    meldung = f"Tippfehler? Meintest du „{aehnlich}“ (statt „{filter_woerter[0]}“)?"
+            return Antwort(_sim(meldung), "nicht_erkannt")
         befehl = ds.EINGEBAUT.get(roh_name)
         if befehl is None:
             if roh_name in ("vi", "vim"):
@@ -476,11 +588,62 @@ class Sitzung:
                           for z, f in zip(ergebnis.zeilen, ergebnis.arten())]
         if ergebnis.sim:
             antwort.zeilen += _sim(ergebnis.sim)
+        elif any(ergebnis.arten()):
+            tipp = self._pfad_vorschlag_linux(roh_name, woerter[1:])
+            if tipp:
+                antwort.zeilen += _sim(tipp)
         if ergebnis.editor:
             antwort.aktion = "editor"
             antwort.editor = ergebnis.editor
             self._editor_als_root = bool(self.zustand.get("root"))
         return self._ziel_pruefen(antwort)
+
+    # ------------------------------------------------------------------ Tippfehler in Pfaden
+
+    def _pfad_vorschlag_linux(self, befehl: str, argumente: list[str]) -> str | None:
+        """Nach „No such file or directory“: Gibt es im Ordner einen ähnlichen Namen?"""
+        fs = self.fs
+        werte = [a for a in argumente if not a.startswith("-")]
+        if befehl in ("chmod", "chown", "grep") and werte:
+            werte = werte[1:]  # Modus, Besitzer bzw. Suchmuster sind kein Pfad
+        for wort in werte:
+            pfad = fs.absolut(wort)
+            if fs.existiert(pfad) or any(c in wort for c in "*?["):
+                continue
+            ordner = "/"
+            for teil in [t for t in pfad.split("/") if t]:
+                weiter = posixpath.join(ordner, teil)
+                if not fs.existiert(weiter):
+                    if fs.ist_verzeichnis(ordner):
+                        aehnlich = vorschlag(teil, fs.eintraege(ordner))
+                        if aehnlich:
+                            return f"Meintest du „{aehnlich}“ (statt „{teil}“)?"
+                    break
+                ordner = weiter
+        return None
+
+    def _pfad_vorschlag_windows(self, argumente: list[str]) -> str | None:
+        wfs = self.aktiv.wfs
+        for wort in argumente:
+            if wort.startswith("-"):
+                continue
+            for einzeln in wort.split(","):
+                pfad = wfs.absolut(einzeln)
+                if wfs.art(pfad) is not None or any(c in pfad for c in "*?"):
+                    continue
+                teile = pfad.split("\\")
+                ordner = teile[0] + "\\"
+                for teil in [t for t in teile[1:] if t]:
+                    weiter = ntpath.join(ordner, teil)
+                    if wfs.art(weiter) is None:
+                        if wfs.art(ordner) == "ordner":
+                            namen = [ntpath.basename(p) for p, _ in wfs.kinder(ordner)]
+                            aehnlich = vorschlag(teil, namen, str.casefold)
+                            if aehnlich:
+                                return f"Meintest du „{aehnlich}“ (statt „{teil}“)?"
+                        break
+                    ordner = wfs.absolut(weiter)
+        return None
 
     def _sudo(self, text: str, woerter: list[str]) -> Antwort:
         rest = text.strip()[4:].strip()

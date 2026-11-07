@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Any
 
 from . import pfade
-from .befehle import Vergleicher
-from .sitzung import Antwort, Sitzung
+from .befehle import Vergleicher, tippfehler_text
+from .sitzung import SIM, Antwort, Sitzung
 from .systeme import REIHENFOLGE, SYSTEME
 from .szenario import Allgemein, Szenario, SzenarioFehler, _fliesstext, _lies_json, _text, lade_allgemein, pruefe_daten
 from .zustand import pruefe_bedingung
@@ -374,6 +374,8 @@ class Lektionslauf:
     def __init__(self, lektion: Lektion, allgemein: Allgemein):
         self.lektion = lektion
         self.sitzung = Sitzung(lektion.szenario, allgemein)
+        self.sitzung.konten_ergaenzen([x for s in [*lektion.mitmachen, *lektion.aufgaben]
+                                       for x in [*s.eingabe, *s.loesung] if isinstance(x, str)])
         self.teil = "mitmachen" if lektion.mitmachen else ("aufgaben" if lektion.aufgaben else "fertig")
         self.index = 0
         self.hinweis_stufe = 0          # der aktuellen Aufgabe
@@ -396,8 +398,9 @@ class Lektionslauf:
         return self.teil == "fertig"
 
     def _passt(self, schritt: Schritt, text: str) -> bool:
+        # In der PowerShell gelten Aliase (gsv, dir, …) wie der volle Name – wie im echten System.
         vorbereitet = self.sitzung.vergleicher.vorbereiten(text)
-        return any(self.sitzung.vergleicher.passt(m, vorbereitet) for m in schritt.vorbereitet)
+        return any(self.sitzung.vergleicher.passt(m, vorbereitet, self.sitzung.aliase) for m in schritt.vorbereitet)
 
     def _geschafft(self, schritt: Schritt, text: str, antwort: Antwort) -> bool:
         # Richtig getippt zählt nur, wenn der Befehl hier auch lief (nicht z. B. in der falschen Shell).
@@ -434,24 +437,42 @@ class Lektionslauf:
         return LektionsAntwort(antwort, tipp=hinweis)
 
     def _tipp(self, schritt: Schritt, text: str, antwort: Antwort) -> str | None:
-        """Warum es noch nicht weitergeht – damit nie „nichts passiert“."""
+        """Warum es noch nicht weitergeht – damit nie „nichts passiert“.
+
+        Steht im Terminal schon ein Tippfehler-Hinweis der Simulation („Meintest du …“, „Fast! …“),
+        wird er hier nicht wiederholt (eine Meldung höchstens einmal).
+        """
         if self._passt(schritt, text) and antwort.art != "treffer":
             return "Richtig getippt – aber so geht es hier nicht. Lies die blaue Meldung im Terminal."
         if self._passt(schritt, text) and schritt.wenn is not None:
             return "Der Befehl stimmt – aber noch nicht am richtigen Ort. Lies die Aufgabe noch einmal genau."
         if schritt.tipp:
             return schritt.tipp.replace("{eingabe}", text.strip())
-        if self.teil == "mitmachen":
-            return tipp(text, schritt.eingabe[0], self.sitzung.vergleicher)
         v = self.sitzung.vergleicher
+        aliase = self.sitzung.aliase
+        sim = " ".join(z.text for z in antwort.zeilen if z.art == SIM)
+        schon_gesagt = "Meintest du" in sim or "Fast!" in sim
+        if self.teil == "mitmachen":
+            fast = v.tippfehler(text, schritt.eingabe, aliase)
+            if schon_gesagt:
+                return f"Für diesen Schritt tippe: {schritt.eingabe[0]}"
+            if fast:
+                return f"{tippfehler_text(fast)} Richtig ist: {schritt.eingabe[0]}"
+            return tipp(text, schritt.eingabe[0], v)
         vorbereitet = v.vorbereiten(text)
         # Reihenfolge wichtig: Ein richtiger erster Teilschritt (Start-Service …) ähnelt oft dem letzten
         # (Get-Service …) – er darf nicht als Tippfehler gelten.
         teilschritte = [v.vorbereiten(x) for x in schritt.loesung[:-1] if isinstance(x, str)]
-        if antwort.art == "treffer" and any(v.passt(m, vorbereitet) for m in teilschritte):
+        if antwort.art == "treffer" and any(v.passt(m, vorbereitet, aliase) for m in teilschritte):
             return "Guter erster Schritt – die Aufgabe ist aber noch nicht ganz erledigt. Lies sie rechts noch einmal."
-        namen = {m[0].name for m in schritt.vorbereitet if m}
-        if vorbereitet and vorbereitet[0].name in namen and not self._passt(schritt, text):
+        # Tippfehler vor allen allgemeinen Meldungen – verglichen mit Vorgabe und Lösung des Schritts
+        fast = v.tippfehler(text, [*schritt.eingabe, *[x for x in schritt.loesung if isinstance(x, str)]], aliase)
+        if fast:
+            return None if schon_gesagt else tippfehler_text(fast)
+        if schon_gesagt:
+            return None
+        namen = {v.name_mit_alias(m[0].name, aliase) for m in schritt.vorbereitet if m}
+        if vorbereitet and v.name_mit_alias(vorbereitet[0].name, aliase) in namen and not self._passt(schritt, text):
             return ("Der Befehl passt – aber nicht mit diesen Zusätzen. Probier ihn so, wie du ihn beim Mitmachen "
                     "getippt hast (oder F1 für einen Hinweis).")
         if any(difflib.SequenceMatcher(None, v.norm(text.strip()), v.norm(e)).ratio() >= 0.75 for e in schritt.eingabe):
