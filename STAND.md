@@ -430,7 +430,7 @@ GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesic
    „Fast! Schau dir „prcoess“ an …“? Dann `gcm *-Process` – löst es die Aufgabe?
 2. In beliebigen Windows-Szenarien Aliase probieren: `gsv`, `dir`, `del`, `ps` … und `Get-Service -Name Spooler`.
 3. Absichtlich vertippen: `pnig …`, `sduo …`, ein falscher Ordnername bei `cd`. Ist der Vorschlag hilfreich?
-4. Linux Server, „Worker darf nicht schreiben“: `sudo chown -R shop:hsop /var/lib/shop` → `invalid group`?
+4. Linux Server, „Hintergrunddienst stürzt immer wieder ab“: `sudo chown -R shop:hsop /var/lib/shop` → `invalid group`?
 5. Optional: `Get-Command *xyz*` in deinem echten Windows – kommt nichts oder eine Fehlermeldung?
 
 **Nach der Bugsuche (07.11.2026)** – die `.exe` aktualisiert sich beim nächsten Start selbst.
