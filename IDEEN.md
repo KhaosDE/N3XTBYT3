@@ -125,35 +125,88 @@ PowerShell zuerst; cmd nur dort, wo man es im Alltag noch braucht.
   mindestens 10 Situationen je System.
 - Grundkurse für alle vier Systeme vorhanden.
 
-## Fehler: Tippfehler im Parameter wird als „falsche Form“ gemeldet
+## Logikprüfung: Tippfehler erkennen, gleichwertige Eingaben annehmen
 Status: freigegeben
 Datum: 07.11.2026
-Was: Hat ein Befehl einen Tippfehler in einem Parameter, soll die Simulation den Tippfehler
-zeigen, statt zu behaupten, der Befehl passe „nicht in dieser Form“.
+Was: Die Simulation weist bei jedem Tippfehler auf das falsch geschriebene Wort hin – im
+Grundkurs und in allen Szenarien, auf allen vier Systemen. Eingaben, die im echten System
+dasselbe bewirken (Aliase, mit/ohne `-Name`), werden angenommen. Dazu einige Logikfehler.
 Warum: Tobi hat in Grundkurs Windows, Lektion 3, Aufgabe 2 `get-command *-prcoess` getippt
-(c und o vertauscht). Die Simulation meldete zweimal „kennt diese Simulation, aber nicht in
-dieser Form“ und „Der Befehl passt – aber nicht mit diesen Zusätzen“. Für einen Einsteiger
-klingt das, als sei `Get-Command` falsch – der Fehler ist aber nur das Wort „prcoess“.
-Umfang:
-- `n3xtbyt3/kern/grundkurs.py`, `_tipp()`: Die Prüfung auf Tippfehler („Fast! …“) kommt
-  **vor** der Meldung „Der Befehl passt – aber nicht mit diesen Zusätzen“. Verglichen wird
-  nicht nur mit `schritt.eingabe` (beim Selbst-Probieren leer oder unpassend), sondern auch
-  mit den Mustern aus `schritt.loesung`/den Befehlsmustern der Aufgabe.
-- Der Tipp nennt die Stelle: „Fast! Schau dir das Wort ‚prcoess‘ an – gemeint ist
-  ‚process‘.“ (Wortweise vergleichen; nur das abweichende Wort nennen, nicht die ganze Lösung.)
-- `n3xtbyt3/kern/sitzung.py`, Meldung „kennt diese Simulation, aber nicht in dieser Form“:
-  dieselbe Wortprüfung gegen die bekannten Muster dieses Befehls; bei einem ähnlichen Muster
-  „Meintest du …?“ mit dem abweichenden Wort. Gilt für Grundkurs und Szenarien in allen
-  Systemen.
-- Echtes Verhalten nachbilden, wo es sicher belegt ist: `Get-Command` mit Platzhalter, auf den
-  nichts passt, gibt in der echten PowerShell keine Ausgabe und keinen Fehler (vor dem Einbau
-  in der Microsoft-Doku zu Get-Command prüfen; ist das nicht belegt, weglassen). Dann zeigt
-  das Terminal eine leere Ausgabe und darunter die blaue Meldung „Kein Befehl passt zu diesem
-  Muster – prüf die Schreibweise.“
-- Dieselbe Meldung nicht doppelt ausgeben (Terminal und Seitenbereich dürfen sich ergänzen,
-  im Terminal steht sie nur einmal).
-- Test: `get-command *-prcoess` in Lektion 3, Aufgabe 2 ergibt einen Tipp, der „prcoess“
-  nennt; `Get-Command *-Process` löst die Aufgabe weiterhin.
+(c und o vertauscht). Die Simulation meldete „kennt diese Simulation, aber nicht in dieser Form“
+und „Der Befehl passt – aber nicht mit diesen Zusätzen“. Für einen Einsteiger heißt das:
+`Get-Command` ist falsch. Der Fehler war nur das Wort „prcoess“.
+
+### Befund (Prüfung am 07.11.2026 mit `werkzeuge/logikpruefung.py`)
+Jede Aufgabe wurde bis zum Lösungsschritt gespielt, dann ein Tippfehler eingegeben.
+| | Tippfehler erkannt | nur allgemeine Meldung | nicht erkannt |
+|---|---|---|---|
+| Grundkurs (452 Tippfehler) | 331 | 86 | 35 |
+| Szenarien (575 Tippfehler) | 176 | 286 | 91 |
+Beispiele:
+- Tippfehler im Befehlsnamen (`pnig`, `sduo`, `tial`, `culr.exe`, `Remoev-Item`, `eixt`):
+  „In dieser Simulation nicht vorhanden“ ohne Vorschlag (79 Fälle in Szenarien).
+- Tippfehler in Argument oder Option (`Get-Help Get-Porcess`, `Get-Volume -DrivLeetter D`,
+  `Test-NetConnection … -Prot 80`, `taskkill /IM EXCLE.EXE`): nur „nicht in dieser Form“.
+- Tippfehler in Pfad oder Dateiname im Grundkurs (`mkdir Arhciv`, `cd …\Doucments\…`,
+  `chmod 600 ~/Dokumente/ebricht.txt`): nur „Das löst Aufgabe 3 noch nicht“.
+- Echte Aliase abgelehnt (69 Fälle), auch beim Selbst-Probieren und in Szenarien:
+  `gsv Spooler`, `sasv`, `spsv`, `gci`/`dir`/`ls`, `ri`/`del`/`rm`/`erase`, `gps`/`ps`, `gcm`.
+- Mit/ohne `-Name` abgelehnt (6 Fälle, Mitmachen): z. B. `Get-Service -Name Spooler` statt
+  `Get-Service Spooler`, `Stop-Service W32Time` statt `Stop-Service -Name W32Time`.
+
+### Umfang
+1. **Tippfehler im Befehlsnamen** (`sitzung.py`, `_unbekannt_text`): Vor „nicht vorhanden“ mit
+   allen bekannten Namen vergleichen (Szenario-Befehle, allgemeine Befehle, eingebaute
+   Datei-Befehle, Aliase, `sudo`). Abstand: vertauschte Nachbarbuchstaben zählen als 1 Fehler
+   (Damerau-Levenshtein); bis 5 Zeichen höchstens 1 Fehler, länger höchstens 2. Treffer:
+   „Meintest du „ping“?“. Nach `sudo` gilt das für den folgenden Befehl.
+2. **Tippfehler in Argument oder Option** (`sitzung.py`, Meldung „nicht in dieser Form“):
+   Wortweise mit allen Mustern dieses Befehls vergleichen. Weicht nur ein Wort (oder wenige) um
+   1–2 Fehler ab: „Fast! Schau dir „prcoess“ an – gemeint ist vermutlich „process“.“ Nur das
+   abweichende Wort nennen, nicht den ganzen Befehl. Platzhalter im Muster (`*`) zählen nicht
+   als Abweichung.
+3. **Tippfehler in Pfaden** (Datei-Befehle Windows und Linux): Die echte Fehlermeldung des
+   Systems bleibt. Gibt es im selben Ordner einen Namen mit 1–2 Fehlern Abstand, folgt die
+   blaue Meldung „Meintest du „Dokumente“?“.
+4. **Grundkurs** (`grundkurs.py`, `_tipp`): Die Tippfehler-Prüfung kommt **vor** „Der Befehl
+   passt – aber nicht mit diesen Zusätzen“ und vor „Das löst Aufgabe … noch nicht“. Verglichen
+   wird mit `eingabe` **und** `loesung` des Schritts. Gleiche Wortweise wie in Punkt 2.
+5. **Echte Aliase der Windows PowerShell 5.1 annehmen** (nur in der PowerShell, nicht in cmd):
+   gsv, sasv, spsv, gps, ps, spps, kill, gcm, gci, dir, ls, sl, cd, chdir, gc, cat, type, gl, pwd,
+   ni, cpi, copy, cp, mi, move, mv, ri, del, rm, erase, rd, rmdir, cls, clear, help. Vor dem Einbau
+   jeden Alias gegen die Microsoft-Doku prüfen (about_Aliases / Liste der Standard-Aliase
+   5.1) – nicht belegte weglassen. `curl` und `wget` **nicht** (in 5.1 Alias für
+   Invoke-WebRequest, anderes Verhalten als curl.exe). Umsetzung zentral im `Vergleicher`
+   (Alias → Befehlsname), damit alle Szenarien ohne Datenänderung profitieren.
+6. **Mit/ohne `-Name` gleichwertig** bei Get-Service, Start-Service, Stop-Service,
+   Restart-Service, Get-Process, Get-Command, Get-Help (Name ist dort der erste
+   Positionsparameter – vorher in der Microsoft-Doku je Befehl prüfen). **Nicht** bei
+   Stop-Process: dort ist der erste Positionsparameter `-Id`.
+7. **Lektion 3, Aufgabe 2:** `Get-Command *process*` erfüllt die Aufgabe, wie sie dasteht
+   („mit einem Platzhalter alle Befehle, die mit Prozessen zu tun haben“), wird aber nicht
+   gewertet. Annehmen und den vorhandenen Hinweis („wird im echten System sehr lang …
+   genauer ist *-Process“) als Erklärung dazu zeigen. Dasselbe für `*service*` in Aufgabe 1,
+   falls dort gleich.
+8. **`chown` mit falsch geschriebenem Benutzer oder Gruppe** läuft still durch
+   (`sudo chown -R www-data:www-adta …` in ls-upload-rechte, `shop:hsop` in ls-worker-rechte).
+   Im echten System: Fehlermeldung „chown: invalid user“ bzw. „invalid group“ (Wortlaut vor dem
+   Einbau in der man-Page/coreutils prüfen). Unbekannte Benutzer/Gruppen → diese Meldung,
+   Zustand unverändert, plus Vorschlag nach Punkt 3.
+9. **Keine doppelten Meldungen:** Im Terminal steht eine Meldung höchstens einmal; der
+   Seitenbereich darf ergänzen.
+10. **`Get-Command` mit Platzhalter ohne Treffer** gibt im echten System keine Ausgabe und
+    keinen Fehler (vor dem Einbau in der Microsoft-Doku prüfen, sonst weglassen). Dann leere
+    Ausgabe plus Meldung nach Punkt 2.
+
+### Test und Abnahme
+- `werkzeuge/logikpruefung.py` wird zu einem Test (`tests/test_logik.py`): Jeder erzeugte
+  Tippfehler bekommt eine Meldung, die das falsche Wort nennt („Meintest du“ / „Fast!“) –
+  Ausnahme: Tippfehler, die im echten System einen gültigen anderen Befehl ergeben; die zeigen
+  die echte Ausgabe. Jeder Alias aus Punkt 5 und jede Schreibweise aus Punkt 6 löst den Schritt.
+- Tobis Fall: `get-command *-prcoess` in Lektion 3, Aufgabe 2 nennt „prcoess“;
+  `Get-Command *-Process` und `gcm *-Process` lösen die Aufgabe.
+- Der Bericht des Werkzeugs zeigt danach 0 Fälle „nur allgemeine Meldung“ und 0 Fälle „nicht
+  erkannt“; Zahlen in `STAND.md` festhalten.
 
 ## Szenarien aus gelösten Problemen in Tobis Notizen
 Status: offen
