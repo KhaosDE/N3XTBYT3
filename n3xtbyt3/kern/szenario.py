@@ -387,7 +387,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
         allgemein = lade_allgemein(system_id)
 
     sid = roh.get("id")
-    if not isinstance(sid, str) or not _ID.match(sid):
+    if not isinstance(sid, str) or not _ID.fullmatch(sid):
         fehler.append("„id“: nur Kleinbuchstaben, Ziffern und Bindestriche, z. B. „win-dns-cache“.")
     elif erwartete_id and sid != erwartete_id:
         fehler.append(f"„id“ ist „{sid}“, der Dateiname sagt „{erwartete_id}“. Beides muss gleich sein.")
@@ -565,7 +565,7 @@ def pruefe_daten(roh: Any, allgemein: Allgemein | None = None,
                    for s in (loesung or [])]
 
     voraussetzung = roh.get("voraussetzung")
-    if voraussetzung is not None and (not isinstance(voraussetzung, str) or not _ID.match(voraussetzung)):
+    if voraussetzung is not None and (not isinstance(voraussetzung, str) or not _ID.fullmatch(voraussetzung)):
         fehler.append("„voraussetzung“: id einer Grundkurs-Lektion, z. B. „gk-win-dienste“.")
         voraussetzung = None
 

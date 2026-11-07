@@ -37,23 +37,44 @@ def schreibe_text(name: str, text: str) -> Path:
     return ziel
 
 
-def lies_json(name: str) -> tuple[Any | None, str | None]:
+def lies_json_genau(name: str) -> tuple[Any | None, str | None, bool]:
     """Liest eine JSON-Datei aus dem Datenordner.
 
-    Rückgabe: (Daten, Warnung). Fehlt die Datei: (None, None). Ist sie kaputt, wird sie
-    zur Sicherheit umbenannt und (None, Warnung) zurückgegeben.
+    Rückgabe: (Daten, Warnung, nicht_ueberschreiben).
+
+    * Fehlt die Datei: (None, None, False).
+    * Ist der Inhalt kaputt (kein JSON, falsche Zeichenkodierung): Die Datei wird zur Sicherheit
+      umbenannt (…defekt-<Zeit>.json) und (None, Warnung, False) zurückgegeben.
+    * Lässt sie sich gerade nicht lesen (z. B. von einem anderen Programm gesperrt) oder klappt das
+      Umbenennen nicht: (None, Warnung, True) – dann darf sie nicht überschrieben werden, sonst wäre
+      der alte Inhalt verloren.
     """
     pfad = pfade.im_datenordner(name)
     if not pfad.exists():
-        return None, None
+        return None, None, False
     try:
-        return json.loads(pfad.read_text(encoding="utf-8-sig")), None
-    except (OSError, json.JSONDecodeError) as e:
-        stempel = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
-        sicherung = pfad.with_name(f"{pfad.stem}.defekt-{stempel}{pfad.suffix}")
+        roh = pfad.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as e:
+        fehler: Exception = e
+    except OSError as e:
+        return None, (f"{pfad.name} ließ sich gerade nicht lesen ({e}). Zum Schutz wird nichts gespeichert – "
+                      "bitte das Programm neu starten."), True
+    else:
         try:
-            os.replace(pfad, sicherung)
-            ort = f" Die alte Datei liegt jetzt unter {sicherung.name}."
-        except OSError:
-            ort = ""
-        return None, f"{pfad.name} ließ sich nicht lesen ({e}).{ort}"
+            return json.loads(roh), None, False
+        except json.JSONDecodeError as e:
+            fehler = e
+    stempel = _dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    sicherung = pfad.with_name(f"{pfad.stem}.defekt-{stempel}{pfad.suffix}")
+    try:
+        os.replace(pfad, sicherung)
+    except OSError:
+        return None, (f"{pfad.name} ist beschädigt ({fehler}) und ließ sich nicht sichern. Zum Schutz wird "
+                      "nichts gespeichert."), True
+    return None, f"{pfad.name} ließ sich nicht lesen ({fehler}). Die alte Datei liegt jetzt unter {sicherung.name}.", False
+
+
+def lies_json(name: str) -> tuple[Any | None, str | None]:
+    """Wie lies_json_genau, ohne die Angabe zum Überschreiben (für Einstellungen)."""
+    daten, warnung, _ = lies_json_genau(name)
+    return daten, warnung

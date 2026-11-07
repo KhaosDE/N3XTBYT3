@@ -296,7 +296,7 @@ def lade_kurs(system_id: str, ordner: Path | None = None, allgemein: Allgemein |
         return ergebnis
     nummern: dict[int, Path] = {}
     for datei in sorted(ordner.glob("*.json")):
-        treffer = _DATEINAME.match(datei.name)
+        treffer = _DATEINAME.fullmatch(datei.name)
         if not treffer:
             ergebnis.fehler.append(SzenarioFehler(datei, ["Dateiname: <nr>-<id>.json, z. B. 01-gk-win-konsole.json."]))
             continue

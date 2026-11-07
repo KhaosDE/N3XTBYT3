@@ -11,7 +11,7 @@ import copy
 from typing import Any, Iterable
 
 from . import pfade
-from .dateien import lies_json, schreibe_json
+from .dateien import lies_json_genau, schreibe_json
 from .lernkartei import Lernkartei
 
 VERSION = 1
@@ -56,6 +56,7 @@ class Spielstand:
     def __init__(self, system_id: str, daten: dict[str, Any] | None = None):
         self.system_id = system_id
         self.warnung: str | None = None
+        self.nicht_speichern = False  # Datei ließ sich nicht lesen: nicht überschreiben (sonst Datenverlust)
         self.daten: dict[str, Any] = {"version": VERSION, "system": system_id, "szenarien": {}}
         if daten and isinstance(daten.get("szenarien"), dict):
             self.daten["szenarien"] = daten["szenarien"]
@@ -65,9 +66,10 @@ class Spielstand:
 
     @classmethod
     def lade(cls, system_id: str) -> "Spielstand":
-        daten, warnung = lies_json(dateiname(system_id))
+        daten, warnung, gesperrt = lies_json_genau(dateiname(system_id))
         stand = cls(system_id, daten if isinstance(daten, dict) else None)
         stand.warnung = warnung
+        stand.nicht_speichern = gesperrt
         return stand
 
     @property
@@ -75,6 +77,9 @@ class Spielstand:
         return Lernkartei(self.daten)
 
     def speichere(self) -> None:
+        if self.nicht_speichern:
+            raise OSError(f"{dateiname(self.system_id)} wird nicht überschrieben, weil sie sich beim Start nicht "
+                          "lesen ließ (sonst ginge der alte Spielstand verloren).")
         schreibe_json(dateiname(self.system_id), self.daten)
 
     # ------------------------------------------------------------------ Lesen

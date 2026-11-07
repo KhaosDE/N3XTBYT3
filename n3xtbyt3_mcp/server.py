@@ -97,6 +97,9 @@ def szenarien_auflisten(argumente: dict) -> str:
 
 
 def _finde_datei(szenario_id: str) -> Path:
+    from n3xtbyt3.kern.szenario import _ID
+    if not _ID.fullmatch(szenario_id):  # nur echte ids – kein Pfad aus den Szenario-Ordnern heraus
+        raise WerkzeugFehler(f"Kein Szenario mit der id „{szenario_id}“ gefunden.")
     for sid in REIHENFOLGE:
         for ordner in (pfade.programmdaten() / "szenarien" / sid, pfade.datenordner() / "szenarien" / sid):
             datei = ordner / f"{szenario_id}.json"
@@ -209,6 +212,8 @@ def bearbeite(nachricht: Any) -> dict | None:
     params = nachricht.get("params") or {}
     if nid is None:  # Benachrichtigung, z. B. notifications/initialized
         return None
+    if not isinstance(params, dict):
+        return _antwort(nid, fehler={"code": -32602, "message": "Invalid params"})
     if methode == "initialize":
         gewuenscht = params.get("protocolVersion")
         version = gewuenscht if gewuenscht in PROTOKOLLE else PROTOKOLLE[0]
@@ -229,6 +234,8 @@ def bearbeite(nachricht: Any) -> dict | None:
     if methode == "tools/call":
         name = params.get("name")
         argumente = params.get("arguments") or {}
+        if not isinstance(argumente, dict):
+            return _antwort(nid, fehler={"code": -32602, "message": "Invalid params: arguments muss ein Objekt sein"})
         if name not in WERKZEUGE:
             return _antwort(nid, fehler={"code": -32602, "message": f"Unbekanntes Werkzeug: {name}"})
         try:

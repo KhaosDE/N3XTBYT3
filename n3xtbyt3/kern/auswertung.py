@@ -89,7 +89,7 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
     # Häufige Fehler: falsche und unbekannte Eingaben aus allen Versuchen
     falsch_namen: Counter[str] = Counter()
     unbekannt_namen: Counter[str] = Counter()
-    beispiele: dict[str, str] = {}
+    beispiele: dict[str, dict[str, str]] = {"falsch": {}, "unbekannt": {}}
     for sz in szenarien:
         for versuch in stand.eintrag(sz.id)["verlauf"]:
             for liste, zaehler in ((versuch.get("falsch", []), falsch_namen),
@@ -100,7 +100,7 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
                         continue
                     name = vergleicher.norm_name(abschnitte[0][0])
                     zaehler[name] += 1
-                    beispiele.setdefault(name, eingabe)
+                    beispiele["falsch" if zaehler is falsch_namen else "unbekannt"].setdefault(name, eingabe)
 
     befehl_werte = []
     for karte in sammle_karten(szenarien, buch, stand, lektionen):
@@ -118,7 +118,8 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
 
     gespielt = [w for w in szenario_werte if w["versuche"]]
     staerken = [f"Kategorie {k['kategorie']}: sicher gelöst" for k in kategorie_werte if k["bewertung"] == "stark"]
-    staerken += [f"Befehl „{b['befehl']}“ sitzt (Fach {b['fach']})" for b in befehl_werte if b["fach"] >= 4][:5]
+    staerken += [f"Befehl „{b['befehl']}“ sitzt (Fach {b['fach']})"
+                 for b in sorted(befehl_werte, key=lambda b: (-b["fach"], b["befehl"])) if b["fach"] >= 4][:5]
     schwaechen = [f"Kategorie {k['kategorie']}: noch unsicher" for k in kategorie_werte if k["bewertung"] == "schwach"]
     schwaechen += [f"Szenario „{w['titel']}“: zuletzt nicht gelöst" for w in gespielt if not w["letzter_geloest"]]
     schwaechen += [f"Szenario „{w['titel']}“: brauchte {w['letzte_hinweise']} Hinweise"
@@ -175,11 +176,18 @@ def erstelle(system_id: str, szenarien: Sequence[Szenario], stand: Spielstand,
         "kategorien": kategorie_werte,
         "befehle": befehl_werte,
         "haeufige_fehler": {
-            "falsch": [{"befehl": n, "anzahl": c, "beispiel": beispiele[n]} for n, c in falsch_namen.most_common(10)],
-            "unbekannt": [{"befehl": n, "anzahl": c, "beispiel": beispiele[n]} for n, c in unbekannt_namen.most_common(10)],
+            "falsch": [{"befehl": n, "anzahl": c, "beispiel": beispiele["falsch"][n]}
+                       for n, c in falsch_namen.most_common(10)],
+            "unbekannt": [{"befehl": n, "anzahl": c, "beispiel": beispiele["unbekannt"][n]}
+                          for n, c in unbekannt_namen.most_common(10)],
         },
         "szenarien": szenario_werte,
     }
+
+
+def _zelle(wert: Any) -> str:
+    """Text für eine Markdown-Tabellenzelle: | und Zeilenumbrüche würden die Spalten verschieben."""
+    return str(wert).replace("|", "\\|").replace("\n", " ")
 
 
 def _grundkurs_md(g: dict[str, Any] | None) -> list[str]:
@@ -219,7 +227,7 @@ def als_markdown(a: dict[str, Any]) -> str:
     ]
     for k in a["kategorien"]:
         h = "–" if k["hinweise_schnitt"] is None else str(k["hinweise_schnitt"])
-        z.append(f"| {k['kategorie']} | {k['szenarien']} | {k['gespielt']} | {k['geloest']} | {h} | {k['bewertung']} |")
+        z.append(f"| {_zelle(k['kategorie'])} | {k['szenarien']} | {k['gespielt']} | {k['geloest']} | {h} | {k['bewertung']} |")
     z += ["", "## Häufige Fehler", ""]
     fehler = a["haeufige_fehler"]
     if not fehler["falsch"] and not fehler["unbekannt"]:
@@ -231,12 +239,12 @@ def als_markdown(a: dict[str, Any]) -> str:
     if a["befehle"]:
         z += ["", "## Befehls-Training", "", "| Befehl | Bedeutung | Fach | richtig | falsch |", "|---|---|---|---|---|"]
         for b in a["befehle"]:
-            z.append(f"| `{b['befehl']}` | {b['bedeutung']} | {b['fach']} | {b['richtig']} | {b['falsch']} |")
+            z.append(f"| `{_zelle(b['befehl'])}` | {_zelle(b['bedeutung'])} | {b['fach']} | {b['richtig']} | {b['falsch']} |")
     z += ["", "## Szenarien", "", "| Szenario | Kategorie | Versuche | gelöst | Fach | fällig |", "|---|---|---|---|---|---|"]
     for w in a["szenarien"]:
         fach = "–" if w["fach"] is None else str(w["fach"])
         faellig = w["faellig"] or "–"
-        z.append(f"| {w['titel']} | {w['kategorie']} | {w['versuche']} | {'ja' if w['geloest'] else 'nein'} | {fach} | {faellig} |")
+        z.append(f"| {_zelle(w['titel'])} | {_zelle(w['kategorie'])} | {w['versuche']} | {'ja' if w['geloest'] else 'nein'} | {fach} | {faellig} |")
     z += ["", "Fächer: 1 = gleich wieder, 2 = nach 1 Tag, 3 = nach 3 Tagen, 4 = nach 7 Tagen, 5 = nach 14 Tagen.", ""]
     return "\n".join(z)
 
