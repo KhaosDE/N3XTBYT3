@@ -2,7 +2,13 @@
 
 ## Was N3XTBYT3 ist
 
-Ein Lern-Simulator für Systemwartung. Tobi lernt darin über ein **nachgebautes Terminal**,
+N3XTBYT3 ist Tobis **Lernplattform für IT-Themen**. Erster und wichtigster Baustein ist der
+Wartungs-Simulator; die Weiterbildung zum Netzwerkadministrator ist ein wichtiger, aber nicht
+der einzige Zweck. Weitere IT-Themen dürfen als eigene Bereiche dazukommen, auch ohne Terminal
+(z. B. Subnetting-Rechnen, Theorie-Quiz). Die Beschränkung „nur Terminal“ oder „nur
+Weiterbildung“ gilt nicht (Entscheidung Tobi, 12.11.2026).
+
+Der Wartungs-Simulator: Tobi lernt darin über ein **nachgebautes Terminal**,
 Fehler an Systemen zu erkennen und zu beheben — Befehle, Fachbegriffe und Vorgehen.
 Im Hauptmenü wählt er eines von vier Systemen: **Windows, Windows Server, Linux,
 Linux Server**. Die Simulation wählt Szenarien aus, gibt gestufte Hinweise und speichert
@@ -38,6 +44,12 @@ den Fortschritt je System.
    Fehlermeldung, die wie eine echte aussieht.
 4. **Keine Geheimnisse, keine personenbezogenen Daten** im Repository — auch nicht in
    Beispielszenarien (Namen, IPs, Firmen sind erfunden; IPs aus 192.168.x.x/10.x.x.x).
+5. **Nur Betrieb, Wartung, Diagnose und Abwehr.** N3XTBYT3 lehrt, Systeme zu betreiben, zu
+   warten, abzusichern und Angriffe zu erkennen. Es lehrt **nicht**, anzugreifen: keine
+   Anleitungen zu Exploits, Schadsoftware, dem Einschleusen von Code in fremde Prozesse oder
+   dem Umgehen von Schutzmaßnahmen — auch nicht als „Simulation“, Spiel oder Übungsmodul. Im
+   Zweifel die Abwehr-Seite bauen (Lücke erkennen und schließen), nie die Angriffs-Seite. Das
+   gilt auch für neue IT-Bereiche der Lernplattform. Entscheidung Tobi, 12.11.2026.
 
 ## Arbeitsweise: selbstständig durchlaufen
 
