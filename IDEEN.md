@@ -221,3 +221,35 @@ Datum: 04.11.2026
 Was: Szenarien ohne Hinweise und mit Zeitlimit, passend zur Weiterbildung.
 Warum: Prüfungssituation üben.
 Umfang: noch nicht ausgearbeitet.
+
+## Weiterbildung A: PowerShell und Netzwerk-Diagnose vertiefen (Szenarien)
+Status: offen
+Datum: 12.11.2026
+Was: Neue Szenarien für die Weiterbildung Netzwerkadministrator (Windows Server), die über
+die Grundlagen hinausgehen:
+- PowerShell vertiefen: Pipeline, Filtern (`Where-Object`), Sortieren, Formatieren,
+  Variablen, kleine Schleifen.
+- Netzwerk-Diagnose: `tracert`, `pathping`, `netstat`, Routing-Tabelle lesen,
+  `Test-NetConnection` genauer; Fehlersuche über mehrere Stationen.
+- Dateiserver tiefer: NTFS- gegen Freigabe-Rechte, Vererbung.
+- Backup/Wiederherstellung: Windows Server Backup (`wbadmin`).
+- WSUS/Updates und Hyper-V nur als Befehlsübung (keine Oberfläche) — eingeschränkt.
+Warum: Prüfungsstoff der Weiterbildung; PowerShell-Vertiefung fehlt bisher ganz.
+Umfang: noch nicht ausgearbeitet. Vor dem Bauen: ILS-Lehrplan „Netzwerkadministrator für
+MS Windows Server" ansehen, damit die Themen zum Kurs passen; dann je Thema Szenarien mit
+Quelle (Microsoft Learn) und `pruefstatus: ungeprueft`. Reiht sich in die vier bestehenden
+Systeme ein, kein neues Format.
+
+## Weiterbildung B: Übungsarten ohne Terminal (Subnetting, Theorie-Quiz)
+Status: offen
+Datum: 12.11.2026
+Was: Zwei neue Übungsarten, die kein Terminal brauchen und als eigener Modus laufen:
+- Subnetting rechnen: Netz, Broadcast, Hostzahl, CIDR — Aufgaben mit Zufallswerten und
+  Korrektur, Rechenweg als Erklärung.
+- Theorie-Quiz: OSI-Modell, wichtige Ports und Protokolle, RAID-Level, Fachbegriffe.
+  Das bestehende Befehls-Training ließe sich dafür erweitern oder als Vorbild nehmen.
+Warum: Beides ist typischer Prüfungsstoff und im reinen Befehls-Trainer bisher nicht
+abbildbar. Subnetting ist in fast jeder Prüfung dran.
+Umfang: noch nicht ausgearbeitet. Eigener Menüpunkt neben den Systemen; Fortschritt und
+Lernkartei wie bei den Szenarien. Aufgaben und Quizfragen als Daten (nicht im Code), mit
+Quelle. Vor dem Bauen: Aufgabentypen und Fragenkatalog hier im Chat festlegen.
