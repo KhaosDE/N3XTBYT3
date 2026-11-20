@@ -155,6 +155,22 @@ Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Logikprüfung“. Prüfwerkze
 im echten System einen gültigen anderen Befehl); jeder Alias und jede Schreibweise mit/ohne `-Name` löst den
 Schritt; Tobis Fall `get-command *-prcoess` nennt „prcoess“; Bericht: 0 „nur allgemeine Meldung“, 0 „nicht erkannt“.
 
+## D — Lernprinzip: Alles wird erklärt, bevor es verlangt wird (aus IDEEN.md, freigegeben 20.11.2026)
+
+Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Lernprinzip“; Regeln auch in `CLAUDE.md` und
+`daten/grundkurs/SCHEMA.md`. Prüfwerkzeug: `werkzeuge/didaktikpruefung.py`.
+
+- D1 Kern: Lektionsschritte kennen `suchaufgabe` und `absichtlich_unbekannt`; die Prüfung verlangt
+  mindestens zwei Sätze je Erklärung und prüft die Regeln für Suchaufgaben.
+- D2 Alle vier Grundkurse überarbeitet (Windows-Lektion 6 genau nach Vorgabe), jeder Befehl und Zusatz
+  wird vor der Aufgabe erklärt, Mitmachen führt vor, die Aufgabe überträgt.
+- D3 Alle 62 Szenarien: Erklärung geht die Lösung Schritt für Schritt durch.
+- D4 `tests/test_didaktik.py`.
+
+**Abnahme D:** `tests/test_didaktik.py` zeigt 0 Befunde (Ausnahmen nur über `suchaufgabe` /
+`absichtlich_unbekannt`); Befunde vorher/nachher in `STAND.md`; Tobi spielt Windows-Lektion 6 und weiß bei jeder
+Aufgabe ohne Hinweis, was zu tippen ist.
+
 ---
 
 ## Laufend (nach M1)

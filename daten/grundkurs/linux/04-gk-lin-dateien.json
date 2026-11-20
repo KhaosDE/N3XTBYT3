@@ -62,15 +62,27 @@
       "rechte": "rw-rw-r--",
       "zeit": "Nov  3 12:20"
     },
-    "/home/anna/Dokumente/archiv/pfannkuchen.txt": null
+    "/home/anna/Dokumente/archiv/pfannkuchen.txt": null,
+    "/home/anna/Dokumente/archiv/pfannkuchen-alt.txt": null,
+    "/home/anna/Dokumente/alt/einkauf-2025.txt": {
+      "inhalt": [
+        "Milch",
+        "Mehl"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Mar 14  2026"
+    }
   },
   "erklaeren": [
-    "Mit Dateien arbeitest du im Terminal mit kurzen Befehlen: cat zeigt den Inhalt, mkdir legt einen Ordner an,",
-    "cp kopiert, mv verschiebt (oder benennt um), rm löscht. Achtung: rm löscht sofort und endgültig – unter",
-    "Linux gibt es im Terminal keinen Papierkorb und keine Rückfrage."
+    "Mit Dateien arbeitest du im Terminal mit kurzen Befehlen: cat und less zeigen den Inhalt, mkdir legt einen",
+    "Ordner an, touch eine leere Datei, cp kopiert, mv verschiebt (oder benennt um), rm löscht.",
+    "Bei cp und mv steht immer zuerst die Quelle (woher), dann das Ziel (wohin).",
+    "Achtung: rm löscht sofort und endgültig – im Terminal gibt es keinen Papierkorb und keine Rückfrage."
   ],
   "begriffe": {
     "cat": "Zeigt den Inhalt einer Datei (eigentlich: concatenate, aneinanderhängen).",
+    "Quelle und Ziel": "Bei cp und mv: erst was (Quelle), dann wohin (Ziel), z. B. cp liste.txt archiv/.",
     "rm -r": "Löscht einen Ordner samt Inhalt (r = rekursiv, also mit allem darunter)."
   },
   "mitmachen": [
@@ -80,12 +92,17 @@
       "ziel": {
         "pfad": "/home/anna/Dokumente"
       },
-      "danach": "Du bist in ~/Dokumente."
+      "danach": "Du bist jetzt in ~/Dokumente (cd kennst du aus Lektion 2). Alle folgenden Befehle beziehen sich auf diesen Ordner: Nennst du nur einen Dateinamen ohne Pfad, sucht die Bash die Datei hier."
     },
     {
       "text": "Zeig die Einkaufsliste: cat einkauf.txt",
       "eingabe": "cat einkauf.txt",
-      "danach": "cat zeigt den ganzen Inhalt. Für lange Dateien nimmt man less (blättern, q beendet)."
+      "danach": "cat gibt den ganzen Inhalt einer Datei im Terminal aus – hier die vier Zeilen der Einkaufsliste. Der Name kommt von „concatenate“ (aneinanderhängen): Mit mehreren Dateinamen hängt cat die Inhalte hintereinander. Für kurze Textdateien ist cat der schnellste Blick hinein."
+    },
+    {
+      "text": "Für lange Dateien: less einkauf.txt",
+      "eingabe": "less einkauf.txt",
+      "danach": "less zeigt eine Datei seitenweise – gut für lange Dateien, bei denen cat alles auf einmal durchlaufen lässt. Der Name ist ein Wortspiel: Das ältere Programm dafür heißt more („mehr“). Im echten Terminal blätterst du mit der Leertaste oder den Pfeiltasten, suchst mit / und beendest mit q – wie bei man. Die Simulation zeigt den Inhalt einfach komplett."
     },
     {
       "text": "Leg einen Ordner an: mkdir projekt",
@@ -93,27 +110,42 @@
       "ziel": {
         "verzeichnis:/home/anna/Dokumente/projekt": true
       },
-      "danach": "mkdir (make directory) legt einen Ordner an. Keine Ausgabe heißt: hat geklappt."
+      "danach": "mkdir steht für „make directory“ und legt einen neuen Ordner an – hier projekt im aktuellen Ordner. Es kommt keine Meldung: Das heißt, es hat geklappt. Gäbe es den Ordner schon, käme „File exists“."
     },
     {
-      "text": "Kopiere die Liste hinein: cp einkauf.txt projekt/",
+      "text": "Leg darin eine leere Datei an: touch projekt/todo.txt",
+      "eingabe": "touch projekt/todo.txt",
+      "danach": "touch (englisch: berühren) legt eine leere Datei an, wenn es sie noch nicht gibt. Gibt es sie schon, ändert touch nur das Datum der letzten Änderung – der Inhalt bleibt. projekt/todo.txt ist ein relativer Pfad: im Ordner projekt die Datei todo.txt."
+    },
+    {
+      "text": "Kopiere die Einkaufsliste hinein: cp einkauf.txt projekt/",
       "eingabe": "cp einkauf.txt projekt/",
-      "danach": "cp Quelle Ziel. Der Schrägstrich hinten macht klar: projekt ist ein Ordner."
+      "danach": "cp (copy) kopiert: erst die Quelle (einkauf.txt), dann das Ziel (projekt/). Ist das Ziel ein Ordner, landet die Kopie darin unter demselben Namen. Der Schrägstrich hinten macht klar, dass projekt ein Ordner ist. Das Original bleibt, wo es war."
     },
     {
       "text": "Benenne die Kopie um: mv projekt/einkauf.txt projekt/liste-alt.txt",
       "eingabe": "mv projekt/einkauf.txt projekt/liste-alt.txt",
-      "danach": "mv verschiebt – im selben Ordner heißt das: umbenennen."
+      "danach": "mv steht für „move“ (verschieben) – auch hier erst die Quelle, dann das Ziel. Bleibt die Datei im selben Ordner und nur der Name ändert sich, ist Verschieben dasselbe wie Umbenennen. Zum Umbenennen nimmt man unter Linux deshalb einfach mv."
     },
     {
       "text": "Sieh nach: ls -l projekt",
       "eingabe": "ls -l projekt",
-      "danach": "Darin liegt jetzt liste-alt.txt."
+      "danach": "ls mit einem Ordnernamen zeigt dessen Inhalt, ohne dass du hineinwechseln musst. Darin liegen liste-alt.txt (28 Bytes – die vier Zeilen der Liste) und todo.txt mit 0 Bytes: die leere Datei von touch. Mit ls -l prüfst du nach jedem Schritt, ob das Ergebnis stimmt."
     },
     {
       "text": "Lösch die Datei: rm projekt/liste-alt.txt",
       "eingabe": "rm projekt/liste-alt.txt",
-      "danach": "Weg – ohne Rückfrage. Darum vorher immer mit ls nachsehen, was du löschst."
+      "danach": "rm steht für „remove“ (entfernen) und löscht die Datei – ohne Rückfrage und ohne Papierkorb. Sie ist endgültig weg. Darum vorher immer mit ls nachsehen, was du löschst, und den Namen genau prüfen."
+    },
+    {
+      "text": "Im Ordner alt liegt eine alte Liste. Versuch, den Ordner zu löschen: rm alt",
+      "eingabe": "rm alt",
+      "danach": "„Is a directory“ (ist ein Ordner): rm löscht ohne Zusatz nur Dateien und weigert sich bei Ordnern. Das ist ein Schutz, damit du nicht aus Versehen einen ganzen Ordner samt Inhalt löschst. Für Ordner braucht rm eine Option."
+    },
+    {
+      "text": "Jetzt mit Option: rm -r alt",
+      "eingabe": "rm -r alt",
+      "danach": "-r steht für „recursive“ (rekursiv): rm geht in den Ordner hinein, löscht alles darin – auch Unterordner – und zum Schluss den Ordner selbst. Das ist praktisch und gefährlich zugleich: Was so gelöscht ist, ist weg. Darum vorher mit ls -l alt nachsehen, was drin ist."
     }
   ],
   "aufgaben": [
@@ -131,7 +163,7 @@
         "cd ~/Dokumente",
         "mkdir archiv"
       ],
-      "danach": "Angelegt."
+      "danach": "mkdir archiv hat im aktuellen Ordner den Ordner archiv angelegt – genau wie vorhin projekt. Standest du woanders, ging es auch von überall mit mkdir ~/Dokumente/archiv."
     },
     {
       "aufgabe": "Kopiere rezepte/pfannkuchen.txt in den Ordner archiv.",
@@ -149,10 +181,29 @@
         "cd ~/Dokumente",
         "cp rezepte/pfannkuchen.txt archiv/"
       ],
-      "danach": "Kopiert."
+      "danach": "cp rezepte/pfannkuchen.txt archiv/ – erst die Quelle mit ihrem Ordner, dann das Ziel. Die Kopie heißt wie das Original und liegt jetzt in archiv; das Rezept in rezepte ist unverändert da."
     },
     {
-      "aufgabe": "Lösch den Ordner projekt.",
+      "aufgabe": "Benenne die Kopie im Ordner archiv um: Aus pfannkuchen.txt soll pfannkuchen-alt.txt werden.",
+      "ziel": {
+        "datei:/home/anna/Dokumente/archiv/pfannkuchen-alt.txt": {
+          "nicht": null
+        },
+        "datei:/home/anna/Dokumente/archiv/pfannkuchen.txt": null
+      },
+      "hinweise": [
+        "Umbenennen ist unter Linux dasselbe wie verschieben.",
+        "mv, dann der alte Name, dann der neue – jeweils mit dem Ordner davor.",
+        "Tippe (in Dokumente): mv archiv/pfannkuchen.txt archiv/pfannkuchen-alt.txt"
+      ],
+      "loesung": [
+        "cd ~/Dokumente",
+        "mv archiv/pfannkuchen.txt archiv/pfannkuchen-alt.txt"
+      ],
+      "danach": "mv archiv/pfannkuchen.txt archiv/pfannkuchen-alt.txt: Quelle und Ziel liegen im selben Ordner, also wird nur umbenannt. Hättest du als Ziel einen anderen Ordner genannt, wäre die Datei dorthin gewandert."
+    },
+    {
+      "aufgabe": "Lösch den Ordner projekt samt Inhalt.",
       "ziel": {
         "verzeichnis:/home/anna/Dokumente/projekt": false
       },
@@ -165,12 +216,13 @@
         "cd ~/Dokumente",
         "rm -r projekt"
       ],
-      "danach": "Gelöscht. Für Ordner braucht rm die Option -r (bei einem leeren Ordner ginge auch rmdir)."
+      "danach": "rm -r projekt löscht den Ordner mitsamt todo.txt darin. Ohne -r hätte rm wie vorhin bei alt mit „Is a directory“ abgelehnt. Gerade bei -r gilt: erst nachsehen, dann löschen."
     }
   ],
   "fertig": [
-    "cat zeigt Dateien, mkdir legt Ordner an.",
-    "cp kopiert (-r für Ordner), mv verschiebt oder benennt um.",
-    "rm löscht sofort und endgültig (-r für Ordner)."
+    "cat zeigt Dateien, less seitenweise.",
+    "mkdir legt Ordner an, touch leere Dateien.",
+    "cp kopiert, mv verschiebt oder benennt um – immer erst Quelle, dann Ziel.",
+    "rm löscht sofort und endgültig; Ordner nur mit -r."
   ]
 }

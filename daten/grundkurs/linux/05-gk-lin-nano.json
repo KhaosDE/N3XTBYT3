@@ -5,6 +5,7 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html",
+    "https://www.nano-editor.org/dist/latest/cheatsheet.html",
     "https://man7.org/linux/man-pages/man1/cat.1.html"
   ],
   "datum": "2026-11-05",
@@ -24,24 +25,35 @@
   },
   "erklaeren": [
     "Einstellungen stehen unter Linux in Textdateien. Zum Bearbeiten im Terminal gibt es den Editor nano:",
-    "nano datei öffnet die Datei. Du bewegst dich mit den Pfeiltasten und tippst einfach. Unten stehen die",
-    "Tasten: ^O heißt Strg+O (speichern), ^X heißt Strg+X (beenden), ^K schneidet eine Zeile aus.",
-    "Der Editor in der Simulation ist ein vereinfachter Ersatz für nano – die Tasten sind dieselben."
+    "nano datei öffnet die Datei. Du bewegst dich mit den Pfeiltasten und tippst einfach los; Enter macht eine",
+    "neue Zeile. Unten stehen die wichtigsten Tasten: ^O heißt Strg+O (speichern), ^X heißt Strg+X (beenden),",
+    "^K schneidet die Zeile aus, in der der Cursor steht (löscht sie also).",
+    "Gibt es die Datei noch nicht, öffnet nano ein leeres Fenster – angelegt wird sie beim ersten Speichern.",
+    "",
+    "Der Editor in der Simulation ist ein vereinfachter Ersatz für nano – die Tasten sind dieselben. Ein",
+    "Unterschied: Im echten nano fragt Strg+O noch nach dem Dateinamen (File Name to Write), und du bestätigst",
+    "mit Enter. Hier wird sofort gespeichert."
   ],
   "begriffe": {
     "Editor": "Programm zum Bearbeiten von Textdateien, z. B. nano.",
-    "^ (Zirkumflex)": "In nano steht ^ für die Strg-Taste: ^O = Strg+O."
+    "^ (Zirkumflex)": "In nano steht ^ für die Strg-Taste: ^O = Strg+O.",
+    "Cursor": "Die blinkende Markierung: Dort erscheint, was du tippst."
   },
   "mitmachen": [
     {
       "text": "Öffne die Einkaufsliste: nano einkauf.txt",
       "eingabe": "nano einkauf.txt",
-      "danach": "Der Editor ist offen. Probier die Pfeiltasten. Schließen mit Strg+X – danach geht es hier weiter."
+      "danach": "Der Editor ist offen: oben der Dateiname, in der Mitte der Text, unten die Tasten. Probier die Pfeiltasten. Hast du nichts geändert, schließt Strg+X sofort. Hast du etwas geändert, fragt nano erst, ob es speichern soll (im echten nano „Save modified buffer?“ – Y für ja, N für nein). Nach dem Schließen geht es hier weiter."
+    },
+    {
+      "text": "Öffne eine Datei, die es noch nicht gibt: nano entwurf.txt",
+      "eingabe": "nano entwurf.txt",
+      "danach": "nano zeigt ein leeres Fenster und meldet „Neue Datei“ (im echten nano: „New File“). Die Datei gibt es erst, wenn du speicherst. Schließt du jetzt mit Strg+X, ohne etwas zu tippen, wird nichts angelegt."
     },
     {
       "text": "Öffne eine Systemdatei: nano /etc/hostname",
       "eingabe": "nano /etc/hostname",
-      "danach": "Oben steht „schreibgeschützt“: Die Datei gehört root, du darfst sie nur lesen. Zum Ändern bräuchtest du sudo nano /etc/hostname – mehr dazu in Lektion 6. Schließen mit Strg+X."
+      "danach": "Oben steht „schreibgeschützt“: Die Datei gehört root, und du darfst sie nur lesen, nicht ändern. Zum Ändern bräuchtest du Administrator-Rechte: sudo nano /etc/hostname – das lernst du in Lektion 6. Schließen mit Strg+X."
     }
   ],
   "aufgaben": [
@@ -68,7 +80,7 @@
           ]
         }
       ],
-      "danach": "Gespeichert. Mit cat einkauf.txt kannst du nachsehen."
+      "danach": "nano einkauf.txt, mit den Pfeiltasten hinter das letzte Wort, Enter für eine neue Zeile, Käse tippen, Strg+O. „Wrote 3 lines“ heißt: drei Zeilen gespeichert. So änderst du später auch Einstellungsdateien: öffnen, Zeile ändern, speichern, beenden."
     },
     {
       "aufgabe": "Leg mit nano die neue Datei notizen.txt an, schreib „Drucker anrufen“ hinein und speichere.",
@@ -89,7 +101,7 @@
           "inhalt": "Drucker anrufen"
         }
       ],
-      "danach": "Neu angelegt. nano legt eine Datei beim ersten Speichern an."
+      "danach": "nano notizen.txt hat ein leeres Fenster geöffnet, und Strg+O hat die Datei angelegt – wie bei entwurf.txt gezeigt, nur diesmal mit Speichern. So legst du schnell eine neue Textdatei an, z. B. für Notizen oder ein kleines Skript."
     },
     {
       "aufgabe": "Zeig an, was jetzt in notizen.txt steht – ohne Editor.",
@@ -109,7 +121,7 @@
         "cat und der Dateiname.",
         "Tippe: cat notizen.txt"
       ],
-      "danach": "Genau: cat."
+      "danach": "cat gibt den Inhalt aus, ohne die Datei zu öffnen: Drucker anrufen. Zum schnellen Nachsehen nimmst du cat (oder less), zum Ändern nano – so kannst du beim Nachsehen nichts aus Versehen verändern."
     }
   ],
   "fertig": [

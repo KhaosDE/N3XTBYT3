@@ -7,20 +7,29 @@
     "https://ubuntu.com/tutorials/command-line-for-beginners",
     "https://man7.org/linux/man-pages/man1/whoami.1.html",
     "https://man7.org/linux/man-pages/man1/hostname.1.html",
-    "https://man7.org/linux/man-pages/man1/clear.1.html"
+    "https://man7.org/linux/man-pages/man1/clear.1.html",
+    "https://man7.org/linux/man-pages/man1/bash.1.html"
   ],
   "datum": "2026-11-05",
   "erklaeren": [
-    "Unter Linux heißt die Befehlszeile Terminal; darin läuft eine Shell namens Bash. Der Prompt sieht so aus:",
-    "anna@pc-lager02:~$ – Benutzer anna auf dem Computer pc-lager02, im Ordner ~ (ihr Home-Ordner), und $",
-    "heißt: normale Rechte. Du tippst einen Befehl und drückst Enter. Wichtig: Linux unterscheidet Groß- und",
-    "Kleinschreibung – whoami und Whoami sind zwei verschiedene Dinge. Die meisten Befehle sind klein geschrieben."
+    "Unter Linux heißt die Befehlszeile Terminal. Darin läuft ein Programm, das deine Befehle annimmt und",
+    "ausführt: die Shell. Unter Ubuntu heißt sie Bash. Vor dem Cursor steht der Prompt, z. B. anna@pc-lager02:~$.",
+    "Er sagt: Benutzer anna, auf dem Computer pc-lager02, im Ordner ~ (ihr Home-Ordner). Das $ am Ende heißt:",
+    "normale Rechte. Du tippst einen Befehl und drückst Enter, darunter erscheint die Antwort.",
+    "",
+    "Wichtig: Linux unterscheidet Groß- und Kleinschreibung – whoami und Whoami sind für Linux zwei verschiedene",
+    "Wörter. Die meisten Befehle sind klein geschrieben.",
+    "",
+    "In dieser Lektion lernst du vier Befehle: whoami zeigt, mit welchem Benutzer du angemeldet bist, hostname",
+    "zeigt den Namen des Computers, clear leert das Fenster, und help zeigt die Hilfe dieser Simulation."
   ],
   "begriffe": {
     "Terminal": "Fenster für Befehle in Textform unter Linux.",
-    "Shell": "Das Programm im Terminal, das Befehle annimmt. Unter Ubuntu: Bash.",
+    "Shell": "Das Programm im Terminal, das Befehle annimmt und ausführt. Unter Ubuntu: Bash.",
+    "Prompt": "Der Text vor dem Cursor, z. B. anna@pc-lager02:~$ – benutzer@computer:ordner. Er zeigt: Das Terminal wartet auf einen Befehl.",
     "Home-Ordner": "Dein persönlicher Ordner, z. B. /home/anna. Kurzform: ~ (Tilde).",
-    "$ und #": "Ende des Prompts: $ = normaler Benutzer, # = root (Administrator)."
+    "$ und #": "Ende des Prompts: $ = normaler Benutzer, # = root (Administrator).",
+    "Verlauf (History)": "Die Liste deiner früheren Befehle. Mit ↑ und ↓ blätterst du darin."
   },
   "befehle": [
     {
@@ -38,35 +47,36 @@
   ],
   "mitmachen": [
     {
-      "text": "Tippe whoami und drück Enter.",
+      "text": "Tippe whoami und drück Enter. whoami ist Englisch: „who am I?“ – „Wer bin ich?“",
       "eingabe": "whoami",
-      "danach": "anna – so heißt der angemeldete Benutzer."
+      "danach": "whoami antwortet mit einer einzigen Zeile: anna – dem Namen des Benutzers, mit dem du gerade angemeldet bist. Derselbe Name steht auch vorne im Prompt, vor dem @. Im Alltag prüfst du damit, unter welchem Konto du arbeitest – zum Beispiel an einem fremden Computer oder bevor du etwas am System änderst."
     },
     {
-      "text": "Tippe hostname.",
+      "text": "Tippe hostname und drück Enter. Host heißt im Netzwerk „Computer“, name heißt Name.",
       "eingabe": "hostname",
-      "danach": "pc-lager02 – der Name dieses Computers. Er steht auch im Prompt."
+      "danach": "hostname zeigt den Namen dieses Computers: pc-lager02. Er steht auch im Prompt, hinter dem @. Jeder Computer im Netzwerk hat einen eigenen Namen. Du brauchst ihn, wenn dich jemand fragt, an welchem Rechner du sitzt, oder wenn du dich später von einem anderen Computer aus verbindest."
     },
     {
-      "text": "Jetzt mit großem W: Whoami",
+      "text": "Jetzt absichtlich falsch, mit großem W: Whoami",
       "eingabe": "Whoami",
-      "danach": "„not found“: Mit großem W gibt es den Befehl nicht. Linux nimmt Groß- und Kleinschreibung genau – das ist die häufigste Fehlerquelle am Anfang."
+      "absichtlich_unbekannt": true,
+      "danach": "„Command 'Whoami' not found“ heißt: Einen Befehl mit diesem Namen gibt es nicht. Mit großem W ist es für Linux ein anderes Wort. Darunter schlägt Ubuntu vor, was du gemeint haben könntest („did you mean“ = „meintest du“). Das ist am Anfang die häufigste Fehlerquelle: Kommt „not found“, prüf zuerst die Schreibweise. Kaputt geht dabei nichts."
     },
     {
       "text": "Hol hostname zurück, ohne es neu zu tippen: Drück Pfeil hoch (↑) – jeder Druck geht einen Befehl weiter zurück. Steht hostname in der Zeile, drück Enter.",
       "eingabe": "hostname",
       "tipp": "Das war „{eingabe}“, nicht hostname. Drück ↑ noch einmal (oder öfter), bis hostname in der Zeile steht – mit ↓ geht es wieder vorwärts. Dann Enter.",
-      "danach": "Mit ↑ und ↓ holst du frühere Befehle zurück."
+      "danach": "Die Bash merkt sich deine Befehle in einem Verlauf (englisch History). Mit ↑ gehst du darin zurück, mit ↓ wieder vorwärts. Das spart Tipparbeit: Einen langen Befehl mit Tippfehler holst du mit ↑ zurück, verbesserst nur die falsche Stelle (mit ← und →) und drückst Enter."
     },
     {
-      "text": "Leer das Fenster: clear",
+      "text": "Leer das Fenster: clear (englisch: leeren, frei machen)",
       "eingabe": "clear",
-      "danach": "clear leert das Terminal. (Im echten Terminal geht auch Strg+L.)"
+      "danach": "clear leert das Terminal: Alles Alte verschwindet, der Prompt steht wieder oben. Deine früheren Befehle sind nicht weg – ↑ holt sie weiter zurück. Das hilft, wenn das Fenster voll ist und du den Überblick verlierst. Im echten Terminal geht dasselbe mit Strg+L."
     },
     {
       "text": "Tippe help.",
       "eingabe": "help",
-      "danach": "Blaue Zeilen mit [N3XTBYT3] kommen von der Simulation: help zeigt hier die Tasten und Grundbefehle. In der echten Bash zeigt help die eingebauten Befehle der Shell."
+      "danach": "Blaue Zeilen mit [N3XTBYT3] kommen von der Simulation, nicht von Linux. help zeigt hier die Tasten (F1 Hinweis, F4 Befehlsbuch, F5 Lexikon, Esc zurück) und die Grundbefehle. In der echten Bash zeigt help etwas anderes: die Befehle, die in die Shell selbst eingebaut sind. Hilfe zu Linux-Befehlen findest du mit man und --help – das lernst du in Lektion 3."
     }
   ],
   "aufgaben": [
@@ -80,7 +90,7 @@
         "who am I – zusammengeschrieben und klein.",
         "Tippe: whoami"
       ],
-      "danach": "Genau: whoami."
+      "danach": "whoami fragt „Wer bin ich?“ und antwortet mit dem Benutzernamen: anna. So prüfst du jederzeit, unter welchem Konto du gerade arbeitest. Das wird wichtig, sobald du mit Administrator-Rechten arbeitest (Lektion 6) – dann steht dort root."
     },
     {
       "aufgabe": "Zeig den Namen des Computers an.",
@@ -92,7 +102,7 @@
         "Klein und zusammengeschrieben.",
         "Tippe: hostname"
       ],
-      "danach": "Richtig: hostname."
+      "danach": "hostname gibt den Namen des Computers aus: pc-lager02. Den Namen siehst du auch im Prompt hinter dem @. Den Befehl brauchst du trotzdem, z. B. wenn du am Telefon sagen sollst, an welchem Rechner du sitzt – oder auf einem Server, dessen Prompt anders aussieht."
     },
     {
       "aufgabe": "Mach das Terminal leer.",
@@ -104,13 +114,14 @@
         "Ein Wort mit fünf Buchstaben.",
         "Tippe: clear"
       ],
-      "danach": "Gut!"
+      "danach": "clear räumt nur das Fenster auf: Dateien und dein Verlauf bleiben, wie sie sind. Im echten Terminal geht es auch mit Strg+L."
     }
   ],
   "fertig": [
     "Du liest den Prompt: benutzer@computer:ordner$.",
     "whoami, hostname und clear kennst du.",
-    "Linux unterscheidet Groß- und Kleinschreibung.",
-    "Mit ↑ holst du frühere Befehle zurück."
+    "Linux unterscheidet Groß- und Kleinschreibung – „not found“ heißt oft: Schreibweise prüfen.",
+    "Mit ↑ holst du frühere Befehle zurück.",
+    "Blaue [N3XTBYT3]-Zeilen kommen von der Simulation."
   ]
 }

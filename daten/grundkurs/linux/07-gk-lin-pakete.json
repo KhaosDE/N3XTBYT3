@@ -5,35 +5,178 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://manpages.ubuntu.com/manpages/noble/man8/apt.8.html",
-    "https://documentation.ubuntu.com/server/how-to/software/package-management/"
+    "https://documentation.ubuntu.com/server/how-to/software/package-management/",
+    "https://manpages.ubuntu.com/manpages/noble/man1/tree.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/htop.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "lin-paket-installieren",
+  "zustand": {
+    "pfad": "/home/anna",
+    "tree": false
+  },
+  "dateien": {
+    "/home/anna/Dokumente/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Bilder/": {
+      "besitzer": "anna:anna",
+      "zeit": "Oct 12 08:03"
+    },
+    "/home/anna/Downloads/": {
+      "besitzer": "anna:anna",
+      "zeit": "Nov  3 12:20"
+    },
+    "/home/anna/Dokumente/einkauf.txt": {
+      "inhalt": [
+        "Milch",
+        "Brot",
+        "Kaffee",
+        "Etiketten"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  2 17:41"
+    },
+    "/home/anna/Dokumente/rezepte/pfannkuchen.txt": {
+      "inhalt": [
+        "Pfannkuchen für 4 Personen",
+        "250 g Mehl",
+        "3 Eier",
+        "500 ml Milch"
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Oct 30 19:05"
+    },
+    "/home/anna/Downloads/anleitung-scanner.txt": {
+      "inhalt": [
+        "Scanner im Lager: Handscanner LS-2",
+        "Akku laden: Station hinten links."
+      ],
+      "besitzer": "anna:anna",
+      "rechte": "rw-rw-r--",
+      "zeit": "Nov  3 12:20"
+    }
+  },
   "erklaeren": [
-    "Unter Ubuntu installiert man Programme aus Paketquellen mit apt. Zuerst holt apt update die aktuelle",
-    "Liste der Pakete, dann installiert apt install paket das Programm samt allem, was es braucht.",
-    "Beides ändert das System – darum mit sudo. Hier fehlt das Programm htop (zeigt laufende Prozesse)."
+    "Unter Ubuntu installierst du Programme aus Paketquellen – Servern, auf denen Ubuntu geprüfte Programme",
+    "bereitstellt. Das Werkzeug dafür heißt apt. apt update holt die aktuelle Liste der Pakete (installiert noch",
+    "nichts). apt install paket lädt das Programm und richtet es samt allem ein, was es braucht.",
+    "Beides ändert das System – darum mit sudo davor.",
+    "Du übst es am kleinen Programm tree (zeigt Ordner als Baum). Danach installierst du selbst htop – das zeigt",
+    "die laufenden Programme an."
   ],
   "begriffe": {
     "Paket": "Ein Programm (oder Teil davon) zum Installieren, z. B. htop.",
     "Paketquelle": "Server, von dem apt die Pakete lädt (Repository).",
-    "apt": "Paketverwaltung von Ubuntu/Debian: update, install, upgrade, remove."
+    "apt": "Paketverwaltung von Ubuntu/Debian: update, install, upgrade, remove.",
+    "Abhängigkeit": "Ein anderes Paket, das ein Programm zum Laufen braucht. apt installiert es mit."
   },
+  "befehle": [
+    {
+      "muster": [
+        "tree"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "tree": false
+          },
+          "sim": true,
+          "ausgabe": "tree ist noch nicht installiert. Das echte Terminal meldet „Command 'tree' not found, but can be installed with:“ und darunter, wie man es installiert."
+        },
+        {
+          "wenn": {
+            "pfad": "/home/anna"
+          },
+          "ausgabe": [
+            ".",
+            "├── Bilder",
+            "├── Dokumente",
+            "│   ├── einkauf.txt",
+            "│   └── rezepte",
+            "│       └── pfannkuchen.txt",
+            "└── Downloads",
+            "    └── anleitung-scanner.txt",
+            "",
+            "4 directories, 3 files"
+          ]
+        },
+        {
+          "sim": true,
+          "ausgabe": "tree zeigt den Ordnerbaum ab dem aktuellen Ordner. Nachgebaut ist er hier nur in deinem Home-Ordner – geh mit cd zurück."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apt install tree",
+        "apt install -y tree",
+        "apt-get install tree",
+        "apt-get install -y tree"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "fehler": true,
+          "ausgabe": [
+            "E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)",
+            "E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?"
+          ]
+        },
+        {
+          "wenn": {
+            "tree": true
+          },
+          "sim": true,
+          "ausgabe": "tree ist schon installiert. apt meldet dann „tree is already the newest version“ und installiert nichts."
+        },
+        {
+          "setze": {
+            "tree": true
+          },
+          "ausgabe": [
+            "Reading package lists... Done",
+            "Building dependency tree... Done",
+            "Reading state information... Done",
+            "The following NEW packages will be installed:",
+            "  tree",
+            "0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded."
+          ],
+          "notiz": "Gekürzt: Danach lädt apt das Paket herunter (Get:…), entpackt es (Unpacking …) und richtet es ein (Setting up tree …)."
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Starte das Programm: htop",
       "eingabe": "htop",
-      "danach": "„not found, but can be installed“ – Ubuntu schlägt gleich vor, wie man es installiert."
+      "danach": "„Command 'htop' not found“: Das Programm ist nicht installiert. Ubuntu hilft aber gleich weiter: „but can be installed with:“ – darunter steht der Befehl, mit dem du es installierst. Diese Meldung verrät dir also auch den Paketnamen."
     },
     {
       "text": "Paketliste holen – erst ohne sudo: apt update",
       "eingabe": "apt update",
-      "danach": "Ohne Root-Rechte geht es nicht. Paketverwaltung ändert das System."
+      "danach": "Ohne sudo lehnt apt ab: Die Paketliste zu erneuern ändert Dateien des Systems, und das darf nur root. Das echte apt meldet hier einen Fehler mit „Permission denied“ (keine Berechtigung). Merke: Alles, was Programme installiert, entfernt oder aktualisiert, braucht sudo."
     },
     {
       "text": "Jetzt richtig: sudo apt update",
       "eingabe": "sudo apt update",
-      "danach": "Hit/Get: apt fragt die Paketquellen ab. „All packages are up to date“ – die Liste ist aktuell."
+      "danach": "apt fragt jede Paketquelle nach ihrer aktuellen Liste. Hit heißt: Liste unverändert, Get heißt: neue Liste geladen. „All packages are up to date“ sagt: Alle installierten Pakete sind aktuell. apt update installiert selbst nichts – es sorgt nur dafür, dass apt die neuesten Versionen kennt. Darum kommt es vor dem Installieren."
+    },
+    {
+      "text": "Installiere das kleine Programm tree: sudo apt install tree",
+      "eingabe": "sudo apt install tree",
+      "danach": "apt liest die Paketliste, prüft, was tree braucht (Abhängigkeiten), und zeigt, was passiert: „The following NEW packages will be installed: tree“ – ein neues Paket. Die Zeile „0 upgraded, 1 newly installed …“ fasst zusammen. Danach lädt apt das Paket, entpackt es und richtet es ein (hier gekürzt). Müsste apt weitere Pakete dazuholen, würde es vorher fragen: „Do you want to continue? [Y/n]“."
+    },
+    {
+      "text": "Starte das neue Programm: tree",
+      "eingabe": "tree",
+      "danach": "Ein installiertes Programm startest du einfach mit seinem Namen. tree zeigt den aktuellen Ordner als Baum: Bilder, Dokumente (mit einkauf.txt und dem Ordner rezepte) und Downloads. Die letzte Zeile zählt Ordner und Dateien."
     }
   ],
   "aufgaben": [
@@ -50,7 +193,7 @@
       "loesung": [
         "sudo apt install htop"
       ],
-      "danach": "Installiert."
+      "danach": "sudo apt install htop – wie eben bei tree, nur mit anderem Paketnamen. Den Namen hatte dir Ubuntu schon bei „not found“ verraten. Die Paketliste war durch apt update noch aktuell, darum musstest du es nicht wiederholen."
     },
     {
       "aufgabe": "Starte htop.",
@@ -61,16 +204,17 @@
         "htop": true
       },
       "hinweise": [
-        "So wie am Anfang.",
+        "So wie vorhin tree.",
         "Einfach der Programmname.",
         "Tippe: htop"
       ],
-      "danach": "htop startet (in der Simulation nur als Meldung)."
+      "danach": "htop zeigt laufend, welche Prozesse wie viel Rechenleistung (CPU) und Arbeitsspeicher brauchen – oben als Balken, darunter als Liste. Beenden mit q oder F10. In der Simulation ist htop nur als Meldung nachgebaut; die laufenden Prozesse lernst du in Lektion 8 mit ps kennen."
     }
   ],
   "fertig": [
     "sudo apt update holt die aktuelle Paketliste.",
-    "sudo apt install paket installiert ein Programm.",
-    "„Command not found, but can be installed with“ verrät den Paketnamen."
+    "sudo apt install paket installiert ein Programm samt Abhängigkeiten.",
+    "„Command not found, but can be installed with“ verrät den Paketnamen.",
+    "Ein installiertes Programm startest du mit seinem Namen."
   ]
 }

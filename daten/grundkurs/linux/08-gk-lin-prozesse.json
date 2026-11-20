@@ -5,41 +5,249 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://man7.org/linux/man-pages/man1/ps.1.html",
+    "https://man7.org/linux/man-pages/man1/pgrep.1.html",
     "https://man7.org/linux/man-pages/man1/kill.1.html",
     "https://man7.org/linux/man-pages/man7/signal.7.html",
-    "https://man7.org/linux/man-pages/man1/grep.1.html"
+    "https://man7.org/linux/man-pages/man1/grep.1.html",
+    "https://man7.org/linux/man-pages/man1/bash.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "lin-prozess-haengt",
+  "zustand": {
+    "lagerscan": true
+  },
   "erklaeren": [
-    "Jedes laufende Programm ist ein Prozess mit einer Nummer (PID). ps aux zeigt alle. Die Liste ist lang –",
-    "mit einer Pipe (|) gibst du sie an grep weiter, das nur passende Zeilen durchlässt. Hängt ein Programm,",
-    "beendest du es mit kill PID (höflich) oder kill -9 PID (erzwungen). Hier friert LibreOffice ein (soffice)."
+    "Jedes laufende Programm ist ein Prozess mit einer Nummer, der PID (Prozess-ID). ps aux zeigt alle Prozesse.",
+    "Die Liste ist lang – mit einer Pipe (|) gibst du sie an grep weiter, das nur die Zeilen mit einem Suchwort",
+    "durchlässt. Hängt ein Programm, schickst du ihm mit kill ein Signal: kill PID bittet höflich ums Beenden",
+    "(Signal TERM), kill -9 PID beendet sofort (Signal KILL).",
+    "",
+    "Auf Annas PC hängen gerade zwei Programme: das Lagerprogramm lagerscan und LibreOffice Calc (sein Prozess",
+    "heißt soffice). Am Lagerprogramm übst du, LibreOffice beendest du danach selbst. Thunderbird (E-Mail) läuft",
+    "normal und bleibt offen."
   ],
   "begriffe": {
-    "PID": "Prozess-ID: die Nummer eines Prozesses.",
+    "Prozess": "Ein laufendes Programm.",
+    "PID": "Prozess-ID: die Nummer eines Prozesses. Sie ist eindeutig – zwei Prozesse können gleich heißen, aber nie dieselbe PID haben.",
     "Pipe (|)": "Gibt die Ausgabe eines Befehls an den nächsten weiter, z. B. ps aux | grep soffice.",
-    "grep": "Lässt nur Zeilen durch, die ein Suchwort enthalten.",
-    "Signal": "Nachricht an einen Prozess: TERM (15) = bitte beenden, KILL (9) = sofort beenden."
+    "grep": "Lässt nur Zeilen durch, die ein Suchwort enthalten (hinter einer Pipe oder in einer Datei).",
+    "Signal": "Nachricht an einen Prozess: TERM (15) = bitte beenden, KILL (9) = sofort beenden.",
+    "Kernel": "Der Kern des Betriebssystems. Er startet und beendet Prozesse."
   },
+  "befehle": [
+    {
+      "muster": [
+        "ps aux"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lagerscan": true,
+            "haengt": true
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        3920 98.8  1.6 412716 131080 ?       Rl   08:49  13:50 /opt/lagerscan/bin/lagerscan",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc",
+            "anna        4711 99.6 14.2 3984112 1163520 ?    Rl   08:41  21:37 /usr/lib/libreoffice/program/soffice.bin --calc"
+          ]
+        },
+        {
+          "wenn": {
+            "lagerscan": true,
+            "haengt": false
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        3920 98.8  1.6 412716 131080 ?       Rl   08:49  13:50 /opt/lagerscan/bin/lagerscan",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc"
+          ]
+        },
+        {
+          "wenn": {
+            "lagerscan": false,
+            "haengt": true
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc",
+            "anna        4711 99.6 14.2 3984112 1163520 ?    Rl   08:41  21:37 /usr/lib/libreoffice/program/soffice.bin --calc"
+          ]
+        },
+        {
+          "wenn": {
+            "lagerscan": false,
+            "haengt": false
+          },
+          "ausgabe": [
+            "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND",
+            "root           1  0.0  0.1  23140 13712 ?        Ss   08:02   0:02 /sbin/init splash",
+            "anna        2210  0.4  2.1 1215400 172304 ?      Sl   08:03   0:41 /usr/bin/gnome-shell",
+            "anna        3305  1.2  3.0 2875528 248612 ?      Sl   08:10   2:03 /usr/lib/thunderbird/thunderbird",
+            "anna        4705  0.0  0.0   2800  1664 ?        S    08:41   0:00 /bin/sh /usr/bin/libreoffice --calc"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "pgrep lagerscan"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lagerscan": true
+          },
+          "ausgabe": "3920"
+        },
+        {}
+      ]
+    },
+    {
+      "muster": [
+        "pgrep -a lagerscan"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lagerscan": true
+          },
+          "ausgabe": "3920 /opt/lagerscan/bin/lagerscan"
+        },
+        {}
+      ]
+    },
+    {
+      "muster": [
+        "pgrep soffice"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "ausgabe": "4711"
+        },
+        {}
+      ]
+    },
+    {
+      "muster": [
+        "pgrep -a soffice"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "haengt": true
+          },
+          "ausgabe": "4711 /usr/lib/libreoffice/program/soffice.bin --calc"
+        },
+        {}
+      ]
+    },
+    {
+      "muster": [
+        "kill 3920",
+        "kill -15 3920",
+        "kill -TERM 3920",
+        "kill -s TERM 3920"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lagerscan": true
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "bash: kill: (3920) - No such process"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "kill -9 3920",
+        "kill -KILL 3920",
+        "kill -s KILL 3920"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lagerscan": true
+          },
+          "setze": {
+            "lagerscan": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "bash: kill: (3920) - No such process"
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
-      "text": "Alle Prozesse: ps aux",
+      "text": "Alle Prozesse anzeigen: ps aux",
       "eingabe": "ps aux",
-      "danach": "USER = wem er gehört, PID = Nummer, %CPU und %MEM = Last, COMMAND = Programm. soffice.bin braucht viel CPU."
+      "danach": "ps steht für „process status“. Die Buchstaben aux (hier ohne Strich) heißen: a = Prozesse aller Benutzer, u = mit Benutzer und Verbrauch, x = auch Prozesse ohne eigenes Terminal, z. B. Programme mit Fenster. Ohne aux zeigt ps nur die Prozesse in deinem Terminal – fast nichts. Die Spalten: USER = wem der Prozess gehört, PID = seine Nummer, %CPU und %MEM = wie viel Rechenleistung und Arbeitsspeicher er braucht, COMMAND = das Programm. (Die Simulation zeigt nur wenige Zeilen – im echten System sind es weit über hundert.) Auffällig: lagerscan (PID 3920) und soffice.bin (PID 4711) brauchen fast 100 % CPU. Ob ein Fenster hängt, zeigt ps nicht direkt – so ein Dauerwert ist aber ein typisches Zeichen."
     },
     {
-      "text": "Nur LibreOffice: ps aux | grep soffice",
-      "eingabe": "ps aux | grep soffice",
-      "danach": "Der senkrechte Strich | ist die Pipe: ps aux liefert, grep filtert. Die PID von soffice ist 4711."
+      "text": "Nur die Zeile von lagerscan: ps aux | grep lagerscan",
+      "eingabe": "ps aux | grep lagerscan",
+      "danach": "Der senkrechte Strich | heißt Pipe (Rohr): Die Ausgabe von ps aux erscheint nicht auf dem Bildschirm, sondern fließt in grep. grep lässt nur Zeilen durch, die das Suchwort enthalten – übrig bleibt lagerscan mit der PID 3920. Im echten Terminal steht meist noch eine zweite Zeile mit „grep --color=auto lagerscan“: Das ist der Suchbefehl selbst, den übersiehst du einfach."
     },
     {
-      "text": "Nur die PID: pgrep soffice",
-      "eingabe": "pgrep soffice",
-      "danach": "pgrep sucht Prozesse nach Namen und zeigt die PID."
+      "text": "Nur die PID: pgrep lagerscan",
+      "eingabe": "pgrep lagerscan",
+      "danach": "pgrep (process grep) sucht Prozesse nach ihrem Namen und gibt nur die PID aus: 3920. Das ist kürzer als ps aux | grep, wenn du nur die Nummer brauchst. Gibt es keinen passenden Prozess, gibt pgrep gar nichts aus."
+    },
+    {
+      "text": "Bitte lagerscan höflich, sich zu beenden: kill 3920",
+      "eingabe": "kill 3920",
+      "danach": "kill heißt „töten“, schickt aber eigentlich ein Signal (eine Nachricht) an den Prozess mit dieser PID. Ohne Zusatz ist das TERM (Nummer 15): „Bitte beende dich.“ Ein Programm darf darauf reagieren – meist räumt es auf, speichert und beendet sich. Keine Ausgabe heißt nur: Das Signal ist angekommen. Ob das Programm wirklich weg ist, musst du nachprüfen."
+    },
+    {
+      "text": "Läuft es noch? pgrep lagerscan",
+      "eingabe": "pgrep lagerscan",
+      "danach": "3920 steht noch da: lagerscan läuft weiter. Viele Programme fangen TERM ab, um vorher aufzuräumen – hängt das Programm aber fest, kommt es nicht dazu und reagiert nicht. Dann hilft nur noch ein Signal, das sich nicht abfangen lässt."
+    },
+    {
+      "text": "Beende es erzwungen: kill -9 3920",
+      "eingabe": "kill -9 3920",
+      "danach": "-9 ist die Nummer des Signals KILL. Das kann ein Programm weder abfangen noch ignorieren: Der Kernel beendet den Prozess sofort. Statt -9 darfst du auch -KILL schreiben. Dafür darf das Programm nicht mehr aufräumen – was nicht gespeichert war, ist verloren. Darum immer erst kill (TERM), und nur wenn das nicht hilft, kill -9."
+    },
+    {
+      "text": "Prüf nach: pgrep lagerscan",
+      "eingabe": "pgrep lagerscan",
+      "danach": "Keine Ausgabe: Es gibt keinen Prozess namens lagerscan mehr – er ist beendet. Nachprüfen gehört immer dazu, denn kill selbst meldet bei Erfolg nichts."
     }
   ],
   "aufgaben": [
+    {
+      "aufgabe": "LibreOffice hängt auch. Finde die PID seines Prozesses – er heißt soffice.",
+      "eingabe": [
+        "pgrep soffice",
+        "ps aux | grep soffice",
+        "pgrep -a soffice",
+        "ps aux"
+      ],
+      "hinweise": [
+        "Wie hast du eben die PID von lagerscan gefunden?",
+        "pgrep und der Prozessname.",
+        "Tippe: pgrep soffice"
+      ],
+      "danach": "pgrep soffice (oder ps aux | grep soffice) zeigt die PID 4711. Die Nummer brauchst du gleich für kill. Mit der PID triffst du genau diesen einen Prozess – Thunderbird bleibt unberührt."
+    },
     {
       "aufgabe": "Bitte LibreOffice höflich, sich zu beenden (Signal TERM).",
       "eingabe": [
@@ -48,11 +256,11 @@
         "kill -TERM 4711"
       ],
       "hinweise": [
-        "Der Befehl heißt wie „töten“ – auf Englisch.",
+        "Wie hast du lagerscan zuerst gebeten? Nur die PID ist anders.",
         "kill und die PID.",
         "Tippe: kill 4711"
       ],
-      "danach": "kill ohne Zusatz schickt TERM – die höfliche Bitte. Ein hängender Prozess reagiert oft nicht darauf."
+      "danach": "kill 4711 schickt LibreOffice das Signal TERM – die höfliche Bitte, wie eben bei lagerscan. Ein Programm, das noch reagiert, kann jetzt speichern und sich sauber beenden. LibreOffice hängt aber fest und läuft weiter."
     },
     {
       "aufgabe": "LibreOffice hängt weiter. Beende es erzwungen.",
@@ -60,20 +268,20 @@
         "haengt": false
       },
       "hinweise": [
-        "Es gibt ein Signal, das sofort beendet.",
+        "Es gibt ein Signal, das sich nicht abfangen lässt.",
         "kill -9 und die PID.",
         "Tippe: kill -9 4711"
       ],
       "loesung": [
         "kill -9 4711"
       ],
-      "danach": "Beendet. -9 (KILL) kann ein Prozess nicht ignorieren – nicht Gespeichertes ist dabei verloren."
+      "danach": "kill -9 4711 schickt KILL: Der Kernel beendet LibreOffice sofort. Nicht gespeicherte Änderungen in der Tabelle sind dabei verloren. Thunderbird läuft weiter, weil du gezielt nur die PID 4711 getroffen hast."
     },
     {
       "aufgabe": "Prüf nach, dass soffice nicht mehr läuft.",
       "eingabe": [
-        "ps aux | grep soffice",
         "pgrep soffice",
+        "ps aux | grep soffice",
         "ps aux",
         "pgrep -a soffice"
       ],
@@ -81,16 +289,17 @@
         "haengt": false
       },
       "hinweise": [
-        "Wie hast du den Prozess am Anfang gefunden?",
-        "ps aux mit Pipe und grep.",
-        "Tippe: ps aux | grep soffice"
+        "Wie hast du bei lagerscan nachgeprüft?",
+        "pgrep und der Prozessname.",
+        "Tippe: pgrep soffice"
       ],
-      "danach": "Weg. Nachprüfen gehört immer dazu."
+      "danach": "pgrep gibt nichts mehr aus, und in ps aux fehlt die Zeile mit soffice.bin: LibreOffice ist beendet. (Bei ps aux | grep soffice bleibt im echten Terminal nur die Zeile von grep selbst.) Erst das Nachprüfen zeigt, dass der Befehl gewirkt hat."
     }
   ],
   "fertig": [
     "ps aux zeigt alle Prozesse, | grep filtert die Ausgabe.",
     "pgrep name zeigt die PID.",
-    "kill PID bittet höflich, kill -9 PID beendet sofort."
+    "kill PID bittet höflich (TERM), kill -9 PID beendet sofort (KILL).",
+    "Danach prüfst du nach, ob der Prozess weg ist."
   ]
 }

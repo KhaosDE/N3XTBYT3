@@ -1,6 +1,6 @@
 # STAND — N3XTBYT3
 
-Stand: 07.11.2026.
+Stand: 20.11.2026.
 
 ## Aktuell
 
@@ -20,6 +20,10 @@ sind behoben, jeder mit Test (`tests/test_bugfixes.py`, `tests/test_oberflaeche.
 **Neu (07.11.2026): Logikprüfung (L, aus `IDEEN.md`).** Tippfehler werden jetzt beim Namen genannt –
 im Grundkurs und in allen Szenarien, auf allen vier Systemen. Echte PowerShell-Aliase (`gsv`, `dir`, `ri` …)
 und `-Name` werden angenommen. Einzelheiten unten unter „Logikprüfung 07.11.2026“.
+
+**Neu (20.11.2026): Lernprinzip (D, aus `IDEEN.md`).** Grundkurs und Szenarien erklären jetzt jeden Befehl und
+jeden Zusatz, bevor eine Aufgabe ihn verlangt; jede Erklärung erklärt wirklich etwas. Einzelheiten unten unter
+„Lernprinzip 20.11.2026“.
 
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
@@ -194,6 +198,41 @@ die vom echten System abweichen, korrigieren.
 - 05.11.2026: **Unter Windows von Tobi bestätigt:** Build 22 hat sich beim Start selbst auf Build 23
   aktualisiert und läuft.
 
+### Lernprinzip 20.11.2026 (IDEEN.md, freigegeben 20.11.2026)
+
+Befunde von `werkzeuge/didaktikpruefung.py` (jetzt Test `tests/test_didaktik.py`):
+
+| | vorher (Befund 20.11.) | vorher mit „mindestens zwei Sätze“ | jetzt |
+|---|---|---|---|
+| Grundkurs Windows | – | 45 | **0** |
+| Grundkurs Windows Server | – | 32 | **0** |
+| Grundkurs Linux | – | 47 | **0** |
+| Grundkurs Linux Server | – | 35 | **0** |
+| Grundkurs gesamt | 103 | 162 | **0** |
+| Szenarien | 22 | 22 | **0** |
+
+- **Windows-Lektion 6** genau nach Vorgabe: Erklären-Absatz kündigt taskkill und Stop-Process an; Mitmachen an drei
+  hängenden Editor-Fenstern (notepad.exe): `taskkill /IM notepad.exe` (höflich, /IM erklärt), `taskkill /PID 5188 /F`
+  (/PID und /F), `Stop-Process -Id 5260`, `taskkill /IM notepad.exe /F`; danach die Excel-Aufgaben als reine Übertragung.
+- **Alle Lektionen:** Jeder Befehl und Zusatz wird vor der Aufgabe erklärt (was, wozu, Herkunft des Namens, Ausgabe
+  lesen; beim Zusatz: was ohne ihn passiert). Wo eine Aufgabe etwas Neues verlangte, führt jetzt ein Mitmach-Schritt es
+  an einem anderen Beispiel vor (z. B. Stop-/Restart-Service am Druckdienst, Test-Connection, zweiter Server, zweites
+  gesperrtes Konto, Bereich „Lager“, `apt install tree`, `kill` am Programm lagerscan, `ping 127.0.0.1`,
+  `systemctl restart cron`, `ufw allow OpenSSH`). Jede Erklärung hat mindestens zwei Sätze. Suchaufgaben: keine.
+- **Alle 62 Szenarien:** Erklärung „So gehst du vor: 1. … 2. …“ (jeder Lösungsbefehl mit Zusätzen und wie man die
+  Ausgabe liest), dann „Warum das die Lösung ist“ und „Merke“. Jedes Szenario ist auch ohne Grundkurs erklärt.
+- **Fachliche Korrekturen** (gefunden beim Überarbeiten, gegen die Doku geprüft):
+  - `Set-DhcpServerv4Scope`: `-StartRange` und `-EndRange` sind nur zusammen gültig (Microsoft Learn, Syntax). Lektion,
+    Szenario `srv-dhcp-bereich-voll` und Befehlsbuch korrigiert; nur `-EndRange` gibt eine Meldung der Simulation.
+  - `lin-hosts-eintrag`: `host name` fragt unter Ubuntu 24.04 den lokalen Namensdienst systemd-resolved, und der liest
+    `/etc/hosts` mit (man-Page systemd-resolved.service). Jetzt: `host intranet.firma.internal 192.168.10.1` fragt den
+    DNS-Server direkt.
+  - `ls-journal-voll`: `df -h /` zeigt nur das Dateisystem von `/`. `pgrep -a` zeigt PID und Befehlszeile.
+  - Erfundene Zeilen in Ausgaben entfernt bzw. als „Gekürzt“ markiert (apt install htop, journalctl --vacuum, curl -I).
+- **Unsicher, bitte bei Gelegenheit prüfen:** Ist htop auf einem frischen Ubuntu 24.04 Desktop schon installiert
+  (Szenario `lin-paket-installieren` geht davon aus, dass nicht)? Nennt „Command 'htop' not found“ dort auch snap?
+- Test: `tests/test_didaktik.py` (Grundkurs und Szenarien je 0 Befunde).
+
 ### Logikprüfung 07.11.2026 (IDEEN.md, freigegeben 07.11.2026)
 
 Bericht von `werkzeuge/logikpruefung.py` (jede Aufgabe bis zum Lösungsschritt gespielt, dann Tippfehler):
@@ -282,6 +321,13 @@ GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesic
   - `Get-Help`, `man`, `systeminfo`, Prozess- und Dienstlisten sind gekürzt (blaue Notiz darunter).
 
 ## Entscheidungen
+
+- 20.11.2026: Windows-Lektion 6 übt an drei hängenden Editor-Fenstern statt an einem; die Reihenfolge ist
+  „/IM höflich → /PID /F → Stop-Process -Id → /IM /F“. Grund: Mit nur einem Fenster wäre es nach dem ersten
+  erzwungenen Beenden weg, und /PID und Stop-Process hätten nichts mehr zum Üben.
+- 20.11.2026: Die Grundkurse wurden von vier Helfern parallel überarbeitet (je ein Kurs), die Szenarien von einem
+  fünften; ich habe die Ergebnisse gelesen, Stichproben gegen die Doku geprüft und fachliche Fehler korrigiert.
+- 20.11.2026: Keine Suchaufgaben eingebaut – alles wird vorher erklärt (Vorgabe: lieber erklären als suchen lassen).
 
 - 04.11.2026 (Tobi): Eigenes Programm, nicht Teil von Shellbreaker; Aussehen angelehnt.
 - 04.11.2026 (Tobi): Nachgebautes Terminal, reine Simulation, ändert nichts am echten System.
@@ -423,6 +469,14 @@ GNU coreutils 9.4 (Ubuntu 24.04) verglichen. Alles behoben und mit Tests abgesic
   den „·“ um; Titel in Listen werden vor den Etiketten gekürzt.
 
 ## Für Tobi zum Testen
+
+**Neu: Lernprinzip (20.11.2026)**
+
+1. Windows-Lektion 6 von vorn spielen: Weißt du bei jeder Excel-Aufgabe ohne F1, was zu tippen ist und warum?
+2. Eine Lektion je Kurs lesen wie ein Einsteiger: Ist jede Erklärung nach einem Schritt verständlich und hilfreich?
+3. Ein Szenario lösen und danach die Erklärung lesen („So gehst du vor …“): Passt sie zu dem, was du getan hast?
+4. Wo du stockst oder etwas nicht erklärt findest: Lektion und Schritt notieren und mir sagen.
+
 
 **Neu: Logikprüfung (07.11.2026)**
 

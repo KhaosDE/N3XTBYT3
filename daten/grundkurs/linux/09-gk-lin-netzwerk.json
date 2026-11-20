@@ -4,37 +4,74 @@
   "titel": "Netzwerk: ip a, ping",
   "pruefstatus": "ungeprueft",
   "quelle": [
+    "https://man7.org/linux/man-pages/man8/ip.8.html",
     "https://man7.org/linux/man-pages/man8/ip-address.8.html",
     "https://man7.org/linux/man-pages/man8/ip-link.8.html",
-    "https://man7.org/linux/man-pages/man8/ping.8.html"
+    "https://man7.org/linux/man-pages/man8/ping.8.html",
+    "https://www.freedesktop.org/software/systemd/man/latest/systemd.net-naming-scheme.html"
   ],
   "datum": "2026-11-05",
   "szenario": "lin-netzwerk-down",
   "erklaeren": [
-    "ip a zeigt alle Netzwerkkarten (Interfaces) mit ihrer Adresse. lo ist die interne Schleife (immer da),",
-    "die echte Karte heißt hier enp0s31f6. ping -c 4 adresse schickt vier Testpakete (ohne -c pingt Linux",
-    "endlos, bis Strg+C). Hier steckt das Kabel – aber der PC hat keine Adresse."
+    "Ein Computer hängt über eine Netzwerkkarte (ein Interface) am Netz. ip a zeigt alle Interfaces mit Zustand",
+    "und Adresse. lo ist die interne Schleife (Loopback): Darüber spricht der Computer mit sich selbst, sie ist",
+    "immer da. Die Kabel-Netzwerkkarte heißt hier enp0s31f6.",
+    "ping schickt kleine Testpakete an eine Adresse und zeigt, ob und wie schnell Antworten kommen. Unter Linux",
+    "pingt ping endlos, bis du Strg+C drückst – mit -c 4 schickt es genau vier Pakete.",
+    "",
+    "Der Fall: Am Lager-PC steckt das Kabel, aber das Netz geht nicht."
   ],
   "begriffe": {
     "Interface": "Netzwerkanschluss, z. B. enp0s31f6 (Kabel) oder wlp2s0 (WLAN).",
+    "enp0s31f6": "Name nach dem Einbauort: en = Ethernet (Kabel), p0 = Bus 0, s31 = Steckplatz 31, f6 = Funktion 6.",
+    "Loopback (lo)": "Interne Schleife mit der Adresse 127.0.0.1 – der Computer selbst.",
     "state UP / DOWN": "Interface eingeschaltet bzw. ausgeschaltet.",
-    "inet": "Die IPv4-Adresse eines Interfaces in der Ausgabe von ip a."
+    "inet": "Die IPv4-Adresse eines Interfaces in der Ausgabe von ip a, z. B. 192.168.10.57/24.",
+    "Router": "Gerät, das dein Netz mit anderen Netzen verbindet; hier 192.168.10.1.",
+    "DHCP": "Dienst im Netz, der Computern automatisch eine IP-Adresse gibt."
   },
+  "befehle": [
+    {
+      "muster": [
+        "ping -c 4 127.0.0.1"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.",
+            "64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.041 ms",
+            "64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.052 ms",
+            "64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.049 ms",
+            "64 bytes from 127.0.0.1: icmp_seq=4 ttl=64 time=0.050 ms",
+            "",
+            "--- 127.0.0.1 ping statistics ---",
+            "4 packets transmitted, 4 received, 0% packet loss, time 3062ms",
+            "rtt min/avg/max/mdev = 0.041/0.048/0.052/0.004 ms"
+          ]
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Netzwerkkarten zeigen: ip a",
       "eingabe": "ip a",
-      "danach": "Bei enp0s31f6 steht state DOWN und keine inet-Zeile: Die Karte ist ausgeschaltet."
+      "danach": "ip ist das Werkzeug für alles rund ums Netzwerk, a ist die Kurzform von address (Adressen). Jedes Interface hat einen Block, der mit einer Nummer beginnt. In den spitzen Klammern stehen Merkmale: UP heißt eingeschaltet, LOWER_UP heißt Verbindung zum Kabel steht. link/ether ist die Hardware-Adresse (MAC) der Karte, inet die IPv4-Adresse. Bei lo steht UP und inet 127.0.0.1. Bei enp0s31f6 fehlt UP, dahinter steht state DOWN, und eine inet-Zeile gibt es nicht: Die Karte ist ausgeschaltet und hat keine Adresse."
     },
     {
-      "text": "Router testen: ping -c 4 192.168.10.1",
+      "text": "Teste zuerst den Computer selbst: ping -c 4 127.0.0.1",
+      "eingabe": "ping -c 4 127.0.0.1",
+      "danach": "127.0.0.1 ist die Adresse der Schleife lo – der Computer pingt sich selbst. -c steht für count (Anzahl): genau 4 Pakete, dann hört ping auf. Jede Zeile „64 bytes from …“ ist eine Antwort: icmp_seq zählt die Pakete, time ist die Antwortzeit in Millisekunden. Unten die Zusammenfassung: 4 gesendet, 4 empfangen, 0 % Verlust (packet loss). Damit weißt du: ping selbst funktioniert – ein Fehler beim nächsten Test liegt am Netz."
+    },
+    {
+      "text": "Jetzt den Router: ping -c 4 192.168.10.1",
       "eingabe": "ping -c 4 192.168.10.1",
-      "danach": "Network is unreachable – ohne aktive Karte gibt es keinen Weg ins Netz."
+      "danach": "„Network is unreachable“ (Netz nicht erreichbar): ping kann gar nicht erst losschicken, weil es keinen Weg in dieses Netz gibt. Kein Wunder – die einzige Netzwerkkarte ist aus und hat keine Adresse. Das ist etwas anderes als ein Gerät, das nur nicht antwortet: Dann kämen Zeilen wie „Destination Host Unreachable“ oder 100 % packet loss."
     },
     {
       "text": "Karte einschalten – erst ohne sudo: ip link set enp0s31f6 up",
       "eingabe": "ip link set enp0s31f6 up",
-      "danach": "Operation not permitted: Das darf nur root."
+      "danach": "So liest du den Befehl: ip link (die Netzwerkkarte selbst), set (einstellen), enp0s31f6 (welche Karte), up (einschalten; down wäre ausschalten). Die Antwort „RTNETLINK answers: Operation not permitted“ heißt: Der Kernel lehnt ab, du darfst das nicht. Netzwerkkarten ein- und ausschalten darf nur root."
     }
   ],
   "aufgaben": [
@@ -51,7 +88,7 @@
       "loesung": [
         "sudo ip link set enp0s31f6 up"
       ],
-      "danach": "Die Karte ist an."
+      "danach": "sudo ip link set enp0s31f6 up: Der Befehl war richtig, es fehlten nur die Rechte – wie bei sudo cat in Lektion 6. Keine Meldung heißt: Die Karte ist eingeschaltet. Im Hintergrund fragt Ubuntu jetzt per DHCP nach einer Adresse."
     },
     {
       "aufgabe": "Prüf nach, ob die Karte jetzt eine Adresse hat.",
@@ -69,7 +106,7 @@
         "ip und a.",
         "Tippe: ip a"
       ],
-      "danach": "state UP und eine inet-Zeile – die Adresse kam per DHCP."
+      "danach": "Bei enp0s31f6 stehen jetzt UP und LOWER_UP, dahinter state UP – und eine neue inet-Zeile: 192.168.10.57/24. Das /24 sagt, wie groß das Netz ist: Die ersten drei Zahlen (192.168.10) gehören zum Netz. dynamic heißt: Die Adresse kam automatisch per DHCP."
     },
     {
       "aufgabe": "Teste den Router mit vier Paketen.",
@@ -80,16 +117,16 @@
         "link_up": true
       },
       "hinweise": [
-        "ping mit Anzahl.",
+        "ping mit Anzahl – wie eben bei 127.0.0.1.",
         "-c 4 und die Adresse des Routers.",
         "Tippe: ping -c 4 192.168.10.1"
       ],
-      "danach": "Antworten kommen – das Netz geht."
+      "danach": "Jetzt kommen vier Antworten „64 bytes from 192.168.10.1“ und unten 0% packet loss – der Router ist erreichbar, das Netz geht. So prüfst du nach jeder Netzwerk-Reparatur: erst die Karte (ip a), dann der Router (ping)."
     }
   ],
   "fertig": [
     "ip a zeigt Interfaces, Zustand (UP/DOWN) und Adressen.",
-    "ping -c 4 adresse testet die Verbindung.",
+    "ping -c 4 adresse testet die Verbindung; 127.0.0.1 ist der Computer selbst.",
     "sudo ip link set <interface> up schaltet eine Karte ein."
   ]
 }

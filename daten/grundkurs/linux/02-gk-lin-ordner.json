@@ -59,45 +59,57 @@
     }
   },
   "erklaeren": [
-    "Unter Linux gibt es keine Laufwerksbuchstaben. Alles hängt an einem einzigen Wurzelordner: / (Slash).",
-    "Ein Pfad wie /home/anna/Dokumente geht von dort aus; die Ordner trennt ein normaler Schrägstrich /.",
-    "Dein Home-Ordner ist /home/anna, kurz ~. Das Terminal steht immer in einem Ordner – er steht im Prompt."
+    "Unter Linux gibt es keine Laufwerksbuchstaben wie C:. Alles hängt an einem einzigen obersten Ordner, der",
+    "Wurzel: / (Slash, Schrägstrich). Ein Pfad wie /home/anna/Dokumente beschreibt den Weg von dort aus: in home,",
+    "darin in anna, darin in Dokumente. Die Ordner trennt ein normaler Schrägstrich /.",
+    "Dein Home-Ordner ist /home/anna, kurz ~. Das Terminal steht immer in einem Ordner, dem aktuellen Ordner –",
+    "er steht im Prompt.",
+    "",
+    "Drei Befehle brauchst du ständig: pwd zeigt, wo du bist. ls zeigt, was im Ordner liegt. cd wechselt in einen",
+    "anderen Ordner. Viele Befehle verstehen Optionen: Zusätze mit einem Strich davor, z. B. -l."
   ],
   "begriffe": {
     "Wurzelverzeichnis (/)": "Der oberste Ordner unter Linux. Alles andere liegt darunter.",
-    "Verzeichnis": "Anderes Wort für Ordner.",
-    "Absoluter Pfad": "Beginnt mit / und funktioniert von überall, z. B. /etc.",
+    "Verzeichnis": "Anderes Wort für Ordner (englisch directory).",
+    "Aktueller Ordner": "Der Ordner, in dem das Terminal gerade steht. Er steht im Prompt.",
+    "Absoluter Pfad": "Beginnt mit / (oder ~) und funktioniert von überall, z. B. /etc.",
     "Relativer Pfad": "Geht vom aktuellen Ordner aus, z. B. Dokumente oder .. (eine Ebene höher).",
-    "Versteckte Datei": "Name beginnt mit einem Punkt, z. B. .bashrc. ls zeigt sie nur mit -a."
+    "Versteckte Datei": "Name beginnt mit einem Punkt, z. B. .bashrc. ls zeigt sie nur mit -a.",
+    "Option": "Ein Zusatz, der ändert, was ein Befehl tut. Er beginnt mit einem Strich, z. B. -l bei ls."
   },
   "mitmachen": [
     {
-      "text": "Wo bist du? pwd",
+      "text": "Wo bist du gerade? Tippe pwd",
       "eingabe": "pwd",
-      "danach": "pwd (print working directory) zeigt den aktuellen Ordner: /home/anna."
+      "danach": "pwd steht für „print working directory“ – „gib den Arbeitsordner aus“. Die Antwort /home/anna ist der volle Pfad des Ordners, in dem du gerade bist: dein Home-Ordner. Im Prompt steht dafür nur die Kurzform ~. pwd hilft immer, wenn du nicht mehr sicher bist, wo du gerade stehst."
     },
     {
-      "text": "Was liegt hier? ls",
+      "text": "Was liegt hier? Tippe ls",
       "eingabe": "ls",
-      "danach": "ls listet den Inhalt: drei Ordner."
+      "danach": "ls kommt von „list“ (auflisten) und zeigt die Namen von allem, was im aktuellen Ordner liegt: Bilder, Dokumente und Downloads – drei Ordner. Ohne Zusatz zeigt ls nur die Namen, nebeneinander und nach dem Alphabet sortiert. Im echten Ubuntu-Terminal sind Ordner blau gefärbt."
     },
     {
-      "text": "Ausführlich: ls -l",
+      "text": "Mehr Einzelheiten: ls -l",
       "eingabe": "ls -l",
-      "danach": "-l heißt lang: Rechte, Besitzer, Größe, Datum. Das d ganz vorn heißt directory (Ordner). Die Rechte lernst du in Lektion 6."
+      "danach": "-l ist eine Option und steht für „long“, das lange Format: eine Zeile pro Eintrag. Lies sie von links: d heißt directory (Ordner; bei einer Datei steht dort ein -). Dann die Rechte (rwxr-xr-x – die lernst du in Lektion 6), eine Zahl, die du erst mal überspringen kannst, Besitzer und Gruppe (anna anna), die Größe in Bytes (bei Ordnern meist 4096), das Datum der letzten Änderung und der Name. „total 12“ ganz oben gibt den belegten Speicherplatz an – den brauchst du selten."
     },
     {
-      "text": "Auch versteckte Dateien: ls -a",
+      "text": "Auch versteckte Dateien zeigen: ls -a",
       "eingabe": "ls -a",
-      "danach": "Dateien mit Punkt am Anfang (.bashrc) sind versteckt – meist Einstellungen. . ist der aktuelle Ordner, .. der darüber."
+      "danach": "-a steht für „all“ (alle). Jetzt erscheinen auch Dateien, deren Name mit einem Punkt beginnt, z. B. .bashrc und .profile. Solche Dateien sind versteckt – meist Einstellungen, die man selten anfasst. Ohne -a blendet ls sie aus. Der einzelne Punkt (.) steht für den aktuellen Ordner, die zwei Punkte (..) für den Ordner darüber."
     },
     {
-      "text": "In den Ordner Dokumente: cd Dokumente",
+      "text": "Beides zusammen: ls -la",
+      "eingabe": "ls -la",
+      "danach": "Optionen aus einem Buchstaben darfst du zusammenschreiben: -la ist dasselbe wie -l -a. Du bekommst das lange Format (-l) und siehst auch die versteckten Dateien (-a). Diese Kombination brauchst du oft, z. B. um bei einer Einstellungsdatei Besitzer und Rechte zu prüfen."
+    },
+    {
+      "text": "Wechsle in den Ordner Dokumente: cd Dokumente",
       "eingabe": "cd Dokumente",
       "ziel": {
         "pfad": "/home/anna/Dokumente"
       },
-      "danach": "Sieh auf den Prompt: ~/Dokumente. Achtung: Dokumente mit großem D – genau so, wie ls es zeigt."
+      "danach": "cd steht für „change directory“ – „wechsle den Ordner“. Sieh auf den Prompt: Dort steht jetzt ~/Dokumente. cd gibt bei Erfolg nichts aus – unter Linux heißt keine Meldung meistens: hat geklappt. Dokumente ist ein relativer Pfad: Er geht vom aktuellen Ordner aus. Achte auf das große D, genau so, wie ls den Namen zeigt. Tipp fürs echte Terminal: Tippe cd Dok und drück die Tab-Taste – die Bash ergänzt den Namen. In der Simulation ist Tab nicht nachgebaut."
     },
     {
       "text": "Eine Ebene hoch: cd ..",
@@ -105,7 +117,7 @@
       "ziel": {
         "pfad": "/home/anna"
       },
-      "danach": "Zurück in /home/anna. Leerzeichen zwischen cd und .. nicht vergessen."
+      "danach": "Die zwei Punkte (..) stehen immer für den Ordner eine Ebene höher – von /home/anna/Dokumente aus also /home/anna. Zwischen cd und .. gehört ein Leerzeichen; zusammengeschrieben (cd..) kennt die Bash den Befehl nicht. So kommst du Ordner für Ordner nach oben."
     },
     {
       "text": "Absolut in die Einstellungen des Systems: cd /etc",
@@ -113,15 +125,23 @@
       "ziel": {
         "pfad": "/etc"
       },
-      "danach": "/etc beginnt mit / – ein absoluter Pfad. In /etc liegen die Einstellungen (Konfiguration) des Systems."
+      "danach": "/etc beginnt mit / – ein absoluter Pfad. Er geht immer von der Wurzel aus und funktioniert deshalb von jedem Ordner aus, egal wo du gerade bist. In /etc liegen die Einstellungen (Konfigurationsdateien) des ganzen Systems – dort wirst du später oft etwas nachsehen."
     },
     {
-      "text": "Nach Hause: cd",
+      "text": "Von hier direkt in deinen Ordner Bilder: cd ~/Bilder",
+      "eingabe": "cd ~/Bilder",
+      "ziel": {
+        "pfad": "/home/anna/Bilder"
+      },
+      "danach": "Die Tilde ~ steht für deinen Home-Ordner /home/anna. ~/Bilder heißt also /home/anna/Bilder. Weil der Pfad mit ~ beginnt, funktioniert er wie ein absoluter Pfad von überall. Hinter ~/ kannst du beliebig viele Ordner anhängen, jeweils getrennt durch /."
+    },
+    {
+      "text": "Nach Hause: cd (ganz ohne Ziel)",
       "eingabe": "cd",
       "ziel": {
         "pfad": "/home/anna"
       },
-      "danach": "cd ohne Ziel bringt dich in deinen Home-Ordner. cd ~ geht genauso."
+      "danach": "cd ohne Ziel bringt dich immer in deinen Home-Ordner zurück – genau wie cd ~. Das ist der schnellste Weg nach Hause, wenn du dich verlaufen hast. Der Prompt zeigt wieder nur ~."
     }
   ],
   "aufgaben": [
@@ -145,7 +165,7 @@
         "cd Downloads",
         "ls"
       ],
-      "danach": "Richtig: erst cd Downloads, dann ls."
+      "danach": "Erst cd Downloads (hineingehen), dann ls (nachsehen): Im Ordner liegt die Datei anleitung-scanner.txt. Diese beiden Schritte machst du ständig – erst an den richtigen Ort, dann schauen, was da ist."
     },
     {
       "aufgabe": "Zeig an, in welchem Ordner du gerade bist.",
@@ -157,7 +177,7 @@
         "p, w, d.",
         "Tippe: pwd"
       ],
-      "danach": "Genau: pwd."
+      "danach": "pwd zeigt den vollen Pfad des aktuellen Ordners – nach Aufgabe 1 also /home/anna/Downloads. Im Prompt steht dafür die Kurzform ~/Downloads. Beides meint denselben Ordner."
     },
     {
       "aufgabe": "Geh mit einem einzigen Befehl in den Ordner rezepte (er liegt in ~/Dokumente) – egal, wo du bist.",
@@ -172,12 +192,13 @@
       "loesung": [
         "cd ~/Dokumente/rezepte"
       ],
-      "danach": "Gut! Mit ~/Dokumente/rezepte oder /home/anna/Dokumente/rezepte kommst du von überall hin."
+      "danach": "~/Dokumente/rezepte ist dasselbe wie /home/anna/Dokumente/rezepte. Weil der Pfad mit ~ (oder /) beginnt, kommst du damit von jedem Ordner aus ans Ziel – du musst nicht erst nach Hause und dann Ordner für Ordner hinein."
     }
   ],
   "fertig": [
     "Unter Linux beginnt alles bei / – Ordner trennt der Schrägstrich.",
-    "pwd zeigt, wo du bist; ls (-l, -a) zeigt, was da liegt.",
-    "cd wechselt den Ordner: cd .., cd /etc, cd (nach Hause)."
+    "pwd zeigt, wo du bist; ls (-l lang, -a versteckte, -la beides) zeigt, was da liegt.",
+    "cd wechselt den Ordner: cd .., cd /etc, cd ~/Bilder, cd (nach Hause).",
+    "Pfade mit / oder ~ am Anfang gehen von überall."
   ]
 }

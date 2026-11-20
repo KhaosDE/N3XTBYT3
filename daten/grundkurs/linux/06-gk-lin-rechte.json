@@ -7,7 +7,9 @@
     "https://man7.org/linux/man-pages/man1/chmod.1.html",
     "https://man7.org/linux/man-pages/man1/chown.1.html",
     "https://man7.org/linux/man-pages/man8/sudo.8.html",
-    "https://man7.org/linux/man-pages/man1/ls.1.html"
+    "https://man7.org/linux/man-pages/man1/ls.1.html",
+    "https://help.ubuntu.com/community/FilePermissions",
+    "https://help.ubuntu.com/community/RootSudo"
   ],
   "datum": "2026-11-05",
   "szenario": "lin-skript-ausfuehrbar",
@@ -25,51 +27,88 @@
       "inhalt": "Quartalsbericht (Entwurf)",
       "rechte": "rw-rw-r--",
       "besitzer": "anna:anna"
+    },
+    "/home/anna/Dokumente/inventur.csv": {
+      "inhalt": [
+        "artikel;bestand",
+        "Etiketten;400",
+        "Klebeband;35"
+      ],
+      "rechte": "644",
+      "besitzer": "root:root",
+      "zeit": "Nov 19 16:02"
     }
   },
   "erklaeren": [
-    "Jede Datei gehört einem Benutzer und einer Gruppe. ls -l zeigt die Rechte als neun Zeichen, z. B. rw-r--r--:",
-    "drei für den Besitzer, drei für die Gruppe, drei für alle anderen. r = lesen, w = schreiben, x = ausführen",
-    "(bei Ordnern: hineingehen). chmod ändert die Rechte, chown den Besitzer. Was nur root darf, erledigst du",
-    "mit sudo davor – sudo fragt nach deinem Passwort."
+    "Jede Datei gehört einem Benutzer (dem Besitzer) und einer Gruppe. ls -l zeigt die Rechte als neun Zeichen,",
+    "z. B. rw-r--r--: drei für den Besitzer, drei für die Gruppe, drei für alle anderen. r heißt lesen (read),",
+    "w schreiben (write), x ausführen (execute) – bei Ordnern: hineingehen. Ein Strich - heißt: Dieses Recht fehlt.",
+    "",
+    "chmod ändert die Rechte, chown den Besitzer. Was nur der Administrator root darf, erledigst du mit sudo",
+    "davor – sudo fragt nach deinem eigenen Passwort.",
+    "Im Home-Ordner liegt das Sicherungsskript backup.sh. Ein Skript ist eine Textdatei mit Befehlen, die man",
+    "wie ein Programm starten kann."
   ],
   "begriffe": {
     "Rechte (rwx)": "r = lesen, w = schreiben, x = ausführen – je für Besitzer, Gruppe, andere.",
+    "Besitzer und Gruppe": "Wem eine Datei gehört (z. B. anna) und welche Gruppe Zugriff hat (z. B. anna). ls -l zeigt beides.",
     "chmod": "Ändert Rechte, z. B. chmod u+x datei (Besitzer darf ausführen) oder chmod 600 datei.",
     "Oktalzahl (z. B. 640)": "Rechte als Zahl: r = 4, w = 2, x = 1, zusammengezählt je Gruppe. 6 = rw-, 4 = r--.",
+    "chown": "Ändert Besitzer und Gruppe: chown benutzer:gruppe datei. Darf nur root.",
     "root": "Der Administrator unter Linux. Darf alles.",
-    "sudo": "Führt einen Befehl als root aus (nach Passwort). Nur für Benutzer in der Gruppe sudo."
+    "sudo": "Führt einen Befehl als root aus (nach deinem Passwort). Nur für Benutzer in der Gruppe sudo.",
+    "Skript": "Textdatei mit Befehlen, die man wie ein Programm startet, z. B. backup.sh."
   },
   "mitmachen": [
     {
       "text": "Sieh dir das Sicherungsskript an: ls -l backup.sh",
       "eingabe": "ls -l backup.sh",
-      "danach": "-rw-r--r-- anna anna: Anna darf lesen und schreiben, alle anderen nur lesen. Ein x fehlt überall – niemand darf es ausführen."
+      "danach": "Lies die Zeile von links: Das erste Zeichen - heißt normale Datei (bei Ordnern steht d). Dann kommen die Rechte rw-r--r--: Besitzer rw- (lesen, schreiben), Gruppe r-- (nur lesen), andere r-- (nur lesen). Danach stehen Besitzer und Gruppe (anna anna), Größe, Datum und Name. Ein x fehlt überall – niemand darf das Skript ausführen."
     },
     {
-      "text": "Starte es: ./backup.sh",
+      "text": "Starte das Skript: ./backup.sh",
       "eingabe": "./backup.sh",
-      "danach": "Permission denied – ohne x-Recht geht es nicht. ./ heißt: die Datei hier im aktuellen Ordner."
+      "danach": "./backup.sh heißt: Starte die Datei backup.sh hier im aktuellen Ordner – der Punkt . ist der aktuelle Ordner. Ohne ./ sucht die Bash nur in den festgelegten Programmordnern (z. B. /usr/bin) und findet das Skript nicht. Die Antwort ist „Permission denied“ (Zugriff verweigert): Zum Starten braucht es das x-Recht – und das fehlt."
     },
     {
       "text": "Gib dir das Ausführrecht: chmod u+x backup.sh",
       "eingabe": "chmod u+x backup.sh",
-      "danach": "u = user (Besitzer), + = dazu, x = ausführen."
+      "danach": "chmod steht für „change mode“ – Rechte ändern. u+x liest du so: u = user (der Besitzer), + = Recht dazugeben, x = ausführen. Weitere Buchstaben: g = Gruppe, o = andere (others), a = alle; mit - statt + nimmst du ein Recht weg. Keine Meldung heißt wieder: hat geklappt."
     },
     {
       "text": "Noch einmal: ./backup.sh",
       "eingabe": "./backup.sh",
-      "danach": "Jetzt läuft das Skript."
+      "danach": "Jetzt hat anna das x-Recht, und das Skript läuft: „Sicherung abgeschlossen.“ Genau dieser Fehler passiert im Alltag oft: Ein Skript wurde heruntergeladen oder kopiert, ist aber nicht ausführbar. Die Lösung ist meist chmod u+x."
+    },
+    {
+      "text": "Rechte gehen auch als Zahl: chmod 755 backup.sh",
+      "eingabe": "chmod 755 backup.sh",
+      "danach": "Jede Ziffer steht für eine der drei Gruppen: Besitzer, Gruppe, andere. Gezählt wird r = 4, w = 2, x = 1. 7 = 4+2+1 = rwx für den Besitzer, 5 = 4+1 = r-x für Gruppe und andere. Anders als u+x setzt die Zahl alle neun Rechte auf einmal neu. 755 ist typisch für Skripte und Programme: Alle dürfen sie starten, nur der Besitzer darf sie ändern."
+    },
+    {
+      "text": "Prüf nach: ls -l backup.sh",
+      "eingabe": "ls -l backup.sh",
+      "danach": "-rwxr-xr-x: genau die Rechte von 755. Nach jeder Änderung an Rechten lohnt der Blick mit ls -l – so siehst du sofort, ob die Zahl gestimmt hat."
     },
     {
       "text": "Lies eine Systemdatei: cat /etc/lagerscan/lizenz.conf",
       "eingabe": "cat /etc/lagerscan/lizenz.conf",
-      "danach": "Permission denied: Die Datei gehört root und ist für andere nicht lesbar (640)."
+      "danach": "Permission denied: Die Datei gehört root (Gruppe root) und hat die Rechte 640, also rw-r-----. Der Besitzer root darf lesen und schreiben, die Gruppe root nur lesen, alle anderen gar nichts – und anna gehört zu den anderen. Dateien mit Lizenzen oder Passwörtern sind absichtlich so geschützt."
     },
     {
       "text": "Mit Root-Rechten: sudo cat /etc/lagerscan/lizenz.conf",
       "eingabe": "sudo cat /etc/lagerscan/lizenz.conf",
-      "danach": "sudo fragt einmal nach Annas Passwort und führt den Befehl als root aus."
+      "danach": "sudo (etwa „superuser do“: als Superuser ausführen) führt den Befehl dahinter als root aus. Es fragt nach Annas eigenem Passwort – nicht nach dem von root. Im echten Terminal siehst du beim Tippen des Passworts nichts, nicht einmal Sternchen: einfach tippen und Enter. Danach merkt sich sudo das Passwort einige Minuten. Unter Ubuntu dürfen die Benutzer der Gruppe sudo den Befehl benutzen – anna gehört dazu."
+    },
+    {
+      "text": "Ein Kollege hat eine Datei mit sudo in deinen Ordner kopiert. Sieh sie dir an: ls -l Dokumente/inventur.csv",
+      "eingabe": "ls -l Dokumente/inventur.csv",
+      "danach": "Die Datei liegt bei anna, gehört aber root (Besitzer root, Gruppe root). Mit rw-r--r-- darf anna sie lesen, aber nicht ändern. Das passiert oft, wenn jemand Dateien mit sudo kopiert: Die Kopie gehört dann root."
+    },
+    {
+      "text": "Gib die Datei anna: sudo chown anna:anna Dokumente/inventur.csv",
+      "eingabe": "sudo chown anna:anna Dokumente/inventur.csv",
+      "danach": "chown steht für „change owner“ – Besitzer ändern. Hinter chown steht zuerst der neue Besitzer, dann ein Doppelpunkt, dann die neue Gruppe (anna:anna), danach die Datei. Den Besitzer ändern darf nur root – ohne sudo käme „Operation not permitted“. Jetzt gehört die Datei anna, und sie kann sie bearbeiten."
     }
   ],
   "aufgaben": [
@@ -86,10 +125,10 @@
       "loesung": [
         "chmod 600 ~/Dokumente/bericht.txt"
       ],
-      "danach": "Richtig: chmod 600 – 6 (rw-) für dich, 0 für Gruppe und andere."
+      "danach": "chmod 600: 6 = 4+2 = rw- für dich, 0 = --- für Gruppe und andere. Jetzt kann außer dir (und root) niemand den Bericht lesen. So schützt du z. B. Dateien mit persönlichen Daten oder Zugangsdaten."
     },
     {
-      "aufgabe": "Die Lizenzdatei soll Anna gehören: Ändere den Besitzer von /etc/lagerscan/lizenz.conf auf anna (Benutzer und Gruppe).",
+      "aufgabe": "Laut Anleitung des Herstellers soll die Lizenzdatei dem Benutzer gehören, der Lagerscan startet: Ändere Besitzer und Gruppe von /etc/lagerscan/lizenz.conf auf anna.",
       "ziel": {
         "besitzer:/etc/lagerscan/lizenz.conf": "anna:anna"
       },
@@ -101,13 +140,14 @@
       "loesung": [
         "sudo chown anna:anna /etc/lagerscan/lizenz.conf"
       ],
-      "danach": "Besitzer geändert. chown geht nur als root – darum sudo."
+      "danach": "sudo chown anna:anna – wie eben bei inventur.csv, nur bei einer Datei in /etc. Mit ls -l /etc/lagerscan/lizenz.conf siehst du jetzt anna anna. Bei Systemdateien aber vorsichtig: Viele Programme erwarten, dass ihre Einstellungen root gehören. Ändere den Besitzer nur, wenn eine Anleitung es verlangt."
     }
   ],
   "fertig": [
     "ls -l zeigt Rechte (rwx für Besitzer, Gruppe, andere) und Besitzer.",
+    "./skript startet ein Skript im aktuellen Ordner – dafür braucht es das x-Recht.",
     "chmod ändert Rechte (u+x oder als Zahl 600, 644, 755).",
-    "chown ändert den Besitzer – nur mit sudo.",
+    "chown benutzer:gruppe ändert den Besitzer – nur mit sudo.",
     "sudo führt einen Befehl als root aus."
   ]
 }

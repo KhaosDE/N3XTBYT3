@@ -7,44 +7,86 @@
     "https://man7.org/linux/man-pages/man5/hosts.5.html",
     "https://man7.org/linux/man-pages/man1/getent.1.html",
     "https://man7.org/linux/man-pages/man1/grep.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/host.1.html",
+    "https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html",
+    "https://www.freedesktop.org/software/systemd/man/latest/systemd-resolved.service.html",
+    "https://www.freedesktop.org/software/systemd/man/latest/resolved.conf.html",
     "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "lin-hosts-eintrag",
   "erklaeren": [
-    "Die fünf Schritte kennst du: beschreiben, Infos sammeln, vermuten, gezielt beheben, nachprüfen und notieren.",
-    "Der Fall: Auf Annas Laptop lädt das Intranet nicht, bei allen anderen schon. Linux schaut bei Namen zuerst in",
-    "die Datei /etc/hosts und fragt erst dann DNS. Ein alter Eintrag dort kann also alles umleiten."
+    "Fehlersuche geht in fünf Schritten: 1. Problem beschreiben, 2. Infos sammeln, 3. Vermutung aufstellen,",
+    "4. gezielt beheben, 5. nachprüfen und notieren.",
+    "Der Fall: Auf Annas Laptop lädt das Intranet (intranet.firma.internal) nicht, bei allen anderen schon. Der",
+    "Intranet-Server ist vor einem Monat von 192.168.10.20 auf 192.168.10.25 umgezogen.",
+    "",
+    "Wichtig zu wissen: Linux schaut bei einem Namen zuerst in die Datei /etc/hosts und fragt erst danach den",
+    "DNS-Server (der übersetzt Namen in Adressen; hier ist das der Router 192.168.10.1). Ein alter Eintrag in",
+    "/etc/hosts kann also einen Namen umleiten."
   ],
   "begriffe": {
-    "/etc/hosts": "Datei mit festen Zuordnungen Name → Adresse. Sie gilt vor DNS.",
-    "getent hosts": "Zeigt, welche Adresse das System für einen Namen wirklich benutzt (inklusive /etc/hosts)."
+    "/etc/hosts": "Datei mit festen Zuordnungen „Adresse Name“. Sie gilt vor DNS.",
+    "DNS": "Dienst, der Namen in IP-Adressen übersetzt.",
+    "getent hosts": "Zeigt, welche Adresse das System für einen Namen wirklich benutzt (inklusive /etc/hosts).",
+    "host": "Fragt einen DNS-Server nach der Adresse zu einem Namen.",
+    "Kommentar (#)": "Zeilen, die mit # beginnen, werden in Einstellungsdateien nicht beachtet."
   },
+  "befehle": [
+    {
+      "muster": [
+        "host intranet.firma.internal 192.168.10.1"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "Using domain server:",
+            "Name: 192.168.10.1",
+            "Address: 192.168.10.1#53",
+            "Aliases: ",
+            "",
+            "intranet.firma.internal has address 192.168.10.25"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "host intranet.firma.internal"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Ohne Server-Angabe fragt host unter Ubuntu den Namensdienst des eigenen PCs (systemd-resolved, 127.0.0.53) – und der beachtet auch /etc/hosts. Um nur den DNS-Server zu fragen, häng seine Adresse an: host intranet.firma.internal 192.168.10.1"
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Infos sammeln: ping -c 4 intranet.firma.internal",
       "eingabe": "ping -c 4 intranet.firma.internal",
-      "danach": "Achte auf die Adresse in Klammern: 192.168.10.20 – und keine Antwort."
+      "danach": "Schritt 2, Infos sammeln. In der ersten Zeile steht in Klammern, welche Adresse ping für den Namen benutzt: 192.168.10.20 – die alte Adresse! „Destination Host Unreachable“ meldet Annas PC (192.168.10.57) selbst: Unter dieser Adresse antwortet im Netz niemand. 100% packet loss – kein Paket kam zurück."
     },
     {
       "text": "Welche Adresse benutzt das System? getent hosts intranet.firma.internal",
       "eingabe": "getent hosts intranet.firma.internal",
-      "danach": "Auch hier .20."
+      "danach": "getent (get entries: Einträge holen) fragt dieselben Quellen ab wie alle Programme – erst /etc/hosts, dann DNS. hosts heißt: Gesucht ist ein Rechnername. Die Antwort ist wieder 192.168.10.20. Das System selbst hält also die alte Adresse für richtig."
     },
     {
-      "text": "Was sagt DNS? host intranet.firma.internal",
-      "eingabe": "host intranet.firma.internal",
-      "danach": "DNS sagt 192.168.10.25. Vermutung: Etwas auf diesem PC leitet den Namen um."
+      "text": "Was sagt der DNS-Server selbst? host intranet.firma.internal 192.168.10.1",
+      "eingabe": "host intranet.firma.internal 192.168.10.1",
+      "danach": "host fragt einen DNS-Server nach einem Namen. Mit der Adresse dahinter fragt host genau diesen Server (192.168.10.1) – an allem vorbei, was Annas PC selbst weiß. Ohne diese Adresse würde unter Ubuntu der Namensdienst des PCs antworten, und der beachtet auch /etc/hosts. Die oberen Zeilen nennen den gefragten Server (#53 ist der DNS-Port), unten steht die Antwort: has address 192.168.10.25 – die neue, richtige Adresse. Schritt 3, Vermutung: DNS stimmt, also leitet etwas auf diesem PC den Namen um."
     },
     {
-      "text": "Steht der Name in /etc/hosts? grep intranet /etc/hosts",
-      "eingabe": "grep intranet /etc/hosts",
-      "danach": "Ja: ein alter Testeintrag mit .20. Er gilt vor DNS – das ist die Ursache."
+      "text": "Steht der Name in /etc/hosts – und in welcher Zeile? grep -n intranet /etc/hosts",
+      "eingabe": "grep -n intranet /etc/hosts",
+      "danach": "grep kennst du als Filter hinter einer Pipe. Mit einem Dateinamen dahinter durchsucht grep direkt die Datei: grep suchwort datei. -n (number) setzt die Zeilennummer davor. Die 5: vorne heißt: In Zeile 5 steht ein alter Testeintrag, der intranet.firma.internal auf die alte Adresse 192.168.10.20 schickt. Er gilt vor DNS – das ist die Ursache."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Beheben: Entferne die Zeile mit 192.168.10.20 aus /etc/hosts (mit Root-Rechten bearbeiten) und speichere.",
+      "aufgabe": "Schritt 4, beheben: Entferne die Zeile mit 192.168.10.20 aus /etc/hosts und speichere. Die Datei gehört root.",
       "ziel": {
         "datei:/etc/hosts": {
           "keine_zeile_enthaelt": "192.168.10.20"
@@ -70,10 +112,10 @@
           ]
         }
       ],
-      "danach": "Die Zeile ist weg."
+      "danach": "sudo nano /etc/hosts öffnet die Datei mit Root-Rechten. Mit den Pfeiltasten in Zeile 5, Strg+K schneidet sie aus, Strg+O speichert. Statt zu löschen hättest du auch ein # an den Anfang setzen können: Zeilen mit # sind Kommentare und werden nicht beachtet – so bleibt sichtbar, was dort stand."
     },
     {
-      "aufgabe": "Nachprüfen: Antwortet das Intranet jetzt?",
+      "aufgabe": "Schritt 5, nachprüfen: Antwortet das Intranet jetzt?",
       "eingabe": [
         "ping -c 4 intranet.firma.internal",
         "ping intranet.firma.internal",
@@ -89,12 +131,13 @@
         "ping mit -c 4 und dem Namen.",
         "Tippe: ping -c 4 intranet.firma.internal"
       ],
-      "danach": "192.168.10.25 antwortet. Notiz: „Alter Testeintrag in /etc/hosts leitete das Intranet um; Zeile entfernt.“"
+      "danach": "Jetzt nennt ping die Adresse 192.168.10.25, und es kommen Antworten – das Intranet geht. Zum Schluss notieren, was du gefunden und geändert hast, z. B.: „Alter Testeintrag in /etc/hosts leitete intranet.firma.internal auf 192.168.10.20 um; Zeile entfernt.“ So weiß der Nächste Bescheid."
     }
   ],
   "fertig": [
     "Die fünf Schritte führen auch unter Linux zum Ziel.",
-    "grep wort datei findet Zeilen in Dateien.",
+    "getent hosts zeigt, was das System benutzt; host name server fragt nur den DNS-Server.",
+    "grep -n wort datei findet Zeilen in Dateien – mit Zeilennummer.",
     "/etc/hosts gilt vor DNS – alte Einträge dort können Namen umleiten.",
     "Ab jetzt kannst du die Linux-Szenarien allein lösen."
   ]

@@ -9,7 +9,8 @@
     "https://man7.org/linux/man-pages/man5/hosts.5.html",
     "https://man7.org/linux/man-pages/man1/getent.1.html",
     "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html",
-    "https://man7.org/linux/man-pages/man8/ping.8.html"
+    "https://man7.org/linux/man-pages/man8/ping.8.html",
+    "https://manpages.ubuntu.com/manpages/noble/man8/systemd-resolved.service.8.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-netzwerk",
@@ -101,13 +102,31 @@
     },
     {
       "muster": [
-        "host intranet.firma.internal"
+        "host intranet.firma.internal 192.168.10.1"
       ],
       "bedeutung": "Den DNS-Server direkt nach einem Namen fragen",
-      "frage": "Frage den DNS-Server direkt nach intranet.firma.internal (mit host)",
       "faelle": [
         {
-          "ausgabe": "intranet.firma.internal has address 192.168.10.25"
+          "ausgabe": [
+            "Using domain server:",
+            "Name: 192.168.10.1",
+            "Address: 192.168.10.1#53",
+            "Aliases: ",
+            "",
+            "intranet.firma.internal has address 192.168.10.25"
+          ]
+        }
+      ],
+      "frage": "Frag den DNS-Server 192.168.10.1 direkt nach intranet.firma.internal"
+    },
+    {
+      "muster": [
+        "host intranet.firma.internal"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Ohne Server-Angabe fragt host unter Ubuntu den Namensdienst des eigenen PCs (systemd-resolved, 127.0.0.53) – und der beachtet auch /etc/hosts. Um nur den DNS-Server zu fragen, häng seine Adresse an: host intranet.firma.internal 192.168.10.1"
         }
       ]
     }
@@ -119,7 +138,7 @@
   },
   "hinweise": [
     "Der DNS-Server kennt die neue Adresse. Wo könnte der Laptop die alte Adresse herhaben, bevor er überhaupt DNS fragt?",
-    "Vergleiche „getent hosts intranet.firma.internal“ (wie das System auflöst) mit „host intranet.firma.internal“ (nur DNS). Lokale Einträge stehen in /etc/hosts.",
+    "Vergleiche „getent hosts intranet.firma.internal“ (wie das System auflöst) mit „host intranet.firma.internal 192.168.10.1“ (fragt nur den DNS-Server). Lokale Einträge stehen in /etc/hosts.",
     "Öffne die Datei mit „sudo nano /etc/hosts“, lösche die Zeile mit 192.168.10.20 (oder setze # davor), speichere mit Strg+O, beende mit Strg+X."
   ],
   "erklaerung": [
@@ -148,8 +167,10 @@
     "(Reihenfolge in /etc/nsswitch.conf). Der alte Testeintrag zeigte noch auf 192.168.10.20. Nach dem Löschen greift",
     "wieder DNS.",
     "",
-    "Merke: „host intranet.firma.internal“ fragt nur DNS und hätte die richtige Adresse gezeigt – unterscheiden sich",
-    "host und getent, steckt der Fehler in /etc/hosts. Unter Windows heißt die Datei",
+    "Merke: „host intranet.firma.internal 192.168.10.1“ fragt direkt den DNS-Server (hier",
+    "192.168.10.1) und hätte die richtige Adresse .25 gezeigt – unterscheiden sich das und getent,",
+    "steckt der Fehler in /etc/hosts. Ohne Server-Angabe fragt host unter Ubuntu den eigenen",
+    "Namensdienst (systemd-resolved), und der liest /etc/hosts mit. Unter Windows heißt die Datei",
     "C:\\Windows\\System32\\drivers\\etc\\hosts."
   ],
   "begriffe": {

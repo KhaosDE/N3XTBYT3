@@ -1,24 +1,36 @@
 {
   "id": "gk-lin-hilfe",
   "system": "linux",
-  "titel": "Hilfe finden: man, --help, whatis",
+  "titel": "Hilfe finden: man, --help, whatis, apropos",
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://man7.org/linux/man-pages/man1/man.1.html",
     "https://man7.org/linux/man-pages/man1/whatis.1.html",
+    "https://man7.org/linux/man-pages/man1/apropos.1.html",
     "https://man7.org/linux/man-pages/man1/ls.1.html",
-    "https://man7.org/linux/man-pages/man1/cp.1.html"
+    "https://man7.org/linux/man-pages/man1/cp.1.html",
+    "https://man7.org/linux/man-pages/man1/mv.1.html",
+    "https://man7.org/linux/man-pages/man1/dd.1.html",
+    "https://man7.org/linux/man-pages/man1/install.1.html",
+    "https://man7.org/linux/man-pages/man1/rm.1.html",
+    "https://man7.org/linux/man-pages/man1/rmdir.1.html"
   ],
   "datum": "2026-11-05",
   "erklaeren": [
-    "Zu fast jedem Linux-Befehl gibt es eine Handbuchseite (man page): man ls. Sie ist ausführlich und englisch.",
-    "Schneller geht oft befehl --help: eine Kurzhilfe direkt im Terminal. Und whatis befehl sagt in einer",
-    "Zeile, was ein Befehl tut. Optionen beginnen unter Linux mit - (kurz, z. B. -l) oder -- (lang, z. B. --help)."
+    "Niemand kennt alle Befehle und Optionen auswendig. Wichtiger ist: wissen, wo es steht. Linux bringt die",
+    "Hilfe gleich mit. whatis befehl erklärt in einer Zeile, was ein Befehl tut. befehl --help zeigt eine",
+    "Kurzhilfe mit allen Optionen. man befehl öffnet das ausführliche Handbuch, die man page. Und apropos wort",
+    "findet einen Befehl, dessen Namen du nicht kennst.",
+    "",
+    "Optionen beginnen unter Linux mit einem Strich (kurz, z. B. -l) oder mit zwei Strichen (lang und",
+    "ausgeschrieben, z. B. --help). Die Hilfe ist englisch – meist reichen wenige Wörter."
   ],
   "begriffe": {
-    "man page": "Handbuchseite zu einem Befehl. Öffnen mit man, blättern mit Leertaste, beenden mit q.",
+    "man page": "Handbuchseite zu einem Befehl. Öffnen mit man, blättern mit Leertaste, suchen mit /, beenden mit q.",
     "Option": "Zusatz zum Befehl: kurz mit einem Strich (-l), lang mit zwei (--help).",
-    "Pager": "Programm, das langen Text seitenweise zeigt (z. B. less). man benutzt einen Pager."
+    "Pager": "Programm, das langen Text seitenweise zeigt (z. B. less). man benutzt einen Pager.",
+    "Abschnitt (1), (8)": "Die Zahl in Klammern hinter einem Befehl, z. B. ls (1): der Teil des Handbuchs. 1 = Befehle für alle Benutzer, 8 = Befehle für den Administrator.",
+    "SYNOPSIS / Usage": "Der Aufbau eines Befehls. [ ] heißt: darf man weglassen; ... heißt: es dürfen mehrere sein."
   },
   "befehle": [
     {
@@ -109,23 +121,70 @@
           "ausgabe": "cp (1)               - copy files and directories"
         }
       ]
+    },
+    {
+      "muster": [
+        "whatis mv"
+      ],
+      "faelle": [
+        {
+          "ausgabe": "mv (1)               - move (rename) files"
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apropos copy",
+        "man -k copy"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "cp (1)               - copy files and directories",
+            "dd (1)               - convert and copy a file",
+            "install (1)          - copy files and set attributes"
+          ],
+          "notiz": "Gekürzt: Auf einem echten Ubuntu stehen hier mehr Treffer – je nachdem, welche Programme installiert sind."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "apropos move",
+        "man -k move"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "mv (1)               - move (rename) files",
+            "rm (1)               - remove files or directories",
+            "rmdir (1)            - remove empty directories"
+          ],
+          "notiz": "Gekürzt: Auf einem echten Ubuntu kommen noch viele Treffer dazu – alle Handbuchseiten, in deren Kurzbeschreibung „move“ vorkommt, auch als Teil eines Wortes."
+        }
+      ]
     }
   ],
   "mitmachen": [
     {
       "text": "Was macht ls? whatis ls",
       "eingabe": "whatis ls",
-      "danach": "Eine Zeile: list directory contents – zeigt den Inhalt von Verzeichnissen. (1) ist der Abschnitt des Handbuchs: 1 = Befehle für alle Benutzer."
+      "danach": "whatis heißt „what is?“ – „Was ist das?“. Die Antwort ist die Kurzbeschreibung aus dem Handbuch: ls – list directory contents, also „Inhalt von Verzeichnissen auflisten“. Die (1) nennt den Abschnitt des Handbuchs: 1 = Befehle für alle Benutzer. whatis ist der schnellste Weg, einen unbekannten Befehl einzuordnen."
     },
     {
       "text": "Die Kurzhilfe: ls --help",
       "eingabe": "ls --help",
-      "danach": "Usage zeigt den Aufbau: ls, dann Optionen, dann Dateien. [ ] heißt: darf man weglassen, ... heißt: es dürfen mehrere sein."
+      "danach": "--help (zwei Striche, ausgeschrieben) zeigt bei fast jedem Befehl eine Kurzhilfe direkt im Terminal. Die Zeile Usage zeigt den Aufbau: erst ls, dann [OPTION]... (Optionen), dann [FILE]... (Dateien). Eckige Klammern [ ] heißen: darf man weglassen; drei Punkte heißen: es dürfen mehrere sein. Darunter folgt im echten Terminal die Liste aller Optionen – dort stehen auch -l und -a, die du schon kennst."
     },
     {
       "text": "Das Handbuch: man ls",
       "eingabe": "man ls",
-      "danach": "NAME und SYNOPSIS (Aufbau) stehen oben. Im echten Terminal blätterst du mit der Leertaste und beendest mit q. Suchen geht mit / und dem Suchwort."
+      "danach": "man steht für „manual“ (Handbuch). Jede man page ist gleich aufgebaut: NAME (Name und Kurzbeschreibung), SYNOPSIS (Aufbau des Befehls), dann DESCRIPTION mit allen Optionen. Im echten Terminal zeigt man die Seite in einem Pager: Mit der Leertaste blätterst du weiter, mit / und einem Wort suchst du, mit q beendest du. man ist ausführlicher als --help – nimm es, wenn die Kurzhilfe nicht reicht."
+    },
+    {
+      "text": "Du kennst den Namen eines Befehls nicht? Such nach einem Stichwort: apropos copy",
+      "eingabe": "apropos copy",
+      "danach": "apropos (französisch „à propos“: zum Thema) durchsucht die Kurzbeschreibungen aller man pages nach einem Wort – hier nach copy (kopieren). Jede Zeile ist ein Treffer: links Name und Abschnitt, rechts die Kurzbeschreibung. So findest du cp (copy files and directories), obwohl du den Namen vorher nicht kanntest. man -k copy macht genau dasselbe."
     }
   ],
   "aufgaben": [
@@ -139,7 +198,7 @@
         "whatis und der Befehl.",
         "Tippe: whatis cp"
       ],
-      "danach": "copy files and directories – kopiert Dateien und Verzeichnisse."
+      "danach": "whatis cp antwortet: cp (1) – copy files and directories. cp ist also die Abkürzung von „copy“ und kopiert Dateien und Ordner; wie man ihn benutzt, lernst du in Lektion 4. Genauso ordnest du jeden Befehl ein, der dir in einer Anleitung begegnet."
     },
     {
       "aufgabe": "Zeig die Kurzhilfe von cp an.",
@@ -151,7 +210,7 @@
         "Zwei Striche und das englische Wort für Hilfe.",
         "Tippe: cp --help"
       ],
-      "danach": "Richtig: --help mit zwei Strichen."
+      "danach": "Die Kurzhilfe zeigt drei Aufrufformen. Die erste ist die wichtigste: cp SOURCE DEST – erst die Quelle (was du kopierst), dann das Ziel (wohin). Diese Reihenfolge – erst woher, dann wohin – gilt bei vielen Linux-Befehlen, die etwas von A nach B bringen."
     },
     {
       "aufgabe": "Öffne die Handbuchseite von cp.",
@@ -163,11 +222,25 @@
         "man und der Befehl.",
         "Tippe: man cp"
       ],
-      "danach": "Genau: man cp."
+      "danach": "Oben stehen wieder NAME und SYNOPSIS, darunter in DESCRIPTION alle Optionen – z. B. -r für ganze Ordner. Im echten Terminal kommst du mit q wieder aus dem Handbuch heraus."
+    },
+    {
+      "aufgabe": "Du suchst einen Befehl zum Verschieben von Dateien, kennst aber seinen Namen nicht. Verschieben heißt auf Englisch move. Such den Befehl über die Kurzbeschreibungen im Handbuch.",
+      "eingabe": [
+        "apropos move",
+        "man -k move"
+      ],
+      "hinweise": [
+        "Es gibt einen Befehl, der die Kurzbeschreibungen aller man pages nach einem Wort durchsucht.",
+        "apropos und das englische Suchwort.",
+        "Tippe: apropos move"
+      ],
+      "danach": "Der passende Treffer ist mv (1) – move (rename) files: mv verschiebt Dateien oder benennt sie um. Du siehst aber auch rm und rmdir: apropos findet „move“ auch mitten in „remove“ (entfernen). Darum die Treffer immer kurz lesen – und bei Bedarf mit whatis oder man nachsehen."
     }
   ],
   "fertig": [
     "whatis befehl erklärt in einer Zeile, befehl --help kurz, man befehl ausführlich.",
+    "apropos wort (oder man -k wort) findet Befehle, deren Namen du nicht kennst.",
     "Optionen: -l (kurz) oder --help (lang).",
     "In man: Leertaste blättert, / sucht, q beendet."
   ]

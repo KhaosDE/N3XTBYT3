@@ -209,7 +209,7 @@ Beispiele:
   erkannt“; Zahlen in `STAND.md` festhalten.
 
 ## Lernprinzip: Alles wird erklärt, bevor es verlangt wird (Grundkurs und Szenarien)
-Status: freigegeben
+Status: erledigt (20.11.2026)
 Datum: 20.11.2026 (ersetzt den Eintrag „Jede Aufgabe nur mit vorher Gezeigtem lösbar" vom 12.11.)
 Was: Grundkurs und Szenarien werden so überarbeitet, dass jeder Befehl und jeder Zusatz (Option,
 Schalter wie `/IM`, `/F`, `-Identity`, `--vacuum-size`) **erklärt** wird, bevor eine Aufgabe ihn
