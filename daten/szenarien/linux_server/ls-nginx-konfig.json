@@ -8,7 +8,8 @@
   "quelle": [
     "https://nginx.org/en/docs/switches.html",
     "https://nginx.org/en/docs/beginners_guide.html",
-    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://curl.se/docs/manpage.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-logs",
@@ -189,7 +190,8 @@
             "Server: nginx/1.24.0 (Ubuntu)",
             "Content-Type: text/html",
             "Connection: keep-alive"
-          ]
+          ],
+          "notiz": "Gekürzt: Im echten System stehen weitere Kopfzeilen, z. B. Date, Content-Length und Last-Modified."
         }
       ]
     }
@@ -203,11 +205,30 @@
     "In /etc/nginx/conf.d/shop.conf Zeile 4 fehlt das „;“ hinter „root /var/www/shop“. Danach „sudo nginx -t“ und „sudo systemctl restart nginx“."
   ],
   "erklaerung": [
-    "In nginx endet jede Anweisung mit einem Semikolon. Ohne „;“ liest nginx weiter:",
-    "„root /var/www/shop index index.html;“ – root bekommt drei statt einem Wert. Darum die Meldung",
-    "„invalid number of arguments in \"root\" directive … shop.conf:5“ – die Zeile danach, nicht Zeile 4.",
-    "„sudo nginx -t“ prüft die Konfiguration, ohne den Dienst anzufassen – immer vor einem Neustart ausführen.",
-    "Danach startet „sudo systemctl restart nginx“ den Webserver wieder."
+    "So gehst du vor:",
+    "",
+    "1. „systemctl status nginx“ zeigt „Active: failed“. Die Zeile „Process: … ExecStartPre=/usr/sbin/nginx -t …",
+    "(code=exited, status=1/FAILURE)“ verrät: Schon die Prüfung der Konfiguration vor dem Start ist gescheitert.",
+    "",
+    "2. „sudo nginx -t“ prüft die Konfiguration (-t = test), ohne den laufenden Dienst anzufassen. „[emerg] invalid",
+    "number of arguments in \"root\" directive in /etc/nginx/conf.d/shop.conf:5“ nennt Datei und Zeile 5.",
+    "",
+    "3. „sudo nano /etc/nginx/conf.d/shop.conf“ öffnet die Datei. In Zeile 4 fehlt am Ende das Semikolon: aus „root",
+    "/var/www/shop“ wird „root /var/www/shop;“. Speichern mit Strg+O und Enter, beenden mit Strg+X.",
+    "",
+    "4. „sudo nginx -t“ noch einmal: „syntax is ok“ und „test is successful“.",
+    "",
+    "5. „sudo systemctl restart nginx“ startet nginx neu (restart = stoppen und wieder starten; läuft der Dienst gar",
+    "nicht, wird er einfach gestartet).",
+    "",
+    "6. „curl -I http://localhost“ prüft auf dem Server selbst: curl ruft eine Webseite ab, -I holt nur die",
+    "Kopfzeilen der Antwort. „HTTP/1.1 200 OK“ – die Seite ist zurück. localhost ist der Rechner selbst.",
+    "",
+    "Warum das die Lösung ist: In nginx endet jede Anweisung mit einem Semikolon. Ohne „;“ liest nginx weiter: „root",
+    "/var/www/shop index index.html;“ – root bekommt drei statt einem Wert. Darum meldet nginx die Zeile danach (5),",
+    "nicht Zeile 4.",
+    "",
+    "Merke: „sudo nginx -t“ immer vor einem Neustart ausführen."
   ],
   "begriffe": {
     "nginx -t": "Testet die nginx-Konfiguration auf Syntaxfehler.",

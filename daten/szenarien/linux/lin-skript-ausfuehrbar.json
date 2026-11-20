@@ -336,10 +336,23 @@
     "„chmod u+x backup.sh“, danach „./backup.sh“."
   ],
   "erklaerung": [
-    "Die Datei hatte die Rechte rw-r--r-- (644): lesen und schreiben, aber nicht ausführen.",
-    "„chmod u+x backup.sh“ gibt dem Besitzer (u = user) das Ausführrecht (x). Danach steht rwxr--r-- da.",
-    "Mit „bash backup.sh“ ginge es auch ohne x-Recht, weil dann bash die Datei liest und ausführt –",
-    "zum direkten Starten mit ./backup.sh braucht es aber das x-Recht. ./ heißt: „im aktuellen Ordner“."
+    "So gehst du vor:",
+    "",
+    "1. „./backup.sh“ versucht, das Skript im aktuellen Ordner zu starten (./ heißt „hier in diesem Ordner“).",
+    "„Permission denied“: Es fehlt ein Recht.",
+    "",
+    "2. „ls -l backup.sh“ zeigt die Rechte (-l = ausführliche Form): -rw-r--r--. Die Besitzerin anna darf lesen (r)",
+    "und schreiben (w), aber nicht ausführen – das x fehlt.",
+    "",
+    "3. „chmod u+x backup.sh“ gibt das Ausführrecht. chmod (change mode) ändert Rechte; u = user (Besitzer), + =",
+    "hinzufügen, x = ausführen. Gruppe und andere bleiben unverändert. Danach steht rwxr--r-- da.",
+    "",
+    "4. „./backup.sh“ meldet „Sicherung abgeschlossen.“ – das Skript läuft.",
+    "",
+    "Warum das die Lösung ist: Die Datei hatte die Rechte rw-r--r-- (644): lesen und schreiben, aber nicht ausführen.",
+    "Zum direkten Starten mit ./backup.sh braucht es das x-Recht.",
+    "",
+    "Merke: Mit „bash backup.sh“ ginge es auch ohne x-Recht, weil dann bash die Datei liest und ausführt."
   ],
   "begriffe": {
     "rwx": "Lesen (r), schreiben (w), ausführen (x). Drei Gruppen: Besitzer, Gruppe, alle anderen.",

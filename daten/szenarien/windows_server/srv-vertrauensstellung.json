@@ -111,10 +111,25 @@
     "„Test-ComputerSecureChannel -Repair -Credential FIRMA\\Administrator“."
   ],
   "erklaerung": [
-    "Der PC und das AD teilen sich ein Computerkonto-Passwort, das Windows regelmäßig (alle 30 Tage) automatisch ändert.",
-    "Das alte Image enthielt ein veraltetes Passwort – der „sichere Kanal“ zur Domäne war kaputt (Test-ComputerSecureChannel: False).",
-    "„Test-ComputerSecureChannel -Repair -Credential …“ setzt das Passwort auf beiden Seiten neu. Danach klappt die Anmeldung",
-    "wieder, ohne Austritt und Neubeitritt. Weil du lokal angemeldet bist, brauchst du dafür die Anmeldedaten eines Domänen-Admins."
+    "So gehst du vor:",
+    "",
+    "1. „Test-ComputerSecureChannel“ prüft die Verbindung (den sicheren Kanal) zwischen diesem PC und seiner Domäne.",
+    "Die Antwort ist nur True (in Ordnung) oder False (gestört). Hier: False.",
+    "",
+    "2. „Test-ComputerSecureChannel -Repair -Credential FIRMA\\Administrator“ repariert den Kanal. -Repair heißt:",
+    "nicht nur testen, sondern den Kanal abbauen und neu aufbauen. -Credential nennt ein Konto, das das in der Domäne",
+    "darf; PowerShell fragt dessen Passwort ab. Ohne -Credential würde der Befehl mit dem angemeldeten Konto arbeiten",
+    "– das ist hier der lokale Administrator, und der hat in der Domäne keine Rechte.",
+    "",
+    "3. „Test-ComputerSecureChannel“ prüft: True – der PC vertraut der Domäne wieder, Domänenbenutzer können sich",
+    "anmelden.",
+    "",
+    "Warum das die Lösung ist: Der PC und das AD teilen sich ein Computerkonto-Passwort, das Windows regelmäßig (alle",
+    "30 Tage) automatisch ändert. Das alte Image enthielt ein veraltetes Passwort – der sichere Kanal zur Domäne war",
+    "kaputt. Die Reparatur stellt ihn wieder her, ohne Austritt und Neubeitritt.",
+    "",
+    "Merke: „The trust relationship … failed“ nach einem alten Image oder Snapshot: erst Test-ComputerSecureChannel,",
+    "dann -Repair mit einem Domänen-Admin."
   ],
   "begriffe": {
     "Vertrauensstellung (Trust)": "Die Beziehung zwischen PC und Domäne; der PC weist sich mit seinem Computerkonto aus.",

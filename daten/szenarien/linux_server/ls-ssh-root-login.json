@@ -8,7 +8,8 @@
   "quelle": [
     "https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html",
     "https://manpages.ubuntu.com/manpages/noble/man8/sshd.8.html",
-    "https://documentation.ubuntu.com/server/how-to/security/openssh-server/"
+    "https://documentation.ubuntu.com/server/how-to/security/openssh-server/",
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-ssh",
@@ -166,11 +167,26 @@
     "„sudo nano /etc/ssh/sshd_config“ → PermitRootLogin no → speichern → „sudo sshd -t“ → „sudo systemctl reload ssh“."
   ],
   "erklaerung": [
-    "Mit „PermitRootLogin yes“ konnten Angreifer direkt das Passwort von root raten – das Journal zeigte die Versuche.",
-    "„PermitRootLogin no“ verbietet das. „sudo sshd -t“ prüft die Datei vorher (keine Ausgabe = in Ordnung),",
-    "„sudo systemctl reload ssh“ übernimmt die Einstellung, ohne bestehende Verbindungen zu trennen.",
-    "Admins melden sich mit eigenem Konto an und nutzen sudo – so ist auch nachvollziehbar, wer was getan hat.",
-    "Unter Ubuntu heißt der Dienst „ssh“, das Programm „sshd“."
+    "So gehst du vor:",
+    "",
+    "1. „journalctl -u ssh -n 5“ zeigt die letzten 5 Meldungen des SSH-Dienstes. -u ssh wählt den Dienst (unit); -n 5",
+    "begrenzt auf die neuesten 5 Zeilen – ohne -n kämen alle, hier Tausende. Jede Zeile „Failed password for root",
+    "from …“ ist ein Versuch, das Passwort von root zu erraten.",
+    "",
+    "2. „sudo nano /etc/ssh/sshd_config“ öffnet die Einstellungen des SSH-Servers (mit sudo, die Datei gehört root).",
+    "Ändere „PermitRootLogin yes“ in „PermitRootLogin no“. Speichern mit Strg+O und Enter, beenden mit Strg+X.",
+    "",
+    "3. „sudo sshd -t“ prüft die Datei auf Fehler (-t = test). Keine Ausgabe heißt: alles in Ordnung. Bei einem",
+    "Tippfehler würde sshd die Zeile nennen – und du merkst es, bevor der Dienst die Datei neu lädt.",
+    "",
+    "4. „sudo systemctl reload ssh“ lässt den Dienst seine Einstellungen neu lesen, ohne bestehende Verbindungen zu",
+    "trennen (reload statt restart).",
+    "",
+    "Warum das die Lösung ist: Mit „PermitRootLogin yes“ konnten Angreifer direkt das Passwort von root raten.",
+    "„PermitRootLogin no“ verbietet die Anmeldung als root per SSH. Admins melden sich mit eigenem Konto an und",
+    "nutzen sudo – so ist auch nachvollziehbar, wer was getan hat.",
+    "",
+    "Merke: Unter Ubuntu heißt der Dienst „ssh“, das Programm „sshd“."
   ],
   "begriffe": {
     "PermitRootLogin": "sshd-Einstellung: Darf sich root per SSH anmelden? (yes, no, prohibit-password …)",

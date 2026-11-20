@@ -109,9 +109,25 @@
     "„Install-WindowsFeature Windows-Server-Backup“."
   ],
   "erklaerung": [
-    "wbadmin gehört zum Feature „Windows Server-Sicherung“ (Windows-Server-Backup). Ohne das Feature gibt es den Befehl nicht.",
-    "„Get-WindowsFeature“ zeigt alle Rollen und Features mit [X] = installiert und [ ] = verfügbar.",
-    "„Install-WindowsFeature“ installiert sie; die Spalte „Restart Needed“ sagt, ob ein Neustart nötig ist."
+    "So gehst du vor:",
+    "",
+    "1. „wbadmin“: PowerShell meldet „The term 'wbadmin' is not recognized …“ – den Befehl gibt es auf diesem Server",
+    "(noch) nicht.",
+    "",
+    "2. „Get-WindowsFeature *Backup*“ zeigt Rollen und Features des Servers. Die Sternchen sind Platzhalter: *Backup*",
+    "heißt „alles mit Backup im Namen“. Ohne Angabe listet der Befehl alle Rollen und Features – eine lange Liste.",
+    "Ergebnis: [ ] Windows Server Backup, Install State Available – verfügbar, aber nicht installiert. [X] hieße",
+    "installiert.",
+    "",
+    "3. „Install-WindowsFeature Windows-Server-Backup“ installiert das Feature. Du gibst den Namen aus der Spalte",
+    "Name an, nicht den Anzeigenamen. Success True und Restart Needed No: installiert, kein Neustart nötig. Danach",
+    "gibt es wbadmin.",
+    "",
+    "Warum das die Lösung ist: wbadmin gehört zum Feature „Windows Server-Sicherung“ (Windows-Server-Backup). Ohne",
+    "das Feature gibt es den Befehl nicht.",
+    "",
+    "Merke: Fehlt auf einem Server ein Werkzeug, prüfe mit Get-WindowsFeature, zu welcher Rolle oder welchem Feature",
+    "es gehört. Die Spalte „Restart Needed“ sagt, ob nach der Installation ein Neustart nötig ist."
   ],
   "begriffe": {
     "Rolle": "Hauptaufgabe eines Servers, z. B. DNS-Server, DHCP-Server, Dateiserver.",

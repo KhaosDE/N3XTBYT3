@@ -7,7 +7,9 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
-    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client"
+    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ping",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/nslookup"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-netzwerk",
@@ -258,11 +260,29 @@
     "Der PC hat sich die alte Adresse im DNS-Cache gemerkt. Leere den Cache mit „ipconfig /flushdns“."
   ],
   "erklaerung": [
-    "Windows merkt sich Antworten des DNS-Servers eine Zeit lang im DNS-Cache (Zwischenspeicher).",
-    "Frau Bergers PC hatte noch die alte Adresse 192.168.10.20 gespeichert – „ping“ und der Browser nehmen diese.",
-    "„nslookup“ fragt dagegen direkt den DNS-Server und bekommt die neue Adresse 192.168.10.25.",
-    "„ipconfig /flushdns“ leert den Cache. Danach fragt Windows neu nach und bekommt die richtige Adresse.",
-    "In der PowerShell macht „Clear-DnsClientCache“ dasselbe."
+    "So gehst du vor:",
+    "",
+    "1. „ping intranet.firma.internal“ schickt Testpakete an den Namen. In der ersten Zeile steht in eckigen",
+    "Klammern, welche Adresse Windows für den Namen nimmt: [192.168.10.20] – die alte Adresse. Viermal „Request timed",
+    "out“ und „Lost = 4 (100% loss)“: Dort antwortet niemand mehr.",
+    "",
+    "2. „nslookup intranet.firma.internal“ fragt direkt den DNS-Server, am Zwischenspeicher des PCs vorbei. „Server:",
+    "dc01.firma.internal“ ist der gefragte DNS-Server; unter „Name:“ steht die Antwort: „Address: 192.168.10.25“ –",
+    "die neue Adresse. ping und nslookup sind sich also nicht einig: Der PC hat sich die alte Adresse gemerkt.",
+    "",
+    "3. „ipconfig /flushdns“ leert den DNS-Cache des PCs (flush = ausspülen). „Successfully flushed the DNS Resolver",
+    "Cache.“ bestätigt das. Beim nächsten Zugriff fragt Windows den DNS-Server neu.",
+    "",
+    "4. „ping intranet.firma.internal“ noch einmal: Jetzt steht [192.168.10.25] da, und es kommen Antworten („Reply",
+    "from …“, 0% loss).",
+    "",
+    "Warum das die Lösung ist: Windows merkt sich Antworten des DNS-Servers eine Zeit lang im DNS-Cache",
+    "(Zwischenspeicher). Frau Bergers PC hatte noch die alte Adresse 192.168.10.20 gespeichert – ping und der Browser",
+    "nahmen diese. Nach dem Leeren fragt Windows neu und bekommt die richtige Adresse. Den Inhalt des Caches zeigt",
+    "„ipconfig /displaydns“.",
+    "",
+    "Merke: Zeigen ping und nslookup verschiedene Adressen, ist oft der Cache schuld. In der PowerShell macht",
+    "„Clear-DnsClientCache“ dasselbe wie „ipconfig /flushdns“."
   ],
   "begriffe": {
     "DNS": "Domain Name System: übersetzt Namen wie intranet.firma.internal in IP-Adressen.",

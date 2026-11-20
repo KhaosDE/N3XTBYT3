@@ -84,16 +84,26 @@
     },
     {
       "muster": [
-        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
         "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200"
       ],
       "bedeutung": "Einen DHCP-Bereich ändern (z. B. Ende des Adressbereichs)",
-      "frage": "Setze das Ende des DHCP-Bereichs 192.168.10.0 auf 192.168.10.200",
+      "frage": "Ändere den DHCP-Bereich 192.168.10.0 so, dass er von 192.168.10.100 bis 192.168.10.200 reicht",
       "faelle": [
         {
           "setze": {
             "bereich_gross": true
           }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Nur -EndRange reicht hier nicht: Laut Microsoft-Doku gehören -StartRange und -EndRange bei Set-DhcpServerv4Scope zusammen – beide müssen angegeben werden, auch wenn der Anfang gleich bleibt. Die echte PowerShell würde jetzt nach dem fehlenden Wert für StartRange fragen."
         }
       ]
     },
@@ -130,24 +140,43 @@
   "hinweise": [
     "169.254.x.x heißt: kein DHCP-Server hat geantwortet bzw. keine Adresse vergeben. Wie voll ist der Bereich?",
     "„Get-DhcpServerv4ScopeStatistics“ zeigt freie und belegte Adressen, „Get-DhcpServerv4Scope“ Start und Ende. Ändern geht mit „Set-DhcpServerv4Scope“.",
-    "„Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200“."
+    "„Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200“ – Anfang und Ende gehören zusammen, der Anfang bleibt .100."
   ],
   "erklaerung": [
-    "Der Bereich hatte nur 51 Adressen (.100 bis .150), alle vergeben (PercentageInUse 100, Free 0).",
-    "Neue Geräte bekamen keine Adresse und gaben sich selbst eine 169.254.x.x (APIPA).",
-    "Mit „Set-DhcpServerv4Scope -EndRange 192.168.10.200“ kommen 50 Adressen dazu. Vorher prüfen, dass im neuen Bereich",
-    "keine Geräte mit fester Adresse stehen. Langfristig hilft auch eine kürzere Lease-Dauer, wenn oft Gäste kommen."
+    "So gehst du vor:",
+    "",
+    "1. „Get-DhcpServerv4ScopeStatistics“ zeigt für jeden IPv4-Bereich (Scope) des DHCP-Servers, wie viele Adressen",
+    "frei und belegt sind. Free 0, InUse 51, PercentageInUse 100: Der Bereich ist komplett vergeben.",
+    "",
+    "2. „Get-DhcpServerv4Scope“ zeigt die Einstellungen der Bereiche: StartRange 192.168.10.100, EndRange",
+    "192.168.10.150 – das sind nur 51 Adressen. LeaseDuration 8.00:00:00 heißt: Eine Adresse bleibt 8 Tage vergeben.",
+    "",
+    "3. „Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200“ vergrößert",
+    "den Bereich. -ScopeId nennt den Bereich über seine Netzadresse (Spalte ScopeId) – ein Server kann mehrere",
+    "Bereiche haben. -StartRange ist die erste, -EndRange die letzte Adresse, die der Server vergeben darf. Die beiden",
+    "gehören zusammen: Wer den Bereich ändert, gibt beide an – den Anfang .100 also noch einmal, obwohl er bleibt.",
+    "Nur -EndRange allein nimmt der Befehl nicht an.",
+    "",
+    "4. „Get-DhcpServerv4ScopeStatistics“ prüft: Free 50 – 50 neue Adressen für die Schulungslaptops.",
+    "",
+    "Warum das die Lösung ist: Der Bereich hatte nur 51 Adressen (.100 bis .150), alle vergeben. Neue Geräte bekamen",
+    "keine Adresse und gaben sich selbst eine 169.254.x.x (APIPA). Mit dem größeren Bereich bekommen sie eine, sobald",
+    "sie neu fragen.",
+    "",
+    "Merke: Vorher prüfen, dass im neuen Bereich keine Geräte mit fester Adresse stehen (laut Netzplan frei).",
+    "Langfristig hilft auch eine kürzere Lease-Dauer, wenn oft Gäste kommen."
   ],
   "begriffe": {
     "DHCP-Bereich (Scope)": "Adressbereich, aus dem der DHCP-Server Adressen vergibt.",
     "Lease": "Eine vergebene Adresse mit Ablaufzeit. Erst danach ist sie wieder frei.",
     "LeaseDuration": "Wie lange eine Adresse vergeben bleibt, Format Tage.Stunden:Minuten:Sekunden (8.00:00:00 = 8 Tage).",
-    "APIPA": "169.254.x.x – Selbstvergabe von Windows, wenn kein DHCP-Server eine Adresse liefert."
+    "APIPA": "169.254.x.x – Selbstvergabe von Windows, wenn kein DHCP-Server eine Adresse liefert.",
+    "ScopeId": "Kennung eines DHCP-Bereichs: seine Netzadresse, z. B. 192.168.10.0."
   },
   "loesung": [
     "Get-DhcpServerv4ScopeStatistics",
     "Get-DhcpServerv4Scope",
-    "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
+    "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200",
     "Get-DhcpServerv4ScopeStatistics"
   ]
 }

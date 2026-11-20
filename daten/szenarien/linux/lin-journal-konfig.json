@@ -7,7 +7,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://man7.org/linux/man-pages/man1/journalctl.1.html",
-    "https://man7.org/linux/man-pages/man1/cp.1.html"
+    "https://man7.org/linux/man-pages/man1/cp.1.html",
+    "https://man7.org/linux/man-pages/man1/mkdir.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-dateien",
@@ -156,10 +157,28 @@
     "„cp /usr/share/lagerscan/lagerscan.conf.example ~/.config/lagerscan/lagerscan.conf“ (der Ordner existiert schon? Sonst vorher „mkdir -p ~/.config/lagerscan“)."
   ],
   "erklaerung": [
-    "Das Journal (systemd) sammelt Meldungen aller Programme. „journalctl -b -p err“ zeigt nur Fehler (Priorität err",
-    "und schlimmer) seit dem letzten Start (-b = boot). Dort stand: Die Konfigurationsdatei fehlt.",
-    "Nach dem Kopieren der Beispieldatei an die erwartete Stelle startet lagerscan wieder.",
-    "Viele Programme legen ihre Benutzer-Einstellungen unter ~/.config/<programm>/ ab."
+    "So gehst du vor:",
+    "",
+    "1. „journalctl -b -p err“ zeigt Fehler aus dem Journal. journalctl liest das Journal, das Protokoll von systemd,",
+    "in dem die Meldungen aller Programme landen. -b (boot) = nur Meldungen seit dem letzten Start; -p err (priority)",
+    "= nur Fehler und Schlimmeres. Ohne die Zusätze kämen Tausende Zeilen. lagerscan meldet: „Cannot open",
+    "/home/anna/.config/lagerscan/lagerscan.conf: No such file or directory“ – die Konfigurationsdatei fehlt.",
+    "",
+    "2. „mkdir -p ~/.config/lagerscan“ legt den Ordner an. mkdir (make directory) erstellt einen Ordner; -p legt",
+    "fehlende Ordner auf dem Weg gleich mit an und meldet keinen Fehler, wenn der Ordner schon existiert.",
+    "",
+    "3. „cp /usr/share/lagerscan/lagerscan.conf.example ~/.config/lagerscan/lagerscan.conf“ kopiert die Beispieldatei",
+    "an die Stelle, wo lagerscan sie sucht. cp (copy) kopiert: erst die Quelle, dann das Ziel. Die Kopie bekommt",
+    "dabei gleich den richtigen Namen (ohne .example).",
+    "",
+    "4. „lagerscan“ startet das Programm: „Connected to 192.168.10.30:8080“ – es läuft.",
+    "",
+    "Warum das die Lösung ist: lagerscan sucht seine Einstellungen in ~/.config/lagerscan/lagerscan.conf. Die Datei",
+    "gab es nach der Neuinstallation nicht, darum brach es sofort ab. Mit der Beispieldatei an der richtigen Stelle",
+    "startet es wieder.",
+    "",
+    "Merke: Viele Programme legen ihre Benutzer-Einstellungen unter ~/.config/<programm>/ ab. Blitzt ein Programm nur",
+    "kurz auf, steht der Grund meist im Journal."
   ],
   "begriffe": {
     "journalctl": "Liest das Journal: -b aktueller Start, -p err nur Fehler, -u Dienst, -t Programmname, -n Anzahl.",

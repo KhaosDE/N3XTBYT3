@@ -190,10 +190,25 @@
     "„Enable-LocalUser -Name jschulz“ (oder in cmd: „net user jschulz /active:yes“)."
   ],
   "erklaerung": [
-    "Das lokale Konto „jschulz“ war deaktiviert (Enabled = False). Ein deaktiviertes Konto kann sich nicht anmelden,",
-    "egal wie richtig das Passwort ist. „Enable-LocalUser -Name jschulz“ schaltet es wieder ein.",
-    "Wichtig ist der Unterschied: deaktiviert = von Hand ausgeschaltet; gesperrt = nach zu vielen falschen",
-    "Passwörtern vorübergehend blockiert. Gesperrte Domänenkonten kommen später bei Windows Server (Unlock-ADAccount)."
+    "So gehst du vor:",
+    "",
+    "1. „Get-LocalUser“ listet alle lokalen Konten dieses PCs. In der Spalte Enabled heißt True = aktiviert, False =",
+    "deaktiviert. Bei jschulz steht False. (Administrator, DefaultAccount und Guest sind unter Windows normalerweise",
+    "auch ausgeschaltet – das ist so gewollt.)",
+    "",
+    "2. „Enable-LocalUser -Name jschulz“ schaltet das Konto ein. Enable heißt „aktivieren“, -Name nennt das Konto.",
+    "Keine Ausgabe heißt: geklappt.",
+    "",
+    "3. „Get-LocalUser -Name jschulz“ prüft nach. Mit -Name zeigt Get-LocalUser nur dieses eine Konto – jetzt mit",
+    "Enabled True.",
+    "",
+    "Warum das die Lösung ist: Das lokale Konto „jschulz“ war deaktiviert. Ein deaktiviertes Konto kann sich nicht",
+    "anmelden, egal wie richtig das Passwort ist. Nach dem Einschalten klappt die Anmeldung mit dem bisherigen",
+    "Passwort.",
+    "",
+    "Merke den Unterschied: deaktiviert = von Hand ausgeschaltet; gesperrt = nach zu vielen falschen Passwörtern",
+    "automatisch blockiert. Gesperrte Domänenkonten kommen später bei Windows Server (Unlock-ADAccount). In cmd geht",
+    "das Einschalten mit „net user jschulz /active:yes“."
   ],
   "begriffe": {
     "Lokales Konto": "Benutzerkonto, das nur auf diesem einen PC existiert (im Gegensatz zum Domänenkonto aus dem Active Directory).",

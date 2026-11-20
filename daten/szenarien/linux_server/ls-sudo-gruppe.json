@@ -134,10 +134,22 @@
     "„sudo usermod -aG sudo mkoch“ – Marie muss sich danach neu anmelden."
   ],
   "erklaerung": [
-    "In /etc/sudoers steht bei Ubuntu „%sudo ALL=(ALL:ALL) ALL“: Alle Mitglieder der Gruppe sudo dürfen sudo.",
-    "„sudo usermod -aG sudo mkoch“ nimmt Marie in die Gruppe auf – ohne die sudoers-Datei anzufassen.",
-    "Neue Gruppen gelten erst nach neuer Anmeldung. Muss man sudoers doch ändern, dann nur mit visudo,",
-    "das die Datei vor dem Speichern prüft – ein Fehler dort kann sudo für alle sperren."
+    "So gehst du vor:",
+    "",
+    "1. „id mkoch“ zeigt Nummern und Gruppen des Benutzers: uid = Benutzernummer, gid = Hauptgruppe, groups = alle",
+    "Gruppen. Hier nur mkoch und users – sudo fehlt.",
+    "",
+    "2. „sudo usermod -aG sudo mkoch“ nimmt Marie in die Gruppe sudo auf. usermod ändert ein Konto; -G nennt",
+    "Zusatzgruppen, -a (append) hängt sie an die bestehenden an. Ohne -a würde -G alle bisherigen Zusatzgruppen",
+    "ersetzen – Marie verlöre z. B. users.",
+    "",
+    "3. „id mkoch“ prüft: groups enthält jetzt 27(sudo).",
+    "",
+    "Warum das die Lösung ist: In /etc/sudoers steht bei Ubuntu „%sudo ALL=(ALL:ALL) ALL“: Alle Mitglieder der Gruppe",
+    "sudo dürfen sudo. Über die Gruppe bekommt Marie das Recht, ohne dass jemand die sudoers-Datei anfasst.",
+    "",
+    "Merke: Neue Gruppen gelten erst nach neuer Anmeldung. Muss man sudoers doch ändern, dann nur mit visudo, das die",
+    "Datei vor dem Speichern prüft – ein Fehler dort kann sudo für alle sperren."
   ],
   "begriffe": {
     "sudo": "Führt einen Befehl mit Root-Rechten aus, wenn man es darf.",

@@ -8,7 +8,8 @@
   "quelle": [
     "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountexpiration",
     "https://learn.microsoft.com/powershell/module/activedirectory/search-adaccount",
-    "https://learn.microsoft.com/powershell/module/activedirectory/clear-adaccountexpiration"
+    "https://learn.microsoft.com/powershell/module/activedirectory/clear-adaccountexpiration",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-srv-ad-benutzer",
@@ -189,10 +190,25 @@
     "„Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01“ – dann gilt es bis einschließlich 28.02.2027."
   ],
   "erklaerung": [
-    "Das Konto hatte als Ablaufdatum den 1.11.2026, 0:00 Uhr – also das Ende des 31.10.",
-    "„Set-ADAccountExpiration“ setzt ein neues Datum. Das Konto läuft zu Beginn des angegebenen Tages ab;",
-    "darum 2027-03-01, damit Tom am 28.02. noch arbeiten kann (in der AD-Konsole steht dann „Ende des 28.02.2027“).",
-    "Das Datum im ISO-Format JJJJ-MM-TT versteht PowerShell unabhängig von der Spracheinstellung.",
+    "So gehst du vor:",
+    "",
+    "1. „Get-ADUser trichter -Properties AccountExpirationDate“ zeigt das Konto mit seinem Ablaufdatum. Get-ADUser",
+    "zeigt sonst nur einige Grundeigenschaften (Name, Enabled, SamAccountName …); -Properties holt zusätzliche",
+    "Eigenschaften vom Server – hier AccountExpirationDate. Ergebnis: 11/1/2026 12:00:00 AM. Das ist die",
+    "amerikanische Schreibweise (Monat/Tag/Jahr): 1.11.2026, 0:00 Uhr. Seitdem ist das Konto abgelaufen.",
+    "",
+    "2. „Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01“ setzt ein neues Ablaufdatum. -Identity",
+    "nennt das Konto; -DateTime den Zeitpunkt, ab dem das Konto abgelaufen ist. Ohne Uhrzeit gilt 0:00 Uhr – darum",
+    "der 1.3.2027, damit Tom am 28.02. noch den ganzen Tag arbeiten kann.",
+    "",
+    "3. „Get-ADUser trichter -Properties AccountExpirationDate“ prüft nach: 3/1/2027 12:00:00 AM, also 1.3.2027, 0:00",
+    "Uhr.",
+    "",
+    "Warum das die Lösung ist: Das Konto hatte als Ablaufdatum den 1.11.2026, 0:00 Uhr – also das Ende des 31.10. Mit",
+    "dem neuen Datum darf Tom sich bis einschließlich 28.02.2027 anmelden (in der AD-Konsole steht dann „Ende des",
+    "28.02.2027“).",
+    "",
+    "Merke: Das Datum im ISO-Format JJJJ-MM-TT versteht PowerShell unabhängig von der Spracheinstellung.",
     "„Clear-ADAccountExpiration“ entfernt das Datum ganz – für befristete Konten ist das ein Sicherheitsrisiko."
   ],
   "begriffe": {

@@ -188,16 +188,30 @@
     "„Unlock-ADAccount -Identity kwagner“."
   ],
   "erklaerung": [
-    "Die Kontosperrrichtlinie der Domäne sperrt ein Konto nach mehreren falschen Passwörtern (Schutz gegen Ausprobieren).",
-    "„Search-ADAccount -LockedOut“ findet gesperrte Konten, „Unlock-ADAccount“ hebt die Sperre auf.",
-    "Das Passwort bleibt dabei gleich. Merke den Unterschied: gesperrt (automatisch, Unlock-ADAccount) –",
-    "deaktiviert (von Hand, Enable-ADAccount)."
+    "So gehst du vor:",
+    "",
+    "1. „Search-ADAccount -LockedOut“ durchsucht das AD nach Konten mit einem bestimmten Zustand; -LockedOut heißt",
+    "„nur gesperrte Konten“. Ergebnis: Kai Wagner, SamAccountName kwagner, „LockedOut : True“. Enabled steht auf True",
+    "– das Konto ist also nicht deaktiviert, nur gesperrt.",
+    "",
+    "2. „Unlock-ADAccount -Identity kwagner“ hebt die Sperre auf. -Identity nennt das Konto, hier über den",
+    "Anmeldenamen (SamAccountName). Das Passwort bleibt dabei unverändert. Keine Ausgabe heißt: geklappt.",
+    "",
+    "3. „Get-ADUser kwagner -Properties LockedOut“ prüft nach. LockedOut gehört nicht zu den Grundeigenschaften, die",
+    "Get-ADUser von sich aus zeigt; -Properties holt sie dazu. „LockedOut : False“ – das Konto ist frei.",
+    "",
+    "Warum das die Lösung ist: Die Kontosperrrichtlinie der Domäne sperrt ein Konto nach mehreren falschen",
+    "Passwörtern (Schutz gegen Ausprobieren). Kai kennt sein richtiges Passwort wieder; es fehlte nur das Aufheben",
+    "der Sperre.",
+    "",
+    "Merke den Unterschied: gesperrt (automatisch, Unlock-ADAccount) – deaktiviert (von Hand, Enable-ADAccount)."
   ],
   "begriffe": {
     "Active Directory (AD)": "Verzeichnisdienst von Windows Server: Benutzer, Gruppen und Computer einer Firma zentral verwaltet.",
     "Domänencontroller (DC)": "Server, auf dem das Active Directory läuft und der Anmeldungen prüft.",
     "Kontosperre": "Automatische Sperre nach zu vielen falschen Passwörtern; hebt sich je nach Richtlinie auch nach Zeit auf.",
-    "SamAccountName": "Der kurze Anmeldename eines Kontos, z. B. kwagner."
+    "SamAccountName": "Der kurze Anmeldename eines Kontos, z. B. kwagner.",
+    "-Properties": "Parameter von Get-ADUser: holt zusätzliche Eigenschaften, die nicht in der Grundausgabe stehen, z. B. LockedOut."
   },
   "loesung": [
     "Search-ADAccount -LockedOut",

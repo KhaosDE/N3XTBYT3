@@ -5,7 +5,10 @@
   "kategorie": "Netzwerk",
   "schwierigkeit": 1,
   "pruefstatus": "ungeprueft",
-  "quelle": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
+  "quelle": [
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ping"
+  ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-netzwerk",
   "shell": "cmd",
@@ -182,10 +185,28 @@
     "Fordere die Adresse neu an: „ipconfig /renew“ (vorher geht auch „ipconfig /release“)."
   ],
   "erklaerung": [
-    "Als der Router neu startete, war sein DHCP-Server kurz nicht erreichbar. Der PC bekam keine Adresse",
-    "und gab sich selbst eine aus dem Bereich 169.254.x.x (APIPA). Damit erreicht er niemanden im Netz.",
-    "„ipconfig /renew“ fragt den DHCP-Server erneut. Jetzt antwortet er, und der PC bekommt 192.168.1.34",
-    "mit Gateway 192.168.1.1. Merke: 169.254.x.x heißt fast immer „DHCP hat nicht geklappt“."
+    "So gehst du vor:",
+    "",
+    "1. „ipconfig“ zeigt die IP-Einstellungen aller Netzwerkadapter. Hier steht „Autoconfiguration IPv4 Address:",
+    "169.254.38.112“, die Subnetzmaske 255.255.0.0 und kein Default Gateway. Eine Adresse 169.254.x.x vergibt Windows",
+    "sich selbst, wenn kein DHCP-Server geantwortet hat – mit ihr kommt der PC nicht ins Netz 192.168.1.x.",
+    "",
+    "2. „ipconfig /release“ gibt die aktuelle Adresse ab (release = freigeben). Danach hat der Adapter keine",
+    "IPv4-Adresse mehr. Der Schritt ist nicht zwingend, sorgt aber für einen sauberen Neuanfang.",
+    "",
+    "3. „ipconfig /renew“ fragt den DHCP-Server neu nach einer Adresse (renew = erneuern). Jetzt antwortet der",
+    "Router: „IPv4 Address: 192.168.1.34“, Subnet Mask 255.255.255.0, „Default Gateway: 192.168.1.1“. Das passt zum",
+    "Netz der anderen Geräte.",
+    "",
+    "4. „ping 192.168.1.1“ prüft, ob der Router antwortet. ping schickt vier kleine Testpakete; viermal „Reply from",
+    "…“ und „Lost = 0 (0% loss)“ heißen: Die Verbindung steht.",
+    "",
+    "Warum das die Lösung ist: Als der Router neu startete, war sein DHCP-Server kurz nicht erreichbar. Der PC bekam",
+    "keine Adresse und gab sich selbst eine aus dem Bereich 169.254.x.x (APIPA). Damit erreicht er niemanden im Netz.",
+    "„ipconfig /renew“ fragt erneut; jetzt antwortet der DHCP-Server, und der PC bekommt 192.168.1.34 mit Gateway",
+    "192.168.1.1.",
+    "",
+    "Merke: 169.254.x.x heißt fast immer „DHCP hat nicht geklappt“. Erste Hilfe: „ipconfig /renew“."
   ],
   "begriffe": {
     "DHCP": "Dienst (meist im Router oder Server), der Geräten automatisch IP-Adresse, Gateway und DNS-Server gibt.",

@@ -224,10 +224,28 @@
     "„sudo ufw allow 2222/tcp“ und danach „sudo ufw delete allow 22/tcp“."
   ],
   "erklaerung": [
-    "sshd lauschte schon auf 2222 (ss -tln), aber ufw ließ nur 22/tcp und 80/tcp herein.",
-    "„sudo ufw allow 2222/tcp“ öffnet den neuen Port, „sudo ufw delete allow 22/tcp“ schließt den alten.",
-    "Reihenfolge ist wichtig, wenn man per SSH arbeitet: erst den neuen Port erlauben und testen, dann den alten schließen –",
-    "sonst sperrt man sich aus. ufw legt jede Regel für IPv4 und IPv6 an (v6)."
+    "So gehst du vor:",
+    "",
+    "1. „ss -tln“ zeigt lauschende TCP-Ports: -t = TCP, -l = nur lauschende, -n = Portnummern als Zahlen. Auf",
+    "0.0.0.0:2222 (und [::]:2222 für IPv6) wartet ein Programm – das ist der umgestellte sshd. Port 22 taucht nicht",
+    "mehr auf.",
+    "",
+    "2. „sudo ufw status“ zeigt die Firewall-Regeln: Status active, erlaubt sind nur 22/tcp und 80/tcp (je auch für",
+    "IPv6, „(v6)“). 2222 fehlt – die Firewall lässt niemanden zum neuen SSH-Port durch.",
+    "",
+    "3. „sudo ufw allow 2222/tcp“ erlaubt eingehende Verbindungen auf Port 2222, nur TCP. „Rule added“ und „Rule",
+    "added (v6)“: Die Regel gilt für IPv4 und IPv6.",
+    "",
+    "4. „sudo ufw delete allow 22/tcp“ löscht die alte Regel. Hinter delete steht genau die Regel, wie sie angelegt",
+    "wurde.",
+    "",
+    "5. „sudo ufw status“ prüft: 2222/tcp ALLOW, 22/tcp ist weg.",
+    "",
+    "Warum das die Lösung ist: sshd lauschte schon auf 2222, aber ufw ließ nur 22/tcp und 80/tcp herein. Jetzt passen",
+    "Dienst und Firewall wieder zusammen.",
+    "",
+    "Merke: Arbeitest du per SSH, ist die Reihenfolge wichtig: erst den neuen Port erlauben und testen, dann den",
+    "alten schließen – sonst sperrst du dich aus."
   ],
   "begriffe": {
     "ufw": "Uncomplicated Firewall: einfache Firewall-Verwaltung unter Ubuntu.",

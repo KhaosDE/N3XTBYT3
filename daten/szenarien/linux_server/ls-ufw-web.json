@@ -175,7 +175,8 @@
             "HTTP/1.1 200 OK",
             "Server: nginx/1.24.0 (Ubuntu)",
             "Content-Type: text/html"
-          ]
+          ],
+          "notiz": "Gekürzt: Im echten System stehen weitere Kopfzeilen, z. B. Date, Content-Length und Last-Modified."
         }
       ]
     },
@@ -208,10 +209,25 @@
     "„sudo ufw allow \"Nginx Full\"“ (HTTP und HTTPS)."
   ],
   "erklaerung": [
-    "ufw blockiert eingehende Verbindungen, die nicht erlaubt sind. Erlaubt war nur OpenSSH (Port 22).",
-    "Pakete bringen oft ufw-Anwendungsprofile mit: „Nginx Full“ öffnet 80 und 443, „Nginx HTTP“ nur 80.",
-    "„sudo ufw allow \"Nginx Full\"“ gibt den Webserver frei. Anführungszeichen, weil der Name ein Leerzeichen hat.",
-    "Lokal (localhost) greift die Firewall nicht – darum ging curl auf dem Server immer."
+    "So gehst du vor:",
+    "",
+    "1. „sudo ufw status“ zeigt die Firewall-Regeln: Status active, erlaubt ist nur OpenSSH (für IPv4 und IPv6). HTTP",
+    "und HTTPS fehlen.",
+    "",
+    "2. „sudo ufw app list“ zeigt die Anwendungsprofile, die installierte Pakete mitbringen: Nginx Full (Ports 80 und",
+    "443), Nginx HTTP (nur 80), Nginx HTTPS (nur 443), OpenSSH.",
+    "",
+    "3. „sudo ufw allow \"Nginx Full\"“ erlaubt das Profil – also 80 und 443. Anführungszeichen, weil der Name ein",
+    "Leerzeichen hat; ohne sie gäbe die Shell „Nginx“ und „Full“ als zwei getrennte Wörter weiter, und ufw verstünde",
+    "den Befehl nicht.",
+    "",
+    "4. „sudo ufw status“ prüft: „Nginx Full ALLOW Anywhere“.",
+    "",
+    "Warum das die Lösung ist: ufw blockiert eingehende Verbindungen, die nicht erlaubt sind. Erlaubt war nur OpenSSH",
+    "(Port 22). Lokal (localhost) greift die Firewall nicht – darum ging curl auf dem Server immer, von den",
+    "Arbeitsplätzen aber nicht.",
+    "",
+    "Merke: Profile sind lesbarer als Portnummern: „Nginx Full“ sagt sofort, wofür die Regel da ist."
   ],
   "begriffe": {
     "Anwendungsprofil": "Vordefinierte ufw-Regel für ein Programm, z. B. Nginx Full = Ports 80 und 443.",

@@ -204,9 +204,24 @@
     "„sudo mkdir /mnt/usb“, dann „sudo mount /dev/sdb1 /mnt/usb“, dann „ls /mnt/usb“."
   ],
   "erklaerung": [
-    "Linux kennt keine Laufwerksbuchstaben: Datenträger werden in Ordner eingehängt (mount). „lsblk“ zeigte den Stick",
-    "als sdb mit der Partition sdb1 ohne MOUNTPOINTS. Der Einhängeordner muss existieren – darum erst „sudo mkdir /mnt/usb“.",
-    "„sudo mount /dev/sdb1 /mnt/usb“ hängt ein; danach liegen die Dateien unter /mnt/usb. Vor dem Abziehen: „sudo umount /mnt/usb“."
+    "So gehst du vor:",
+    "",
+    "1. „lsblk“ listet alle Datenträger (block devices) als Baum. sdb mit RM 1 (removable = wechselbar) und 28.9G ist",
+    "der Stick, darunter seine Partition sdb1 – ohne Eintrag in MOUNTPOINTS, also nicht eingehängt. nvme0n1 ist die",
+    "eingebaute SSD.",
+    "",
+    "2. „sudo mkdir /mnt/usb“ legt den Ordner an, in dem der Stick erscheinen soll (Einhängepunkt). mkdir erstellt",
+    "einen Ordner; unter /mnt darf nur root schreiben, darum sudo.",
+    "",
+    "3. „sudo mount /dev/sdb1 /mnt/usb“ hängt die Partition ein: erst das Gerät, dann der Ordner. Keine Ausgabe",
+    "heißt: geklappt.",
+    "",
+    "4. „ls /mnt/usb“ zeigt die Dateien des Sticks: zwei Inventurlisten und lagerplaetze.ods.",
+    "",
+    "Warum das die Lösung ist: Linux kennt keine Laufwerksbuchstaben: Datenträger werden in Ordner eingehängt",
+    "(mount). Ohne Desktop macht das niemand automatisch – also von Hand.",
+    "",
+    "Merke: Vor dem Abziehen aushängen: „sudo umount /mnt/usb“."
   ],
   "begriffe": {
     "mount / umount": "Datenträger in einen Ordner einhängen / wieder aushängen.",

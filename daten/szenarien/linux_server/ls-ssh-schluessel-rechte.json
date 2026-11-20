@@ -8,7 +8,9 @@
   "quelle": [
     "https://manpages.ubuntu.com/manpages/noble/man8/sshd.8.html",
     "https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html",
-    "https://man7.org/linux/man-pages/man1/chmod.1.html"
+    "https://man7.org/linux/man-pages/man1/chmod.1.html",
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html",
+    "https://man7.org/linux/man-pages/man1/ls.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-ssh",
@@ -78,10 +80,30 @@
     "„sudo chmod 700 /home/deploy/.ssh“ und „sudo chmod 600 /home/deploy/.ssh/authorized_keys“."
   ],
   "erklaerung": [
-    "sshd prüft mit StrictModes: Home-Ordner, .ssh und authorized_keys dürfen nicht für Gruppe oder andere",
-    "beschreibbar sein – sonst könnte jemand einen fremden Schlüssel einschmuggeln. Mit 777/666 lehnte sshd ab",
-    "(„bad ownership or modes for directory /home/deploy/.ssh“). Üblich ist 700 für .ssh und 600 für",
-    "authorized_keys. Danach klappt die Anmeldung per Schlüssel wieder."
+    "So gehst du vor:",
+    "",
+    "1. „journalctl -u ssh“ zeigt die Meldungen des SSH-Dienstes (-u = unit, nur dieser Dienst). „Authentication",
+    "refused: bad ownership or modes for directory /home/deploy/.ssh“ – sshd lehnt den Schlüssel ab, weil Besitzer",
+    "oder Rechte (modes) des Ordners .ssh nicht passen.",
+    "",
+    "2. „sudo ls -la /home/deploy/.ssh“ zeigt den Ordner ausführlich. -l = lange Form mit Rechten und Besitzer, -a =",
+    "auch versteckte Einträge (beginnen mit einem Punkt), dazu „.“ (der Ordner selbst) und „..“ (der Ordner darüber).",
+    "Ohne -a fehlte die Zeile „.“ mit den Rechten von .ssh. sudo, weil du in fremde Home-Ordner sonst nicht",
+    "hineinschauen darfst. Ergebnis: „.“ hat drwxrwxrwx (777 – jeder darf schreiben), authorized_keys hat -rw-rw-rw-",
+    "(666).",
+    "",
+    "3. „sudo chmod 700 /home/deploy/.ssh“ setzt den Ordner auf rwx------: Nur der Besitzer deploy darf lesen,",
+    "schreiben, öffnen. In Zahlen: r = 4, w = 2, x = 1; die erste Ziffer gilt für den Besitzer (7 = 4+2+1), die",
+    "zweite für die Gruppe, die dritte für alle anderen (je 0 = nichts).",
+    "",
+    "4. „sudo chmod 600 /home/deploy/.ssh/authorized_keys“ setzt die Datei auf rw-------: 6 = 4+2 (lesen und",
+    "schreiben) für den Besitzer, sonst nichts.",
+    "",
+    "Warum das die Lösung ist: sshd prüft mit StrictModes: Home-Ordner, .ssh und authorized_keys dürfen nicht für",
+    "Gruppe oder andere beschreibbar sein – sonst könnte jemand einen fremden Schlüssel einschmuggeln. Mit 700 und",
+    "600 klappt die Anmeldung per Schlüssel wieder.",
+    "",
+    "Merke: Üblich sind 700 für .ssh und 600 für authorized_keys."
   ],
   "begriffe": {
     "authorized_keys": "Liste der öffentlichen Schlüssel, mit denen man sich als dieser Benutzer anmelden darf.",

@@ -8,7 +8,8 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man1/ps.1.html",
     "https://man7.org/linux/man-pages/man1/kill.1.html",
-    "https://man7.org/linux/man-pages/man1/uptime.1.html"
+    "https://man7.org/linux/man-pages/man1/uptime.1.html",
+    "https://man7.org/linux/man-pages/man1/head.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-prozesse",
@@ -189,15 +190,35 @@
     "„sudo kill 3312“."
   ],
   "erklaerung": [
-    "Der Import (PID 3312, Benutzer www-data) lief seit 3 Uhr mit 99,8 % CPU – load average um 2 bei wenigen Kernen.",
-    "„ps aux --sort=-%cpu | head“ sortiert absteigend nach CPU. Weil der Prozess einem anderen Benutzer gehört,",
-    "braucht kill Root-Rechte. Erst TERM (kill 3312) – reagiert er nicht, KILL (kill -9 3312).",
-    "Danach sinkt die Last. Die Ursache (warum der Import hing) gehört an den Hersteller."
+    "So gehst du vor:",
+    "",
+    "1. „uptime“ zeigt in einer Zeile: die Uhrzeit (09:15:02), wie lange der Server schon läuft (up 1 day, 6:12), wie",
+    "viele Benutzer angemeldet sind, und die load average über 1, 5 und 15 Minuten: 1.98, 2.01, 2.00. Die Last ist",
+    "also seit mindestens einer Viertelstunde gleichbleibend hoch.",
+    "",
+    "2. „ps aux --sort=-%cpu | head -5“ zeigt die Prozesse mit der meisten Rechenzeit. ps aux listet alle Prozesse (a",
+    "= Prozesse aller Benutzer, u = ausführliche Spalten, x = auch ohne Terminal); --sort=-%cpu sortiert nach",
+    "CPU-Anteil, das Minus heißt absteigend (größter oben). Die Pipe | gibt die Liste an head weiter; head -5 zeigt",
+    "nur die ersten 5 Zeilen (Kopfzeile plus 4 Prozesse). Oben steht PID 3312, Benutzer www-data, 99.8 %CPU,",
+    "gestartet 03:00, Befehl php …/import.php --full – der hängende Import.",
+    "",
+    "3. „sudo kill 3312“ schickt dem Prozess das Signal TERM („bitte beenden“). sudo ist nötig, weil der Prozess dem",
+    "Benutzer www-data gehört und nicht dir.",
+    "",
+    "4. „uptime“ prüft: Die 1-Minuten-Last ist auf 0.31 gefallen; die Werte für 5 und 15 Minuten sinken langsam nach.",
+    "",
+    "Warum das die Lösung ist: Der Import lief seit 3 Uhr mit fast 100 % CPU, statt nach 10 Minuten fertig zu sein.",
+    "Der Hersteller erlaubt das Abbrechen; nach dem Beenden ist die Rechenzeit wieder frei.",
+    "",
+    "Merke: Erst TERM (kill PID) – reagiert der Prozess nicht, KILL (kill -9 PID). Die Ursache (warum der Import",
+    "hing) gehört an den Hersteller."
   ],
   "begriffe": {
     "load average": "Durchschnittliche Anzahl wartender/laufender Prozesse über 1, 5 und 15 Minuten.",
     "--sort=-%cpu": "ps-Ausgabe absteigend nach CPU-Anteil sortieren.",
-    "www-data": "Benutzer, unter dem Webserver und PHP auf Ubuntu laufen."
+    "www-data": "Benutzer, unter dem Webserver und PHP auf Ubuntu laufen.",
+    "uptime": "Zeigt Uhrzeit, Laufzeit seit dem Start, angemeldete Benutzer und die load average.",
+    "head": "Zeigt die ersten Zeilen einer Ausgabe, z. B. head -5 = die ersten 5."
   },
   "loesung": [
     "uptime",

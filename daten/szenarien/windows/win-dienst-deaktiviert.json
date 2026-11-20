@@ -9,7 +9,9 @@
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/set-service",
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/start-service",
     "https://learn.microsoft.com/windows-server/administration/windows-commands/sc-config",
-    "https://learn.microsoft.com/windows/win32/debug/system-error-codes--1000-1299-"
+    "https://learn.microsoft.com/windows/win32/debug/system-error-codes--1000-1299-",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/get-service",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/select-object"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-dienste",
@@ -276,10 +278,30 @@
     "Erst „Set-Service -Name Audiosrv -StartupType Automatic“, dann „Start-Service Audiosrv“."
   ],
   "erklaerung": [
-    "Das Tuning-Programm hat den Dienst „Windows Audio“ auf den Starttyp „Disabled“ (deaktiviert) gesetzt.",
-    "Ein deaktivierter Dienst lässt sich nicht starten – darum der Fehler bei Start-Service bzw. Systemfehler 1058 bei net start.",
-    "Lösung in zwei Schritten: Starttyp zurück auf „Automatic“ (startet mit Windows), dann den Dienst jetzt starten.",
-    "In cmd geht der erste Schritt mit „sc config audiosrv start= auto“ – mit Leerzeichen nach dem „=“."
+    "So gehst du vor:",
+    "",
+    "1. „Get-Service Audiosrv | Select-Object Name, Status, StartType“ zeigt den Dienst mit drei Spalten. Get-Service",
+    "holt den Dienst; das Zeichen | (Pipe) reicht das Ergebnis an Select-Object weiter, das nur die genannten Spalten",
+    "auswählt. Das ist nötig, weil Get-Service den Starttyp sonst nicht anzeigt. Ergebnis: Status „Stopped“,",
+    "StartType „Disabled“ – der Dienst ist aus und darf auch nicht starten.",
+    "",
+    "2. „Start-Service Audiosrv“ versucht, den Dienst zu starten. Das scheitert mit „cannot be started“, weil sich",
+    "ein deaktivierter Dienst nicht starten lässt. Der Fehlversuch bestätigt die Ursache.",
+    "",
+    "3. „Set-Service -Name Audiosrv -StartupType Automatic“ ändert den Starttyp. Set-Service ändert Einstellungen",
+    "eines Dienstes; -Name sagt, welcher Dienst gemeint ist; -StartupType legt fest, wann er startet: Automatic = mit",
+    "Windows, Manual = bei Bedarf, Disabled = nie. Der Befehl startet den Dienst aber noch nicht – keine Ausgabe",
+    "heißt: geklappt.",
+    "",
+    "4. „Start-Service Audiosrv“ startet den Dienst jetzt. Diesmal klappt es, weil er nicht mehr deaktiviert ist.",
+    "",
+    "Warum das die Lösung ist: Das Tuning-Programm hat den Dienst „Windows Audio“ auf den Starttyp „Disabled“",
+    "gesetzt. Darum der Fehler bei Start-Service (bzw. Systemfehler 1058 bei net start). Lösung in zwei Schritten:",
+    "Starttyp zurück auf „Automatic“ – dann startet er auch nach dem nächsten Neustart –, danach den Dienst jetzt",
+    "starten.",
+    "",
+    "Merke: Status (läuft jetzt?) und Starttyp (startet mit Windows?) sind zwei verschiedene Dinge. In cmd geht der",
+    "erste Schritt mit „sc config audiosrv start= auto“ – mit Leerzeichen nach dem „=“."
   ],
   "begriffe": {
     "Starttyp": "Legt fest, wann ein Dienst startet: Automatic (mit Windows), Manual (bei Bedarf), Disabled (nie).",

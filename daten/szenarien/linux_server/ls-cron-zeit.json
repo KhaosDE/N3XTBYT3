@@ -62,10 +62,23 @@
     "„crontab -e“, die Zeile zu „30 2 * * * /opt/backup/backup.sh“ ändern, Strg+O, Strg+X."
   ],
   "erklaerung": [
-    "Die Zeile „30 2 * * 0 …“ heißt: Minute 30, Stunde 2, jeder Tag im Monat, jeder Monat, Wochentag 0 = Sonntag.",
-    "Mit * im letzten Feld läuft das Backup jeden Tag um 02:30. „crontab -e“ öffnet die eigene crontab im Editor",
-    "und prüft sie beim Speichern; „crontab -l“ zeigt sie an. Die Datei liegt unter /var/spool/cron/crontabs/,",
-    "man bearbeitet sie aber nur mit crontab -e."
+    "So gehst du vor:",
+    "",
+    "1. „crontab -l“ zeigt die crontab des angemeldeten Benutzers (-l = list). Die Zeile „30 2 * * 0",
+    "/opt/backup/backup.sh“ hat fünf Zeitfelder vor dem Befehl; die Kopfzeile „# m h dom mon dow command“ benennt",
+    "sie: Minute 30, Stunde 2, Tag im Monat *, Monat *, Wochentag 0. Wochentag 0 ist Sonntag – darum läuft das Backup",
+    "nur sonntags.",
+    "",
+    "2. „crontab -e“ öffnet die eigene crontab im Editor (-e = edit; unter Ubuntu meist nano). Ändere die 0 im",
+    "letzten Zeitfeld in *: „30 2 * * * /opt/backup/backup.sh“. Speichern mit Strg+O und Enter, beenden mit Strg+X.",
+    "Beim Beenden prüft crontab die Datei und übernimmt sie.",
+    "",
+    "3. „crontab -l“ prüft: 30 2 * * * – täglich um 02:30 Uhr.",
+    "",
+    "Warum das die Lösung ist: * heißt in einem Zeitfeld „jeder Wert“. Mit * im Wochentag-Feld läuft das Backup an",
+    "jedem Tag um 02:30.",
+    "",
+    "Merke: Die Datei liegt unter /var/spool/cron/crontabs/, man bearbeitet sie aber nur mit „crontab -e“."
   ],
   "begriffe": {
     "cron": "Dienst, der Aufgaben zu festen Zeiten startet.",

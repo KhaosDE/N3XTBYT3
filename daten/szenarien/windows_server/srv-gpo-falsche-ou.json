@@ -9,7 +9,8 @@
     "https://learn.microsoft.com/powershell/module/grouppolicy/get-gpinheritance",
     "https://learn.microsoft.com/powershell/module/activedirectory/move-adobject",
     "https://learn.microsoft.com/windows-server/administration/windows-commands/gpupdate",
-    "https://learn.microsoft.com/troubleshoot/windows-server/group-policy/applying-group-policy-troubleshooting-guidance"
+    "https://learn.microsoft.com/troubleshoot/windows-server/group-policy/applying-group-policy-troubleshooting-guidance",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-srv-ad-benutzer",
@@ -178,10 +179,28 @@
     "„Move-ADObject -Identity \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath \"OU=Vertrieb,DC=firma,DC=internal\"“."
   ],
   "erklaerung": [
-    "Jonas’ Konto lag im Standard-Container „CN=Users“ statt in der OU „Vertrieb“. Neue Konten landen dort,",
-    "wenn man beim Anlegen keine OU angibt. „Users“ ist keine OU – Gruppenrichtlinien lassen sich damit nicht verknüpfen.",
-    "Nach dem Verschieben mit „Move-ADObject“ gilt die Richtlinie „Vertrieb-Laufwerke“ auch für Jonas.",
-    "Am PC muss er sich neu anmelden (oder „gpupdate /force“ und neu anmelden), damit das Laufwerk V: kommt."
+    "So gehst du vor:",
+    "",
+    "1. „Get-ADUser jklein“ zeigt das Konto. Wichtig ist der DistinguishedName: CN=Jonas",
+    "Klein,CN=Users,DC=firma,DC=internal. Von links gelesen: Objekt „Jonas Klein“, liegt im Container „Users“ der",
+    "Domäne firma.internal – nicht in der OU Vertrieb.",
+    "",
+    "2. „Get-GPInheritance -Target \"OU=Vertrieb,DC=firma,DC=internal\"“ zeigt, welche Gruppenrichtlinien für eine OU",
+    "gelten. -Target nennt die OU über ihren DistinguishedName (in Anführungszeichen, weil Kommas darin stehen).",
+    "GpoLinks {Vertrieb-Laufwerke} = direkt mit dieser OU verknüpft; InheritedGpoLinks = alle, die dort wirken, auch",
+    "die von oben geerbten. Die Richtlinie ist also richtig verknüpft – nur Jonas liegt nicht in dieser OU.",
+    "",
+    "3. „Move-ADObject -Identity \"CN=Jonas Klein,CN=Users,DC=firma,DC=internal\" -TargetPath",
+    "\"OU=Vertrieb,DC=firma,DC=internal\"“ verschiebt das Konto. -Identity = das Objekt, das verschoben wird (hier über",
+    "seinen DistinguishedName); -TargetPath = der Zielort (die OU). Danach heißt der DistinguishedName CN=Jonas",
+    "Klein,OU=Vertrieb,DC=firma,DC=internal.",
+    "",
+    "Warum das die Lösung ist: Jonas’ Konto lag im Standard-Container „CN=Users“ statt in der OU „Vertrieb“. Neue",
+    "Konten landen dort, wenn man beim Anlegen keine OU angibt. „Users“ ist keine OU – Gruppenrichtlinien lassen sich",
+    "damit nicht verknüpfen. Nach dem Verschieben gilt „Vertrieb-Laufwerke“ auch für Jonas.",
+    "",
+    "Merke: Am PC muss Jonas sich neu anmelden (oder „gpupdate /force“ und neu anmelden), damit das Laufwerk V:",
+    "kommt."
   ],
   "begriffe": {
     "Gruppenrichtlinie (GPO)": "Sammlung von Einstellungen, die das AD automatisch auf Benutzer oder Computer anwendet.",

@@ -162,11 +162,27 @@
     "„Start-Process powershell -Verb RunAs“ und dann im neuen Fenster „sfc /scannow“."
   ],
   "erklaerung": [
-    "„sfc /scannow“ prüft alle geschützten Windows-Systemdateien und ersetzt beschädigte durch saubere Kopien.",
-    "Dafür braucht es Administratorrechte. Auch wer Administrator ist, arbeitet wegen der Benutzerkontensteuerung (UAC)",
-    "normalerweise ohne diese Rechte – erst „Als Administrator ausführen“ (in PowerShell: Start-Process … -Verb RunAs)",
-    "schaltet sie für das neue Fenster frei. Am Fenstertitel „Administrator: …“ erkennst du das.",
-    "Findet sfc Fehler, die es nicht reparieren kann, hilft vorher „DISM /Online /Cleanup-Image /RestoreHealth“."
+    "So gehst du vor:",
+    "",
+    "1. „sfc /scannow“ startet die Systemdateiprüfung. sfc heißt System File Checker; /scannow heißt „jetzt alle",
+    "geschützten Systemdateien prüfen und beschädigte reparieren“. In diesem Fenster kommt aber: „You must be an",
+    "administrator running a console session in order to use the sfc utility.“ – es fehlen die Administratorrechte.",
+    "",
+    "2. „Start-Process powershell -Verb RunAs“ öffnet ein neues PowerShell-Fenster mit Administratorrechten.",
+    "Start-Process startet ein Programm (hier powershell); -Verb RunAs heißt „als Administrator ausführen“. Ohne",
+    "-Verb RunAs ginge nur ein weiteres normales Fenster auf. Die Benutzerkontensteuerung fragt nach, Herr Neumann",
+    "bestätigt; das neue Fenster heißt „Administrator: Windows PowerShell“.",
+    "",
+    "3. „sfc /scannow“ im neuen Fenster: Jetzt läuft die Prüfung. „Windows Resource Protection found corrupt files",
+    "and successfully repaired them.“ heißt: Es gab beschädigte Dateien, und sfc hat sie durch saubere Kopien",
+    "ersetzt. Einzelheiten stehen in C:\\Windows\\Logs\\CBS\\CBS.log.",
+    "",
+    "Warum das die Lösung ist: sfc braucht Administratorrechte. Auch wer Administrator ist, arbeitet wegen der",
+    "Benutzerkontensteuerung (UAC) normalerweise ohne diese Rechte – erst „Als Administrator ausführen“ schaltet sie",
+    "für das neue Fenster frei. Am Fenstertitel „Administrator: …“ erkennst du das.",
+    "",
+    "Merke: Findet sfc Fehler, die es nicht reparieren kann, hilft vorher „DISM /Online /Cleanup-Image",
+    "/RestoreHealth“."
   ],
   "begriffe": {
     "sfc": "System File Checker: prüft und repariert geschützte Windows-Systemdateien.",

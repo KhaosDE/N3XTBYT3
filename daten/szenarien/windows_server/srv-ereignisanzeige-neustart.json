@@ -7,7 +7,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.diagnostics/get-winevent",
-    "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
+    "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/format-list"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-srv-ereignisse",
@@ -138,10 +139,26 @@
     "„Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List“."
   ],
   "erklaerung": [
-    "Ereignis 1074 (Quelle User32) protokolliert jeden geplanten Neustart: welches Programm, für welchen Benutzer, welcher Grund.",
-    "Hier hat FIRMA\\azubi01 mit shutdown.exe neu gestartet – kein Absturz. Die Ereignisse 6006 (Ereignisprotokoll beendet)",
-    "und 6005 (gestartet) zeigen ein sauberes Herunterfahren. Bei einem Absturz oder Stromausfall gäbe es stattdessen",
-    "6008 (unerwartetes Herunterfahren) und 41 (Kernel-Power). Die Tabelle schneidet lange Meldungen ab – „| Format-List“ zeigt alles."
+    "So gehst du vor:",
+    "",
+    "1. „Get-WinEvent -LogName System -MaxEvents 5“ zeigt die neuesten Einträge des Systemprotokolls. -LogName wählt",
+    "das Protokoll (System, Application, Security …); -MaxEvents 5 begrenzt auf 5 Einträge, die neuesten zuerst. Ohne",
+    "-MaxEvents kämen Tausende. Du siehst 6005 und 6006 (Ereignisprotokoll gestartet bzw. beendet) und 1074 um",
+    "10:42:17 PM – aber die Meldung ist abgeschnitten („…“).",
+    "",
+    "2. „Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List“ holt genau diesen",
+    "Eintrag ganz. -FilterHashtable übergibt einen Filter in der Form @{…}: Protokoll System und Ereignis-ID 1074.",
+    "-MaxEvents 1 nimmt nur den neuesten Treffer. Die Pipe | reicht ihn an Format-List weiter, das jede Eigenschaft",
+    "in einer eigenen Zeile zeigt – nichts wird abgeschnitten. In der Message steht: shutdown.exe hat den Neustart",
+    "„on behalf of user FIRMA\\azubi01“ ausgelöst, Shutdown Type: restart.",
+    "",
+    "Warum das die Lösung ist: Ereignis 1074 (Quelle User32) protokolliert jeden geplanten Neustart: welches",
+    "Programm, für welchen Benutzer, welcher Grund. Hier hat FIRMA\\azubi01 mit shutdown.exe neu gestartet – kein",
+    "Absturz. Die Ereignisse 6006 (Ereignisprotokoll beendet) und 6005 (gestartet) zeigen ein sauberes",
+    "Herunterfahren.",
+    "",
+    "Merke: Bei einem Absturz oder Stromausfall gäbe es stattdessen 6008 (unerwartetes Herunterfahren) und 41",
+    "(Kernel-Power). Tabellen schneiden lange Meldungen ab – „| Format-List“ zeigt alles."
   ],
   "begriffe": {
     "Ereignisanzeige": "Windows-Protokolle (System, Anwendung, Sicherheit). In PowerShell: Get-WinEvent.",

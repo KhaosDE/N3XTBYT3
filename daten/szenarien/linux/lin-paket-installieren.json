@@ -133,10 +133,23 @@
     "„sudo apt update“ und dann „sudo apt install htop“."
   ],
   "erklaerung": [
-    "Ubuntu installiert Software als Pakete aus geprüften Paketquellen. „sudo apt update“ lädt die aktuellen",
-    "Paketlisten, „sudo apt install htop“ installiert das Paket samt Abhängigkeiten. Ohne sudo meldet apt,",
-    "dass es die Sperrdatei von dpkg nicht öffnen kann („are you root?“). Auf dem Desktop geht dasselbe",
-    "auch über das App-Zentrum – im Terminal sieht man aber, was genau passiert."
+    "So gehst du vor:",
+    "",
+    "1. „htop“ meldet „Command 'htop' not found, but can be installed with: sudo apt install htop“ – das Programm ist",
+    "nicht installiert; Ubuntu sagt sogar, wie es geht.",
+    "",
+    "2. „sudo apt update“ lädt die aktuellen Paketlisten aus den Paketquellen (Zeilen Hit/Get). Danach weiß apt,",
+    "welche Pakete es in welcher Version gibt. update installiert selbst noch nichts.",
+    "",
+    "3. „sudo apt install htop“ installiert das Paket samt allem, was es braucht (Abhängigkeiten). „The following NEW",
+    "packages will be installed: htop“ und „Setting up htop“ zeigen, dass es geklappt hat. Danach startet „htop“.",
+    "",
+    "Warum das die Lösung ist: Ubuntu installiert Software als Pakete aus geprüften Paketquellen. apt ist die",
+    "Paketverwaltung dafür; installieren darf nur root, darum sudo. Ohne sudo meldet apt, dass es die Sperrdatei von",
+    "dpkg nicht öffnen kann („are you root?“).",
+    "",
+    "Merke: Erst „apt update“ (Listen holen), dann „apt install“. Auf dem Desktop geht dasselbe über das App-Zentrum",
+    "– im Terminal siehst du aber, was genau passiert."
   ],
   "begriffe": {
     "Paket": "Ein Programm samt Dateien und Angaben zu Abhängigkeiten, z. B. htop.",

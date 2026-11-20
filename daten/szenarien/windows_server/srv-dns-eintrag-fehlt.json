@@ -149,16 +149,37 @@
     "„Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42“."
   ],
   "erklaerung": [
-    "Geräte mit DHCP tragen sich meist selbst im DNS ein. Geräte mit fester IP-Adresse (Drucker, Server) nicht –",
-    "für sie legt man den Eintrag von Hand an. Ein A-Eintrag verbindet einen Namen mit einer IPv4-Adresse.",
-    "Mit -CreatePtr entsteht zusätzlich der Rückwärts-Eintrag (Adresse → Name), falls eine Reverse-Zone existiert.",
-    "„DNS name does not exist“ heißt: Der DNS-Server kennt den Namen nicht – nicht, dass das Gerät aus ist."
+    "So gehst du vor:",
+    "",
+    "1. „Resolve-DnsName drucker02.firma.internal“ fragt DNS nach dem Namen – das PowerShell-Gegenstück zu nslookup.",
+    "„DNS name does not exist“ heißt: Der DNS-Server kennt den Namen nicht. Es heißt nicht, dass der Drucker aus ist.",
+    "",
+    "2. „Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A“ zeigt Einträge auf dem DNS-Server. -ZoneName",
+    "wählt die Zone (firma.internal); -RRType den Eintragstyp (RR = Resource Record, also DNS-Eintrag), hier A = Name",
+    "→ IPv4-Adresse. Ohne -RRType kämen alle Eintragstypen. In der Spalte HostName fehlt drucker02; „@“ steht für die",
+    "Zone selbst, RecordData ist die Adresse.",
+    "",
+    "3. „Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42“ legt den",
+    "A-Eintrag an. -ZoneName = in welcher Zone; -Name = der Hostname ohne Zone (aus drucker02 und firma.internal wird",
+    "drucker02.firma.internal); -IPv4Address = die Adresse des Druckers.",
+    "",
+    "4. „Resolve-DnsName drucker02.firma.internal“ prüft: Type A, IPAddress 192.168.10.42. TTL 3600 heißt: Andere",
+    "Rechner dürfen sich die Antwort 3600 Sekunden (eine Stunde) merken.",
+    "",
+    "Warum das die Lösung ist: Geräte mit DHCP tragen sich meist selbst im DNS ein. Geräte mit fester IP-Adresse",
+    "(Drucker, Server) nicht – für sie legt man den Eintrag von Hand an. Ein A-Eintrag verbindet einen Namen mit",
+    "einer IPv4-Adresse.",
+    "",
+    "Merke: Mit -CreatePtr entsteht zusätzlich der Rückwärts-Eintrag (Adresse → Name), falls eine Reverse-Zone",
+    "existiert."
   ],
   "begriffe": {
     "A-Eintrag": "DNS-Eintrag, der einem Namen eine IPv4-Adresse zuordnet.",
     "Zone": "Bereich im DNS, für den ein Server zuständig ist, z. B. firma.internal.",
     "PTR-Eintrag": "Rückwärts-Eintrag: zu einer IP-Adresse den Namen finden.",
-    "Feste IP-Adresse": "Von Hand eingestellt statt per DHCP – das Gerät meldet sich dann nicht selbst im DNS an."
+    "Feste IP-Adresse": "Von Hand eingestellt statt per DHCP – das Gerät meldet sich dann nicht selbst im DNS an.",
+    "Resolve-DnsName": "PowerShell-Befehl, der einen Namen per DNS auflöst (ähnlich nslookup).",
+    "Resource Record (RR)": "Ein einzelner DNS-Eintrag, z. B. vom Typ A, PTR oder CNAME."
   },
   "loesung": [
     "Resolve-DnsName drucker02.firma.internal",

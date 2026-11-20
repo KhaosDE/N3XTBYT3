@@ -172,10 +172,22 @@
     "„sudo ip link set enp0s31f6 up“."
   ],
   "erklaerung": [
-    "Die Schnittstelle enp0s31f6 war administrativ ausgeschaltet: In <BROADCAST,MULTICAST> fehlte UP, state DOWN.",
-    "„sudo ip link set enp0s31f6 up“ schaltet sie ein. Danach holt sich der NetworkManager per DHCP die Adresse",
-    "192.168.10.57/24 (inet-Zeile). LOWER_UP heißt: Kabelverbindung steht. Ohne sudo: „Operation not permitted“.",
-    "„Network is unreachable“ bei ping heißt: Es gibt gar keinen Weg ins Netz – hier, weil die Karte aus war."
+    "So gehst du vor:",
+    "",
+    "1. „ip a“ (kurz für ip address) zeigt alle Netzwerkschnittstellen mit ihren Adressen. lo ist die interne",
+    "Schleife (127.0.0.1). Bei enp0s31f6 steht in den spitzen Klammern nur <BROADCAST,MULTICAST> – UP fehlt –, dazu",
+    "„state DOWN“ und keine Zeile mit inet: Die Karte ist ausgeschaltet und hat keine IPv4-Adresse.",
+    "",
+    "2. „sudo ip link set enp0s31f6 up“ schaltet die Schnittstelle ein. ip link verwaltet Schnittstellen; „set … up“",
+    "schaltet sie an („down“ hieße aus). Das braucht Root-Rechte – ohne sudo kommt „Operation not permitted“.",
+    "",
+    "3. „ip a“ prüft: <BROADCAST,MULTICAST,UP,LOWER_UP>, state UP und die Zeile „inet 192.168.10.57/24“. Die Karte",
+    "ist an, das Kabel verbunden (LOWER_UP), und per DHCP kam eine Adresse.",
+    "",
+    "Warum das die Lösung ist: Die Schnittstelle war von Hand ausgeschaltet. Ohne UP schickt Linux nichts über die",
+    "Karte – egal, ob das Kabel steckt. Nach dem Einschalten holt sich der NetworkManager per DHCP die Adresse.",
+    "",
+    "Merke: „Network is unreachable“ bei ping heißt: Es gibt gar keinen Weg ins Netz – hier, weil die Karte aus war."
   ],
   "begriffe": {
     "enp0s31f6": "Name der Ethernet-Schnittstelle (vorhersagbare Namen nach Steckplatz).",

@@ -8,7 +8,8 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man1/ps.1.html",
     "https://man7.org/linux/man-pages/man1/kill.1.html",
-    "https://man7.org/linux/man-pages/man7/signal.7.html"
+    "https://man7.org/linux/man-pages/man7/signal.7.html",
+    "https://man7.org/linux/man-pages/man1/grep.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-prozesse",
@@ -168,10 +169,27 @@
     "„kill 4711“ – wenn er weiterläuft: „kill -9 4711“."
   ],
   "erklaerung": [
-    "LibreOffice läuft als Prozess soffice.bin mit PID 4711 und belegte 99,6 % CPU.",
-    "„kill 4711“ schickt das Signal TERM: „Bitte beende dich“. Ein hängendes Programm reagiert darauf oft nicht.",
-    "„kill -9 4711“ schickt KILL: Der Kernel beendet den Prozess sofort, ungespeicherte Daten sind weg.",
-    "Erst TERM versuchen, dann KILL. Mit „ps aux | grep soffice“ findet man den Prozess schneller."
+    "So gehst du vor:",
+    "",
+    "1. „ps aux | grep soffice“ sucht den LibreOffice-Prozess. ps aux listet alle Prozesse (a = Prozesse aller",
+    "Benutzer, u = ausführliche Spalten mit Benutzer, %CPU und %MEM, x = auch Prozesse ohne Terminal). Die Pipe |",
+    "gibt die Liste an grep weiter, das nur Zeilen mit „soffice“ durchlässt. Zweite Spalte = PID 4711, dritte = %CPU",
+    "99.6. Im echten System erscheint oft noch eine Zeile für den grep-Befehl selbst – die kannst du übergehen.",
+    "",
+    "2. „kill 4711“ schickt dem Prozess das Signal TERM: „Bitte beende dich“. kill braucht die PID; ohne weitere",
+    "Angabe ist TERM das Standardsignal. Ein Programm, das noch reagiert, kann dabei aufräumen und speichern. Keine",
+    "Ausgabe heißt nur: Das Signal ist verschickt.",
+    "",
+    "3. „ps aux | grep soffice“ noch einmal: Der Prozess 4711 ist immer noch da – ein hängendes Programm reagiert",
+    "nicht auf die Bitte.",
+    "",
+    "4. „kill -9 4711“ schickt das Signal 9 (KILL): Der Kernel beendet den Prozess sofort. Das Programm kann nichts",
+    "mehr speichern – Ungespeichertes in Calc ist weg. Thunderbird läuft weiter, weil nur diese PID betroffen ist.",
+    "",
+    "Warum das die Lösung ist: LibreOffice läuft als Prozess soffice.bin mit PID 4711 und belegte 99,6 % CPU. Auf",
+    "TERM reagierte er nicht, KILL kann ein Prozess nicht abfangen.",
+    "",
+    "Merke: Erst TERM versuchen, dann KILL."
   ],
   "begriffe": {
     "Prozess / PID": "Ein laufendes Programm und seine Nummer.",

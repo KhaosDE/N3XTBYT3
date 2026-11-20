@@ -8,7 +8,8 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man1/journalctl.1.html",
     "https://man7.org/linux/man-pages/man5/journald.conf.5.html",
-    "https://man7.org/linux/man-pages/man1/du.1.html"
+    "https://man7.org/linux/man-pages/man1/du.1.html",
+    "https://man7.org/linux/man-pages/man1/df.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-speicher",
@@ -24,8 +25,7 @@
   "befehle": [
     {
       "muster": [
-        "df -h",
-        "df -h /"
+        "df -h"
       ],
       "bedeutung": "Belegten und freien Platz der Dateisysteme anzeigen (lesbare Größen)",
       "faelle": [
@@ -50,6 +50,28 @@
             "tmpfs                              2.0G     0  2.0G   0% /dev/shm",
             "tmpfs                              5.0M     0  5.0M   0% /run/lock",
             "/dev/sda2                          2.0G  182M  1.7G  10% /boot"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "df -h /"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "journal_gross": true
+          },
+          "ausgabe": [
+            "Filesystem                         Size  Used Avail Use% Mounted on",
+            "/dev/mapper/ubuntu--vg-ubuntu--lv   30G   30G     0 100% /"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Filesystem                         Size  Used Avail Use% Mounted on",
+            "/dev/mapper/ubuntu--vg-ubuntu--lv   30G   13G   16G  45% /"
           ]
         }
       ]
@@ -136,7 +158,8 @@
           "setze": {
             "journal_gross": false
           },
-          "ausgabe": "Vacuuming done, freed 17.5G of archived journals from /var/log/journal/3f2a9c1e7b6d4e5f8a0b1c2d3e4f5a6b."
+          "ausgabe": "Vacuuming done, freed 17.5G of archived journals from /var/log/journal/3f2a9c1e7b6d4e5f8a0b1c2d3e4f5a6b.",
+          "notiz": "Gekürzt: Im echten System steht davor für jede gelöschte Datei eine Zeile „Deleted archived journal …“."
         },
         {
           "ausgabe": "Vacuuming done, freed 0B of archived journals from /var/log/journal/3f2a9c1e7b6d4e5f8a0b1c2d3e4f5a6b."
@@ -182,11 +205,30 @@
     "„sudo journalctl --vacuum-size=500M“."
   ],
   "erklaerung": [
-    "Das Journal von systemd lag mit 18 GB unter /var/log/journal und füllte die Platte.",
-    "„journalctl --disk-usage“ zeigt die Größe, „sudo journalctl --vacuum-size=500M“ löscht die ältesten",
-    "archivierten Journal-Dateien, bis höchstens 500 MB übrig sind (oder --vacuum-time=2weeks nach Alter).",
-    "Dauerhaft begrenzt man das Journal in /etc/systemd/journald.conf mit SystemMaxUse=500M.",
-    "Außerdem sollte man den Dienst reparieren, der so viele Fehler schreibt."
+    "So gehst du vor:",
+    "",
+    "1. „df -h“ zeigt jedes Dateisystem mit Größe, belegt und frei (-h = lesbare Größen in G und M). Das Dateisystem",
+    "„/“ (Mounted on /) steht auf 100 %, Avail 0.",
+    "",
+    "2. „sudo du -sh /var/log/*“ misst jeden Eintrag in /var/log. du zeigt den belegten Platz; -s = nur die Summe je",
+    "Ordner, -h = lesbar. sudo, weil du manche Ordner sonst nicht lesen darfst. /var/log/journal mit 18G ist der",
+    "Übeltäter.",
+    "",
+    "3. „journalctl --disk-usage“ bestätigt: „Archived and active journals take up 18.0G“. --disk-usage zeigt nur an,",
+    "wie viel Platz das Journal belegt, und ändert nichts.",
+    "",
+    "4. „sudo journalctl --vacuum-size=500M“ räumt auf: --vacuum-size löscht die ältesten archivierten",
+    "Journal-Dateien, bis sie zusammen höchstens 500 MB belegen. Die gerade benutzten Dateien bleiben unangetastet.",
+    "„freed 17.5G“.",
+    "",
+    "5. „df -h“ prüft: 45 %, 16G frei.",
+    "",
+    "Warum das die Lösung ist: Das Journal von systemd lag mit 18 GB unter /var/log/journal und füllte die Platte.",
+    "Aufgeräumt wurden nur alte Protokolle – Anwendungsdaten blieben unberührt.",
+    "",
+    "Merke: Statt nach Größe geht es auch nach Alter (--vacuum-time=2weeks). Dauerhaft begrenzt man das Journal in",
+    "/etc/systemd/journald.conf mit SystemMaxUse=500M. Außerdem sollte man den Dienst reparieren, der so viele Fehler",
+    "schreibt."
   ],
   "begriffe": {
     "Journal (journald)": "Zentrales Protokoll von systemd, gespeichert unter /var/log/journal.",

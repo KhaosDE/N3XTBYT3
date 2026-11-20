@@ -242,10 +242,25 @@
     "„net start w32time“ und danach „w32tm /resync“."
   ],
   "erklaerung": [
-    "Der Windows-Zeitdienst (W32Time) lief nicht. Ohne ihn gleicht Windows die Uhr nicht mit der Zeitquelle ab,",
-    "und sie läuft langsam weg. Die Meldung „The service has not been started. (0x80070426)“ sagt genau das.",
-    "„net start w32time“ startet den Dienst, „w32tm /resync“ stellt die Uhr sofort neu.",
-    "Falsche Uhrzeit führt oft zu Folgefehlern: Zertifikatsfehler im Browser, Anmeldeprobleme in der Domäne (Kerberos)."
+    "So gehst du vor:",
+    "",
+    "1. „w32tm /query /status“ fragt den Windows-Zeitdienst nach seinem Zustand. w32tm ist das Werkzeug für den",
+    "Zeitdienst; /query heißt „abfragen“, /status „den Zustand zeigen“ (z. B. Zeitquelle und letzte",
+    "Synchronisierung). Hier kommt nur: „The service has not been started. (0x80070426)“ – der Dienst W32Time läuft",
+    "nicht.",
+    "",
+    "2. „net start w32time“ startet den Dienst. „net start Dienstname“ ist der Weg in cmd, einen Dienst zu starten",
+    "(in PowerShell: Start-Service w32time). „The Windows Time service was started successfully.“ bestätigt es.",
+    "",
+    "3. „w32tm /resync“ sagt dem Dienst: Gleiche die Uhr jetzt sofort ab (resync = neu synchronisieren). Ohne diesen",
+    "Schritt würde er erst beim nächsten geplanten Abgleich stellen. „The command completed successfully.“ – die Uhr",
+    "stimmt wieder.",
+    "",
+    "Warum das die Lösung ist: Der Windows-Zeitdienst (W32Time) lief nicht. Ohne ihn gleicht Windows die Uhr nicht",
+    "mit der Zeitquelle ab, und sie läuft langsam weg. Die Fehlermeldung von w32tm sagt genau das.",
+    "",
+    "Merke: Falsche Uhrzeit führt oft zu Folgefehlern: Zertifikatsfehler im Browser, falsche Buchungen,",
+    "Anmeldeprobleme in der Domäne (Kerberos)."
   ],
   "begriffe": {
     "W32Time": "Der Windows-Zeitdienst. Gleicht die Uhr mit einem Zeitserver (oder in der Domäne mit dem Domänencontroller) ab.",

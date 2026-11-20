@@ -194,10 +194,29 @@
     "Leere den Papierkorb: „Clear-RecycleBin -Force“. Zusätzlich kannst du den Temp-Ordner leeren: „Remove-Item $env:TEMP\\* -Recurse -Force“."
   ],
   "erklaerung": [
-    "Gelöschte Dateien liegen erst einmal im Papierkorb und belegen weiter Platz – hier rund 18 GB Videos.",
-    "„Clear-RecycleBin -Force“ leert ihn ohne Rückfrage. Dazu kommen Reste im Temp-Ordner (%TEMP%,",
-    "in PowerShell $env:TEMP), die Programme liegen lassen. Die darf man löschen; was gerade benutzt wird,",
-    "bleibt einfach liegen. Immer zuerst mit „Get-Volume“ messen, dann aufräumen, dann noch einmal messen."
+    "So gehst du vor:",
+    "",
+    "1. „Get-Volume -DriveLetter C“ zeigt das Laufwerk C:. -DriveLetter wählt das Laufwerk über seinen Buchstaben;",
+    "ohne den Zusatz zeigt Get-Volume alle Laufwerke. In der Spalte SizeRemaining stehen nur noch 812.5 MB frei, von",
+    "237.86 GB (Size).",
+    "",
+    "2. „Clear-RecycleBin -Force“ leert den Papierkorb des angemeldeten Benutzers. -Force überspringt die Rückfrage",
+    "(„Are you sure you want to perform this action?“); ohne -Force musst du erst mit Y bestätigen. Ohne",
+    "Laufwerksangabe leert der Befehl die Papierkörbe aller Laufwerke. Hier lagen die rund 18 GB „gelöschten“ Videos.",
+    "",
+    "3. „Remove-Item $env:TEMP\\* -Recurse -Force“ leert den Temp-Ordner des Benutzers. $env:TEMP ist der Pfad dieses",
+    "Ordners (in cmd: %TEMP%), \\* heißt „alles darin“. -Recurse löscht auch Unterordner samt Inhalt; ohne -Recurse",
+    "fragt PowerShell bei jedem Ordner nach, der nicht leer ist. -Force nimmt auch versteckte und schreibgeschützte",
+    "Dateien mit. Dateien, die ein Programm gerade benutzt, lassen sich nicht löschen und bleiben liegen; im echten",
+    "System erscheinen dafür rote Meldungen, die du hier übergehen kannst.",
+    "",
+    "4. „Get-Volume -DriveLetter C“ misst noch einmal: Jetzt sind 21.83 GB frei.",
+    "",
+    "Warum das die Lösung ist: Gelöschte Dateien liegen erst einmal im Papierkorb und belegen weiter Platz – hier",
+    "rund 18 GB Videos. Dazu kommen Reste im Temp-Ordner, die Programme liegen lassen. Beides darf weg; Frau Bergers",
+    "eigene Dateien bleiben unberührt.",
+    "",
+    "Merke: Immer erst messen, dann aufräumen, dann noch einmal messen."
   ],
   "begriffe": {
     "Papierkorb": "Zwischenlager für gelöschte Dateien. Sie belegen weiter Speicherplatz, bis er geleert wird.",

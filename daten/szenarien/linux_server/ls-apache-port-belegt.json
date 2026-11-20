@@ -8,7 +8,8 @@
   "quelle": [
     "https://httpd.apache.org/docs/2.4/bind.html",
     "https://man7.org/linux/man-pages/man8/ss.8.html",
-    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-systemctl",
@@ -230,10 +231,30 @@
     "„sudo systemctl disable --now nginx“, dann „sudo systemctl start apache2“."
   ],
   "erklaerung": [
-    "Ein Port kann nur von einem Programm belegt werden. nginx lief noch auf Port 80 – Apache bekam",
-    "„(98) Address already in use“. „sudo ss -tlnp“ zeigt zu jedem lauschenden Port das Programm (-p, braucht root).",
-    "„sudo systemctl disable --now nginx“ stoppt nginx und verhindert den Start beim nächsten Booten.",
-    "Danach kann Apache Port 80 belegen."
+    "So gehst du vor:",
+    "",
+    "1. „systemctl status apache2“ zeigt „Active: failed (Result: exit-code)“ – Apache ist beim Start mit einem",
+    "Fehler beendet worden. Den Grund zeigt status hier nicht.",
+    "",
+    "2. „journalctl -u apache2“ zeigt nur die Journal-Meldungen dieses Dienstes (-u = unit, also Dienst). Ohne -u",
+    "kämen die Meldungen aller Programme. „(98)Address already in use: … could not bind to address 0.0.0.0:80“ heißt:",
+    "Port 80 ist schon belegt.",
+    "",
+    "3. „sudo ss -tlnp“ zeigt, welche Programme auf welchen Ports lauschen. ss (socket statistics): -t = nur TCP, -l",
+    "= nur lauschende Ports, -n = Zahlen statt Namen (80 statt http), -p = das Programm dazu. -p braucht Root-Rechte,",
+    "darum sudo. Die Zeile 0.0.0.0:80 gehört „nginx“ – der alte Webserver hält den Port.",
+    "",
+    "4. „sudo systemctl disable --now nginx“ schaltet nginx ab: disable = kein Start mehr beim Hochfahren („Removed …",
+    "nginx.service“), --now = zusätzlich sofort stoppen. Ein bloßes „stop“ reicht nicht: Beim nächsten Neustart käme",
+    "nginx zurück und Apache hätte wieder dasselbe Problem.",
+    "",
+    "5. „sudo systemctl start apache2“ startet Apache; jetzt ist Port 80 frei.",
+    "",
+    "Warum das die Lösung ist: Ein Port kann nur von einem Programm belegt werden. nginx lief noch auf Port 80 –",
+    "Apache bekam „Address already in use“. Mit nginx dauerhaft aus kann Apache den Port belegen.",
+    "",
+    "Merke: Startet ein Dienst nicht, zuerst „journalctl -u <dienst>“ lesen. Bei „Address already in use“ zeigt „sudo",
+    "ss -tlnp“, wer den Port hat."
   ],
   "begriffe": {
     "Address already in use": "Der Port ist schon von einem anderen Programm belegt (Fehler 98).",

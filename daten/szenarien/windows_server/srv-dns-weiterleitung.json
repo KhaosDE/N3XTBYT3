@@ -7,7 +7,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/dnsserver/add-dnsserverforwarder",
-    "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverforwarder"
+    "https://learn.microsoft.com/powershell/module/dnsserver/get-dnsserverforwarder",
+    "https://learn.microsoft.com/powershell/module/dnsclient/resolve-dnsname"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-srv-dns",
@@ -133,10 +134,27 @@
     "„Add-DnsServerForwarder -IPAddress 192.168.10.1“."
   ],
   "erklaerung": [
-    "Ein DNS-Server beantwortet Namen aus seinen eigenen Zonen selbst (firma.internal). Für alle anderen Namen",
-    "fragt er entweder die Root-Server im Internet (Root Hints) oder leitet an einen anderen DNS-Server weiter (Forwarder).",
-    "Hier blockiert die Firewall direkte Anfragen ins Internet; nur der Router darf. Nach der Neuinstallation fehlte",
-    "die Weiterleitung – „Add-DnsServerForwarder -IPAddress 192.168.10.1“ stellt sie wieder her."
+    "So gehst du vor:",
+    "",
+    "1. „Resolve-DnsName www.example.com“ fragt DNS nach einem Internetnamen. „This operation returned because the",
+    "timeout period expired“ heißt: Es kam keine Antwort – DC01 kennt den Namen nicht und erreicht auch niemanden,",
+    "der ihn kennt.",
+    "",
+    "2. „Get-DnsServerForwarder“ zeigt die Weiterleitungen (Forwarder) des DNS-Servers. „IPAddress :“ ist leer – es",
+    "gibt keinen Forwarder. „UseRootHint : True“ heißt: DC01 versucht stattdessen, die Root-Server im Internet direkt",
+    "zu fragen – und genau das blockiert die Firewall.",
+    "",
+    "3. „Add-DnsServerForwarder -IPAddress 192.168.10.1“ trägt den Router als Forwarder ein. -IPAddress nennt die",
+    "Adresse des DNS-Servers, an den DC01 alle Fragen weiterreicht, die er nicht selbst beantworten kann.",
+    "",
+    "4. „Resolve-DnsName www.example.com“ prüft: Jetzt wird der Name aufgelöst.",
+    "",
+    "Warum das die Lösung ist: Ein DNS-Server beantwortet Namen aus seinen eigenen Zonen selbst (firma.internal). Für",
+    "alle anderen Namen fragt er entweder die Root-Server im Internet (Root Hints) oder leitet an einen anderen",
+    "DNS-Server weiter (Forwarder). Hier dürfen nur Anfragen über den Router hinaus; nach der Neuinstallation fehlte",
+    "die Weiterleitung.",
+    "",
+    "Merke: Gehen interne Namen, Internetnamen aber nicht, prüfe am DNS-Server die Weiterleitung."
   ],
   "begriffe": {
     "Forwarder (Weiterleitung)": "DNS-Server, an den Anfragen weitergereicht werden, die der eigene Server nicht selbst kennt.",

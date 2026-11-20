@@ -150,10 +150,28 @@
     "„New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow“."
   ],
   "erklaerung": [
-    "Die Anwendung lauschte auf Port 8080 (State Listen), aber die Windows-Firewall blockiert eingehende Verbindungen,",
-    "für die keine Regel existiert. Auf dem Server selbst merkt man das nicht – nur von außen.",
-    "„New-NetFirewallRule … -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow“ öffnet genau diesen Port.",
-    "Gute Regeln haben einen sprechenden Namen und sind so eng wie möglich (nur nötiger Port, ggf. nur interne Adressen)."
+    "So gehst du vor:",
+    "",
+    "1. „Get-NetTCPConnection -LocalPort 8080“ zeigt TCP-Verbindungen dieses Servers. -LocalPort 8080 beschränkt auf",
+    "den Port 8080 auf diesem Rechner; ohne den Zusatz kämen alle Verbindungen. State „Listen“ heißt: Ein Programm",
+    "wartet auf Verbindungen. LocalAddress 0.0.0.0 = es lauscht auf allen Netzwerkadaptern; OwningProcess 3120 ist",
+    "die PID des Programms. Die Anwendung ist also in Ordnung.",
+    "",
+    "2. „Get-NetFirewallRule -DisplayName Warenwirtschaft*“ sucht Firewallregeln über ihren Anzeigenamen.",
+    "-DisplayName ist der Name, den du auch in der Firewall-Oberfläche siehst; das * steht für „beliebig weiter“. „No",
+    "MSFT_NetFirewallRule objects found …“ heißt: Es gibt keine Regel für die Warenwirtschaft.",
+    "",
+    "3. „New-NetFirewallRule -DisplayName \"Warenwirtschaft 8080\" -Direction Inbound -Protocol TCP -LocalPort 8080",
+    "-Action Allow“ legt die Regel an. -DisplayName = sprechender Name (in Anführungszeichen wegen des Leerzeichens);",
+    "-Direction Inbound = für eingehende Verbindungen; -Protocol TCP = nur TCP; -LocalPort 8080 = nur dieser Port auf",
+    "dem Server (ein Port geht nur zusammen mit TCP oder UDP); -Action Allow = erlauben (Block hieße sperren). Die",
+    "Ausgabe zeigt die neue Regel mit Enabled True, Direction Inbound und Action Allow.",
+    "",
+    "Warum das die Lösung ist: Die Anwendung lauschte auf Port 8080, aber die Windows-Firewall blockiert eingehende",
+    "Verbindungen, für die keine Regel existiert. Auf dem Server selbst merkt man das nicht – nur von außen.",
+    "",
+    "Merke: Gute Regeln haben einen sprechenden Namen und sind so eng wie möglich (nur der nötige Port, ggf. nur",
+    "interne Adressen)."
   ],
   "begriffe": {
     "Port": "Nummer, über die ein Dienst auf einem Rechner erreichbar ist, z. B. 8080 für die Warenwirtschaft.",

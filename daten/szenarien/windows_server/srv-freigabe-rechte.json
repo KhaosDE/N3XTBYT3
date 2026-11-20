@@ -154,16 +154,35 @@
     "„Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force“."
   ],
   "erklaerung": [
-    "Beim Zugriff übers Netzwerk gelten Freigabe- UND NTFS-Rechte; wirksam ist die jeweils strengere Ebene.",
-    "NTFS erlaubte „Ändern“, die Freigabe aber nur „Read“ für Everyone – also nur Lesen.",
-    "„Grant-SmbShareAccess … -AccessRight Change“ gibt GG-Vertrieb auf Freigabe-Ebene Schreibrechte.",
-    "Viele Admins setzen die Freigabe großzügig (z. B. Authentifizierte Benutzer – Change) und steuern alles über NTFS."
+    "So gehst du vor:",
+    "",
+    "1. „Get-SmbShareAccess -Name Vertrieb“ zeigt die Freigabeberechtigungen. -Name wählt die Freigabe über ihren",
+    "Namen (der Teil hinter \\\\SRV-DATEI01\\). Ergebnis: Everyone – Allow – Read. Über das Netzwerk darf also jeder nur",
+    "lesen.",
+    "",
+    "2. „icacls D:\\Daten\\Vertrieb“ zeigt die NTFS-Berechtigungen des Ordners auf der Festplatte. icacls ohne weitere",
+    "Zusätze listet nur auf. FIRMA\\GG-Vertrieb:(OI)(CI)(M) heißt: Die Gruppe hat „Ändern“ (M), vererbt auf Dateien",
+    "(OI) und Unterordner (CI). NTFS ist also in Ordnung – die Bremse ist die Freigabe.",
+    "",
+    "3. „Grant-SmbShareAccess -Name Vertrieb -AccountName FIRMA\\GG-Vertrieb -AccessRight Change -Force“ ergänzt die",
+    "Freigabeberechtigung. -Name = welche Freigabe; -AccountName = für wen (Domäne\\Gruppe); -AccessRight Change =",
+    "Ändern (Read = lesen, Full = Vollzugriff); -Force = ohne Rückfrage, sonst musst du die Änderung erst bestätigen.",
+    "Die Ausgabe zeigt jetzt zusätzlich FIRMA\\GG-Vertrieb – Allow – Change.",
+    "",
+    "Warum das die Lösung ist: Beim Zugriff übers Netzwerk gelten Freigabe- UND NTFS-Rechte; wirksam ist die jeweils",
+    "strengere Ebene. NTFS erlaubte „Ändern“, die Freigabe aber nur „Read“ – also nur Lesen. Jetzt erlauben beide",
+    "Ebenen das Schreiben.",
+    "",
+    "Merke: Viele Admins setzen die Freigabe großzügig (z. B. Authentifizierte Benutzer – Change) und steuern alles",
+    "über NTFS."
   ],
   "begriffe": {
     "Freigabe (SMB-Share)": "Ordner, der über das Netzwerk erreichbar ist (\\\\Server\\Freigabe).",
     "Freigabeberechtigung": "Rechte für den Zugriff über das Netzwerk: Read, Change, Full.",
     "NTFS-Berechtigung": "Rechte direkt am Ordner auf der Festplatte; gelten auch lokal.",
-    "Effektive Rechte": "Übers Netzwerk gilt die strengere der beiden Ebenen."
+    "Effektive Rechte": "Übers Netzwerk gilt die strengere der beiden Ebenen.",
+    "icacls": "Befehl zum Anzeigen und Ändern von NTFS-Berechtigungen. Ohne Zusätze zeigt er sie nur an.",
+    "(OI) / (CI) / M": "Object Inherit (Dateien erben) / Container Inherit (Unterordner erben) / Modify (Ändern)."
   },
   "loesung": [
     "Get-SmbShareAccess -Name Vertrieb",

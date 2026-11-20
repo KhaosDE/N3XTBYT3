@@ -8,7 +8,8 @@
   "quelle": [
     "https://netplan.readthedocs.io/en/stable/netplan-yaml/",
     "https://manpages.ubuntu.com/manpages/noble/man8/netplan-apply.8.html",
-    "https://man7.org/linux/man-pages/man1/resolvectl.1.html"
+    "https://man7.org/linux/man-pages/man1/resolvectl.1.html",
+    "https://man7.org/linux/man-pages/man8/ping.8.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-netzwerk",
@@ -187,10 +188,30 @@
     "„sudo nano /etc/netplan/50-cloud-init.yaml“, 192.168.10.250 durch 192.168.10.5 ersetzen, speichern, „sudo netplan apply“."
   ],
   "erklaerung": [
-    "Ubuntu Server konfiguriert das Netzwerk mit Netplan (YAML-Dateien in /etc/netplan/). Dort stand der falsche",
-    "DNS-Server 192.168.10.250. Nach der Korrektur übernimmt „sudo netplan apply“ die Einstellung;",
-    "systemd-resolved fragt dann 192.168.10.5. „Temporary failure in name resolution“ heißt: Kein DNS-Server hat geantwortet.",
-    "In YAML zählen Einrückungen (Leerzeichen, keine Tabs). Auf entfernten Servern ist „netplan try“ sicherer."
+    "So gehst du vor:",
+    "",
+    "1. „ping -c 4 intranet.firma.internal“ (-c 4 = vier Pakete, dann Schluss) meldet „Temporary failure in name",
+    "resolution“: Der Name lässt sich nicht auflösen, kein DNS-Server hat geantwortet.",
+    "",
+    "2. „ping -c 4 192.168.10.25“ – mit der Adresse kommen Antworten. Das Netz geht, nur DNS nicht.",
+    "",
+    "3. „resolvectl dns“ zeigt, welche DNS-Server systemd-resolved je Schnittstelle fragt: „Link 2 (ens18):",
+    "192.168.10.250“ – falsch, richtig ist 192.168.10.5.",
+    "",
+    "4. „sudo nano /etc/netplan/50-cloud-init.yaml“ öffnet die Netzwerk-Einstellungen von Netplan (mit sudo, die",
+    "Datei gehört root). Unter nameservers → addresses ersetzt du 192.168.10.250 durch 192.168.10.5. Die Einrückungen",
+    "nicht verändern (nur Leerzeichen, keine Tabs). Speichern mit Strg+O und Enter, beenden mit Strg+X.",
+    "",
+    "5. „sudo netplan apply“ übernimmt die geänderte Datei ins laufende System. Ohne diesen Schritt bliebe die alte",
+    "Einstellung aktiv.",
+    "",
+    "6. „ping -c 4 intranet.firma.internal“ prüft: Der Name wird zu 192.168.10.25 aufgelöst, Antworten kommen.",
+    "",
+    "Warum das die Lösung ist: Ubuntu Server konfiguriert das Netzwerk mit Netplan (YAML-Dateien in /etc/netplan/).",
+    "Dort stand der falsche DNS-Server. Nach „netplan apply“ fragt systemd-resolved den richtigen.",
+    "",
+    "Merke: In YAML zählen Einrückungen. Auf entfernten Servern ist „sudo netplan try“ sicherer: Es nimmt die",
+    "Änderung zurück, wenn du sie nicht bestätigst."
   ],
   "begriffe": {
     "Netplan": "Netzwerkkonfiguration von Ubuntu in YAML-Dateien unter /etc/netplan/.",

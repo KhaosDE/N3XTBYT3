@@ -102,9 +102,22 @@
     "„sudo timedatectl set-ntp true“."
   ],
   "erklaerung": [
-    "Die Zeitsynchronisierung (systemd-timesyncd, NTP) war ausgeschaltet; die Uhr lief langsam weg.",
-    "„sudo timedatectl set-ntp true“ schaltet sie ein; kurz danach steht „System clock synchronized: yes“.",
-    "Falsche Uhrzeit bricht vieles: Zertifikate wirken ungültig, Einmal-Codes (2FA) passen nicht, Protokolle haben falsche Zeiten."
+    "So gehst du vor:",
+    "",
+    "1. „timedatectl“ zeigt Uhrzeit, Zeitzone und Synchronisierung. Wichtig sind „System clock synchronized: no“ und",
+    "„NTP service: inactive“ – die automatische Zeitsynchronisierung ist aus. Time zone Europe/Berlin stimmt.",
+    "",
+    "2. „sudo timedatectl set-ntp true“ schaltet die Synchronisierung per NTP ein (set-ntp false würde sie",
+    "ausschalten). Unter Ubuntu startet das den Dienst systemd-timesyncd. sudo, weil das eine Systemeinstellung ist.",
+    "",
+    "3. „timedatectl“ prüft: „NTP service: active“ und „System clock synchronized: yes“; die Uhrzeit hat die",
+    "fehlenden Minuten aufgeholt.",
+    "",
+    "Warum das die Lösung ist: Die Zeitsynchronisierung war ausgeschaltet; die Uhr lief langsam weg. Mit NTP gleicht",
+    "Linux die Uhr regelmäßig mit einem Zeitserver ab.",
+    "",
+    "Merke: Falsche Uhrzeit bricht vieles: Zertifikate wirken ungültig, Einmal-Codes (2FA) passen nicht, Protokolle",
+    "haben falsche Zeiten."
   ],
   "begriffe": {
     "NTP": "Network Time Protocol: Uhrzeit über das Netzwerk abgleichen.",

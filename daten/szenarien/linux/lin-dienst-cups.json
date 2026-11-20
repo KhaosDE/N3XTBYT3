@@ -174,10 +174,23 @@
     "„sudo systemctl enable --now cups“ (oder start und enable einzeln)."
   ],
   "erklaerung": [
-    "systemd unterscheidet: start/stop = jetzt; enable/disable = beim Systemstart automatisch.",
-    "CUPS war gestoppt und disabled. „sudo systemctl enable --now cups“ erledigt beides auf einmal.",
-    "In „systemctl status“ zeigt „Loaded: …; enabled“ den Autostart und „Active: active (running)“ den Lauf.",
-    "Die Zeilen „Synchronizing state … SysV“ erscheinen, weil cups zusätzlich ein altes Startskript mitbringt."
+    "So gehst du vor:",
+    "",
+    "1. „systemctl status cups“ zeigt den Druckdienst. systemctl verwaltet Dienste; status zeigt einen davon an. In",
+    "der Zeile Loaded steht „disabled“ (startet nicht automatisch beim Hochfahren), in der Zeile Active „inactive",
+    "(dead)“ (läuft gerade nicht). Beides muss sich ändern.",
+    "",
+    "2. „sudo systemctl enable --now cups“ erledigt beides auf einmal. enable trägt den Dienst für den Systemstart",
+    "ein („Created symlink …“); --now startet ihn zusätzlich sofort. Ohne --now wäre er nur für den nächsten Start",
+    "eingetragen, liefe jetzt aber noch nicht. sudo ist nötig, weil nur root Dienste ändern darf.",
+    "",
+    "3. „systemctl status cups“ prüft: „Loaded: …; enabled“ und „Active: active (running)“.",
+    "",
+    "Warum das die Lösung ist: systemd unterscheidet: start/stop = jetzt; enable/disable = beim Systemstart",
+    "automatisch. CUPS war gestoppt und disabled; jetzt läuft der Dienst und startet auch nach dem Neustart wieder.",
+    "",
+    "Merke: Die Zeilen „Synchronizing state … SysV“ erscheinen, weil cups zusätzlich ein altes Startskript mitbringt",
+    "– das ist kein Fehler."
   ],
   "begriffe": {
     "systemd / systemctl": "systemd startet und überwacht Dienste; systemctl ist das Werkzeug dazu.",

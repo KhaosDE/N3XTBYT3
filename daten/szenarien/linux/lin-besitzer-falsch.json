@@ -42,9 +42,24 @@
     "„sudo chown anna:anna ~/Dokumente/bericht.txt“."
   ],
   "erklaerung": [
-    "Mit „sudo cp“ kopiert root die Datei – die Kopie gehört dann root. Die Rechte rw-r--r-- erlauben nur dem",
-    "Besitzer (root) das Schreiben; Anna darf nur lesen. „sudo chown anna:anna …“ macht Anna zur Besitzerin",
-    "(Benutzer:Gruppe). Merke: Dateien in den eigenen Ordner besser ohne sudo kopieren."
+    "So gehst du vor:",
+    "",
+    "1. „ls -l ~/Dokumente“ listet den Ordner ausführlich. ls zeigt den Inhalt eines Ordners; -l (long) zeigt zu",
+    "jeder Datei Rechte, Besitzer, Gruppe, Größe und Datum. ~ steht für Annas Home-Ordner. Lies die Zeile von",
+    "bericht.txt: -rw-r--r-- 1 root root. Besitzer ist root, Gruppe root. rw- gilt für den Besitzer, r-- für die",
+    "Gruppe, r-- für alle anderen – Anna darf die Datei nur lesen. notizen.txt gehört dagegen anna.",
+    "",
+    "2. „sudo chown anna:anna ~/Dokumente/bericht.txt“ macht Anna zur Besitzerin. chown (change owner) ändert",
+    "Besitzer und Gruppe, Schreibweise benutzer:gruppe. Das darf nur root, darum steht sudo davor: Es führt den",
+    "Befehl mit Root-Rechten aus und fragt dafür nach Annas eigenem Passwort.",
+    "",
+    "3. „ls -l ~/Dokumente“ prüft: bericht.txt gehört jetzt anna anna. Mit rw- für die Besitzerin darf Anna",
+    "speichern.",
+    "",
+    "Warum das die Lösung ist: Mit „sudo cp“ kopiert root die Datei – die Kopie gehört dann root. Die Rechte",
+    "rw-r--r-- erlauben nur dem Besitzer das Schreiben. Als Besitzerin hat Anna wieder rw-.",
+    "",
+    "Merke: Dateien in den eigenen Ordner besser ohne sudo kopieren."
   ],
   "begriffe": {
     "Besitzer und Gruppe": "Jede Datei gehört einem Benutzer und einer Gruppe; danach richten sich die Rechte.",

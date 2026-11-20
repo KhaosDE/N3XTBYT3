@@ -8,7 +8,10 @@
   "quelle": [
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/measure-object",
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/remove-item",
-    "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/where-object"
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/where-object",
+    "https://learn.microsoft.com/powershell/module/storage/get-volume",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/get-childitem",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/get-date"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-dateien",
@@ -161,10 +164,33 @@
     "„Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) | Remove-Item“ (vorher einmal mit -WhatIf am Ende)."
   ],
   "erklaerung": [
-    "18 734 Logdateien belegten rund 90 GB. Die Pipeline sucht alle .log-Dateien (Get-ChildItem), behält nur die,",
-    "deren letzte Änderung (LastWriteTime) älter als heute minus 30 Tage ist (Where-Object), und löscht sie (Remove-Item).",
-    "„-WhatIf“ macht einen Probelauf: Er zeigt nur, was gelöscht würde. Vor jedem Löschen mit Platzhaltern eine gute Idee.",
-    "Dauerhaft hilft eine geplante Aufgabe, die das regelmäßig erledigt – oder eine Einstellung der Software selbst."
+    "So gehst du vor:",
+    "",
+    "1. „Get-Volume -DriveLetter D“ misst das Laufwerk D:. -DriveLetter wählt es über den Buchstaben; ohne den Zusatz",
+    "kämen alle Laufwerke. SizeRemaining 1.2 GB von 200 GB (Size) – fast voll.",
+    "",
+    "2. „Get-ChildItem D:\\App\\Logs | Measure-Object -Property Length -Sum“ misst die Logs. Get-ChildItem listet alle",
+    "Dateien im Ordner; die Pipe | reicht sie an Measure-Object weiter. -Property Length sagt, welche Eigenschaft",
+    "gerechnet wird (Length = Dateigröße in Byte); -Sum lässt sie zusammenzählen. Ohne -Sum würde Measure-Object nur",
+    "zählen. Ergebnis: Count 18734 Dateien, Sum 96211345408 Byte – rund 90 GB.",
+    "",
+    "3. „Get-ChildItem D:\\App\\Logs -Filter *.log | Where-Object LastWriteTime -lt (Get-Date).AddDays(-30) |",
+    "Remove-Item -WhatIf“ ist der Probelauf. Lies ihn von links nach rechts: -Filter *.log nimmt nur Dateien, die auf",
+    ".log enden. Where-Object lässt nur die durch, die eine Bedingung erfüllen: LastWriteTime (letzte Änderung) -lt",
+    "(less than, kleiner als – bei Daten heißt das: früher als) heute minus 30 Tage. (Get-Date) ist das Datum von",
+    "jetzt, .AddDays(-30) zieht 30 Tage ab. Remove-Item würde die Dateien löschen – aber -WhatIf macht nur einen",
+    "Probelauf: Jede Zeile „What if: Performing the operation \"Remove File\" …“ nennt eine Datei, die gelöscht würde.",
+    "Die Namen (app_2023-11-…) zeigen: Nur alte Logs sind betroffen.",
+    "",
+    "4. Derselbe Befehl ohne -WhatIf löscht die Dateien jetzt wirklich.",
+    "",
+    "5. „Get-Volume -DriveLetter D“ misst nach: 91.73 GB frei.",
+    "",
+    "Warum das die Lösung ist: 18 734 Logdateien aus drei Jahren belegten rund 90 GB. Die Vorgabe erlaubt, alles zu",
+    "löschen, was älter als 30 Tage ist – genau das wählt die Bedingung aus.",
+    "",
+    "Merke: Vor jedem Löschen mit Platzhaltern oder Filtern erst ein Probelauf mit -WhatIf. Dauerhaft hilft eine",
+    "geplante Aufgabe, die das regelmäßig erledigt – oder eine Einstellung der Software selbst."
   ],
   "begriffe": {
     "Pipeline ( | )": "Reicht die Ergebnisse eines Befehls an den nächsten weiter.",

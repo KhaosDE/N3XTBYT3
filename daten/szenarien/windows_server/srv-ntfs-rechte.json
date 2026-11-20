@@ -141,10 +141,25 @@
     "„icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M“."
   ],
   "erklaerung": [
-    "Im Ordner fehlte die Gruppe GG-Buchhaltung ganz. „icacls … /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M“ gibt „Ändern“ (M).",
-    "(OI) = Objekte erben (Dateien), (CI) = Container erben (Unterordner). Ohne die beiden gilt das Recht nur für den",
-    "Ordner selbst – nicht für die Dateien darin. Vorsicht in der PowerShell: Dort müssen die Klammern in",
-    "Anführungszeichen stehen: icacls D:\\Daten\\Buchhaltung /grant \"FIRMA\\GG-Buchhaltung:(OI)(CI)M\"."
+    "So gehst du vor:",
+    "",
+    "1. „icacls D:\\Daten\\Buchhaltung“ zeigt die NTFS-Rechte des Ordners. Jede Zeile: Konto:(Vererbung)(Recht).",
+    "Administrators und SYSTEM haben (F) Vollzugriff, CREATOR OWNER hat (IO)(F) – GG-Buchhaltung fehlt ganz.",
+    "„Successfully processed 1 files“ ist nur die Zusammenfassung.",
+    "",
+    "2. „icacls D:\\Daten\\Buchhaltung /grant FIRMA\\GG-Buchhaltung:(OI)(CI)M“ gibt der Gruppe Rechte. /grant heißt",
+    "„Recht erteilen“; die neuen Rechte kommen zu den vorhandenen dazu (mit /grant:r würden die bisherigen",
+    "ausdrücklichen Rechte dieses Kontos ersetzt). Dahinter folgen Konto, Doppelpunkt, Rechte: (OI) = Dateien erben",
+    "das Recht, (CI) = Unterordner erben es, M = Ändern (lesen, schreiben, löschen). Ohne (OI)(CI) gälte das Recht",
+    "nur für den Ordner selbst, nicht für die Dateien darin.",
+    "",
+    "3. „icacls D:\\Daten\\Buchhaltung“ prüft: FIRMA\\GG-Buchhaltung:(OI)(CI)(M) steht jetzt in der Liste.",
+    "",
+    "Warum das die Lösung ist: Die Freigabe erlaubte den Zugriff, aber im Ordner fehlte die Gruppe GG-Buchhaltung",
+    "ganz. Über das Netzwerk gilt immer die strengere der beiden Ebenen – hier also NTFS.",
+    "",
+    "Merke: Vorsicht in der PowerShell: Dort müssen die Klammern in Anführungszeichen stehen: icacls",
+    "D:\\Daten\\Buchhaltung /grant \"FIRMA\\GG-Buchhaltung:(OI)(CI)M\"."
   ],
   "begriffe": {
     "icacls": "Befehl zum Anzeigen und Ändern von NTFS-Berechtigungen.",

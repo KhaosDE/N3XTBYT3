@@ -8,7 +8,8 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man1/journalctl.1.html",
     "https://man7.org/linux/man-pages/man1/chown.1.html",
-    "https://man7.org/linux/man-pages/man1/systemctl.1.html"
+    "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://man7.org/linux/man-pages/man1/ls.1.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-ls-logs",
@@ -141,10 +142,26 @@
     "„sudo chown -R shop:shop /var/lib/shop“, dann „sudo systemctl restart shop-worker“."
   ],
   "erklaerung": [
-    "Beim Umzug wurden die Daten als root kopiert – /var/lib/shop gehörte root, und der Dienst läuft als „shop“.",
-    "Er durfte die Warteschlange nicht öffnen (PermissionError, Errno 13). „sudo chown -R shop:shop /var/lib/shop“",
-    "gibt Ordner und Inhalt (-R = rekursiv) dem Dienstbenutzer. Danach startet der Dienst.",
-    "Dienste laufen aus Sicherheitsgründen oft unter eigenen Benutzern – ihre Daten müssen ihnen gehören."
+    "So gehst du vor:",
+    "",
+    "1. „systemctl status shop-worker“ zeigt „Active: failed (Result: exit-code)“ – der Dienst hat sich mit einem",
+    "Fehler beendet.",
+    "",
+    "2. „journalctl -u shop-worker“ zeigt nur die Meldungen dieses Dienstes (-u = unit): „PermissionError: [Errno 13]",
+    "Permission denied: '/var/lib/shop/queue'“ – keine Berechtigung für die Warteschlangen-Datei.",
+    "",
+    "3. „ls -l /var/lib/shop“ zeigt (-l = ausführlich): queue gehört root root mit -rw-r--r--. Der Dienst läuft als",
+    "Benutzer „shop“ und darf die Datei nur lesen, nicht schreiben.",
+    "",
+    "4. „sudo chown -R shop:shop /var/lib/shop“ gibt den Ordner samt Inhalt dem Dienstbenutzer shop. chown ändert",
+    "Besitzer:Gruppe; -R (rekursiv) gilt für den Ordner und alles darin.",
+    "",
+    "5. „sudo systemctl restart shop-worker“ startet den Dienst neu; jetzt kann er die Warteschlange öffnen.",
+    "",
+    "Warum das die Lösung ist: Beim Umzug wurden die Daten als root kopiert – /var/lib/shop gehörte root, der Dienst",
+    "läuft aber als „shop“. Jetzt gehören ihm seine Daten wieder.",
+    "",
+    "Merke: Dienste laufen aus Sicherheitsgründen oft unter eigenen Benutzern – ihre Daten müssen ihnen gehören."
   ],
   "begriffe": {
     "Dienstbenutzer": "Eigener Benutzer für einen Dienst (hier shop), damit er nur an seine eigenen Daten kommt.",

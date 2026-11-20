@@ -211,10 +211,26 @@
     "„sudo apt update“, „sudo apt upgrade -y“, „cat /var/run/reboot-required“, „sudo shutdown -r 22:00“."
   ],
   "erklaerung": [
-    "„apt update“ holt die Listen, „apt upgrade -y“ spielt die Updates ohne Rückfrage ein.",
-    "Neue Kernel und manche Bibliotheken wirken erst nach einem Neustart; Ubuntu legt dann /var/run/reboot-required an.",
-    "„sudo shutdown -r 22:00“ plant den Neustart außerhalb der Arbeitszeit; „shutdown -c“ bricht ihn ab.",
-    "So bleiben Server sicher, ohne dass tagsüber jemand rausfliegt."
+    "So gehst du vor:",
+    "",
+    "1. „sudo apt update“ holt die aktuellen Paketlisten. Die letzte Zeile „12 packages can be upgraded“ sagt, wie",
+    "viele Updates bereitliegen. Installiert wird dabei noch nichts.",
+    "",
+    "2. „sudo apt upgrade -y“ spielt die Updates ein. -y beantwortet die Rückfrage „Do you want to continue?“",
+    "automatisch mit Ja. „12 upgraded“ bestätigt es.",
+    "",
+    "3. „cat /var/run/reboot-required“ gibt den Inhalt dieser Datei aus. Ubuntu legt sie an, wenn ein Update (z. B.",
+    "ein neuer Kernel) erst nach einem Neustart wirkt. „*** System restart required ***“ – also ja. Gäbe es die Datei",
+    "nicht, meldete cat „No such file or directory“: kein Neustart nötig.",
+    "",
+    "4. „sudo shutdown -r 22:00“ plant den Neustart. shutdown fährt den Rechner herunter; -r (reboot) heißt „danach",
+    "neu starten“ – ohne -r bliebe der Server aus. 22:00 ist die Uhrzeit; ohne Zeitangabe ginge es nach einer Minute",
+    "los. „Reboot scheduled for … 22:00:00 CET“ bestätigt den Plan.",
+    "",
+    "Warum das die Lösung ist: Die Sicherheitsupdates sind sofort eingespielt; der nötige Neustart findet außerhalb",
+    "der Arbeitszeit statt. So bleibt der Server sicher, ohne dass tagsüber jemand rausfliegt.",
+    "",
+    "Merke: „shutdown -c“ bricht einen geplanten Neustart wieder ab."
   ],
   "begriffe": {
     "apt upgrade": "Aktualisiert installierte Pakete. -y beantwortet Rückfragen mit Ja.",

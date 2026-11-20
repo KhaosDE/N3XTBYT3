@@ -7,7 +7,10 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/troubleshoot/windows-server/printing/printer-not-responding",
-    "https://learn.microsoft.com/troubleshoot/windows-server/printing/print-spooler-service-not-running"
+    "https://learn.microsoft.com/troubleshoot/windows-server/printing/print-spooler-service-not-running",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/stop-service",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/start-service",
+    "https://learn.microsoft.com/powershell/module/microsoft.powershell.management/remove-item"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-dienste",
@@ -278,10 +281,30 @@
     "Reihenfolge: „Stop-Service Spooler“ → „Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*“ → „Start-Service Spooler“."
   ],
   "erklaerung": [
-    "Jeder Druckauftrag liegt als Datei im Spool-Ordner (C:\\Windows\\System32\\spool\\PRINTERS): eine .SHD- und eine .SPL-Datei.",
+    "So gehst du vor:",
+    "",
+    "1. „Get-Service Spooler“ zeigt den Druckdienst (Spooler = Druckwarteschlange). Status „Running“: Der Dienst",
+    "läuft – trotzdem hängt der Auftrag. Das Problem steckt also nicht im Dienst selbst.",
+    "",
+    "2. „Get-ChildItem C:\\Windows\\System32\\spool\\PRINTERS“ zeigt den Inhalt des Spool-Ordners (wie dir oder ls). Dort",
+    "liegen 00017.SHD und 00017.SPL – die beiden Dateien des hängenden Auftrags (die SPL mit gut 2 MB ist der",
+    "Druckinhalt).",
+    "",
+    "3. „Stop-Service Spooler“ hält den Druckdienst an. Das muss zuerst geschehen: Solange der Dienst läuft, hat er",
+    "die Dateien geöffnet, und sie lassen sich nicht löschen. Keine Ausgabe heißt: geklappt.",
+    "",
+    "4. „Remove-Item C:\\Windows\\System32\\spool\\PRINTERS\\*“ löscht alle Dateien im Ordner. Remove-Item löscht Dateien",
+    "und Ordner; das * ist ein Platzhalter für „alle Namen“. Achtung: Damit sind alle wartenden Druckaufträge weg –",
+    "wer noch etwas drucken wollte, muss es neu schicken.",
+    "",
+    "5. „Start-Service Spooler“ startet den Druckdienst wieder, jetzt mit leerer Warteschlange.",
+    "",
+    "Warum das die Lösung ist: Jeder Druckauftrag liegt als Datei im Spool-Ordner: eine .SHD- und eine .SPL-Datei.",
     "Ist eine davon kaputt, hängt die ganze Warteschlange. Ein reiner Neustart des Dienstes hilft dann oft nicht,",
     "weil er die kaputte Datei beim Start wieder einliest. Darum: Dienst anhalten, Dateien löschen, Dienst starten.",
-    "Solange der Dienst läuft, sind die Dateien gesperrt – deshalb kam beim Löschen vorher eine Fehlermeldung."
+    "",
+    "Merke: Reihenfolge anhalten → löschen → starten. Mit „Get-Service Spooler“ kannst du am Ende prüfen, dass er",
+    "wieder „Running“ ist."
   ],
   "begriffe": {
     "Druckwarteschlange (Spooler)": "Windows-Dienst „Spooler“, der Druckaufträge annimmt, zwischenspeichert und an den Drucker schickt.",

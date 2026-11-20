@@ -8,7 +8,8 @@
   "quelle": [
     "https://learn.microsoft.com/powershell/module/dnsclient/set-dnsclientserveraddress",
     "https://learn.microsoft.com/powershell/module/dnsclient/get-dnsclientserveraddress",
-    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client"
+    "https://learn.microsoft.com/windows-server/networking/dns/troubleshoot/troubleshoot-dns-client",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ping"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-netzwerk",
@@ -262,11 +263,31 @@
     "Stell den Adapter zurück auf automatisch: „Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses“."
   ],
   "erklaerung": [
-    "Auf dem Laptop war fest der DNS-Server 192.168.10.250 eingetragen – den gibt es nicht.",
-    "Darum lief jede Namensanfrage ins Leere (Timeout), während Verbindungen per IP-Adresse funktionierten.",
-    "„Set-DnsClientServerAddress … -ResetServerAddresses“ löscht den festen Eintrag; der Adapter nimmt wieder",
-    "den DNS-Server, den DHCP liefert (dc01, 192.168.10.5). Ein Leeren des DNS-Cache hilft hier nicht,",
-    "weil der Fehler nicht im Zwischenspeicher, sondern in der Einstellung steckt."
+    "So gehst du vor:",
+    "",
+    "1. „ping intranet.firma.internal“ meldet „Ping request could not find host intranet.firma.internal“: Windows",
+    "kann den Namen nicht in eine Adresse übersetzen.",
+    "",
+    "2. „ping 192.168.10.25“ – mit der Adresse statt dem Namen kommen Antworten (0% loss). Das Netzwerk geht also;",
+    "nur die Namensauflösung (DNS) klappt nicht.",
+    "",
+    "3. „Get-DnsClientServerAddress“ zeigt für jeden Netzwerkadapter, welche DNS-Server er fragt. Spalten:",
+    "InterfaceAlias = Name des Adapters, Address Family = IPv4 oder IPv6, ServerAddresses = die DNS-Server. Beim",
+    "Adapter „Ethernet“ steht {192.168.10.250} – richtig wäre 192.168.10.5 (dc01).",
+    "",
+    "4. „Set-DnsClientServerAddress -InterfaceAlias Ethernet -ResetServerAddresses“ stellt den Adapter zurück.",
+    "-InterfaceAlias wählt den Adapter über seinen Namen (wie in der Spalte InterfaceAlias), damit nur dieser",
+    "geändert wird. -ResetServerAddresses löscht die fest eingetragenen DNS-Server; der Adapter nimmt dann wieder",
+    "die, die DHCP liefert. (Mit -ServerAddresses 192.168.10.5 könntest du stattdessen einen Server fest eintragen –",
+    "gewünscht ist aber „automatisch“.)",
+    "",
+    "5. „ping intranet.firma.internal“ prüft: Der Name wird zu 192.168.10.25 aufgelöst, und es kommen Antworten.",
+    "",
+    "Warum das die Lösung ist: Auf dem Laptop war fest der DNS-Server 192.168.10.250 eingetragen – den gibt es nicht.",
+    "Darum lief jede Namensanfrage ins Leere, während Verbindungen per IP-Adresse funktionierten. Ein Leeren des",
+    "DNS-Cache hilft hier nicht, weil der Fehler nicht im Zwischenspeicher, sondern in der Einstellung steckt.",
+    "",
+    "Merke: Gehen IP-Adressen, aber keine Namen, prüfe zuerst, welcher DNS-Server eingestellt ist."
   ],
   "begriffe": {
     "DNS-Server": "Rechner, der Namen in IP-Adressen übersetzt. In Firmennetzen meist der Domänencontroller.",

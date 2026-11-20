@@ -184,9 +184,23 @@
     "„sudo systemctl enable --now mariadb“."
   ],
   "erklaerung": [
-    "MariaDB war „disabled“: Sie startet nicht automatisch. Von Hand gestartet lief sie bis zum Neustart.",
-    "„sudo systemctl enable --now mariadb“ trägt den Dienst für den Systemstart ein (Symlink in multi-user.target.wants)",
-    "und startet ihn sofort. Mit „systemctl is-enabled“ und „is-active“ lässt sich beides schnell prüfen."
+    "So gehst du vor:",
+    "",
+    "1. „systemctl status mariadb“ zeigt in der Zeile Loaded „disabled“ (kein Autostart) und in der Zeile Active",
+    "„inactive (dead)“ (läuft nicht). Weil die Datenbank damals nur von Hand gestartet wurde, war sie nach dem",
+    "Neustart weg.",
+    "",
+    "2. „sudo systemctl enable --now mariadb“: enable trägt den Dienst für den Systemstart ein („Created symlink …",
+    "multi-user.target.wants …“), --now startet ihn zusätzlich sofort. Ohne --now liefe die Datenbank erst nach dem",
+    "nächsten Neustart. sudo, weil nur root Dienste ändern darf.",
+    "",
+    "3. „systemctl is-enabled mariadb“ fragt nur den Autostart ab und antwortet mit einem Wort: „enabled“.",
+    "",
+    "Warum das die Lösung ist: MariaDB war „disabled“: Sie startet nicht automatisch. Von Hand gestartet lief sie nur",
+    "bis zum Neustart. Jetzt läuft sie und startet bei jedem Neustart mit.",
+    "",
+    "Merke: start = jetzt, enable = beim Systemstart. Den Lauf prüfst du mit „systemctl is-active mariadb“ (Antwort",
+    "„active“)."
   ],
   "begriffe": {
     "enabled / disabled": "Startet ein Dienst beim Systemstart automatisch (enabled) oder nicht (disabled)?",

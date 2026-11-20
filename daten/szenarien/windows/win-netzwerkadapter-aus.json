@@ -7,7 +7,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/netadapter/get-netadapter",
-    "https://learn.microsoft.com/powershell/module/netadapter/enable-netadapter"
+    "https://learn.microsoft.com/powershell/module/netadapter/enable-netadapter",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-win-netzwerk",
@@ -175,11 +176,25 @@
     "Der Adapter „Ethernet“ ist deaktiviert. Schalte ihn ein: „Enable-NetAdapter -Name Ethernet“."
   ],
   "erklaerung": [
-    "Der Netzwerkadapter war in Windows deaktiviert (Status „Disabled“). Ein deaktivierter Adapter",
-    "taucht in „ipconfig“ gar nicht auf – das ist ein guter Hinweis. „Get-NetAdapter“ zeigt ihn trotzdem.",
-    "„Enable-NetAdapter -Name Ethernet“ schaltet ihn wieder ein; danach holt er sich per DHCP eine Adresse",
-    "und der Status ist „Up“. „PING: transmit failed. General failure.“ bedeutet: Windows konnte das Paket",
-    "gar nicht erst losschicken."
+    "So gehst du vor:",
+    "",
+    "1. „ipconfig“ zeigt nur die Überschrift „Windows IP Configuration“ und keinen einzigen Adapter. Ein",
+    "deaktivierter Adapter taucht in ipconfig gar nicht auf – das ist der erste Hinweis.",
+    "",
+    "2. „Get-NetAdapter“ listet alle Netzwerkadapter, auch ausgeschaltete. Beim Adapter „Ethernet“ steht Status",
+    "„Disabled“ und LinkSpeed „0 bps“: Er ist in Windows ausgeschaltet. Das Kabel ist also nicht schuld.",
+    "",
+    "3. „Enable-NetAdapter -Name Ethernet“ schaltet den Adapter ein. -Name nennt den Adapter (so wie in der Spalte",
+    "Name von Get-NetAdapter). Danach holt er sich per DHCP eine Adresse, und sein Status wird „Up“.",
+    "",
+    "4. „ping 192.168.10.1“ prüft, ob der Router antwortet: viermal „Reply from 192.168.10.1“, 0% loss – das Netz ist",
+    "zurück.",
+    "",
+    "Warum das die Lösung ist: Der Netzwerkadapter war in Windows deaktiviert. Ohne eingeschalteten Adapter gibt es",
+    "keine Adresse und keine Verbindung – egal, ob das Kabel steckt.",
+    "",
+    "Merke: Zeigt ipconfig keinen Adapter, schau mit Get-NetAdapter nach dem Status. Die Meldung „PING: transmit",
+    "failed. General failure.“ bedeutet: Windows konnte das Paket gar nicht erst losschicken."
   ],
   "begriffe": {
     "Netzwerkadapter": "Die Netzwerkkarte (oder WLAN-Karte) im PC. In Windows kann man sie ein- und ausschalten.",

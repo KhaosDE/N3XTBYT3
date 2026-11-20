@@ -135,10 +135,26 @@
     "„sudo dpkg --configure -a“, danach „sudo apt upgrade -y“."
   ],
   "erklaerung": [
-    "Beim Stromausfall waren einige Pakete entpackt, aber noch nicht eingerichtet. dpkg merkt sich das und",
-    "lässt keine weiteren Änderungen zu, bis das erledigt ist. „sudo dpkg --configure -a“ richtet alle",
-    "halb installierten Pakete fertig ein. Danach funktionieren apt upgrade und apt install wieder.",
-    "Tipp: Updates nie bei fast leerem Akku starten."
+    "So gehst du vor:",
+    "",
+    "1. „sudo apt upgrade -y“ versucht die Updates. apt upgrade aktualisiert alle installierten Pakete; -y",
+    "beantwortet die Rückfrage „Do you want to continue?“ automatisch mit Ja. apt bricht ab: „E: dpkg was",
+    "interrupted, you must manually run 'sudo dpkg --configure -a' to correct the problem.“ E: steht für Error. Die",
+    "Meldung nennt den Reparaturbefehl gleich mit.",
+    "",
+    "2. „sudo dpkg --configure -a“ richtet die halb installierten Pakete fertig ein. dpkg ist das Werkzeug unter apt,",
+    "das Pakete wirklich installiert. --configure heißt „einrichten“; -a (all) heißt: alle Pakete, die entpackt, aber",
+    "noch nicht eingerichtet sind – statt einzelne Paketnamen zu nennen. Die Zeilen „Setting up …“ zeigen, welche",
+    "Pakete jetzt fertig werden.",
+    "",
+    "3. „sudo apt upgrade -y“ noch einmal: Jetzt läuft apt durch.",
+    "",
+    "Warum das die Lösung ist: Beim leeren Akku waren einige Pakete entpackt, aber noch nicht eingerichtet. dpkg",
+    "merkt sich das und lässt keine weiteren Änderungen zu, bis das erledigt ist. Danach funktionieren apt upgrade",
+    "und apt install wieder.",
+    "",
+    "Merke: Fehlermeldungen von apt ganz lesen – oft steht die Lösung darin. Updates nie bei fast leerem Akku",
+    "starten."
   ],
   "begriffe": {
     "dpkg --configure -a": "Richtet alle entpackten, aber nicht fertig eingerichteten Pakete ein.",

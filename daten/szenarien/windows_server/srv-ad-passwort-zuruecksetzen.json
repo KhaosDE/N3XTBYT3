@@ -7,7 +7,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/activedirectory/set-adaccountpassword",
-    "https://learn.microsoft.com/powershell/module/activedirectory/set-aduser"
+    "https://learn.microsoft.com/powershell/module/activedirectory/set-aduser",
+    "https://learn.microsoft.com/powershell/module/activedirectory/get-aduser"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-srv-ad-benutzer",
@@ -122,10 +123,24 @@
     "„Set-ADAccountPassword -Identity lhoffmann -Reset“, danach „Set-ADUser -Identity lhoffmann -ChangePasswordAtLogon $true“."
   ],
   "erklaerung": [
-    "„Set-ADAccountPassword -Reset“ setzt ein neues Passwort, ohne das alte zu kennen (dafür braucht man Admin-Rechte).",
-    "Ohne -NewPassword fragt PowerShell das Passwort verdeckt ab – so steht es nicht im Befehlsverlauf.",
-    "„Set-ADUser -ChangePasswordAtLogon $true“ zwingt Lisa, bei der nächsten Anmeldung ein eigenes Passwort zu wählen.",
-    "So kennt am Ende nur sie ihr Passwort. Vor jedem Zurücksetzen die Identität prüfen (z. B. Rückruf)."
+    "So gehst du vor:",
+    "",
+    "1. „Get-ADUser lhoffmann“ prüft zuerst, ob es das Konto gibt und ob es das richtige ist: Lisa Hoffmann, OU",
+    "Buchhaltung, Enabled True.",
+    "",
+    "2. „Set-ADAccountPassword -Identity lhoffmann -Reset“ setzt ein neues Passwort. -Identity nennt das Konto;",
+    "-Reset heißt „neu setzen, ohne das alte zu kennen“ – das darf nur ein Administrator. Ohne -Reset würde der",
+    "Befehl zuerst das alte Passwort verlangen, und das kennt Lisa ja nicht mehr. Weil du kein -NewPassword angibst,",
+    "fragt PowerShell das neue Passwort zweimal verdeckt ab – so steht es nicht im Befehlsverlauf.",
+    "",
+    "3. „Set-ADUser -Identity lhoffmann -ChangePasswordAtLogon $true“ ändert eine Eigenschaft des Kontos. Set-ADUser",
+    "ändert Benutzerkonten; -ChangePasswordAtLogon $true heißt: Lisa muss bei der nächsten Anmeldung ein eigenes",
+    "Passwort wählen ($true = wahr, also ja). Mit $false würde diese Pflicht wieder abgeschaltet.",
+    "",
+    "Warum das die Lösung ist: Das vorläufige Passwort kennst nur du; durch den Zwang zum Ändern kennt am Ende nur",
+    "Lisa ihr Passwort.",
+    "",
+    "Merke: Vor jedem Zurücksetzen die Identität prüfen (z. B. Rückruf über eine bekannte Nummer)."
   ],
   "begriffe": {
     "-Reset": "Setzt das Passwort neu, ohne das alte anzugeben (Admin-Funktion).",

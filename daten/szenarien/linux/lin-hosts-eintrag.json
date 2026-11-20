@@ -8,7 +8,8 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man5/hosts.5.html",
     "https://man7.org/linux/man-pages/man1/getent.1.html",
-    "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html"
+    "https://manpages.ubuntu.com/manpages/noble/man1/nano.1.html",
+    "https://man7.org/linux/man-pages/man8/ping.8.html"
   ],
   "datum": "2026-11-04",
   "voraussetzung": "gk-lin-netzwerk",
@@ -122,10 +123,34 @@
     "Öffne die Datei mit „sudo nano /etc/hosts“, lösche die Zeile mit 192.168.10.20 (oder setze # davor), speichere mit Strg+O, beende mit Strg+X."
   ],
   "erklaerung": [
-    "Linux schaut bei Namen zuerst in /etc/hosts und fragt erst danach den DNS-Server (Reihenfolge in /etc/nsswitch.conf).",
-    "Der alte Testeintrag zeigte noch auf 192.168.10.20. „host“ fragt nur DNS und lieferte die richtige Adresse,",
-    "„getent hosts“ und „ping“ nahmen den Eintrag aus /etc/hosts. Nach dem Löschen bzw. Auskommentieren mit #",
-    "greift wieder DNS. /etc/hosts gehört root – darum „sudo nano“. Unter Windows heißt die Datei C:\\Windows\\System32\\drivers\\etc\\hosts."
+    "So gehst du vor:",
+    "",
+    "1. „ping -c 4 intranet.firma.internal“ schickt Testpakete. -c 4 (count) schickt genau 4 Pakete und hört dann auf",
+    "– ohne -c läuft ping unter Linux, bis du Strg+C drückst. In der ersten Zeile steht in Klammern die Adresse, die",
+    "Linux für den Namen nimmt: 192.168.10.20 – die alte. „Destination Host Unreachable“ und „100% packet loss“: Dort",
+    "ist niemand.",
+    "",
+    "2. „getent hosts intranet.firma.internal“ löst den Namen so auf, wie Programme es tun – über alle eingestellten",
+    "Quellen, zuerst /etc/hosts, dann DNS. Ergebnis: 192.168.10.20. Der DNS-Server kennt aber die neue Adresse; die",
+    "alte muss also aus einer lokalen Quelle kommen.",
+    "",
+    "3. „cat /etc/hosts“ gibt den Inhalt der Datei aus (cat zeigt Dateien an). Unter „# Testeintrag Intranet“ steht",
+    "die Zeile „192.168.10.20 intranet.firma.internal“ – der vergessene Testeintrag.",
+    "",
+    "4. „sudo nano /etc/hosts“ öffnet die Datei im Editor nano. sudo ist nötig, weil /etc/hosts root gehört. Lösche",
+    "die Zeile mit 192.168.10.20 (oder setze ein # davor, dann ist sie nur noch ein Kommentar). Strg+O speichert",
+    "(Enter bestätigt den Dateinamen), Strg+X beendet nano.",
+    "",
+    "5. „ping -c 4 intranet.firma.internal“ prüft: Jetzt steht 192.168.10.25 da, und es kommen Antworten (0% packet",
+    "loss).",
+    "",
+    "Warum das die Lösung ist: Linux schaut bei Namen zuerst in /etc/hosts und fragt erst danach den DNS-Server",
+    "(Reihenfolge in /etc/nsswitch.conf). Der alte Testeintrag zeigte noch auf 192.168.10.20. Nach dem Löschen greift",
+    "wieder DNS.",
+    "",
+    "Merke: „host intranet.firma.internal“ fragt nur DNS und hätte die richtige Adresse gezeigt – unterscheiden sich",
+    "host und getent, steckt der Fehler in /etc/hosts. Unter Windows heißt die Datei",
+    "C:\\Windows\\System32\\drivers\\etc\\hosts."
   ],
   "begriffe": {
     "/etc/hosts": "Lokale Liste „IP-Adresse Name“. Wird vor dem DNS gefragt.",

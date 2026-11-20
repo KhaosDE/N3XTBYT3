@@ -143,9 +143,24 @@
     "„Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung“."
   ],
   "erklaerung": [
-    "Das Recht „Anmelden über Remotedesktopdienste“ haben standardmäßig die Administratoren und die lokale Gruppe",
-    "„Remote Desktop Users“. Nimmt man die AD-Gruppe GG-Buchhaltung dort auf, dürfen alle Buchhalter per RDP auf SRV-TS01.",
-    "Gruppennamen mit Leerzeichen stehen in Anführungszeichen. Auf einem deutschen Server heißt die Gruppe „Remotedesktopbenutzer“."
+    "So gehst du vor:",
+    "",
+    "1. „Get-LocalGroupMember -Group \"Remote Desktop Users\"“ zeigt die Mitglieder einer lokalen Gruppe dieses",
+    "Servers. -Group nennt die Gruppe (in Anführungszeichen, weil Leerzeichen darin sind). Keine Ausgabe heißt: Die",
+    "Gruppe ist leer – außer den Administratoren darf niemand per Remotedesktop herein.",
+    "",
+    "2. „Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member FIRMA\\GG-Buchhaltung“ nimmt die AD-Gruppe in die",
+    "lokale Gruppe auf. -Group = in welche Gruppe; -Member = wer hinein soll (Domäne\\Name). Statt jeden Buchhalter",
+    "einzeln aufzunehmen, nimmst du die ganze AD-Gruppe.",
+    "",
+    "3. „Get-LocalGroupMember -Group \"Remote Desktop Users\"“ prüft: FIRMA\\GG-Buchhaltung, ObjectClass Group,",
+    "PrincipalSource ActiveDirectory – die Gruppe kommt aus dem AD.",
+    "",
+    "Warum das die Lösung ist: Das Recht „Anmelden über Remotedesktopdienste“ haben standardmäßig die Administratoren",
+    "und die lokale Gruppe „Remote Desktop Users“. Ist GG-Buchhaltung dort Mitglied, dürfen alle Buchhalter per RDP",
+    "auf SRV-TS01.",
+    "",
+    "Merke: Auf einem deutschen Server heißt die Gruppe „Remotedesktopbenutzer“."
   ],
   "begriffe": {
     "Remotedesktop (RDP)": "Fernzugriff auf einen Windows-Rechner mit Bildschirm, Tastatur und Maus übers Netzwerk.",

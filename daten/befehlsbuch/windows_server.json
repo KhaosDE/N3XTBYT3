@@ -201,10 +201,10 @@
     {
       "befehl": "Set-DhcpServerv4Scope",
       "was": "Ändert einen DHCP-Bereich.",
-      "beispiel": "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200",
+      "beispiel": "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200",
       "parameter": {
         "-ScopeId": "Welcher Bereich.",
-        "-StartRange / -EndRange": "Erste / letzte Adresse.",
+        "-StartRange / -EndRange": "Erste / letzte Adresse – immer beide zusammen angeben.",
         "-LeaseDuration": "Wie lange eine Adresse verliehen wird."
       },
       "wann": "Wenn der Bereich zu klein ist.",

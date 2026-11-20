@@ -187,16 +187,36 @@
     "„Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker“ – danach muss Nina sich einmal ab- und wieder anmelden."
   ],
   "erklaerung": [
-    "Die Ordnerrechte gehören der Gruppe GG-Vertrieb, und Nina war noch nicht Mitglied. „Add-ADGroupMember“ nimmt sie auf.",
-    "Wichtig: Gruppenmitgliedschaften stehen im Anmeldeticket (Kerberos-Ticket). Nina muss sich ab- und wieder anmelden,",
-    "erst dann gilt die neue Gruppe. Rechte über Gruppen statt an einzelne Personen zu vergeben, spart Arbeit",
-    "und hält die Rechte übersichtlich."
+    "So gehst du vor:",
+    "",
+    "1. „Get-ADPrincipalGroupMembership nbecker“ zeigt, in welchen AD-Gruppen ein Konto Mitglied ist (principal =",
+    "Konto, membership = Mitgliedschaft). Der Name dahinter ist das Konto; eigentlich gehört er zum Parameter",
+    "-Identity, den du weglassen darfst, weil er an erster Stelle steht. Ergebnis: nur „Domain Users“ – GG-Vertrieb",
+    "fehlt.",
+    "",
+    "2. „Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker“ nimmt Nina in die Gruppe auf. -Identity nennt die",
+    "Gruppe, zu der jemand hinzukommt; -Members nennt, wer hinzukommt (mehrere mit Komma, z. B. nbecker,kwagner).",
+    "Vertauschst du die beiden, sucht der Befehl eine Gruppe namens nbecker und scheitert. Keine Ausgabe heißt:",
+    "geklappt.",
+    "",
+    "3. „Get-ADGroupMember GG-Vertrieb“ zeigt alle Mitglieder der Gruppe (auch hier ist der Name an erster Stelle die",
+    "-Identity, diesmal die der Gruppe). Jetzt steht Nina Becker (SamAccountName nbecker) neben Kai Wagner und Jonas",
+    "Klein in der Liste.",
+    "",
+    "Warum das die Lösung ist: Die Ordnerrechte gehören der Gruppe GG-Vertrieb, und Nina war noch nicht Mitglied.",
+    "Nach der Aufnahme bekommt sie über die Gruppe dieselben Rechte wie ihre Kollegen.",
+    "",
+    "Merke: Gruppenmitgliedschaften stehen im Anmeldeticket (Kerberos-Ticket). Nina muss sich ab- und wieder",
+    "anmelden, erst dann gilt die neue Gruppe. Rechte über Gruppen statt an einzelne Personen zu vergeben, spart",
+    "Arbeit und hält die Rechte übersichtlich."
   ],
   "begriffe": {
     "Sicherheitsgruppe": "AD-Gruppe, der man Rechte geben kann. Alle Mitglieder erhalten diese Rechte.",
     "GG-": "Häufige Namensregel für globale Gruppen (Global Group), z. B. GG-Vertrieb.",
     "Kerberos-Ticket": "Anmeldenachweis in der Domäne; enthält die Gruppen, in denen man bei der Anmeldung war.",
-    "Minimale Rechte": "Jeder bekommt nur die Rechte, die er für seine Arbeit braucht."
+    "Minimale Rechte": "Jeder bekommt nur die Rechte, die er für seine Arbeit braucht.",
+    "Domain Users": "Standardgruppe der Domäne, in der jedes Benutzerkonto Mitglied ist.",
+    "-Identity": "Parameter der AD-Cmdlets: welches Objekt (Benutzer, Gruppe …) gemeint ist. Steht er an erster Stelle, darf man den Namen -Identity weglassen."
   },
   "loesung": [
     "Get-ADPrincipalGroupMembership nbecker",
