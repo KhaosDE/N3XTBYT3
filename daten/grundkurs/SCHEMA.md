@@ -50,6 +50,8 @@ Eine Lektion läuft auf derselben Befehlsauswertung wie die Szenarien. Ablauf:
 * `tipp` (frei): eigener Hinweis, wenn etwas anderes getippt wurde; `{eingabe}` steht für das Getippte.
   Ohne `tipp` gibt es beim Mitmachen einen Tippfehler-Hinweis und beim Selbst-Probieren „Das löst Aufgabe n
   noch nicht …“ – es bleibt also nie ohne Rückmeldung.
+* `absichtlich_unbekannt` (frei, `true`): Der Schritt führt bewusst einen Befehl vor, den es nicht gibt
+  (z. B. `Get-Kaffee` für die Fehlermeldung). Die Didaktikprüfung überspringt ihn.
 
 ## Aufgaben
 
@@ -65,6 +67,21 @@ Eine Lektion läuft auf derselben Befehlsauswertung wie die Szenarien. Ablauf:
 * Wie Mitmachen, nur ohne Vorgabe: `eingabe` und/oder `ziel` (mindestens eins), `wenn` frei.
 * `hinweise`: genau drei (F1, Stufe für Stufe).
 * `loesung`: Befehle, mit denen der Test die Aufgabe automatisch löst (Standard: erste `eingabe`).
+* `suchaufgabe` (frei, `true`): Die Aufgabe darf einen Befehl verlangen, der noch nicht erklärt wurde – den
+  findet Tobi selbst. Erlaubt ab Lektion 3, höchstens eine je Lektion. Der Aufgabentext sagt, dass der
+  Befehl neu ist, und nennt das Suchwerkzeug (`Get-Command`, `Get-Help`, `apropos`, `man`, `--help`);
+  `danach` erklärt den gefundenen Befehl vollständig.
+
+## Lernprinzip (Pflicht, geprüft von `tests/test_didaktik.py`)
+
+1. Jeder Befehl und jeder Zusatz (`/IM`, `-Identity`, `--vacuum-size` …) wird **erklärt**, bevor eine
+   Aufgabe ihn verlangt: im Erklären-Absatz, in `begriffe` oder im `danach` eines früheren Schritts. Hinweise
+   (F1) zählen nicht. Erklären heißt: was er tut, wozu man ihn braucht, woher der Name kommt, wie man die
+   Ausgabe liest; beim Zusatz: was er bewirkt und was ohne ihn passiert.
+2. Mitmachen zeigt es vor, die Aufgabe überträgt es auf ein anderes Beispiel und verlangt nichts Neues
+   (Ausnahme: `suchaufgabe`).
+3. `danach` erklärt (mindestens zwei Sätze: warum es funktioniert hat, was die Ausgabe zeigt, wann man das
+   in echt braucht) – „Richtig.“ allein reicht nie.
 
 ## Regeln
 

@@ -49,6 +49,8 @@ class Schritt:
     tipp: str | None = None              # eigener Hinweis, wenn etwas anderes kam ({eingabe} = das Getippte)
     hinweise: list[str] = field(default_factory=list)   # nur Aufgaben: genau 3
     loesung: list[Any] = field(default_factory=list)    # nur Aufgaben (für den Test); Standard: eingabe[0]
+    suchaufgabe: bool = False            # Aufgabe darf einen neuen Befehl verlangen, den man selbst sucht
+    absichtlich_unbekannt: bool = False  # Vorführung eines unbekannten Befehls (z. B. Get-Kaffee)
     vorbereitet: list = field(default_factory=list, repr=False)
 
 
@@ -112,7 +114,8 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
         return []
     schritte: list[Schritt] = []
     textfeld = "aufgabe" if aufgaben else "text"
-    erlaubt = {textfeld, "eingabe", "danach", "ziel", "wenn", "tipp"} | ({"hinweise", "loesung"} if aufgaben else set())
+    erlaubt = ({textfeld, "eingabe", "danach", "ziel", "wenn", "tipp", "absichtlich_unbekannt"}
+               | ({"hinweise", "loesung", "suchaufgabe"} if aufgaben else set()))
     for nr, r in enumerate(roh, start=1):
         stelle = f"{ort}[{nr}]"
         if not isinstance(r, dict):
@@ -148,6 +151,13 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
         danach = _fliesstext(r.get("danach"))
         if not danach:
             fehler.append(f"{stelle}.danach: Erklärung nach dem Schritt fehlt.")
+        merkmale = {}
+        for feld in ("suchaufgabe", "absichtlich_unbekannt"):
+            wert = r.get(feld, False)
+            if not isinstance(wert, bool):
+                fehler.append(f"{stelle}.{feld}: true oder false.")
+                wert = False
+            merkmale[feld] = wert
         hinweise: list[str] = []
         loesung: list[Any] = []
         if aufgaben:
@@ -169,7 +179,7 @@ def _schritte(roh: Any, ort: str, aufgaben: bool, vergleicher: Vergleicher, beka
                        for x in loesung]
         schritte.append(Schritt(text=text or "", eingabe=list(eingabe), danach=danach or "", ziel=ziel, wenn=wenn,
                                 tipp=eigener_tipp,
-                                hinweise=hinweise, loesung=list(loesung),
+                                hinweise=hinweise, loesung=list(loesung), **merkmale,
                                 vorbereitet=[vergleicher.vorbereiten(e) for e in eingabe]))
     return schritte
 

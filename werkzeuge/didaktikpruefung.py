@@ -18,6 +18,16 @@ from n3xtbyt3.kern.szenario import lade_allgemein, lade_system  # noqa: E402
 SYSTEME = ["windows", "windows_server", "linux", "linux_server"]
 VORAUSGESETZT = {"linux_server": "linux", "windows_server": "windows"}
 KURZE_ERKLAERUNG = 40
+SUCHWERKZEUGE = ("Get-Command", "Get-Help", "apropos", "man ", "--help")
+
+
+def saetze(wert):
+    """Ungefähre Zahl der Sätze (Satzzeichen am Wortende)."""
+    return len(re.findall(r"[.!?…](?:\s|$)", wert.strip()))
+
+
+def zu_knapp(wert):
+    return len(wert) < KURZE_ERKLAERUNG or saetze(wert) < 2
 SCHALTER_WIN = re.compile(r"^/[A-Za-z?]{1,3}$")
 SCHALTER = re.compile(r"^--?[A-Za-z][\w-]*")
 
@@ -77,20 +87,32 @@ def pruefe_grundkurs():
             wissen += " " + text(lektion.erklaeren) + " " + text(lektion.begriffe)
             for nr, schritt in enumerate(lektion.mitmachen, 1):
                 danach = text(schritt.danach)
-                if len(danach) < KURZE_ERKLAERUNG:
+                if zu_knapp(danach):
                     befunde.append((lektion.id, f"Mitmachen {nr}", "Erklärung danach fehlt/zu knapp", danach))
-                luecken = fehlend(schritt.eingabe[:1], wissen + " " + danach, windows)
+                luecken = [] if schritt.absichtlich_unbekannt else \
+                    fehlend(schritt.eingabe[:1], wissen + " " + danach, windows)
                 if luecken:
                     befunde.append((lektion.id, f"Mitmachen {nr}", "Befehl/Zusatz nirgends erklärt",
                                     ", ".join(luecken)))
                 wissen += " " + danach
+            suchaufgaben = [a for a in lektion.aufgaben if a.suchaufgabe]
+            if len(suchaufgaben) > 1:
+                befunde.append((lektion.id, "Aufgaben", "mehr als eine Suchaufgabe", str(len(suchaufgaben))))
+            if suchaufgaben and lektion.nr < 3:
+                befunde.append((lektion.id, "Aufgaben", "Suchaufgabe vor Lektion 3", ""))
             for nr, aufgabe in enumerate(lektion.aufgaben, 1):
                 loesung = aufgabe.loesung or aufgabe.eingabe[:1]
-                luecken = fehlend(loesung, wissen, windows)
+                if aufgabe.suchaufgabe:
+                    luecken = []
+                    if not any(w.casefold() in text(aufgabe.text).casefold() for w in SUCHWERKZEUGE):
+                        befunde.append((lektion.id, f"Aufgabe {nr}", "Suchaufgabe nennt kein Suchwerkzeug",
+                                        text(aufgabe.text)))
+                else:
+                    luecken = [] if aufgabe.absichtlich_unbekannt else fehlend(loesung, wissen, windows)
                 if luecken:
                     befunde.append((lektion.id, f"Aufgabe {nr}", "vorher nicht erklärt", ", ".join(luecken)))
                 danach = text(aufgabe.danach)
-                if len(danach) < KURZE_ERKLAERUNG:
+                if zu_knapp(danach):
                     befunde.append((lektion.id, f"Aufgabe {nr}", "Erklärung danach fehlt/zu knapp", danach))
                 wissen += " " + danach
         wissen_je_system[sid] = wissen
@@ -103,7 +125,7 @@ def pruefe_szenarien(wissen_je_system):
         windows = sid.startswith("windows")
         for szenario in lade_system(sid, allgemein=lade_allgemein(sid)).szenarien:
             erklaerung = text(szenario.erklaerung)
-            if len(erklaerung) < KURZE_ERKLAERUNG:
+            if zu_knapp(erklaerung):
                 befunde.append((szenario.id, "Szenario", "Erklärung fehlt/zu knapp", erklaerung))
             wissen = wissen_je_system[sid] + " " + erklaerung + " " + text(szenario.begriffe)
             luecken = fehlend(szenario.loesung, wissen, windows)

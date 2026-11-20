@@ -14,16 +14,23 @@
   "shell": "powershell",
   "zustand": {
     "admin": false,
-    "pfad": "C:\\Users\\mberger"
+    "pfad": "C:\\Users\\mberger",
+    "excel_laeuft": true,
+    "notepad_5188": true,
+    "notepad_5260": true,
+    "notepad_5332": true
   },
   "erklaeren": [
     "Jedes laufende Programm ist ein Prozess. Er hat einen Namen (z. B. EXCEL) und eine Nummer, die PID",
     "(Prozess-ID). Hängt ein Programm, kannst du es aus der Konsole beenden – erst höflich, dann erzwungen.",
-    "Was nicht gespeichert war, geht dabei verloren. In diesem Computer hängt gerade Excel."
+    "Was nicht gespeichert war, geht dabei verloren. Du lernst zwei Wege: taskkill, ein älteres Programm,",
+    "das in der PowerShell und in der cmd geht, und Stop-Process, den Befehl der PowerShell. Auf diesem",
+    "Computer hängen gerade drei Fenster des Editors (notepad.exe) – an ihnen übst du. Danach ist Excel dran."
   ],
   "begriffe": {
     "Prozess": "Ein laufendes Programm. Ein Programm kann auch mehrere Prozesse haben.",
-    "PID": "Prozess-ID: die Nummer, unter der Windows einen Prozess führt.",
+    "PID": "Prozess-ID: die Nummer, unter der Windows einen Prozess führt. Sie ist eindeutig – zwei Prozesse können gleich heißen, aber nie dieselbe PID haben.",
+    "Image Name": "Der Name der Programmdatei eines Prozesses, z. B. EXCEL.EXE oder notepad.exe (Spalte bei tasklist).",
     "Reagiert nicht": "Das Programm nimmt keine Eingaben mehr an (im Task-Manager: „Keine Rückmeldung“)."
   },
   "befehle": [
@@ -34,6 +41,181 @@
       "faelle": [
         {
           "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false,
             "excel_laeuft": true
           },
           "ausgabe": [
@@ -51,12 +233,157 @@
           "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
         },
         {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
           "ausgabe": [
             "",
             "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
             "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
             "   2410      98    58912     121604      38.12   4532   1 explorer",
             "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
+            "    612      34    61240      70588       1.92   8124   1 powershell",
+            "   4211       0      196       1236                 4   0 System",
+            ""
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "   1873     102   389512     412388     184.53   6420   1 EXCEL",
+            "   2410      98    58912     121604      38.12   4532   1 explorer",
+            "      0       0       60          8                 0   0 Idle",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
             "   1095      71   142216     168932      52.07   7012   1 OUTLOOK",
             "    612      34    61240      70588       1.92   8124   1 powershell",
             "   4211       0      196       1236                 4   0 System",
@@ -68,11 +395,410 @@
     },
     {
       "muster": [
+        "Get-Process notepad",
+        "Get-Process -Name notepad"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName",
+            "-------  ------    -----      -----     ------     --  -- -----------",
+            "    238      14     3120      18432       0.42   5188   1 notepad",
+            "    231      14     3084      18240       0.39   5260   1 notepad",
+            "    229      13     3052      18096       0.38   5332   1 notepad",
+            ""
+          ]
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Get-Process : Cannot find a process with the name \"notepad\". Verify the process name and call the cmdlet again."
+        }
+      ]
+    },
+    {
+      "muster": [
         "tasklist"
       ],
       "faelle": [
         {
           "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false,
             "excel_laeuft": true
           },
           "ausgabe": [
@@ -89,6 +815,12 @@
           "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
         },
         {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
           "ausgabe": [
             "",
             "Image Name                     PID Session Name        Session#    Mem Usage",
@@ -96,6 +828,139 @@
             "System Idle Process              0 Services                   0          8 K",
             "System                           4 Services                   0      1,236 K",
             "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
+            "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
+            "powershell.exe                8124 Console                    1     70,588 K"
+          ],
+          "notiz": "Gekürzt: Im echten System stehen hier über hundert Prozesse."
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "System Idle Process              0 Services                   0          8 K",
+            "System                           4 Services                   0      1,236 K",
+            "explorer.exe                  4532 Console                    1    121,604 K",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K",
             "OUTLOOK.EXE                   7012 Console                    1    168,932 K",
             "powershell.exe                8124 Console                    1     70,588 K"
           ],
@@ -105,9 +970,1031 @@
     },
     {
       "muster": [
+        "tasklist /FI \"STATUS eq NOT RESPONDING\""
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5188 Console                    1     18,432 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5260 Console                    1     18,240 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5260 Console                    1     18,240 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "",
+            "Image Name                     PID Session Name        Session#    Mem Usage",
+            "========================= ======== ================ =========== ============",
+            "EXCEL.EXE                     6420 Console                    1    412,388 K",
+            "notepad.exe                   5188 Console                    1     18,432 K",
+            "notepad.exe                   5260 Console                    1     18,240 K",
+            "notepad.exe                   5332 Console                    1     18,096 K"
+          ]
+        },
+        {
+          "ausgabe": "INFO: No tasks are running which match the specified criteria."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /IM notepad.exe"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "ausgabe": [
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5188.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5260.",
+            "SUCCESS: Sent termination signal to the process \"notepad.exe\" with PID 5332."
+          ]
+        },
+        {
+          "ausgabe": "ERROR: The process \"notepad.exe\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /IM notepad.exe /F",
+        "taskkill /F /IM notepad.exe"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          },
+          "ausgabe": [
+            "SUCCESS: The process \"notepad.exe\" with PID 5188 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5260 has been terminated.",
+            "SUCCESS: The process \"notepad.exe\" with PID 5332 has been terminated."
+          ]
+        },
+        {
+          "ausgabe": "ERROR: The process \"notepad.exe\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Process -Name notepad",
+        "Stop-Process -Name notepad -Force"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": false
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": false,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": false,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": false,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "wenn": {
+            "notepad_5188": true,
+            "notepad_5260": true,
+            "notepad_5332": true,
+            "excel_laeuft": true
+          },
+          "setze": {
+            "notepad_5188": false,
+            "notepad_5260": false,
+            "notepad_5332": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Stop-Process : Cannot find a process with the name \"notepad\". Verify the process name and call the cmdlet again."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5188 /F",
+        "taskkill /F /PID 5188"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true
+          },
+          "setze": {
+            "notepad_5188": false
+          },
+          "ausgabe": "SUCCESS: The process with PID 5188 has been terminated."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5188\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5188"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true
+          },
+          "ausgabe": "SUCCESS: Sent termination signal to the process with PID 5188."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5188\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Process -Id 5188",
+        "Stop-Process 5188",
+        "Stop-Process -Id 5188 -Force"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5188": true
+          },
+          "setze": {
+            "notepad_5188": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Stop-Process : Cannot find a process with the process identifier 5188."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5260 /F",
+        "taskkill /F /PID 5260"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5260": true
+          },
+          "setze": {
+            "notepad_5260": false
+          },
+          "ausgabe": "SUCCESS: The process with PID 5260 has been terminated."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5260\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5260"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5260": true
+          },
+          "ausgabe": "SUCCESS: Sent termination signal to the process with PID 5260."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5260\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Process -Id 5260",
+        "Stop-Process 5260",
+        "Stop-Process -Id 5260 -Force"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5260": true
+          },
+          "setze": {
+            "notepad_5260": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Stop-Process : Cannot find a process with the process identifier 5260."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5332 /F",
+        "taskkill /F /PID 5332"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5332": true
+          },
+          "setze": {
+            "notepad_5332": false
+          },
+          "ausgabe": "SUCCESS: The process with PID 5332 has been terminated."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5332\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "taskkill /PID 5332"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5332": true
+          },
+          "ausgabe": "SUCCESS: Sent termination signal to the process with PID 5332."
+        },
+        {
+          "ausgabe": "ERROR: The process \"5332\" not found."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Stop-Process -Id 5332",
+        "Stop-Process 5332",
+        "Stop-Process -Id 5332 -Force"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "notepad_5332": true
+          },
+          "setze": {
+            "notepad_5332": false
+          }
+        },
+        {
+          "fehler": true,
+          "ausgabe": "Stop-Process : Cannot find a process with the process identifier 5332."
+        }
+      ]
+    },
+    {
+      "muster": [
         "Stop-Process -Name EXCEL",
         "Stop-Process -Id 6420",
-        "Stop-Process EXCEL"
+        "Stop-Process EXCEL",
+        "Stop-Process 6420"
       ],
       "faelle": [
         {
@@ -129,39 +2016,59 @@
     {
       "text": "Was läuft gerade? Get-Process",
       "eingabe": "Get-Process",
-      "danach": "Jede Zeile ist ein Prozess. Wichtig sind ProcessName (Name), Id (die PID) und WS(K) – der Arbeitsspeicher in Kilobyte. EXCEL braucht auffällig viel. (Gekürzt: Im echten System stehen hier über hundert Prozesse.)"
+      "danach": "Jede Zeile ist ein Prozess. Wichtig sind ProcessName (Name), Id (die PID) und WS(K) – der Arbeitsspeicher in Kilobyte. EXCEL braucht auffällig viel, und notepad (der Editor) steht dreimal da – mit drei verschiedenen PIDs. (Gekürzt: Im echten System stehen hier über hundert Prozesse.)"
     },
     {
       "text": "Nur Excel: Get-Process EXCEL",
       "eingabe": "Get-Process EXCEL",
-      "danach": "Mit dem Namen dahinter zeigt Get-Process nur diesen Prozess. Die PID von Excel ist 6420."
+      "danach": "Mit dem Namen dahinter zeigt Get-Process nur diesen Prozess. Die PID von Excel ist 6420 – die brauchst du gleich."
     },
     {
       "text": "Dasselbe auf die alte Art: tasklist",
       "eingabe": "tasklist",
-      "danach": "tasklist ist ein älteres Programm mit derselben Information: Name, PID, Speicher. Es geht in der PowerShell und in der cmd. (Gekürzt.)"
+      "danach": "tasklist (Liste der Tasks) ist ein älteres Programm mit derselben Information. Die Spalte „Image Name“ ist der Name der Programmdatei mit .exe – EXCEL.EXE, notepad.exe. Daneben stehen die PID und der Speicher. Es geht in der PowerShell und in der cmd. (Gekürzt.)"
     },
     {
       "text": "Wer reagiert nicht? tasklist /FI \"STATUS eq NOT RESPONDING\"",
       "eingabe": "tasklist /FI \"STATUS eq NOT RESPONDING\"",
-      "danach": "/FI heißt Filter. „STATUS eq NOT RESPONDING“ heißt: nur Prozesse, deren Status „reagiert nicht“ ist (eq = equals, gleich). Die Anführungszeichen halten den Filter zusammen."
+      "danach": "/FI heißt Filter. „STATUS eq NOT RESPONDING“ heißt: nur Prozesse, deren Status „reagiert nicht“ ist (eq = equals, gleich). Die Anführungszeichen halten den Filter zusammen. Übrig bleiben Excel und die drei Editor-Fenster – die hängen alle."
+    },
+    {
+      "text": "Bitte alle Editor-Fenster höflich, sich zu schließen: taskkill /IM notepad.exe",
+      "eingabe": "taskkill /IM notepad.exe",
+      "danach": "taskkill heißt „Task töten“: Es beendet Prozesse. /IM steht für Image Name – dahinter der Name der Programmdatei, so wie er bei tasklist in der Spalte „Image Name“ steht. Ohne weiteren Zusatz schickt taskkill jedem Prozess mit diesem Namen nur die Bitte „schließ dich“ – wie ein Klick aufs X. Darum steht dreimal „Sent termination signal“ (Signal zum Beenden geschickt). Ein hängendes Programm reagiert darauf aber nicht: Die drei Editor-Fenster laufen weiter."
+    },
+    {
+      "text": "Beende ein Editor-Fenster über seine Nummer, erzwungen: taskkill /PID 5188 /F",
+      "eingabe": "taskkill /PID 5188 /F",
+      "danach": "/PID heißt: Gemeint ist der Prozess mit dieser Prozess-ID. Das ist eindeutig – drei Prozesse heißen notepad.exe, aber nur einer hat die PID 5188. So triffst du genau das eine hängende Fenster. /F steht für force (erzwingen): Windows wartet nicht auf das Programm, sondern beendet es sofort. Was im Fenster nicht gespeichert war, ist verloren."
+    },
+    {
+      "text": "Dasselbe auf die PowerShell-Art: Stop-Process -Id 5260",
+      "eingabe": "Stop-Process -Id 5260",
+      "danach": "Stop-Process ist der Befehl der PowerShell zum Beenden von Prozessen. -Id ist die PID. Stop-Process fragt nicht höflich, es beendet sofort – wie taskkill mit /F. Bei Erfolg kommt keine Meldung; keine rote Zeile heißt: hat geklappt. Mit -Name geht es auch über den Namen, dann ohne .exe: Stop-Process -Name notepad."
+    },
+    {
+      "text": "Und das letzte Editor-Fenster über den Namen, erzwungen: taskkill /IM notepad.exe /F",
+      "eingabe": "taskkill /IM notepad.exe /F",
+      "danach": "Mit /IM und /F zusammen beendet taskkill jeden Prozess mit diesem Namen sofort – hier war nur noch einer übrig (PID 5332). Vorsicht im echten Alltag: Laufen mehrere Fenster desselben Programms, trifft /IM alle auf einmal. Willst du nur eins beenden, nimm die PID."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Bitte Excel höflich, sich zu beenden – ohne Zwang.",
+      "aufgabe": "Jetzt ist Excel dran. Bitte Excel höflich, sich zu beenden – ohne Zwang.",
       "eingabe": [
         "taskkill /IM EXCEL.EXE"
       ],
       "hinweise": [
-        "Das Programm zum Beenden heißt wie „Task töten“.",
-        "taskkill mit /IM (Image, der Programmname).",
+        "Wie hast du vorhin die Editor-Fenster höflich gebeten? Nur der Name der Programmdatei ist anders.",
+        "taskkill mit /IM und dem Image Name von Excel (steht bei tasklist).",
         "Tippe: taskkill /IM EXCEL.EXE"
       ],
-      "danach": "taskkill ohne /F schickt Excel die Bitte „schließ dich“ – wie ein Klick aufs X. Ein hängendes Programm reagiert darauf nicht. Darum: als Nächstes mit Zwang."
+      "danach": "taskkill /IM EXCEL.EXE schickt Excel die Bitte „schließ dich“ – das hast du beim Editor genauso gemacht. Excel hängt und reagiert nicht darauf, darum läuft es weiter. Höflich zuerst ist trotzdem richtig: Ein Programm, das noch reagiert, kann dann selbst aufräumen und nach dem Speichern fragen."
     },
     {
-      "aufgabe": "Excel reagiert nicht. Beende es jetzt erzwungen.",
+      "aufgabe": "Excel reagiert nicht. Beende es jetzt erzwungen – egal auf welchem der drei Wege von eben.",
       "ziel": {
         "excel_laeuft": false
       },
@@ -173,7 +2080,7 @@
       "loesung": [
         "taskkill /IM EXCEL.EXE /F"
       ],
-      "danach": "Excel ist beendet. Erzwungen geht mit taskkill /IM EXCEL.EXE /F oder Stop-Process -Name EXCEL. Nicht gespeicherte Arbeit ist dabei verloren."
+      "danach": "Excel ist beendet. Erzwungen geht mit taskkill /IM EXCEL.EXE /F, über die Nummer mit taskkill /PID 6420 /F oder in der PowerShell mit Stop-Process -Name EXCEL bzw. Stop-Process -Id 6420. Nicht gespeicherte Arbeit ist dabei verloren – darum erst höflich, dann mit Zwang."
     },
     {
       "aufgabe": "Prüfe nach, dass Excel nicht mehr läuft.",
@@ -192,13 +2099,14 @@
         "Get-Process mit dem Namen dahinter.",
         "Tippe: Get-Process EXCEL"
       ],
-      "danach": "Gut – nachprüfen gehört immer dazu. Die rote Meldung „Cannot find a process“ heißt hier: Erfolg."
+      "danach": "Gut – nachprüfen gehört immer dazu. Die rote Meldung „Cannot find a process“ heißt hier: Erfolg, denn einen Prozess namens EXCEL gibt es nicht mehr. Erst wenn du nachgesehen hast, weißt du, dass der Befehl gewirkt hat."
     }
   ],
   "fertig": [
     "Get-Process und tasklist zeigen die laufenden Prozesse mit PID.",
     "tasklist /FI \"STATUS eq NOT RESPONDING\" findet hängende Programme.",
-    "taskkill /IM name bittet höflich, /F erzwingt; Stop-Process beendet sofort.",
+    "taskkill /IM name bittet höflich, /F erzwingt, /PID trifft genau einen Prozess.",
+    "Stop-Process -Name bzw. -Id beendet sofort (wie /F).",
     "Danach prüfst du nach, ob es geklappt hat."
   ]
 }
