@@ -22,6 +22,23 @@ den Fortschritt je System.
 - **Szenarien aus der Wirklichkeit:** Echte Fehler, die Tobi löst, kommen laufend als
   neue Szenarien dazu. Das Programm muss das ohne Codeänderung erlauben.
 
+## Lernprinzip
+
+Ziel ist eine funktionierende Lernsoftware, die **erklärt, erläutert, das Wissen abfragt und
+erprobt** (Tobi, 20.11.2026). Daraus folgt für Grundkurs, Szenarien und jeden neuen Bereich:
+
+1. **Erklären** – jeder Befehl und jeder Zusatz wird erklärt (was, wozu, wie liest man die Ausgabe),
+   bevor eine Aufgabe ihn verlangt. Hinweise (F1) ersetzen keine Erklärung.
+2. **Erläutern/Vorführen** – im Mitmachen an einem Beispiel gezeigt; die Erklärung danach sagt,
+   warum es so funktioniert.
+3. **Abfragen** – die Aufgabe überträgt das Gelernte auf ein anderes Beispiel und verlangt nichts Neues
+   (Ausnahme: gekennzeichnete Suchaufgabe).
+4. **Erproben** – Szenarien wenden es in echten Fehlersituationen an; ihre Erklärung geht die Lösung
+   Schritt für Schritt durch.
+
+`tests/test_didaktik.py` prüft das (siehe `IDEEN.md`, „Lernprinzip"). Eine Lektion oder ein Szenario,
+das den Test nicht besteht, ist nicht fertig.
+
 ## Unverhandelbar
 
 1. **Reine Simulation.** Das Programm führt nie echte Systembefehle aus: kein

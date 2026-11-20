@@ -1,0 +1,129 @@
+
+===== GRUNDKURS: 103 Befunde
+gk-win-konsole             Mitmachen 2  Befehl/Zusatz nirgends erklärt: whoami
+gk-win-konsole             Mitmachen 4  Befehl/Zusatz nirgends erklärt: get-kaffee
+gk-win-konsole             Aufgabe 2    vorher nicht erklärt: whoami
+gk-win-ordner              Mitmachen 3  Befehl/Zusatz nirgends erklärt: set-location
+gk-win-infos               Mitmachen 4  Befehl/Zusatz nirgends erklärt: get-computerinfo
+gk-win-infos               Aufgabe 1    Erklärung danach fehlt/zu knapp: Richtig: Microsoft Windows 11 Pro.
+gk-win-infos               Aufgabe 2    Erklärung danach fehlt/zu knapp: Genau, Get-Date.
+gk-win-dateien             Mitmachen 1  Erklärung danach fehlt/zu knapp: Du bist in Documents.
+gk-win-dateien             Aufgabe 2    Erklärung danach fehlt/zu knapp: Richtig: Copy-Item Quelle Ziel.
+gk-win-prozesse            Aufgabe 1    vorher nicht erklärt: /im, taskkill
+gk-win-prozesse            Aufgabe 2    vorher nicht erklärt: /im
+gk-win-dienste             Mitmachen 3  Befehl/Zusatz nirgends erklärt: start-service
+gk-win-dienste             Mitmachen 4  Befehl/Zusatz nirgends erklärt: -startuptype
+gk-win-dienste             Mitmachen 5  Erklärung danach fehlt/zu knapp: Diesmal ohne Fehler – der Dienst läuft.
+gk-win-dienste             Mitmachen 5  Befehl/Zusatz nirgends erklärt: start-service
+gk-win-dienste             Aufgabe 2    vorher nicht erklärt: restart-service
+gk-win-netzwerk            Mitmachen 2  Befehl/Zusatz nirgends erklärt: /all
+gk-win-netzwerk            Aufgabe 1    vorher nicht erklärt: test-connection
+gk-win-netzwerk            Aufgabe 2    vorher nicht erklärt: resolve-dnsname
+gk-win-netzwerk            Aufgabe 3    vorher nicht erklärt: /all
+gk-win-admin               Mitmachen 1  Befehl/Zusatz nirgends erklärt: stop-service
+gk-win-admin               Mitmachen 2  Befehl/Zusatz nirgends erklärt: sfc
+gk-win-admin               Mitmachen 3  Befehl/Zusatz nirgends erklärt: start-process
+gk-win-admin               Mitmachen 4  Befehl/Zusatz nirgends erklärt: sfc
+gk-win-admin               Aufgabe 1    vorher nicht erklärt: stop-service
+gk-win-admin               Aufgabe 1    Erklärung danach fehlt/zu knapp: Mit Adminrechten klappt es ohne Fehler.
+gk-win-admin               Aufgabe 2    vorher nicht erklärt: start-service
+gk-win-admin               Aufgabe 2    Erklärung danach fehlt/zu knapp: Running – alles wieder wie vorher.
+gk-win-fehlersuche         Mitmachen 2  Befehl/Zusatz nirgends erklärt: -printername, get-printjob
+gk-win-fehlersuche         Aufgabe 1    vorher nicht erklärt: stop-service
+gk-win-fehlersuche         Aufgabe 2    Erklärung danach fehlt/zu knapp: Die Warteschlange ist leer.
+gk-win-fehlersuche         Aufgabe 3    vorher nicht erklärt: start-service
+gk-srv-server              Mitmachen 3  Befehl/Zusatz nirgends erklärt: -computername
+gk-srv-server              Aufgabe 1    vorher nicht erklärt: -computername
+gk-srv-ad-benutzer         Mitmachen 3  Befehl/Zusatz nirgends erklärt: -lockedout
+gk-srv-ad-benutzer         Aufgabe 1    vorher nicht erklärt: -identity, unlock-adaccount
+gk-srv-ad-gruppen          Mitmachen 1  Befehl/Zusatz nirgends erklärt: get-adgroupmember
+gk-srv-ad-gruppen          Mitmachen 2  Befehl/Zusatz nirgends erklärt: get-adprincipalgroupmembership
+gk-srv-ad-gruppen          Aufgabe 1    vorher nicht erklärt: -identity, -members, add-adgroupmember
+gk-srv-ad-gruppen          Aufgabe 2    vorher nicht erklärt: get-adgroupmember
+gk-srv-ad-gruppen          Aufgabe 2    Erklärung danach fehlt/zu knapp: Nina steht in der Liste.
+gk-srv-dns                 Mitmachen 2  Befehl/Zusatz nirgends erklärt: -rrtype, -zonename, get-dnsserverresourcerecord
+gk-srv-dns                 Aufgabe 1    vorher nicht erklärt: -ipv4address, -zonename, add-dnsserverresourcerecorda
+gk-srv-dns                 Aufgabe 1    Erklärung danach fehlt/zu knapp: Eingetragen.
+gk-srv-dhcp                Mitmachen 1  Befehl/Zusatz nirgends erklärt: get-dhcpserverv4scopestatistics
+gk-srv-dhcp                Mitmachen 2  Befehl/Zusatz nirgends erklärt: get-dhcpserverv4scope
+gk-srv-dhcp                Aufgabe 1    vorher nicht erklärt: -endrange, -scopeid, set-dhcpserverv4scope
+gk-srv-dhcp                Aufgabe 1    Erklärung danach fehlt/zu knapp: Der Bereich ist größer.
+gk-srv-dhcp                Aufgabe 2    vorher nicht erklärt: get-dhcpserverv4scopestatistics
+gk-srv-ereignisse          Mitmachen 1  Befehl/Zusatz nirgends erklärt: -logname
+gk-srv-ereignisse          Aufgabe 1    vorher nicht erklärt: -filterhashtable, format-list
+gk-srv-fehlersuche         Mitmachen 2  Erklärung danach fehlt/zu knapp: Nur Tom – es ist kein größeres Problem.
+gk-srv-fehlersuche         Mitmachen 2  Befehl/Zusatz nirgends erklärt: -accountexpired
+gk-srv-fehlersuche         Aufgabe 1    vorher nicht erklärt: -datetime, -identity, set-adaccountexpiration
+gk-lin-terminal            Mitmachen 2  Befehl/Zusatz nirgends erklärt: hostname
+gk-lin-terminal            Mitmachen 4  Befehl/Zusatz nirgends erklärt: hostname
+gk-lin-terminal            Aufgabe 1    Erklärung danach fehlt/zu knapp: Genau: whoami.
+gk-lin-terminal            Aufgabe 2    vorher nicht erklärt: hostname
+gk-lin-terminal            Aufgabe 2    Erklärung danach fehlt/zu knapp: Richtig: hostname.
+gk-lin-terminal            Aufgabe 3    Erklärung danach fehlt/zu knapp: Gut!
+gk-lin-ordner              Mitmachen 2  Erklärung danach fehlt/zu knapp: ls listet den Inhalt: drei Ordner.
+gk-lin-ordner              Mitmachen 5  Befehl/Zusatz nirgends erklärt: cd
+gk-lin-ordner              Aufgabe 1    Erklärung danach fehlt/zu knapp: Richtig: erst cd Downloads, dann ls.
+gk-lin-ordner              Aufgabe 2    Erklärung danach fehlt/zu knapp: Genau: pwd.
+gk-lin-hilfe               Aufgabe 2    vorher nicht erklärt: cp
+gk-lin-hilfe               Aufgabe 2    Erklärung danach fehlt/zu knapp: Richtig: --help mit zwei Strichen.
+gk-lin-hilfe               Aufgabe 3    Erklärung danach fehlt/zu knapp: Genau: man cp.
+gk-lin-dateien             Mitmachen 1  Erklärung danach fehlt/zu knapp: Du bist in ~/Dokumente.
+gk-lin-dateien             Mitmachen 6  Erklärung danach fehlt/zu knapp: Darin liegt jetzt liste-alt.txt.
+gk-lin-dateien             Aufgabe 1    Erklärung danach fehlt/zu knapp: Angelegt.
+gk-lin-dateien             Aufgabe 2    Erklärung danach fehlt/zu knapp: Kopiert.
+gk-lin-nano                Aufgabe 3    Erklärung danach fehlt/zu knapp: Genau: cat.
+gk-lin-rechte              Mitmachen 2  Befehl/Zusatz nirgends erklärt: ./backup.sh
+gk-lin-rechte              Mitmachen 4  Erklärung danach fehlt/zu knapp: Jetzt läuft das Skript.
+gk-lin-rechte              Mitmachen 4  Befehl/Zusatz nirgends erklärt: ./backup.sh
+gk-lin-pakete              Aufgabe 1    Erklärung danach fehlt/zu knapp: Installiert.
+gk-lin-prozesse            Aufgabe 3    Erklärung danach fehlt/zu knapp: Weg. Nachprüfen gehört immer dazu.
+gk-lin-netzwerk            Aufgabe 1    Erklärung danach fehlt/zu knapp: Die Karte ist an.
+gk-lin-netzwerk            Aufgabe 3    Erklärung danach fehlt/zu knapp: Antworten kommen – das Netz geht.
+gk-lin-fehlersuche         Mitmachen 2  Erklärung danach fehlt/zu knapp: Auch hier .20.
+gk-lin-fehlersuche         Mitmachen 3  Befehl/Zusatz nirgends erklärt: host
+gk-lin-fehlersuche         Aufgabe 1    Erklärung danach fehlt/zu knapp: Die Zeile ist weg.
+gk-ls-ssh                  Mitmachen 1  Erklärung danach fehlt/zu knapp: srv-web01 – der Webserver.
+gk-ls-ssh                  Mitmachen 3  Erklärung danach fehlt/zu knapp: srv-db01 – du bist wirklich drüben.
+gk-ls-ssh                  Mitmachen 4  Befehl/Zusatz nirgends erklärt: exit
+gk-ls-ssh                  Aufgabe 2    Erklärung danach fehlt/zu knapp: admin.
+gk-ls-ssh                  Aufgabe 3    vorher nicht erklärt: exit
+gk-ls-ssh                  Aufgabe 3    Erklärung danach fehlt/zu knapp: Zurück auf srv-web01.
+gk-ls-systemctl            Mitmachen 3  Erklärung danach fehlt/zu knapp: Dienste ändern darf nur root.
+gk-ls-systemctl            Aufgabe 2    Erklärung danach fehlt/zu knapp: active (running) – die Datenbank läuft.
+gk-ls-logs                 Aufgabe 2    Erklärung danach fehlt/zu knapp: Der shop-worker läuft wieder.
+gk-ls-speicher             Mitmachen 3  Erklärung danach fehlt/zu knapp: Rund 18 GB Protokolle.
+gk-ls-speicher             Mitmachen 3  Befehl/Zusatz nirgends erklärt: --disk-usage
+gk-ls-speicher             Aufgabe 1    vorher nicht erklärt: --vacuum-size
+gk-ls-speicher             Aufgabe 2    Erklärung danach fehlt/zu knapp: Wieder genug Platz.
+gk-ls-ufw                  Mitmachen 3  Befehl/Zusatz nirgends erklärt: -i, curl
+gk-ls-ufw                  Aufgabe 1    Erklärung danach fehlt/zu knapp: Freigegeben.
+gk-ls-benutzer             Mitmachen 1  Erklärung danach fehlt/zu knapp: Nur mkoch und users – sudo fehlt.
+gk-ls-benutzer             Mitmachen 2  Erklärung danach fehlt/zu knapp: Nur admin.
+gk-ls-benutzer             Aufgabe 2    Erklärung danach fehlt/zu knapp: sudo steht jetzt dabei.
+gk-ls-fehlersuche          Mitmachen 1  Erklärung danach fehlt/zu knapp: failed – nginx läuft nicht.
+gk-ls-fehlersuche          Aufgabe 1    Erklärung danach fehlt/zu knapp: Gespeichert.
+gk-ls-fehlersuche          Aufgabe 3    vorher nicht erklärt: -i, curl
+
+===== SZENARIEN: 22 Befunde
+tk-dateiserver-voll        Szenario     weder im Grundkurs noch im Szenario erklärt: -computername, -driveletter, get-psdrive, get-volume
+tk-shop-502                Szenario     weder im Grundkurs noch im Szenario erklärt: -i, -n, -port, tail, test-netconnection
+win-dienst-deaktiviert     Szenario     weder im Grundkurs noch im Szenario erklärt: -startuptype
+win-dns-server-falsch      Szenario     weder im Grundkurs noch im Szenario erklärt: -interfacealias, get-dnsclientserveraddress
+win-druckwarteschlange     Szenario     weder im Grundkurs noch im Szenario erklärt: start-service, stop-service
+win-festplatte-voll        Szenario     weder im Grundkurs noch im Szenario erklärt: -driveletter
+srv-ad-gruppe-fehlt        Szenario     weder im Grundkurs noch im Szenario erklärt: -identity, -members, get-adgroupmember, get-adprincipalgroupmembership
+srv-ad-konto-abgelaufen    Szenario     weder im Grundkurs noch im Szenario erklärt: -datetime, -identity
+srv-ad-konto-gesperrt      Szenario     weder im Grundkurs noch im Szenario erklärt: -identity
+srv-ad-passwort-zuruecksetzen Szenario     weder im Grundkurs noch im Szenario erklärt: -identity
+srv-dhcp-bereich-voll      Szenario     weder im Grundkurs noch im Szenario erklärt: -scopeid, get-dhcpserverv4scope, get-dhcpserverv4scopestatistics
+srv-dns-eintrag-fehlt      Szenario     weder im Grundkurs noch im Szenario erklärt: -ipv4address, -rrtype, -zonename, add-dnsserverresourcerecorda, get-dnsserverresourcerecor
+srv-dns-weiterleitung      Szenario     weder im Grundkurs noch im Szenario erklärt: get-dnsserverforwarder
+srv-ereignisanzeige-neustart Szenario     weder im Grundkurs noch im Szenario erklärt: -logname
+srv-firewall-port          Szenario     weder im Grundkurs noch im Szenario erklärt: -displayname, get-netfirewallrule, get-nettcpconnection
+srv-freigabe-rechte        Szenario     weder im Grundkurs noch im Szenario erklärt: -accountname, -force, get-smbshareaccess, icacls
+srv-gpo-falsche-ou         Szenario     weder im Grundkurs noch im Szenario erklärt: -identity, -target, -targetpath, get-gpinheritance
+srv-rdp-gruppe             Szenario     weder im Grundkurs noch im Szenario erklärt: -group, -member, add-localgroupmember, get-localgroupmember
+srv-speicher-logs          Szenario     weder im Grundkurs noch im Szenario erklärt: -driveletter, -filter, -sum, get-volume
+ls-prozess-cpu             Szenario     weder im Grundkurs noch im Szenario erklärt: uptime
+ls-ssh-root-login          Szenario     weder im Grundkurs noch im Szenario erklärt: -n
+ls-ssh-schluessel-rechte   Szenario     weder im Grundkurs noch im Szenario erklärt: -la

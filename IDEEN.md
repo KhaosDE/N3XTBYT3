@@ -208,71 +208,86 @@ Beispiele:
 - Der Bericht des Werkzeugs zeigt danach 0 Fälle „nur allgemeine Meldung“ und 0 Fälle „nicht
   erkannt“; Zahlen in `STAND.md` festhalten.
 
-## Grundkurs: Jede Aufgabe nur mit vorher Gezeigtem lösbar
+## Lernprinzip: Alles wird erklärt, bevor es verlangt wird (Grundkurs und Szenarien)
 Status: freigegeben
-Datum: 12.11.2026
-Was: Im Grundkurs verlangen 17 Aufgaben einen Befehl, der vorher in keinem Mitmachen-Teil
-vorgeführt wurde. Das wird behoben, und eine feste Regel samt Test verhindert es künftig.
-Warum: Tobi meldet aus Windows-Lektion 6: Er soll Excel beenden, aber `taskkill` und
-`Stop-Process` wurden nie gezeigt oder erklärt. Der Aufbau „Erklären → Mitmachen → Selbst
-probieren“ verspricht, dass man beim Selbst-Probieren nur anwendet, was man gesehen hat.
-Gefunden mit `werkzeuge/didaktikpruefung.py` (Stand 12.11.2026).
+Datum: 20.11.2026 (ersetzt den Eintrag „Jede Aufgabe nur mit vorher Gezeigtem lösbar" vom 12.11.)
+Was: Grundkurs und Szenarien werden so überarbeitet, dass jeder Befehl und jeder Zusatz (Option,
+Schalter wie `/IM`, `/F`, `-Identity`, `--vacuum-size`) **erklärt** wird, bevor eine Aufgabe ihn
+verlangt – nicht nur gezeigt. Jede Erklärung nach einem Schritt erklärt wirklich etwas.
+Warum: Tobi, 20.11.2026: In Windows-Lektion 6 soll er Excel beenden, `taskkill` wird aber nirgends
+vorher erklärt – nur in den Hinweisen und erst nach dem Lösen. „Alle Aufgaben müssen eine Erklärung
+haben … Ziel ist eine funktionierende Lernsoftware, die erklärt, erläutert, das Wissen abfragt und
+erprobt." Das Lernprinzip steht jetzt auch in `CLAUDE.md` (Abschnitt „Lernprinzip").
 
-### Regel (gilt ab sofort für alle Lektionen)
-Jede Aufgabe muss mit Befehlen lösbar sein, die im Mitmachen-Teil dieser oder einer früheren
-Lektion vorgeführt wurden (oder im vorausgesetzten Kurs: Windows vor Windows Server, Linux vor
-Linux Server). Ausnahme nur als **ausdrückliche Suchaufgabe**: Der Aufgabentext sagt dann
-selbst, dass der Befehl neu ist und womit man ihn findet, z. B. „Den Befehl kennst du noch
-nicht. Finde ihn mit Get-Command *Restart*“ bzw. „… mit apropos“. Solche Aufgaben sind im
-Lektionsformat gekennzeichnet (neues Feld `"suchaufgabe": true`), erst ab der Hilfe-Lektion
-(Lektion 3) erlaubt und höchstens eine pro Lektion.
+### Befund (`werkzeuge/didaktikpruefung.py`, 20.11.2026; volle Liste: `docs/didaktik-befund-2026-11-20.txt`)
+- Grundkurs: 31 Mitmach-Schritte benutzen einen Befehl/Zusatz, der nirgends erklärt wird
+  (z. B. `whoami`, `Set-Location`, `Start-Service`, `-StartupType`, `ipconfig /all`, `-ComputerName`,
+  `Get-ADGroupMember`, `-ZoneName`, `--disk-usage`).
+- Grundkurs: 25 Aufgaben verlangen etwas, das vorher nicht erklärt wurde (z. B. `taskkill /IM` in
+  Lektion 6, `Restart-Service`, `Test-Connection`, `Unlock-ADAccount -Identity`,
+  `Set-DhcpServerv4Scope -ScopeId -EndRange`, `journalctl --vacuum-size`, `curl -I`).
+- Grundkurs: 47 Erklärungen nach einem Schritt sind nur Bestätigungen („Genau: pwd.", „Angelegt.",
+  „Gut!").
+- Szenarien: 22 Szenarien nutzen Befehle/Zusätze, die weder im Grundkurs noch im Szenario erklärt
+  sind (z. B. `Get-Volume -DriveLetter`, `icacls`, `Get-SmbShareAccess`, `-Identity`, `uptime`, `ls -la`).
+- Ein paar Treffer sind gewollt und kein Fehler (z. B. `Get-Kaffee` in Lektion 1 als Beispiel für
+  einen unbekannten Befehl) – siehe „Ausnahmen".
 
-### Gruppe 1 – Kernhandlung der Lektion fehlt (zwingend im Mitmachen vorführen)
-Das ist genau Tobis Fall: Die Lektion handelt davon, wird aber nie gezeigt.
-- `gk-win-prozesse` Aufgabe 1+2 (`taskkill /IM …`, `/F`): Im Mitmachen an einem **anderen**
-  hängenden Programm vorführen (z. B. Editor `notepad.exe`), damit für die Aufgaben mit Excel
-  noch etwas zu tun bleibt: `taskkill /IM notepad.exe`, dann erzwungen mit `/F`, dazu
-  `Stop-Process -Name notepad` als PowerShell-Weg. Erklärung „höflich gegen erzwungen“
-  (was `/F` macht, warum Ungespeichertes verloren geht).
-- `gk-lin-prozesse` Aufgabe 1+2 (`kill`, `kill -9`): genauso an einem anderen Prozess
-  vorführen; Signal TERM gegen KILL einfach erklären.
-- `gk-lin-rechte` Aufgabe 2 (`chown`): Die Lektion zu Rechten zeigt `chown` nie. Im Mitmachen
-  an einer anderen Datei vorführen (`sudo chown …`), Benutzer:Gruppe erklären.
-- `gk-ls-logs` Aufgabe 1 (`chown -R`): wird durch `gk-lin-rechte` mit abgedeckt, wenn dort
-  `chown` gezeigt wird; zusätzlich `-R` (ganzer Ordner) im Mitmachen dieser Lektion zeigen.
+### Regeln für jede Erklärung
+1. **Neuer Befehl** (beim ersten Auftreten, im Erklären-Absatz oder im Text/`danach` des
+   Mitmach-Schritts): Was macht er? Wozu brauchst du ihn im Alltag? Woher kommt der Name
+   (z. B. taskkill = „Task töten“)? Wie liest du die Ausgabe?
+2. **Neuer Zusatz** (Option/Schalter): Was bewirkt er, was passiert ohne ihn? Beispiel: `/IM` =
+   Image-Name, also der Name der Programmdatei (`EXCEL.EXE`); `/F` = force, erzwingen.
+3. **Mitmachen zeigt es vor, die Aufgabe überträgt es.** Die Aufgabe nutzt das Gelernte an einem
+   anderen Beispiel (anderes Programm, anderer Name, andere Adresse) – sie verlangt nie etwas Neues.
+   Ausnahme nur als gekennzeichnete Suchaufgabe (siehe unten).
+4. **`danach` erklärt, nicht nur bestätigen:** Warum hat das funktioniert, was zeigt die Ausgabe,
+   wann brauchst du das in echt? Mindestens zwei Sätze. „Richtig." allein reicht nie.
+5. **Szenarien:** Jeder Befehl und Zusatz der Lösung ist entweder in einer Lektion erklärt, die das
+   Szenario als `voraussetzung` nennt, oder in der `erklaerung`/den `begriffe` des Szenarios selbst.
+   Die Erklärung nach dem Lösen geht die Lösung Schritt für Schritt durch (was, warum).
+6. Alle neuen Texte mit Quelle (Microsoft Learn / man-Page); Inhalte bleiben `ungeprueft`.
 
-### Gruppe 2 – Neuer Befehl nach dem Verb-Nomen-Prinzip (vorführen oder Suchaufgabe)
-`gk-win-dienste` A2 `Restart-Service`, `gk-win-netzwerk` A1 `Test-Connection`, `gk-srv-server`
-A2 `Exit-PSSession`, `gk-srv-ad-benutzer` A1 `Unlock-ADAccount`, `gk-srv-ad-gruppen` A1
-`Add-ADGroupMember`, `gk-srv-features` A1 `Install-WindowsFeature`.
-Je Lektion entscheiden (einfachere Lösung, in `STAND.md` festhalten): entweder im Mitmachen
-vorführen, oder zur gekennzeichneten Suchaufgabe machen, deren Text auf `Get-Command`
-verweist. Höchstens eine Suchaufgabe pro Lektion – der Rest wird vorgeführt.
+### Lektion 6 (Windows, Prozesse) – genau so umbauen
+- Erklären-Absatz: kündigt an, dass du zwei Wege lernst: `taskkill` (älteres Programm, geht in
+  PowerShell und cmd) und `Stop-Process` (PowerShell).
+- Neue Mitmach-Schritte **an einem anderen hängenden Programm** (z. B. Editor, `notepad.exe`), damit für
+  Excel in den Aufgaben noch etwas zu tun bleibt:
+  1. `taskkill /IM notepad.exe` – erklärt: taskkill = „Task töten“, `/IM` = Image-Name (Name der
+     Programmdatei, steht in der Spalte „Image Name“ von tasklist); ohne `/F` schickt taskkill nur die
+     Bitte „schließ dich“ (wie ein Klick aufs X) – ein hängendes Programm reagiert darauf nicht.
+     Die echte Rückmeldung zeigen (laut Doku).
+  2. `taskkill /IM notepad.exe /F` – erklärt: `/F` = force, Windows beendet das Programm sofort;
+     Ungespeichertes ist verloren.
+  3. Alternative mit der PID: `taskkill /PID <Nummer> /F` – erklärt, warum die PID eindeutig ist, wenn
+     mehrere Prozesse gleich heißen.
+  4. `Stop-Process -Name notepad` (bzw. `-Id`) – erklärt: der PowerShell-Weg, beendet sofort (wie `/F`);
+     `-Name` ohne `.exe`.
+- Danach die Aufgaben mit Excel (höflich, erzwungen, nachprüfen) – jetzt reine Übertragung.
 
-### Gruppe 3 – Lange Spezialbefehle (immer vorführen, nicht erraten lassen)
-`gk-srv-dns` A1 `Add-DnsServerResourceRecordA`, `gk-srv-dhcp` A1 `Set-DhcpServerv4Scope`,
-`gk-srv-fehlersuche` A1 `Set-ADAccountExpiration`. Diese Namen samt Parametern kann ein
-Einsteiger nicht ableiten. Im Mitmachen an einem anderen Beispiel vorführen (anderer Name,
-andere Adresse, anderes Datum), die Aufgabe bleibt die Übertragung.
+### Suchaufgaben (Ausnahme von Regel 3)
+Erlaubt ab der Hilfe-Lektion (Lektion 3), höchstens eine pro Lektion, gekennzeichnet mit
+`"suchaufgabe": true`. Der Aufgabentext sagt selbst, dass der Befehl neu ist und womit man ihn
+findet (`Get-Command`, `Get-Help`, `apropos`, `man`, `--help`). Die Erklärung danach erklärt den
+gefundenen Befehl vollständig nach Regel 1 und 2.
 
-### Gruppe 4 – Hilfe-Mechanismus auf neuen Befehl übertragen (vermutlich in Ordnung)
-`gk-win-hilfe` A3 `ping /?`, `gk-lin-hilfe` A2 `cp --help`: Hier ist der Befehl neu, gelernt
-werden soll aber die Hilfe-Art (`/?`, `--help`). Prüfen, ob `/?` bzw. `--help` im Mitmachen
-an einem anderen Befehl gezeigt wurde. Falls ja: unverändert lassen. Falls nein: vorführen.
+### Ausnahmen
+Gewollt unbekannte Befehle (Vorführung einer Fehlermeldung, z. B. `Get-Kaffee`) bekommen am Schritt
+`"absichtlich_unbekannt": true`; die Prüfung überspringt sie.
 
-### Weitere Punkte
-- Der Erklären-Text darf nichts versprechen, was die Lektion nicht vorführt (Lektion 6:
-  „erst höflich, dann erzwungen“).
-- Neue Mitmachen-Schritte bekommen wie alle Inhalte `quelle` (Microsoft Learn / man-Page).
-- Die Befehle wandern wie gewohnt ins Befehlsbuch und ins Befehls-Training.
+### Vorgehen
+Lektion für Lektion durchgehen, alle vier Kurse, danach alle Szenarien. Nicht nur die Befunde des
+Werkzeugs abarbeiten: Das Werkzeug prüft nur, ob ein Wort in einem Erklärtext vorkommt, nicht ob die
+Erklärung gut ist. Jede Lektion zusätzlich von Hand lesen, als wäre man Einsteiger: Weiß ich bei
+jeder Aufgabe ohne Hinweis, was zu tippen ist und warum?
 
 ### Test und Abnahme
-- `werkzeuge/didaktikpruefung.py` wird zum Test `tests/test_didaktik.py`: Jede Aufgabe ist
-  mit vorher Gezeigtem lösbar oder als `suchaufgabe` gekennzeichnet; Suchaufgaben nennen im
-  Text `Get-Command`, `Get-Help`, `apropos`, `man` oder `--help`, stehen ab Lektion 3 und
-  kommen höchstens einmal pro Lektion vor.
-- Der Bericht des Werkzeugs zeigt danach 0 Lücken (außer gekennzeichneten Suchaufgaben).
-- Tobi spielt Windows-Lektion 6 erneut und weiß bei Aufgabe 1 ohne Hinweis, was zu tippen ist.
+- `werkzeuge/didaktikpruefung.py` wird zum Test `tests/test_didaktik.py` und zeigt **0 Befunde**
+  (Ausnahmen nur über `suchaufgabe` / `absichtlich_unbekannt`). Der Test prüft außerdem: höchstens eine
+  Suchaufgabe pro Lektion, erst ab Lektion 3, Text nennt das Suchwerkzeug.
+- In `STAND.md`: Zahl der Befunde vorher/nachher, je Kurs.
+- Tobi spielt Windows-Lektion 6 und weiß bei jeder Aufgabe ohne Hinweis, was zu tippen ist.
 
 ## Szenarien aus gelösten Problemen in Tobis Notizen
 Status: offen
