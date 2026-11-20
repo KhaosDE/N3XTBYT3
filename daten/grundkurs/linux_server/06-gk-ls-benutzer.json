@@ -6,35 +6,50 @@
   "quelle": [
     "https://man7.org/linux/man-pages/man1/id.1.html",
     "https://man7.org/linux/man-pages/man8/usermod.8.html",
-    "https://man7.org/linux/man-pages/man8/sudo.8.html"
+    "https://man7.org/linux/man-pages/man8/sudo.8.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/groups.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/getent.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man5/sudoers.5.html"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-sudo-gruppe",
   "erklaeren": [
-    "Wer was auf dem Server darf, hängt an Gruppen. Wer in der Gruppe sudo ist, darf Befehle mit sudo als root",
-    "ausführen. id benutzer zeigt alle Gruppen eines Benutzers, usermod -aG gruppe benutzer nimmt ihn",
-    "zusätzlich in eine Gruppe auf. Hier: Der neue Admin Max Koch (mkoch) darf kein sudo."
+    "Wer was auf dem Server darf, hängt unter Linux an Gruppen. Jeder Benutzer hat eine Hauptgruppe und kann in",
+    "weiteren Gruppen sein. Bei Ubuntu gilt: Wer in der Gruppe sudo ist, darf Befehle mit sudo als root",
+    "ausführen – so steht es in der Datei /etc/sudoers. Zum Nachsehen gibt es drei Befehle: id benutzer (Nummern",
+    "und alle Gruppen), groups benutzer (nur die Gruppennamen) und getent group gruppe (wer ist in der Gruppe?).",
+    "Zum Ändern: usermod -aG gruppe benutzer nimmt jemanden zusätzlich in eine Gruppe auf.",
+    "",
+    "Hier: Marie Koch (Benutzer mkoch) hilft ab heute bei der Serverpflege, bekommt bei sudo aber nur",
+    "„mkoch is not in the sudoers file.“"
   ],
   "begriffe": {
-    "uid / gid": "Nummer des Benutzers / seiner Hauptgruppe.",
-    "Gruppe sudo": "Wer darin ist, darf sudo benutzen.",
-    "usermod -aG": "-a = append (dazu), -G = Gruppen. Ohne -a würden alle anderen Gruppen ersetzt!"
+    "uid / gid": "User-ID und Group-ID: die Nummern, unter denen Linux Benutzer und Gruppen führt. gid ist die Hauptgruppe.",
+    "Hauptgruppe": "Bei Ubuntu bekommt jeder Benutzer eine eigene Gruppe mit seinem Namen.",
+    "Gruppe sudo": "Unter Ubuntu die Gruppe der Administratoren (Nummer 27). Wer darin ist, darf sudo benutzen.",
+    "/etc/sudoers": "Regelt, wer sudo darf. Bei Ubuntu steht dort %sudo ALL=(ALL:ALL) ALL – alle aus der Gruppe sudo dürfen alles. Nur mit visudo bearbeiten.",
+    "usermod -aG": "-G = Gruppen, -a = append (anhängen). Ohne -a würde der Benutzer aus allen Zusatzgruppen entfernt, die nicht in der Liste stehen!"
   },
   "mitmachen": [
     {
       "text": "Welche Gruppen hat mkoch? id mkoch",
       "eingabe": "id mkoch",
-      "danach": "Nur mkoch und users – sudo fehlt."
+      "danach": "id (identity) zeigt drei Teile: uid=1001(mkoch) ist die Benutzernummer mit Namen, gid=1001(mkoch) die Hauptgruppe – bei Ubuntu eine Gruppe mit gleichem Namen –, und groups= alle Gruppen, in denen mkoch ist: mkoch und users. Die Gruppe sudo (Nummer 27) fehlt – darum darf Marie kein sudo."
     },
     {
-      "text": "Wer ist in der Gruppe sudo? getent group sudo",
+      "text": "Kürzer: groups mkoch",
+      "eingabe": "groups mkoch",
+      "danach": "groups zeigt nur die Gruppennamen, ohne Nummern: vor dem Doppelpunkt der Benutzer, dahinter seine Gruppen. Das liest sich schneller, wenn du nur wissen willst, ob eine bestimmte Gruppe dabei ist. Auch hier: sudo fehlt."
+    },
+    {
+      "text": "Von der anderen Seite: Wer ist in der Gruppe sudo? getent group sudo",
       "eingabe": "getent group sudo",
-      "danach": "Nur admin."
+      "danach": "getent (get entries, „Einträge holen“) liest Einträge aus den Listen des Systems – hier aus der Gruppenliste /etc/group. Die Zeile hat vier Teile, getrennt durch Doppelpunkte: der Name der Gruppe (sudo), ein x als Platzhalter für ein Gruppenpasswort, die Nummer 27 und die Mitglieder – nur admin. So prüfst du schnell, wer auf einem Server Admin-Rechte hat."
     },
     {
       "text": "Versuch ohne sudo: usermod -aG sudo mkoch",
       "eingabe": "usermod -aG sudo mkoch",
-      "danach": "Permission denied – Benutzer ändern darf nur root."
+      "danach": "usermod (user modify, „Benutzer ändern“) ändert ein Benutzerkonto. -G nennt die Zusatzgruppen, -a (append, „anhängen“) sorgt dafür, dass die neue Gruppe dazukommt. Ohne -a ersetzt usermod die Zusatzgruppen: mkoch wäre nur noch in sudo und flöge aus users. -a und -G schreibst du zusammen als -aG; dahinter erst die Gruppe, dann den Benutzer. Die rote Meldung „Permission denied … cannot lock /etc/passwd“ heißt: Benutzerkonten ändern darf nur root."
     }
   ],
   "aufgaben": [
@@ -44,14 +59,14 @@
         "mkoch_sudo": true
       },
       "hinweise": [
-        "Der Befehl ist richtig – es fehlen die Rechte.",
+        "Der Befehl von eben ist richtig – es fehlen die Rechte.",
         "sudo davor; -a nicht vergessen.",
         "Tippe: sudo usermod -aG sudo mkoch"
       ],
       "loesung": [
         "sudo usermod -aG sudo mkoch"
       ],
-      "danach": "Aufgenommen. mkoch muss sich neu anmelden, damit die Gruppe wirkt."
+      "danach": "Keine Ausgabe heißt: Es hat geklappt – mkoch ist jetzt in der Gruppe sudo, ohne dass jemand /etc/sudoers anfassen musste. Wichtig für Marie: Neue Gruppen gelten erst nach einer neuen Anmeldung; sie muss sich einmal ab- und wieder anmelden (bei ssh: exit und neu verbinden)."
     },
     {
       "aufgabe": "Prüf nach.",
@@ -68,11 +83,13 @@
         "id und der Benutzername.",
         "Tippe: id mkoch"
       ],
-      "danach": "sudo steht jetzt dabei."
+      "danach": "sudo steht jetzt dabei – bei id als 27(sudo), bei groups als Name, bei getent group sudo hinter admin. users ist dank -a noch da. Wer sudo darf, darf auf dem Server alles: Nimm nur Leute in diese Gruppe auf, die ihn wirklich pflegen."
     }
   ],
   "fertig": [
-    "id benutzer zeigt Gruppen; getent group gruppe zeigt Mitglieder.",
-    "sudo usermod -aG gruppe benutzer nimmt jemanden zusätzlich auf (immer mit -a!)."
+    "id benutzer und groups benutzer zeigen die Gruppen; getent group gruppe zeigt die Mitglieder.",
+    "Unter Ubuntu darf sudo benutzen, wer in der Gruppe sudo ist.",
+    "sudo usermod -aG gruppe benutzer nimmt jemanden zusätzlich auf – immer mit -a!",
+    "Neue Gruppen gelten erst nach einer neuen Anmeldung."
   ]
 }

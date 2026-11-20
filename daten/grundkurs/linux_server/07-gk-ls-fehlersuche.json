@@ -6,41 +6,72 @@
   "quelle": [
     "https://nginx.org/en/docs/switches.html",
     "https://nginx.org/en/docs/beginners_guide.html",
+    "https://nginx.org/en/docs/ngx_core_module.html#error_log",
     "https://man7.org/linux/man-pages/man1/systemctl.1.html",
-    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/curl.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-nginx-konfig",
   "erklaeren": [
-    "Zum Abschluss die fünf Schritte am Server. Der Fall: Nach einer Änderung an der Konfiguration startet der",
-    "Webserver nginx nicht mehr, der Shop ist weg. Viele Dienste können ihre Konfiguration selbst prüfen –",
-    "bei nginx mit nginx -t. Das sagt dir Datei und Zeile des Fehlers."
+    "Zum Abschluss die fünf Schritte der Fehlersuche am Server: beschreiben, Infos sammeln, vermuten, gezielt",
+    "beheben, nachprüfen und notieren. Der Fall: Nach einer Änderung an der Konfiguration startet der Webserver",
+    "nginx nicht mehr, der Shop ist weg. Die Werkzeuge kennst du: systemctl status, journalctl -u, cat, sudo nano",
+    "und curl -I. Neu ist nur eins: Viele Dienste können ihre Konfiguration selbst prüfen – bei nginx mit",
+    "sudo nginx -t (t = test). Das nennt dir Datei und Zeile des Fehlers, ohne den Dienst anzufassen."
   ],
   "begriffe": {
     "Konfiguration": "Einstellungsdatei eines Programms, unter Linux meist in /etc.",
-    "nginx -t": "Prüft die nginx-Konfiguration, ohne etwas zu ändern (t = test).",
-    "Direktive": "Eine Einstellung in der nginx-Konfiguration; jede endet mit einem Semikolon (;)."
+    "nginx -t": "Prüft die nginx-Konfiguration auf Fehler (t = test), ohne etwas zu ändern oder den Dienst zu starten.",
+    "Direktive": "Eine Einstellung in der nginx-Konfiguration; jede endet mit einem Semikolon (;).",
+    "[emerg]": "emergency (Notfall): schwerster Fehlergrad bei nginx – so kann der Server nicht starten.",
+    "conf.d": "Ordner für zusätzliche Konfigurationsdateien, die nginx.conf mit include einbindet.",
+    "datei:zeile": "Schreibweise in Fehlermeldungen: shop.conf:5 heißt Datei shop.conf, Zeile 5."
   },
+  "befehle": [
+    {
+      "muster": [
+        "curl -I http://localhost",
+        "curl -I localhost"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "nginx_aktiv": false
+          },
+          "ausgabe": "curl: (7) Failed to connect to localhost port 80 after 0 ms: Couldn't connect to server"
+        },
+        {
+          "ausgabe": [
+            "HTTP/1.1 200 OK",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html"
+          ],
+          "notiz": "Gekürzt: Im echten System folgen weitere Kopfzeilen, z. B. Date, Content-Length und Last-Modified."
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Infos sammeln: systemctl status nginx",
       "eingabe": "systemctl status nginx",
-      "danach": "failed – nginx läuft nicht."
+      "danach": "× und failed: nginx läuft nicht. Spannend ist die Zeile Process: Bevor systemd nginx startet, lässt es nginx -t laufen (ExecStartPre, „vor dem Start ausführen“) – und genau dieser Test ist mit status=1/FAILURE gescheitert. Der Fehler steckt also in der Konfiguration, nicht im Programm."
     },
     {
       "text": "Warum? journalctl -u nginx",
       "eingabe": "journalctl -u nginx",
-      "danach": "[emerg] invalid number of arguments in \"root\" directive – irgendwas mit der Zeile root."
+      "danach": "Die erste Zeile verrät es: [emerg] (emergency, schwerster Fehler) invalid number of arguments in \"root\" directive – die Einstellung root hat die falsche Anzahl an Werten. Dahinter steht der Ort: /etc/nginx/conf.d/shop.conf:5, also Datei shop.conf, Zeile 5. Die systemd-Zeilen darunter bestätigen nur: Der Start ist gescheitert."
     },
     {
-      "text": "Die Konfiguration prüfen: sudo nginx -t",
+      "text": "Die Konfiguration selbst prüfen: sudo nginx -t",
       "eingabe": "sudo nginx -t",
-      "danach": "Datei und Zeile: /etc/nginx/conf.d/shop.conf, Zeile 5. Vermutung: ein Tippfehler bei root."
+      "danach": "nginx -t (t = test) liest alle Konfigurationsdateien, meldet den ersten Fehler mit Datei und Zeile und ändert nichts – der Dienst wird weder gestartet noch gestoppt. sudo braucht es, weil nginx beim Test auch Dateien öffnet, an die ein normaler Benutzer nicht herankommt (z. B. seine Protokolldatei). Die Meldung ist dieselbe wie im Journal: shop.conf, Zeile 5. Vermutung: ein Tippfehler rund um root."
     },
     {
       "text": "Nachsehen: cat /etc/nginx/conf.d/shop.conf",
       "eingabe": "cat /etc/nginx/conf.d/shop.conf",
-      "danach": "Bei root /var/www/shop fehlt das Semikolon am Ende – nginx liest die nächste Zeile mit dazu."
+      "danach": "Zeile 4: root /var/www/shop – hier fehlt das Semikolon am Ende. In nginx endet jede Einstellung (Direktive) mit ;. Fehlt es, liest nginx einfach weiter: root /var/www/shop index index.html; – root bekommt drei Werte statt einem. Darum meldet nginx Zeile 5, wo das nächste Semikolon steht, obwohl der Fehler in Zeile 4 liegt. Merke: Ist die gemeldete Zeile in Ordnung, sieh dir die Zeile davor an. Die Datei gehört root, also bearbeitest du sie mit sudo nano (Strg+O speichert, Enter bestätigt, Strg+X beendet)."
     }
   ],
   "aufgaben": [
@@ -70,7 +101,7 @@
           ]
         }
       ],
-      "danach": "Gespeichert."
+      "danach": "„[ Wrote 6 lines ]“ heißt: nano hat alle sechs Zeilen gespeichert – hinter root /var/www/shop steht jetzt das Semikolon. Bevor du nginx neu startest, kommt der Test: Ein Neustart mit fehlerhafter Konfiguration würde wieder scheitern."
     },
     {
       "aufgabe": "Prüf die Konfiguration erneut und starte nginx neu.",
@@ -86,7 +117,7 @@
         "sudo nginx -t",
         "sudo systemctl restart nginx"
       ],
-      "danach": "syntax is ok – und nginx läuft. Erst testen, dann neu starten: So legt eine kaputte Konfiguration nie den laufenden Dienst lahm."
+      "danach": "„syntax is ok“ und „test is successful“: Die Konfiguration ist fehlerfrei, und nach dem restart läuft nginx. Erst testen, dann neu starten – so legt eine kaputte Konfiguration nie einen laufenden Dienst lahm. Das gilt für viele Dienste: sudo sshd -t prüft zum Beispiel die Einstellungen von ssh."
     },
     {
       "aufgabe": "Nachprüfen: Antwortet der Webserver?",
@@ -103,12 +134,13 @@
         "curl -I und die Adresse.",
         "Tippe: curl -I http://localhost"
       ],
-      "danach": "200 OK. Notiz: „Fehlendes Semikolon in shop.conf (root-Zeile); korrigiert, nginx -t ok, neu gestartet.“"
+      "danach": "HTTP/1.1 200 OK – der Shop ist wieder da. Zum Schluss die Notiz für die Kollegen: „Fehlendes Semikolon in shop.conf (root-Zeile); korrigiert, nginx -t ok, neu gestartet.“ So weiß beim nächsten Mal jeder sofort, was los war."
     }
   ],
   "fertig": [
-    "Status, Log, Konfigurationstest – so findest du Datei und Zeile des Fehlers.",
-    "Erst nginx -t, dann neu starten.",
+    "Status, Journal, Konfigurationstest – so findest du Datei und Zeile eines Fehlers.",
+    "Fehlt in nginx ein Semikolon, meldet nginx oft erst die Zeile danach.",
+    "Erst sudo nginx -t, dann sudo systemctl restart nginx.",
     "Ab jetzt kannst du die Linux-Server-Szenarien allein lösen."
   ]
 }

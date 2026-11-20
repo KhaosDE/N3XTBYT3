@@ -5,35 +5,86 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://manpages.ubuntu.com/manpages/noble/man8/ufw.8.html",
-    "https://documentation.ubuntu.com/server/how-to/security/firewalls/"
+    "https://documentation.ubuntu.com/server/how-to/security/firewalls/",
+    "https://manpages.ubuntu.com/manpages/noble/man1/curl.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-ufw-web",
   "erklaeren": [
-    "Eine Firewall entscheidet, welche Verbindungen von außen auf den Server dürfen. Unter Ubuntu ist das ufw",
-    "(uncomplicated firewall). Jeder Dienst lauscht auf einem Port (Web: 80 und 443, ssh: 22); nur was die",
-    "Firewall erlaubt, kommt durch. Hier läuft der neue Webserver, aber von außen kommt niemand dran."
+    "Eine Firewall entscheidet, welche Verbindungen von außen auf den Server dürfen. Unter Ubuntu heißt sie ufw",
+    "(uncomplicated firewall, „unkomplizierte Firewall“). Jeder Dienst lauscht auf einem Port, einer Nummer:",
+    "Webseiten auf 80 (HTTP) und 443 (HTTPS), ssh auf 22. Ist ufw eingeschaltet, blockiert sie alles, was von",
+    "außen kommt und nicht ausdrücklich erlaubt ist. sudo ufw status zeigt die Regeln, sudo ufw allow … erlaubt",
+    "einen Port oder ein Programm. Zum Testen, ob ein Webserver überhaupt antwortet, lernst du curl kennen.",
+    "",
+    "Hier läuft der neue Webserver nginx, aber von außen kommt niemand an den Shop."
   ],
   "begriffe": {
     "Firewall": "Filter für Netzwerkverbindungen: erlaubt oder blockiert.",
     "Port": "Nummer, unter der ein Dienst erreichbar ist (80 = HTTP, 443 = HTTPS, 22 = ssh).",
-    "Anwendungsprofil": "In ufw ein Name für die Ports eines Programms, z. B. „Nginx Full“ = 80 und 443."
+    "Anwendungsprofil": "In ufw ein Name für die Ports eines Programms, z. B. „Nginx Full“ = 80 und 443.",
+    "(v6)": "Dieselbe Regel für IPv6, die neuere Form der IP-Adressen. ufw legt sie automatisch mit an.",
+    "localhost": "Name für den Rechner selbst (Adresse 127.0.0.1). Verbindungen dorthin lässt ufw immer durch.",
+    "curl": "Ruft Adressen (URLs) wie eine Webseite im Terminal ab. Der Name steht für „client for URLs“.",
+    "HTTP-Statuscode": "Dreistellige Antwort eines Webservers: 200 = OK, 404 = nicht gefunden, 502 = Fehler beim Dienst hinter dem Webserver."
   },
+  "befehle": [
+    {
+      "muster": [
+        "ufw allow OpenSSH"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "ausgabe": [
+            "Skipping adding existing rule",
+            "Skipping adding existing rule (v6)"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "curl -I http://localhost"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "HTTP/1.1 200 OK",
+            "Server: nginx/1.24.0 (Ubuntu)",
+            "Content-Type: text/html"
+          ],
+          "notiz": "Gekürzt: Im echten System folgen weitere Kopfzeilen, z. B. Date, Content-Length und Last-Modified."
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Was ist erlaubt? sudo ufw status",
       "eingabe": "sudo ufw status",
-      "danach": "Status: active – nur OpenSSH ist erlaubt. Port 80 und 443 fehlen."
+      "danach": "Status: active heißt: Die Firewall ist eingeschaltet. Darunter die Regeln: To ist das Ziel auf diesem Server (Port oder Profil), Action sagt, was passiert (ALLOW = durchlassen), und From, woher die Verbindung kommen darf (Anywhere = von überall). Jede Regel steht zweimal – die Zeile mit (v6) gilt für IPv6. Erlaubt ist nur OpenSSH (Port 22); Port 80 und 443 für den Webserver fehlen, also blockt ufw alle Besucher. Schon das Anzeigen der Regeln braucht bei ufw sudo."
     },
     {
       "text": "Welche Profile gibt es? sudo ufw app list",
       "eingabe": "sudo ufw app list",
-      "danach": "Nginx Full steht für 80 und 443 zusammen."
+      "danach": "app list zeigt die Anwendungsprofile: Namen, hinter denen die Ports eines Programms stehen. Sie kommen mit den Paketen – nginx bringt drei mit: Nginx HTTP (Port 80), Nginx HTTPS (Port 443) und Nginx Full (beide). OpenSSH steht für Port 22. Mit einem Profil musst du dir keine Portnummern merken."
     },
     {
-      "text": "Läuft der Webserver lokal? curl -I http://localhost",
+      "text": "Antwortet der Webserver überhaupt? curl -I http://localhost",
       "eingabe": "curl -I http://localhost",
-      "danach": "HTTP/1.1 200 OK – auf dem Server selbst antwortet nginx. Es liegt also an der Firewall."
+      "danach": "curl („client for URLs“) ruft eine Adresse ab wie ein Browser, nur im Terminal. -I (großes i, lang --head) holt nur die Kopfzeilen der Antwort – ohne -I schreibt curl den ganzen HTML-Text der Seite ins Terminal. http://localhost heißt: dieser Server selbst. Die erste Zeile ist die wichtigste: HTTP/1.1 200 OK – Statuscode 200, alles in Ordnung; Server: nginx/1.24.0 verrät, wer geantwortet hat. nginx läuft also. Weil ufw Verbindungen zu localhost immer durchlässt, liegt das Problem bei der Firewall, nicht bei nginx."
+    },
+    {
+      "text": "So sieht eine Freigabe aus – gefahrlos mit einer Regel, die es schon gibt: sudo ufw allow OpenSSH",
+      "eingabe": "sudo ufw allow OpenSSH",
+      "danach": "ufw allow und dahinter ein Profil (oder ein Port wie 80/tcp) erlaubt eingehende Verbindungen. Weil OpenSSH schon erlaubt ist, überspringt ufw die Regel: „Skipping adding existing rule“ – einmal für IPv4 und einmal (v6) für IPv6. Bei einer neuen Regel stünde dort „Rule added“. Hat ein Profilname ein Leerzeichen, setzt du ihn in Anführungszeichen, sonst hält ufw das zweite Wort für etwas anderes: \"Nginx Full\". Und ganz wichtig am Server: OpenSSH nie sperren – sonst sperrst du dich selbst aus."
     }
   ],
   "aufgaben": [
@@ -43,14 +94,14 @@
         "web_frei": true
       },
       "hinweise": [
-        "Erlauben heißt allow.",
+        "Erlauben heißt allow – wie eben bei OpenSSH.",
         "sudo ufw allow und der Profilname in Anführungszeichen.",
         "Tippe: sudo ufw allow \"Nginx Full\""
       ],
       "loesung": [
         "sudo ufw allow \"Nginx Full\""
       ],
-      "danach": "Freigegeben."
+      "danach": "„Rule added“ und „Rule added (v6)“ – die Regel gilt für IPv4 und IPv6. Ab sofort lässt ufw Verbindungen auf Port 80 und 443 durch; einen Neustart braucht es dafür nicht. Die Anführungszeichen sind wegen des Leerzeichens im Namen nötig."
     },
     {
       "aufgabe": "Prüf die Regeln nach.",
@@ -67,12 +118,13 @@
         "sudo ufw status.",
         "Tippe: sudo ufw status"
       ],
-      "danach": "Nginx Full: ALLOW – der Shop ist erreichbar."
+      "danach": "Nginx Full steht jetzt mit ALLOW in der Liste, auch als (v6) – der Shop ist von außen erreichbar. Nach jeder Änderung an der Firewall nachzusehen, gehört dazu: So siehst du schwarz auf weiß, was wirklich gilt."
     }
   ],
   "fertig": [
-    "sudo ufw status zeigt die Regeln.",
-    "sudo ufw allow … öffnet Ports oder Profile.",
-    "Erst lokal prüfen (curl -I http://localhost), dann die Firewall."
+    "sudo ufw status zeigt die Regeln (To, Action, From).",
+    "sudo ufw app list zeigt Anwendungsprofile wie „Nginx Full“ (80 und 443).",
+    "sudo ufw allow … öffnet ein Profil oder einen Port; Namen mit Leerzeichen in Anführungszeichen.",
+    "curl -I http://localhost prüft, ob der Webserver auf dem Server selbst antwortet – erst das, dann die Firewall."
   ]
 }

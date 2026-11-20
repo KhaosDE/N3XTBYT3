@@ -4,36 +4,106 @@
   "titel": "Speicherplatz: df und du",
   "pruefstatus": "ungeprueft",
   "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man1/df.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/du.1.html",
     "https://man7.org/linux/man-pages/man1/df.1.html",
     "https://man7.org/linux/man-pages/man1/du.1.html",
-    "https://man7.org/linux/man-pages/man1/journalctl.1.html"
+    "https://man7.org/linux/man-pages/man1/journalctl.1.html",
+    "https://man7.org/linux/man-pages/man5/journald.conf.5.html"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-journal-voll",
   "erklaeren": [
-    "Ist die Festplatte eines Servers voll, fallen Dienste aus. df -h zeigt, wie voll jedes Dateisystem ist,",
-    "du -sh zeigt, wie viel ein Ordner belegt. -h heißt: lesbare Größen (G, M, K). Hier ist die Platte von",
-    "srv-web01 fast voll."
+    "Ist die Festplatte eines Servers voll, fallen Dienste aus: Sie können nichts mehr schreiben, im Log steht",
+    "„No space left on device“. Zwei Befehle helfen beim Suchen: df (disk free, „freier Plattenplatz“) zeigt,",
+    "wie voll jedes Dateisystem ist; du (disk usage, „Plattenbelegung“) zeigt, wie viel Ordner und Dateien",
+    "belegen. Beide bekommen fast immer -h dazu (human-readable, „für Menschen lesbar“): Dann stehen da Größen",
+    "wie 18G oder 312K statt langer Zahlen.",
+    "",
+    "Hier ist die Platte von srv-web01 voll – du suchst den Platzfresser und räumst ihn sicher auf."
   ],
   "begriffe": {
-    "Dateisystem": "Ein Speicherbereich mit Ordnern und Dateien; / ist das Haupt-Dateisystem.",
-    "Use%": "Wie viel Prozent belegt sind. Ab 90 % wird es eng."
+    "Dateisystem": "Ein Speicherbereich mit Ordnern und Dateien, z. B. eine Partition. / ist das Haupt-Dateisystem.",
+    "Mounted on": "Der Ordner, unter dem ein Dateisystem eingehängt ist. Alles unter / liegt auf dem Haupt-Dateisystem, außer wo ein anderes eingehängt ist (z. B. /boot).",
+    "Use%": "Wie viel Prozent belegt sind. Ab 90 % wird es eng.",
+    "tmpfs": "Dateisystem im Arbeitsspeicher für vorübergehende Dateien – belegt keinen Platz auf der Platte.",
+    "* (Platzhalter)": "Die Shell ersetzt * durch alle Namen im Ordner: /var/log/* wird zu /var/log/apt /var/log/auth.log …",
+    "Archivierte Journal-Dateien": "Ältere, abgeschlossene Dateien des Journals. In die aktive Datei schreibt systemd gerade."
   },
+  "befehle": [
+    {
+      "muster": [
+        "df -h /"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "journal_gross": true
+          },
+          "ausgabe": [
+            "Filesystem                         Size  Used Avail Use% Mounted on",
+            "/dev/mapper/ubuntu--vg-ubuntu--lv   30G   30G     0 100% /"
+          ]
+        },
+        {
+          "ausgabe": [
+            "Filesystem                         Size  Used Avail Use% Mounted on",
+            "/dev/mapper/ubuntu--vg-ubuntu--lv   30G   13G   16G  45% /"
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "journalctl --vacuum-size=500M",
+        "journalctl --vacuum-size=1G",
+        "journalctl --vacuum-time=2weeks",
+        "journalctl --vacuum-time=14d"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Dafür braucht es Root-Rechte. Setze sudo davor."
+        },
+        {
+          "wenn": {
+            "journal_gross": true
+          },
+          "setze": {
+            "journal_gross": false
+          },
+          "ausgabe": "Vacuuming done, freed 17.5G of archived journals from /var/log/journal/3f2a9c1e7b6d4e5f8a0b1c2d3e4f5a6b.",
+          "notiz": "Gekürzt: Im echten System steht davor für jede gelöschte Datei eine Zeile „Deleted archived journal …“."
+        },
+        {
+          "ausgabe": "Vacuuming done, freed 0B of archived journals from /var/log/journal/3f2a9c1e7b6d4e5f8a0b1c2d3e4f5a6b."
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Wie voll ist die Platte? df -h",
       "eingabe": "df -h",
-      "danach": "Use% bei / ist fast 100 % – kaum noch Platz."
+      "danach": "Jede Zeile ist ein Dateisystem. Die Spalten: Size (Größe), Used (belegt), Avail (available, noch frei), Use% (belegt in Prozent) und Mounted on (unter welchem Ordner es hängt). Wichtig ist die Zeile mit / am Ende – die Hauptplatte, die Ubuntu Server bei der Installation als /dev/mapper/ubuntu--vg-ubuntu--lv anlegt: 30G von 30G belegt, 100 %. Die tmpfs-Zeilen liegen im Arbeitsspeicher und spielen keine Rolle. Ohne -h stünden in den Spalten lange Zahlen in Kilobyte-Blöcken; mit -h liest du sofort 30G."
     },
     {
       "text": "Wer belegt den Platz in /var/log? sudo du -sh /var/log/*",
       "eingabe": "sudo du -sh /var/log/*",
-      "danach": "/var/log/journal ist riesig: Das Journal ist übergelaufen."
+      "danach": "Der Befehl du zählt zusammen, wie viel Platz Dateien und Ordner belegen. -s (summarize, zusammenfassen) gibt je Eintrag nur eine Summe – ohne -s listet der Befehl jeden Unterordner einzeln auf, das wird schnell sehr lang. -h kennst du von df; beide Zusätze schreibst du zusammen als -sh. Den Stern * ersetzt die Shell durch alle Einträge in /var/log, so bekommt jeder eine eigene Zeile: links die Größe, rechts der Name. sudo braucht es, weil einige Dateien dort nur root lesen darf. Der Ausreißer ist eindeutig: /var/log/journal mit 18G – das Journal von systemd ist übergelaufen. Warum gerade /var? Dort liegen Protokolle, Datenbanken und Zwischenspeicher – das, was auf Servern wächst."
     },
     {
-      "text": "Wie groß genau? journalctl --disk-usage",
+      "text": "Wie groß ist das Journal genau? journalctl --disk-usage",
       "eingabe": "journalctl --disk-usage",
-      "danach": "Rund 18 GB Protokolle."
+      "danach": "--disk-usage (Plattenbelegung) zählt alle Journal-Dateien zusammen: die archivierten (ältere, abgeschlossene Dateien) und die aktiven, in die gerade geschrieben wird. 18.0G – mehr als die Hälfte der Platte. Ohne sudo geht das, weil du als admin in der Gruppe adm das Journal lesen darfst."
+    },
+    {
+      "text": "Aufräumen – erst ohne sudo: journalctl --vacuum-size=1G",
+      "eingabe": "journalctl --vacuum-size=1G",
+      "danach": "--vacuum-size (vacuum = staubsaugen) löscht die ältesten archivierten Journal-Dateien, bis sie zusammen weniger als die angegebene Größe belegen. Die Größe steht direkt hinter dem = (ohne Leerzeichen) mit Einheit: K, M oder G – 1G ist ein Gigabyte, 500M sind 500 Megabyte. Die aktiven Dateien bleiben, die neuesten Meldungen gehen also nicht verloren. Weil dabei Dateien gelöscht werden, braucht es sudo – darum die Meldung. Statt nach Größe geht es auch nach Alter: --vacuum-time=2weeks löscht archivierte Dateien, die älter als zwei Wochen sind. Nie von Hand mit rm im Journal löschen: systemd schreibt gerade hinein."
     }
   ],
   "aufgaben": [
@@ -43,14 +113,14 @@
         "journal_gross": false
       },
       "hinweise": [
-        "journalctl kann selbst aufräumen (vacuum).",
+        "journalctl kann selbst aufräumen (vacuum) – mit Root-Rechten.",
         "sudo journalctl --vacuum-size=…",
         "Tippe: sudo journalctl --vacuum-size=500M"
       ],
       "loesung": [
         "sudo journalctl --vacuum-size=500M"
       ],
-      "danach": "Alte Protokolle sind weg, die neuesten bleiben."
+      "danach": "„Vacuuming done, freed 17.5G“ – 17,5 GB alte Journal-Dateien sind gelöscht, die neuesten 500 MB bleiben. Damit es nicht wieder passiert, begrenzt man das Journal dauerhaft in /etc/systemd/journald.conf mit SystemMaxUse=500M – und repariert den Dienst, der so viele Meldungen schreibt."
     },
     {
       "aufgabe": "Prüf nach, wie voll die Platte jetzt ist.",
@@ -66,12 +136,28 @@
         "df mit lesbaren Größen.",
         "Tippe: df -h"
       ],
-      "danach": "Wieder genug Platz."
+      "danach": "Use% bei / ist von 100 % auf 45 % gesunken – 16G sind wieder frei, die Dienste können wieder schreiben. Nach dem Aufräumen mit df -h nachzusehen, gehört immer dazu: Erst die Zahl zeigt, ob du den richtigen Platzfresser erwischt hast. (df -h / zeigt nur die Zeile der Hauptplatte.)"
+    },
+    {
+      "aufgabe": "Prüf auch nach, wie groß das Journal jetzt ist.",
+      "eingabe": [
+        "journalctl --disk-usage"
+      ],
+      "wenn": {
+        "journal_gross": false
+      },
+      "hinweise": [
+        "journalctl kann selbst sagen, wie viel Platz es belegt.",
+        "journalctl mit dem langen Zusatz für Plattenbelegung.",
+        "Tippe: journalctl --disk-usage"
+      ],
+      "danach": "500.0M – genau die Grenze, die du gesetzt hast. Mit --disk-usage siehst du auch später, ob das Journal wieder wächst; das lohnt sich bei der regelmäßigen Kontrolle eines Servers."
     }
   ],
   "fertig": [
-    "df -h zeigt den freien Platz je Dateisystem.",
-    "du -sh ordner/* zeigt, was wie viel belegt.",
-    "journalctl --vacuum-size räumt das Journal sicher auf."
+    "df -h zeigt den Platz je Dateisystem; wichtig sind die Zeile mit / und Use%.",
+    "sudo du -sh ordner/* zeigt, welcher Eintrag wie viel belegt.",
+    "journalctl --disk-usage zeigt die Größe des Journals.",
+    "sudo journalctl --vacuum-size=500M (oder --vacuum-time=2weeks) räumt es sicher auf – nie mit rm."
   ]
 }

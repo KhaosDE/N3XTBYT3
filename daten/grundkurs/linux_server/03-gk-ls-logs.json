@@ -4,9 +4,11 @@
   "titel": "Protokolle lesen: journalctl und /var/log",
   "pruefstatus": "ungeprueft",
   "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man1/journalctl.1.html",
     "https://man7.org/linux/man-pages/man1/journalctl.1.html",
     "https://man7.org/linux/man-pages/man1/systemctl.1.html",
-    "https://man7.org/linux/man-pages/man1/chown.1.html"
+    "https://man7.org/linux/man-pages/man1/chown.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man1/ls.1.html"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-worker-rechte",
@@ -30,36 +32,76 @@
     }
   },
   "erklaeren": [
-    "Was ein Dienst tut und warum er abstürzt, steht im Protokoll (Log). systemd sammelt alles im Journal:",
-    "journalctl -u dienst zeigt die Meldungen eines Dienstes. Viele Programme schreiben zusätzlich Dateien",
-    "nach /var/log (z. B. nginx). Hier stürzt der Hintergrunddienst shop-worker immer wieder ab."
+    "Was ein Dienst tut und warum er abstürzt, steht im Protokoll (Log). systemd sammelt die Meldungen aller",
+    "Dienste an einer Stelle, dem Journal. Lesen kannst du es mit journalctl (journal control); journalctl -u",
+    "dienst zeigt nur die Meldungen eines Dienstes. Viele Programme schreiben zusätzlich eigene Protokolldateien",
+    "in den Ordner /var/log (z. B. nginx).",
+    "",
+    "Hier stürzt der Hintergrunddienst shop-worker immer wieder ab – er verschickt die Bestellmails des Shops."
   ],
   "begriffe": {
     "Log": "Protokoll: Meldungen eines Programms mit Zeit, oft mit Fehlergrund.",
-    "Journal": "Das Protokoll von systemd; lesen mit journalctl.",
+    "Journal": "Das zentrale Protokoll von systemd; lesen mit journalctl. Wer in der Gruppe adm ist (wie admin), darf es ohne sudo lesen.",
     "/var/log": "Ordner mit Protokolldateien vieler Programme.",
-    "Traceback": "Fehlerbericht eines Python-Programms; die letzte Zeile nennt den Grund."
+    "Traceback": "Fehlerbericht eines Python-Programms; die letzte Zeile nennt den Grund.",
+    "Errno 13": "Fehlernummer für „Permission denied“ (keine Berechtigung).",
+    "Dienstbenutzer": "Eigener Benutzer, unter dem ein Dienst läuft (hier shop). Er kommt nur an seine eigenen Daten – das schützt den Rest des Systems.",
+    "chown -R": "chown (change owner) ändert Besitzer und Gruppe; -R (rekursiv) auch für alles im Ordner."
   },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl is-active shop-worker",
+        "systemctl is-active shop-worker.service"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "worker_aktiv": false
+          },
+          "ausgabe": "failed"
+        },
+        {
+          "ausgabe": "active"
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Was ist mit dem Dienst? systemctl status shop-worker",
       "eingabe": "systemctl status shop-worker",
-      "danach": "failed – der Dienst ist abgestürzt. Den Grund zeigt das Journal."
+      "danach": "Das × und „failed (Result: exit-code)“ heißen: Der Dienst ist abgestürzt – das Programm hat sich mit einem Fehlercode beendet, vor 9 Minuten. „enabled“ zeigt, dass er beim Hochfahren starten soll; am Autostart liegt es also nicht. Warum er abbricht, steht nicht hier, sondern im Journal."
     },
     {
       "text": "Sein Protokoll: journalctl -u shop-worker",
       "eingabe": "journalctl -u shop-worker",
-      "danach": "Die letzte Zeile ist entscheidend: PermissionError – der Dienst darf in /var/lib/shop nicht schreiben."
+      "danach": "-u steht für unit: nur die Meldungen dieses einen Dienstes. Ohne -u zeigt journalctl das ganze Journal aller Dienste – Tausende Zeilen. Jede Zeile beginnt mit Datum und Uhrzeit, dem Servernamen und dem Programm mit seiner Prozessnummer in eckigen Klammern, z. B. shop-worker[1220]. Lies von unten nach oben: systemd meldet, dass das Programm mit status=1/FAILURE geendet hat; darüber steht der Traceback des Python-Programms, und dessen letzte Zeile nennt den Grund: PermissionError: [Errno 13] Permission denied: '/var/lib/shop/queue' – der Dienst darf die Datei queue nicht öffnen. Im echten Terminal zeigt journalctl lange Ausgaben zum Blättern an (wie less); mit q kommst du heraus."
     },
     {
-      "text": "Wem gehört der Ordner? ls -l /var/lib/shop",
+      "text": "Nur die neuesten Zeilen: journalctl -u shop-worker -n 20",
+      "eingabe": "journalctl -u shop-worker -n 20",
+      "danach": "-n ist die Kurzform von --lines (Zeilen): journalctl zeigt nur die neuesten 20 Zeilen. Hier ist das Protokoll kurz, darum siehst du dieselben fünf Zeilen wie eben. Bei einem Dienst, der seit Wochen läuft, sparst du dir damit langes Blättern – die aktuelle Fehlermeldung steht meist ganz unten."
+    },
+    {
+      "text": "Wem gehört die Datei? ls -l /var/lib/shop",
       "eingabe": "ls -l /var/lib/shop",
-      "danach": "Er gehört root – der Dienst läuft aber als Benutzer shop."
+      "danach": "ls -l kennst du aus dem Linux-Kurs: Es zeigt den Inhalt eines Ordners mit Rechten und Besitzer. In der Zeile von queue stehen in Spalte 3 und 4 Besitzer und Gruppe: root root. rw-r--r-- heißt: Nur der Besitzer root darf schreiben. Der Dienst läuft aber als Benutzer shop – für ihn gilt r--, er darf also nur lesen."
     },
     {
-      "text": "Wo liegen die anderen Protokolle? ls /var/log",
+      "text": "Und der Ordner selbst? ls -la /var/lib/shop",
+      "eingabe": [
+        "ls -la /var/lib/shop",
+        "ls -al /var/lib/shop",
+        "ls -l -a /var/lib/shop",
+        "ls -a -l /var/lib/shop"
+      ],
+      "danach": "-la sind zwei Zusätze zusammengeschrieben: -l (lange Liste) und -a (all, auch versteckte Einträge). Dadurch erscheinen die Zeilen . und ..: Der Punkt ist der Ordner /var/lib/shop selbst, die zwei Punkte sind der Ordner darüber (/var/lib). Auch der Ordner gehört root – shop dürfte darin nicht einmal neue Dateien anlegen. Die Lösung: Ordner und Inhalt müssen dem Dienstbenutzer gehören. chown (change owner) kennst du: sudo chown benutzer:gruppe ziel. Neu ist -R (rekursiv): Es ändert den Besitzer des Ordners und von allem, was darin liegt. Ohne -R gehörte nur der Ordner dem Benutzer shop, die Datei queue weiter root – und der Dienst scheiterte weiter."
+    },
+    {
+      "text": "Bevor du es behebst, ein Blick auf die anderen Protokolle: ls /var/log",
       "eingabe": "ls /var/log",
-      "danach": "auth.log (Anmeldungen), syslog (Systemmeldungen), nginx/ (Webserver) … Lesen meist nur mit sudo."
+      "danach": "Hier liegen Protokolldateien, die Programme selbst schreiben: auth.log sammelt Anmeldungen und sudo-Aufrufe, syslog allgemeine Systemmeldungen, dpkg.log und apt/ die Paketinstallationen, nginx/ die Protokolle des Webservers; in journal/ speichert systemd das Journal. Viele davon dürfen nur root und die Gruppe adm lesen – du bist als admin in adm, sonst bräuchtest du sudo. Lesen kannst du sie mit cat oder less."
     }
   ],
   "aufgaben": [
@@ -69,14 +111,14 @@
         "besitzer:/var/lib/shop": "shop:shop"
       },
       "hinweise": [
-        "Besitzer ändert chown – mit sudo.",
+        "Besitzer ändert chown – mit sudo, und für den Inhalt mit einem Zusatz.",
         "sudo chown -R benutzer:gruppe ordner",
         "Tippe: sudo chown -R shop:shop /var/lib/shop"
       ],
       "loesung": [
         "sudo chown -R shop:shop /var/lib/shop"
       ],
-      "danach": "Besitzer geändert. -R heißt: auch alles darin."
+      "danach": "Ordner und Datei gehören jetzt shop:shop – vor dem Doppelpunkt steht der Benutzer, dahinter die Gruppe. Ohne sudo hätte chown abgelehnt, denn nur root darf Dateien einem anderen Besitzer geben. Mit ls -la /var/lib/shop kannst du es nachprüfen. Allen mit chmod 777 alles zu erlauben, wäre dagegen falsch: Dann dürfte jeder auf dem Server die Bestelldaten ändern."
     },
     {
       "aufgabe": "Starte den Dienst neu.",
@@ -84,19 +126,38 @@
         "worker_aktiv": true
       },
       "hinweise": [
-        "systemctl kennt restart.",
+        "systemctl kennt einen Unterbefehl für „neu starten“.",
         "sudo systemctl restart und der Dienstname.",
         "Tippe: sudo systemctl restart shop-worker"
       ],
       "loesung": [
         "sudo systemctl restart shop-worker"
       ],
-      "danach": "Der shop-worker läuft wieder."
+      "danach": "Diesmal klappt der Start, weil der Dienst jetzt in seinen Ordner schreiben darf. Ein abgestürzter Dienst bleibt auf failed stehen, auch wenn die Ursache behoben ist – den Anstoß gibst du mit restart (start ginge hier auch). Keine Ausgabe heißt wieder: hat geklappt."
+    },
+    {
+      "aufgabe": "Prüf nach, ob der shop-worker jetzt läuft.",
+      "eingabe": [
+        "systemctl status shop-worker",
+        "systemctl status shop-worker.service",
+        "systemctl is-active shop-worker"
+      ],
+      "wenn": {
+        "worker_aktiv": true
+      },
+      "hinweise": [
+        "Wie hast du am Anfang nachgesehen, was mit dem Dienst ist?",
+        "systemctl status und der Dienstname.",
+        "Tippe: systemctl status shop-worker"
+      ],
+      "danach": "● und active (running) bzw. active: Der Dienst läuft, die Bestellmails gehen wieder raus. Erst durch dieses Nachsehen weißt du, dass die Ursache wirklich behoben ist. Neue Fehler fändest du sofort mit journalctl -u shop-worker."
     }
   ],
   "fertig": [
     "systemctl status zeigt, dass ein Dienst ausgefallen ist; journalctl -u dienst zeigt, warum.",
-    "Die letzte Fehlerzeile im Log nennt meist die Ursache.",
+    "journalctl -n 20 zeigt nur die neuesten Zeilen; die letzte Fehlerzeile nennt meist die Ursache.",
+    "ls -l und ls -la zeigen Besitzer – auch den des Ordners selbst (.).",
+    "sudo chown -R benutzer:gruppe ordner gibt einen Ordner samt Inhalt einem anderen Besitzer.",
     "Weitere Protokolle liegen in /var/log."
   ]
 }

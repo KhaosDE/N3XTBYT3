@@ -4,38 +4,98 @@
   "titel": "Dienste mit systemctl",
   "pruefstatus": "ungeprueft",
   "quelle": [
+    "https://manpages.ubuntu.com/manpages/noble/man1/systemctl.1.html",
     "https://man7.org/linux/man-pages/man1/systemctl.1.html",
+    "https://manpages.ubuntu.com/manpages/noble/man8/cron.8.html",
     "https://documentation.ubuntu.com/server/how-to/databases/install-mysql/"
   ],
   "datum": "2026-11-05",
   "szenario": "ls-mariadb-autostart",
   "erklaeren": [
-    "Dienste (Webserver, Datenbank, ssh) verwaltet unter Linux systemd. Der Befehl dazu ist systemctl:",
-    "status zeigt den Zustand, start/stop/restart steuern ihn, enable sorgt dafür, dass er beim Hochfahren",
-    "startet. Wichtig: start wirkt nur jetzt, enable erst beim nächsten Start – enable --now macht beides.",
-    "Hier: Nach einem Neustart läuft die Datenbank MariaDB nicht mehr."
+    "Dienste sind Programme, die ohne Fenster im Hintergrund laufen – Webserver, Datenbank, ssh. Unter Ubuntu",
+    "startet und überwacht sie systemd. Du steuerst systemd mit systemctl (system control, „System steuern“).",
+    "Der Aufbau ist immer gleich: systemctl, dann ein Unterbefehl, dann der Dienstname.",
+    "",
+    "Zum Ansehen: status (alles auf einen Blick), is-active (läuft er gerade?) und is-enabled (startet er beim",
+    "Hochfahren?). Zum Steuern: start (jetzt starten), stop (jetzt anhalten), restart (anhalten und gleich wieder",
+    "starten), enable (beim Hochfahren automatisch starten) und disable (nicht mehr automatisch starten).",
+    "Wichtig: start wirkt nur jetzt, enable erst beim nächsten Hochfahren – enable --now macht beides auf einmal.",
+    "Ansehen darf jeder, steuern nur root – also mit sudo davor.",
+    "",
+    "Hier: Nach einem Neustart des Servers läuft die Datenbank MariaDB nicht mehr."
   ],
   "begriffe": {
     "systemd": "Startet und überwacht unter Ubuntu alle Dienste.",
+    "systemctl": "Befehl zum Steuern von systemd: systemctl unterbefehl dienst, z. B. systemctl status mariadb.",
     "Unit": "Ein von systemd verwalteter Baustein, z. B. mariadb.service.",
-    "active / inactive": "Dienst läuft / läuft nicht.",
-    "enabled / disabled": "Startet beim Hochfahren / startet nicht von selbst."
+    "active / inactive / failed": "Dienst läuft / läuft nicht / ist mit einem Fehler abgebrochen.",
+    "enabled / disabled": "Startet beim Hochfahren / startet nicht von selbst.",
+    "start / stop / restart": "Jetzt starten / jetzt anhalten / anhalten und sofort wieder starten (z. B. nach geänderten Einstellungen).",
+    "--now": "Zusatz für enable: zusätzlich sofort starten (bei disable: sofort anhalten). Ohne --now ändert enable nur, was beim nächsten Hochfahren passiert.",
+    "polkit": "Regelt unter Ubuntu, wer ohne sudo Systemeinstellungen ändern darf. Fehlt das Recht, fragt es nach dem Passwort eines Administrators."
   },
+  "befehle": [
+    {
+      "muster": [
+        "systemctl restart cron",
+        "systemctl restart cron.service"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "root": false
+          },
+          "sim": true,
+          "ausgabe": "Ohne sudo fragt systemd nach dem Passwort eines Administrators (polkit) – nimm sudo."
+        },
+        {}
+      ]
+    },
+    {
+      "muster": [
+        "systemctl is-active cron",
+        "systemctl is-active cron.service"
+      ],
+      "faelle": [
+        {
+          "ausgabe": "active"
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Zustand ansehen: systemctl status mariadb",
       "eingabe": "systemctl status mariadb",
-      "danach": "Loaded: … disabled heißt: startet nicht beim Hochfahren. Active: inactive (dead): läuft gerade nicht."
+      "danach": "So liest du die Ausgabe: Ganz vorn zeigt ein leerer Kreis ○, dass der Dienst nicht läuft (● hieße „läuft“, × „abgestürzt“); dahinter stehen Name und Beschreibung. Loaded: nennt die Unit-Datei und „disabled“ – MariaDB startet nicht beim Hochfahren. „preset: enabled“ heißt nur, dass Ubuntu sie von sich aus eingeschaltet hätte – hier wurde sie aber abgeschaltet. Active: inactive (dead) heißt: Sie läuft gerade nicht. Im echten System stehen darunter noch die letzten Protokollzeilen; ist die Ausgabe länger als der Bildschirm, kommst du mit q heraus."
     },
     {
       "text": "Kurz gefragt: systemctl is-enabled mariadb",
       "eingabe": "systemctl is-enabled mariadb",
-      "danach": "disabled – darum war die Datenbank nach dem Neustart weg."
+      "danach": "is-enabled fragt nur: Startet der Dienst beim Hochfahren? Die Antwort ist ein Wort – disabled, also nein. Das erklärt den Fehler: MariaDB wurde wohl nur von Hand gestartet, und das hält nur bis zum nächsten Neustart. Kurze Antworten wie diese sind praktisch, wenn du schnell viele Dienste prüfst."
     },
     {
-      "text": "Versuch ohne sudo: systemctl enable --now mariadb",
+      "text": "Und läuft sie gerade? systemctl is-active mariadb",
+      "eingabe": "systemctl is-active mariadb",
+      "danach": "inactive – sie läuft nicht. is-active antwortet mit active (läuft), inactive (läuft nicht) oder failed (abgestürzt). Zusammen mit is-enabled weißt du in zwei Zeilen alles Wichtige: läuft nicht und startet nicht von selbst."
+    },
+    {
+      "text": "Übe das Neustarten an einem anderen Dienst, dem Zeitplaner cron (er startet geplante Aufgaben): sudo systemctl restart cron",
+      "eingabe": [
+        "sudo systemctl restart cron",
+        "sudo systemctl restart cron.service"
+      ],
+      "danach": "restart hält den Dienst an und startet ihn sofort wieder – das brauchst du, wenn ein Dienst klemmt oder nachdem du seine Einstellungen geändert hast. Keine Ausgabe heißt bei systemctl: Es hat geklappt; ein Fehler käme als rote Meldung. (Die Passwortabfrage davor kommt von sudo, nicht von systemctl.) sudo braucht es, weil nur root Dienste steuern darf. start und stop schreibst du genauso: sudo systemctl start … bzw. sudo systemctl stop …"
+    },
+    {
+      "text": "Prüf, ob cron wieder läuft: systemctl is-active cron",
+      "eingabe": "systemctl is-active cron",
+      "danach": "active – cron ist nach dem Neustart wieder da. Nach jedem Eingriff kurz nachzusehen gehört zum sauberen Arbeiten: Ein restart kann auch scheitern, etwa bei einer falschen Einstellung – dann stünde hier failed."
+    },
+    {
+      "text": "Jetzt MariaDB – erst ohne sudo: systemctl enable --now mariadb",
       "eingabe": "systemctl enable --now mariadb",
-      "danach": "Dienste ändern darf nur root."
+      "danach": "Ohne sudo darf systemctl nichts ändern; im echten System fragt polkit dann nach dem Passwort eines Administrators. Zum Befehl selbst: enable trägt MariaDB für den Systemstart ein, --now startet sie zusätzlich sofort. Ohne --now liefe sie erst nach dem nächsten Hochfahren – und start allein (ohne enable) wäre nach dem nächsten Neustart wieder weg. Genau das ist hier passiert."
     }
   ],
   "aufgaben": [
@@ -53,7 +113,7 @@
       "loesung": [
         "sudo systemctl enable --now mariadb"
       ],
-      "danach": "enable --now: startet jetzt und künftig beim Hochfahren."
+      "danach": "MariaDB läuft und startet ab jetzt bei jedem Hochfahren. Die Ausgabe zeigt, was enable tut: „Created symlink … multi-user.target.wants/mariadb.service“ – systemd legt eine Verknüpfung (Symlink) an, und alles in multi-user.target.wants startet beim normalen Hochfahren mit. Die Zeilen mit SysV gehören zum alten Startsystem: systemd schaltet das alte Startskript des Dienstes gleich mit ein."
     },
     {
       "aufgabe": "Prüf nach, ob der Dienst jetzt läuft.",
@@ -70,12 +130,28 @@
         "systemctl status und der Dienstname.",
         "Tippe: systemctl status mariadb"
       ],
-      "danach": "active (running) – die Datenbank läuft."
+      "danach": "Der gefüllte Punkt ● und active (running) heißen: Die Datenbank läuft – seit wann, steht dahinter. Main PID ist die Prozessnummer des Datenbankprogramms (mariadbd). In der Loaded-Zeile steht jetzt enabled: Auch der nächste Neustart ist abgesichert."
+    },
+    {
+      "aufgabe": "Frag mit dem kurzen Befehl nach, ob MariaDB jetzt beim Hochfahren startet.",
+      "eingabe": [
+        "systemctl is-enabled mariadb"
+      ],
+      "wenn": {
+        "db_enabled": true
+      },
+      "hinweise": [
+        "Für den Autostart gibt es eine Abfrage mit einem Wort als Antwort.",
+        "systemctl is-… und der Dienstname.",
+        "Tippe: systemctl is-enabled mariadb"
+      ],
+      "danach": "enabled – ab jetzt startet MariaDB bei jedem Hochfahren von selbst. Nach dem nächsten Neustart des Servers prüfst du mit is-active, ob wirklich alles wieder läuft."
     }
   ],
   "fertig": [
-    "systemctl status zeigt, ob ein Dienst läuft (active) und ob er automatisch startet (enabled).",
-    "sudo systemctl start/stop/restart steuert ihn jetzt.",
+    "systemctl status zeigt alles: läuft der Dienst (active) und startet er automatisch (enabled)?",
+    "systemctl is-active und is-enabled antworten mit einem Wort.",
+    "sudo systemctl start/stop/restart steuert einen Dienst jetzt – keine Ausgabe heißt: hat geklappt.",
     "sudo systemctl enable --now startet ihn jetzt und bei jedem Hochfahren."
   ]
 }
