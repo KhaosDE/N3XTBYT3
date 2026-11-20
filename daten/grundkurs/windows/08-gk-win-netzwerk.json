@@ -8,7 +8,8 @@
     "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ping",
     "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/nslookup",
     "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/test-connection?view=powershell-5.1",
-    "https://learn.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname"
+    "https://learn.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname",
+    "https://learn.microsoft.com/troubleshoot/windows-client/networking/troubleshoot-dns-client-resolution-issues"
   ],
   "datum": "2026-11-05",
   "szenario": "win-dns-cache",
@@ -74,6 +75,43 @@
     },
     {
       "muster": [
+        "Test-Connection 192.168.10.5",
+        "Test-Connection -ComputerName 192.168.10.5"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Source        Destination     IPV4Address     IPV6Address  Bytes    Time(ms)",
+            "------        -----------     -----------     -----------  -----    --------",
+            "PC-BUERO-07   192.168.10.5     192.168.10.5                32       0",
+            "PC-BUERO-07   192.168.10.5     192.168.10.5                32       0",
+            "PC-BUERO-07   192.168.10.5     192.168.10.5                32       0",
+            "PC-BUERO-07   192.168.10.5     192.168.10.5                32       0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Resolve-DnsName dc01.firma.internal",
+        "Resolve-DnsName -Name dc01.firma.internal"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "dc01.firma.internal                            A      3600  Answer     192.168.10.5",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
         "Resolve-DnsName intranet.firma.internal",
         "Resolve-DnsName -Name intranet.firma.internal"
       ],
@@ -101,27 +139,37 @@
     {
       "text": "Die eigene Adresse: ipconfig",
       "eingabe": "ipconfig",
-      "danach": "IPv4 Address ist die Adresse dieses PCs (192.168.10.57), Subnet Mask zeigt das eigene Netz, Default Gateway ist der Router (192.168.10.1)."
+      "danach": "ipconfig (IP-Konfiguration) zeigt die Netzwerk-Einstellungen jeder Netzwerkkarte. Lies die Zeilen so: links steht, was gemeint ist, rechts nach dem Doppelpunkt der Wert. IPv4 Address ist die Adresse dieses PCs (192.168.10.57), Subnet Mask zeigt das eigene Netz (alle 192.168.10.x), Default Gateway ist der Router (192.168.10.1). Das ist der erste Blick bei jedem Netzwerkproblem: Hat der PC überhaupt eine passende Adresse?"
     },
     {
       "text": "Alle Details: ipconfig /all",
       "eingabe": "ipconfig /all",
-      "danach": "Zusätzlich: DHCP Enabled (Adresse kommt automatisch), DNS Servers (wer Namen übersetzt) und die Physical Address (MAC-Adresse der Netzwerkkarte)."
+      "danach": "Der Schalter /all heißt „alles“: Ohne ihn zeigt ipconfig nur Adresse, Maske und Gateway, mit ihm die vollständigen Einstellungen. Neu sind u. a. DHCP Enabled: Yes (die Adresse kommt automatisch), DHCP Server (wer sie verteilt hat), DNS Servers (wer Namen in Adressen übersetzt – hier 192.168.10.5) und Physical Address (die MAC-Adresse, die feste Nummer der Netzwerkkarte). Den DNS-Server brauchst du gleich."
     },
     {
       "text": "Ist der Router erreichbar? ping 192.168.10.1",
       "eingabe": "ping 192.168.10.1",
-      "danach": "4 Pakete gesendet, 4 Antworten (Reply), 0 % Verlust: Die Verbindung zum Router steht."
+      "danach": "ping schickt kleine Testpakete an eine Adresse und wartet auf Antwort – der Name kommt vom Echolot-Geräusch („Ping“). Jede Zeile „Reply from …“ ist eine Antwort: bytes=32 ist die Paketgröße, time<1ms die Laufzeit, TTL ein Zähler, der bei jedem Router unterwegs um eins kleiner wird. Unten steht die Statistik: 4 gesendet (Sent), 4 empfangen (Received), 0 % verloren (Lost) – die Verbindung zum Router steht. ping ist der schnellste Test, ob ein Gerät erreichbar ist."
+    },
+    {
+      "text": "Ist der DNS-Server erreichbar? Diesmal auf die PowerShell-Art: Test-Connection 192.168.10.5",
+      "eingabe": "Test-Connection 192.168.10.5",
+      "danach": "Test-Connection (Verbindung testen) macht dasselbe wie ping, ist aber ein PowerShell-Befehl: Es schickt 4 Testpakete und zeigt jede Antwort als Zeile einer Tabelle. Source ist dein PC, Destination das Ziel, IPV4Address dessen Adresse, Bytes die Paketgröße und Time(ms) die Laufzeit in Millisekunden. Vier Zeilen heißen vier Antworten: Der DNS-Server 192.168.10.5 antwortet. Die Adresse steht direkt hinter dem Befehl; ausgeschrieben wäre es Test-Connection -ComputerName 192.168.10.5 (-ComputerName = welcher Computer). Antwortet ein Ziel nicht, kommt statt der Tabelle eine rote Fehlermeldung."
     },
     {
       "text": "Jetzt das Intranet: ping intranet.firma.internal",
       "eingabe": "ping intranet.firma.internal",
-      "danach": "Request timed out – keine Antwort. Achte auf die Adresse in eckigen Klammern: 192.168.10.20."
+      "danach": "„Request timed out“ heißt: keine Antwort, viermal; unten steht 100% loss (alles verloren). Achte auf die erste Zeile: In eckigen Klammern steht die Adresse, in die Windows den Namen übersetzt hat – 192.168.10.20. Ob das die richtige Adresse ist, prüfst du als Nächstes."
     },
     {
       "text": "Was sagt der DNS-Server? nslookup intranet.firma.internal",
       "eingabe": "nslookup intranet.firma.internal",
-      "danach": "nslookup fragt direkt den DNS-Server: Das Intranet hat die Adresse 192.168.10.25 – nicht .20! Windows hat sich eine alte Antwort gemerkt."
+      "danach": "nslookup (name server lookup: beim Namensserver nachschlagen) fragt direkt den DNS-Server. Oben steht, wer geantwortet hat (Server: dc01.firma.internal, Address: 192.168.10.5), darunter die Antwort: Name und Address. Das Intranet hat laut DNS-Server die Adresse 192.168.10.25 – nicht .20! nslookup fragt am DNS-Cache von Windows vorbei – Windows selbst hat sich also eine alte Antwort gemerkt."
+    },
+    {
+      "text": "Dasselbe auf die PowerShell-Art, für den DNS-Server selbst: Resolve-DnsName dc01.firma.internal",
+      "eingabe": "Resolve-DnsName dc01.firma.internal",
+      "danach": "Resolve-DnsName (DNS-Namen auflösen) übersetzt einen Namen in eine Adresse, wie nslookup. Die Tabelle liest du so: Name ist der gefragte Name, Type A heißt Adress-Eintrag (IPv4), TTL sagt, wie viele Sekunden die Antwort gemerkt werden darf, Section Answer heißt „das ist die Antwort“, IPAddress ist die Adresse: 192.168.10.5. Anders als nslookup schaut Resolve-DnsName zuerst in den DNS-Cache von Windows – es sieht also dasselbe wie ping. Der Name steht direkt hinter dem Befehl (ausgeschrieben: -Name dc01.firma.internal)."
     },
     {
       "text": "Den Cache leeren: ipconfig /flushdns",
@@ -129,12 +177,12 @@
       "ziel": {
         "dns_cache_alt": false
       },
-      "danach": "„Successfully flushed“: Der DNS-Cache ist leer. Beim nächsten Mal fragt Windows neu."
+      "danach": "Der Schalter /flushdns heißt „DNS ausspülen“: Windows vergisst alle gemerkten DNS-Antworten. „Successfully flushed the DNS Resolver Cache“ bestätigt das. Beim nächsten Mal fragt Windows den DNS-Server neu – und bekommt die aktuelle Adresse. Das ist der Standard-Griff, wenn ein Name zu einer alten Adresse führt, z. B. nachdem ein Server eine neue Adresse bekommen hat."
     },
     {
       "text": "Noch einmal: ping intranet.firma.internal",
       "eingabe": "ping intranet.firma.internal",
-      "danach": "Jetzt antwortet 192.168.10.25. Gefunden, behoben, nachgeprüft."
+      "danach": "Jetzt steht 192.168.10.25 in den eckigen Klammern, und es kommen Antworten (Reply). Gefunden, behoben, nachgeprüft: Der Fehler war ein veralteter Eintrag im DNS-Cache. Merk dir die Reihenfolge: ping (geht es?), nslookup (was sagt der DNS-Server?), ipconfig /flushdns (Cache leeren), ping (geht es jetzt?)."
     }
   ],
   "aufgaben": [
@@ -149,7 +197,7 @@
         "Test-Connection und die Adresse.",
         "Tippe: Test-Connection 192.168.10.1"
       ],
-      "danach": "Test-Connection ist der PowerShell-Bruder von ping: gleiche Pakete, Ergebnis als Tabelle."
+      "danach": "Test-Connection 192.168.10.1 schickt vier Testpakete an den Router – wie vorhin an den DNS-Server, nur mit anderer Adresse. Vier Zeilen in der Tabelle heißen vier Antworten: Der Router ist erreichbar. In der PowerShell ist Test-Connection praktisch, weil das Ergebnis eine Tabelle mit festen Spalten ist, die man weiterverarbeiten kann."
     },
     {
       "aufgabe": "Lass dir mit der PowerShell anzeigen, welche Adresse zum Namen intranet.firma.internal gehört.",
@@ -163,7 +211,7 @@
         "Resolve-DnsName und der Name.",
         "Tippe: Resolve-DnsName intranet.firma.internal"
       ],
-      "danach": "Richtig: 192.168.10.25. Resolve-DnsName ist das PowerShell-Gegenstück zu nslookup."
+      "danach": "Resolve-DnsName intranet.firma.internal liefert 192.168.10.25 – nach dem Leeren des Caches die richtige Adresse. Du hast denselben Befehl wie beim DNS-Server benutzt, nur mit anderem Namen. nslookup kann das auch; Resolve-DnsName ist das PowerShell-Gegenstück und zeigt zusätzlich Typ und TTL."
     },
     {
       "aufgabe": "Zeig an, welcher DNS-Server eingetragen ist.",
@@ -175,12 +223,12 @@
         "Du brauchst die ausführliche Ansicht von ipconfig.",
         "Tippe: ipconfig /all"
       ],
-      "danach": "Bei DNS Servers steht der DNS-Server (in der Firma meist der Domänencontroller)."
+      "danach": "ipconfig /all zeigt bei DNS Servers die Adresse 192.168.10.5 – das ist der DNS-Server dieses PCs (in einer Firma meist der Domänencontroller, hier dc01). ipconfig ohne /all zeigt diese Zeile nicht. Steht hier eine falsche Adresse, kann der PC keine Namen mehr übersetzen – dazu gibt es ein eigenes Szenario."
     }
   ],
   "fertig": [
     "IP-Adresse, Subnetzmaske, Gateway und DNS-Server findest du mit ipconfig (/all).",
-    "ping und Test-Connection prüfen, ob ein Gerät antwortet.",
+    "ping und Test-Connection prüfen, ob ein Gerät antwortet (Test-Connection zeigt eine Tabelle).",
     "nslookup und Resolve-DnsName fragen den DNS-Server nach einer Adresse.",
     "ipconfig /flushdns leert einen veralteten DNS-Cache."
   ]

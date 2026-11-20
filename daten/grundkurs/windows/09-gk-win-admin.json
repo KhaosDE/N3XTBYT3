@@ -154,12 +154,12 @@
     {
       "text": "Versuch, den Zeitdienst anzuhalten: Stop-Service -Name W32Time",
       "eingabe": "Stop-Service -Name W32Time",
-      "danach": "„Cannot open W32Time service“: Windows lässt dich nicht an den Dienst – es fehlen die Rechte. Diese Meldung steht so auch in der Microsoft-Anleitung für Einsteiger."
+      "danach": "Stop-Service kennst du aus Lektion 7: Es hält einen Dienst an – hier W32Time (Windows Time), den Dienst, der die Uhr stellt. -Name sagt, welcher Dienst gemeint ist; man darf es auch weglassen. Die rote Meldung „Cannot open W32Time service“ heißt: Windows lässt dich nicht an den Dienst – diesem Fenster fehlen die Adminrechte. In Lektion 7 ging es, weil das Fenster dort Adminrechte hatte. Diese Meldung steht so auch in der Microsoft-Anleitung für Einsteiger."
     },
     {
       "text": "Noch ein Beispiel: sfc /scannow (prüft die Windows-Systemdateien)",
       "eingabe": "sfc /scannow",
-      "danach": "Klare Ansage: „You must be an administrator“ – du brauchst ein Fenster mit Adminrechten. Sieh auf den Fenstertitel oben: Dort steht nur „Windows PowerShell“."
+      "danach": "sfc ist der System File Checker (Systemdatei-Prüfer): Er prüft die geschützten Systemdateien von Windows. Der Schalter /scannow heißt „jetzt prüfen“: Er prüft alle diese Dateien und repariert beschädigte, wenn das möglich ist. Die Meldung „You must be an administrator …“ ist eine klare Ansage: Ohne Adminrechte darf sfc nicht laufen. Sieh auf den Fenstertitel oben: Dort steht nur „Windows PowerShell“, ohne „Administrator“."
     },
     {
       "text": "Öffne eine PowerShell als Administrator: Start-Process powershell -Verb RunAs",
@@ -167,12 +167,12 @@
       "ziel": {
         "admin": true
       },
-      "danach": "-Verb RunAs heißt „als Administrator ausführen“. Im echten Windows kommt das UAC-Fenster, dann ein neues Fenster. Der Titel heißt jetzt „Administrator: Windows PowerShell“, der Prompt steht in C:\\Windows\\system32. (Ohne Konsole: Rechtsklick auf Start → „Terminal (Administrator)“.)"
+      "danach": "Start-Process (Prozess starten) startet ein Programm – hier powershell, also ein neues PowerShell-Fenster. -Verb RunAs heißt „als Administrator ausführen“ (run as = ausführen als). Ohne -Verb RunAs öffnet sich nur ein normales Fenster ohne Adminrechte. Im echten Windows fragt jetzt die UAC (Benutzerkontensteuerung) nach, dann öffnet sich das neue Fenster: Der Titel heißt „Administrator: Windows PowerShell“, der Prompt steht in C:\\Windows\\system32. (Ohne Konsole: Rechtsklick auf Start → „Terminal (Administrator)“.)"
     },
     {
       "text": "Jetzt noch einmal: sfc /scannow",
       "eingabe": "sfc /scannow",
-      "danach": "Diesmal läuft die Prüfung und repariert beschädigte Systemdateien."
+      "danach": "Diesmal läuft die Prüfung. Lies die Ausgabe von oben nach unten: „Beginning system scan“ (Prüfung beginnt), „Verification 100% complete“ (alles geprüft), dann das Ergebnis: Der Windows-Ressourcenschutz (Windows Resource Protection) hat beschädigte Dateien gefunden und repariert. Die Einzelheiten stehen in der Protokolldatei CBS.log. sfc /scannow nimmst du, wenn Windows sich merkwürdig verhält, Systemprogramme abstürzen oder Funktionen fehlen."
     }
   ],
   "aufgaben": [
@@ -189,7 +189,7 @@
       "loesung": [
         "Stop-Service -Name W32Time"
       ],
-      "danach": "Mit Adminrechten klappt es ohne Fehler."
+      "danach": "Stop-Service -Name W32Time läuft jetzt ohne rote Meldung – derselbe Befehl wie vorhin, nur in einem Fenster mit Adminrechten. Keine Ausgabe heißt: Der Zeitdienst ist angehalten. Merke: Kommt bei einem richtig geschriebenen Befehl „cannot open … service“, liegt es fast immer an fehlenden Rechten, nicht am Befehl."
     },
     {
       "aufgabe": "Starte den Zeitdienst wieder und prüf nach, dass er läuft.",
@@ -209,7 +209,7 @@
         "Start-Service -Name W32Time",
         "Get-Service W32Time"
       ],
-      "danach": "Running – alles wieder wie vorher."
+      "danach": "Erst Start-Service -Name W32Time, dann Get-Service W32Time: Status Running – der Zeitdienst läuft wieder. Das Wiederstarten ist wichtig, denn ohne W32Time stellt Windows die Uhr nicht mehr nach – und eine falsche Uhr stört die Anmeldung im Firmennetz. Ändern, dann nachprüfen: So arbeitest du immer."
     }
   ],
   "fertig": [

@@ -8,7 +8,8 @@
     "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/whoami",
     "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-5.1",
     "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-computerinfo?view=powershell-5.1",
-    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/systeminfo"
+    "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/systeminfo",
+    "https://learn.microsoft.com/troubleshoot/windows-server/windows-security/kerberos-authentication-troubleshooting-guidance"
   ],
   "datum": "2026-11-05",
   "zustand": {
@@ -93,27 +94,27 @@
     {
       "text": "Der Name des Computers: hostname",
       "eingabe": "hostname",
-      "danach": "Kennst du schon aus Lektion 1. Den Namen brauchst du, wenn du dich aus der Ferne verbindest oder ein Ticket schreibst."
+      "danach": "Kennst du schon aus Lektion 1: hostname zeigt den Namen des Computers, hier PC-BUERO-07. Den Namen brauchst du, wenn du dich aus der Ferne verbindest oder ein Ticket schreibst."
     },
     {
       "text": "Wer ist angemeldet? whoami",
       "eingabe": "whoami",
-      "danach": "Auch bekannt. Wichtig bei Rechte-Problemen: Ist wirklich der Benutzer angemeldet, der sich meldet?"
+      "danach": "Auch bekannt: whoami zeigt Computer (oder Domäne) und Benutzername, getrennt durch den Backslash. Wichtig bei Rechte-Problemen: Ist wirklich der Benutzer angemeldet, der sich meldet?"
     },
     {
       "text": "Datum und Uhrzeit: Get-Date",
       "eingabe": "Get-Date",
-      "danach": "Get-Date zeigt Datum und Uhrzeit des Computers. Geht die Uhr falsch, scheitern Anmeldungen und sichere Webseiten – dazu gibt es ein eigenes Szenario."
+      "danach": "Get-Date (Datum holen) zeigt Datum und Uhrzeit des Computers: Wochentag, Monat, Tag, Jahr und Uhrzeit – auf Englisch, weil dieses Windows englisch eingestellt ist. Vergleiche sie mit deiner Uhr. Geht die Uhr des Computers falsch, scheitern Anmeldungen und sichere Webseiten – dazu gibt es ein eigenes Szenario."
     },
     {
       "text": "Die Windows-Version: Get-ComputerInfo -Property OsName, OsVersion, CsName",
       "eingabe": "Get-ComputerInfo -Property OsName, OsVersion, CsName",
-      "danach": "OsName ist die Windows-Ausgabe, OsVersion die Version (22631 ist die Build-Nummer), CsName der Computername. Mit -Property wählst du aus, was du sehen willst – mehrere Einträge mit Komma getrennt."
+      "danach": "Get-ComputerInfo (Computer-Infos holen) sammelt alles über den Computer – ohne Zusatz ist das eine sehr lange Liste mit weit über hundert Einträgen. Mit -Property (Eigenschaft) wählst du aus, welche Einträge du sehen willst, mehrere mit Komma getrennt. Die Ausgabe ist dann eine kleine Tabelle: oben die Namen, darunter die Werte. OsName ist die Windows-Ausgabe (Os = Operating System, Betriebssystem), OsVersion die Version (22631 ist die Build-Nummer), CsName der Computername (Cs = Computer System)."
     },
     {
       "text": "Der Klassiker: systeminfo",
       "eingabe": "systeminfo",
-      "danach": "systeminfo ist ein älteres Programm und zeigt alles auf einmal: Name, Windows-Version, Build und dass der PC Mitglied einer Domäne ist (Member Workstation). Das echte systeminfo zeigt danach noch viel mehr (Arbeitsspeicher, Updates, Netzwerkkarten) – hier ist es gekürzt."
+      "danach": "systeminfo (System-Information) ist ein älteres Programm und zeigt alles auf einmal. Lies es so: links steht, was gemeint ist, rechts nach dem Doppelpunkt der Wert. Hier: Host Name (der Name), OS Name (Windows-Ausgabe), OS Version mit Build und OS Configuration: Member Workstation – der PC ist Mitglied einer Domäne. Das echte systeminfo zeigt danach noch viel mehr (Arbeitsspeicher, Updates, Netzwerkkarten) – hier ist es gekürzt."
     }
   ],
   "aufgaben": [
@@ -131,7 +132,7 @@
         "Der ältere zeigt alles auf einmal und heißt wie „System-Information“.",
         "Tippe: systeminfo"
       ],
-      "danach": "Richtig: Microsoft Windows 11 Pro."
+      "danach": "Microsoft Windows 11 Pro – das steht bei systeminfo in der Zeile „OS Name“ und bei Get-ComputerInfo in der Spalte OsName. Die Ausgabe (Home, Pro, Enterprise …) ist wichtig, weil nicht jede Ausgabe dieselben Funktionen hat – eine Anleitung für Pro passt nicht immer zu Home. Im Alltag ist das eine der ersten Fragen, wenn eine Anleitung nicht zum Computer passt."
     },
     {
       "aufgabe": "Prüfe, ob Datum und Uhrzeit des Computers stimmen.",
@@ -143,7 +144,7 @@
         "Datum auf Englisch: Date.",
         "Tippe: Get-Date"
       ],
-      "danach": "Genau, Get-Date."
+      "danach": "Get-Date zeigt Datum und Uhrzeit des Computers – vergleiche sie mit deiner eigenen Uhr. Weicht die Zeit um mehr als ein paar Minuten ab, scheitert in Firmennetzen die Anmeldung: Kerberos, das Anmeldeverfahren der Domäne, erlaubt standardmäßig höchstens 5 Minuten Unterschied. Auch sichere Webseiten melden dann Zertifikatsfehler."
     }
   ],
   "fertig": [

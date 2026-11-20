@@ -19,6 +19,8 @@
     "Links in der Zeile steht der Prompt (die Eingabeaufforderung): hier „PS C:\\Users\\mberger>“.",
     "PS heißt PowerShell – so heißt die Befehlszeile von Windows. Dahinter steht der Ordner, in dem du gerade bist.",
     "Du tippst einen Befehl und drückst Enter. Der Computer antwortet mit Text darunter.",
+    "Die meisten Befehle sind englische Wörter oder Abkürzungen davon. Wenn du weißt, woher ein Name kommt,",
+    "kannst du ihn dir leicht merken – darum steht nach jedem Schritt, was der Name bedeutet.",
     "Groß- und Kleinschreibung ist unter Windows egal. Kaputt machen kannst du hier nichts: Es ist eine Simulation."
   ],
   "begriffe": {
@@ -51,28 +53,29 @@
     {
       "text": "Tippe hostname und drück Enter.",
       "eingabe": "hostname",
-      "danach": "PC-BUERO-07 ist der Name dieses Computers. Jeder Computer im Netzwerk hat einen eigenen Namen – den brauchst du oft, wenn du jemandem hilfst."
+      "danach": "hostname zeigt den Namen dieses Computers: PC-BUERO-07. Der Befehl heißt so, weil ein Computer im Netzwerk auf Englisch „host“ genannt wird – hostname ist also der Name des Rechners. Die Ausgabe ist nur eine Zeile: der Name, sonst nichts. Jeder Computer im Netzwerk hat einen eigenen Namen. Den brauchst du oft, wenn du jemandem hilfst – etwa am Telefon („Wie heißt dein PC?“) oder um dich aus der Ferne mit dem Computer zu verbinden."
     },
     {
       "text": "Tippe whoami (sprich: „who am I“ – wer bin ich?) und drück Enter.",
       "eingabe": "whoami",
-      "danach": "pc-buero-07\\mberger heißt: Benutzer mberger auf dem Computer pc-buero-07. Vor dem Backslash (\\) steht, woher das Konto kommt, dahinter der Benutzername."
+      "danach": "whoami (englisch „who am I?“ – „wer bin ich?“) zeigt, mit welchem Benutzerkonto du angemeldet bist. Die Ausgabe pc-buero-07\\mberger liest du so: Vor dem Backslash (\\) steht, woher das Konto kommt – hier vom Computer pc-buero-07 selbst; in einer Firma steht dort oft der Name der Domäne (des Firmennetzes mit zentraler Anmeldung). Dahinter steht der Benutzername: mberger. Das brauchst du, wenn jemand meldet „Ich darf das nicht“: Erst prüfen, ob wirklich das richtige Konto angemeldet ist."
     },
     {
       "text": "Hol hostname zurück, ohne es neu zu tippen: Drück Pfeil hoch (↑). Jeder Druck geht einen Befehl weiter zurück (erst whoami, dann hostname). Steht hostname in der Zeile, drück Enter.",
       "eingabe": "hostname",
       "tipp": "Das war „{eingabe}“, nicht hostname. Drück ↑ noch einmal (oder öfter), bis hostname in der Zeile steht – mit ↓ geht es wieder vorwärts. Dann Enter.",
-      "danach": "Mit ↑ und ↓ blätterst du durch deine früheren Befehle. Das spart Tipparbeit, vor allem bei langen Befehlen."
+      "danach": "Mit ↑ und ↓ blätterst du durch deine früheren Befehle: ↑ geht einen Befehl zurück, ↓ wieder vor. Die Pfeiltasten gehören zur Konsole selbst, nicht zu einem Befehl – sie funktionieren immer. Das spart Tipparbeit, vor allem bei langen Befehlen oder wenn du einen Befehl nach einer Änderung noch einmal prüfen willst."
     },
     {
       "text": "Tippe einen Befehl, den es nicht gibt: Get-Kaffee",
       "eingabe": "Get-Kaffee",
-      "danach": "So sieht eine echte Fehlermeldung der PowerShell aus: rot und auf Englisch. Wichtig ist die erste Zeile: „is not recognized“ heißt „gibt es nicht“ – meist ein Tippfehler. Ein falscher Befehl macht nichts kaputt."
+      "absichtlich_unbekannt": true,
+      "danach": "So sieht eine echte Fehlermeldung der PowerShell aus: rot und auf Englisch. Wichtig ist die erste Zeile: „The term 'Get-Kaffee' is not recognized as the name of a cmdlet …“ heißt „Get-Kaffee kenne ich nicht als Befehl“ (ein cmdlet ist ein PowerShell-Befehl, mehr dazu in Lektion 3) – meist steckt ein Tippfehler dahinter. Die Zeilen darunter zeigen, wo der Fehler sitzt: „At line:1 char:1“ heißt Zeile 1, Zeichen 1, und die Wellenlinie ~~~ unterstreicht das unbekannte Wort. Ein falscher Befehl macht nichts kaputt: Prüf die Schreibweise und versuch es noch einmal."
     },
     {
       "text": "Tippe cls und drück Enter.",
       "eingabe": "cls",
-      "danach": "cls (clear screen) leert das Fenster. Deine Befehle sind nicht weg – ↑ holt sie weiter zurück."
+      "danach": "cls steht für „clear screen“ (Bildschirm leeren) und macht das Fenster leer. Es gibt keine Ausgabe – oben steht nur wieder der Prompt. Deine Befehle sind nicht weg: ↑ holt sie weiter zurück. In der PowerShell ist cls ein Zweitname für Clear-Host; clear geht auch. Praktisch, wenn das Fenster voller alter Ausgaben ist und du die nächste in Ruhe lesen willst."
     },
     {
       "text": "Tippe help und drück Enter.",
@@ -92,7 +95,7 @@
         "Name des Computers auf Englisch: host name.",
         "Tippe: hostname"
       ],
-      "danach": "Genau: hostname zeigt den Namen des Computers."
+      "danach": "hostname zeigt den Namen des Computers – hier PC-BUERO-07. Im Alltag fragst du ihn ab, bevor du ein Ticket schreibst oder dich per Fernwartung verbindest: So ist klar, um welchen Computer es geht. Gerade in Firmen sehen viele PCs gleich aus – der Name unterscheidet sie."
     },
     {
       "aufgabe": "Zeig an, mit welchem Benutzer du angemeldet bist.",
@@ -104,7 +107,7 @@
         "Who am I – alles zusammengeschrieben.",
         "Tippe: whoami"
       ],
-      "danach": "Richtig: whoami zeigt Computer (oder Domäne) und Benutzername."
+      "danach": "whoami zeigt pc-buero-07\\mberger: vor dem Backslash der Computer (in der Firma oft die Domäne), dahinter der Benutzername. Das ist eine der ersten Fragen bei Rechte-Problemen: Arbeitet wirklich das Konto, das du erwartest? Melden sich mehrere Leute am selben PC an, siehst du so sofort, wer gerade dran ist."
     },
     {
       "aufgabe": "Mach das Fenster leer.",
@@ -118,7 +121,7 @@
         "clear screen – abgekürzt.",
         "Tippe: cls"
       ],
-      "danach": "Gut! cls leert das Fenster. In der PowerShell gehen auch Clear-Host und clear."
+      "danach": "cls (clear screen) leert das Fenster: Alte Ausgaben verschwinden, deine früheren Befehle bleiben mit ↑ erreichbar. In der PowerShell gehen auch Clear-Host (der volle Name) und clear. Nutze es, wenn das Fenster zu voll wird und du eine neue Ausgabe in Ruhe lesen willst."
     }
   ],
   "fertig": [

@@ -65,6 +65,9 @@
   "erklaeren": [
     "Mit Dateien arbeitest du in der Konsole genauso wie im Explorer – nur mit Befehlen:",
     "Inhalt anzeigen, neu anlegen, kopieren, verschieben (auch: umbenennen) und löschen.",
+    "Die Befehle folgen wieder dem Bauplan Verb-Nomen. Das Nomen Item heißt „Element“ – gemeint ist eine Datei",
+    "oder ein Ordner: New-Item legt ein Element neu an, Copy-Item kopiert es, Move-Item verschiebt es,",
+    "Remove-Item entfernt es. Content heißt Inhalt: Get-Content zeigt den Inhalt einer Datei.",
     "Wichtig: Was du in der Konsole löschst, landet nicht im Papierkorb. Es ist sofort weg."
   ],
   "begriffe": {
@@ -79,12 +82,12 @@
       "ziel": {
         "pfad": "C:\\Users\\mberger\\Documents"
       },
-      "danach": "Du bist in Documents."
+      "danach": "Du bist in Documents – der Prompt zeigt es (cd kennst du aus Lektion 2). Alle folgenden Befehle beziehen sich auf diesen Ordner: Schreibst du nur einen Dateinamen ohne Pfad, sucht die PowerShell die Datei hier."
     },
     {
       "text": "Zeig den Inhalt einer Datei: Get-Content Einkaufsliste.txt",
       "eingabe": "Get-Content Einkaufsliste.txt",
-      "danach": "Get-Content zeigt, was in einer Textdatei steht. Kurz: type oder cat."
+      "danach": "Get-Content (Inhalt holen) zeigt, was in einer Textdatei steht – Zeile für Zeile, genau wie in der Datei: Milch, Brot, Kaffee, Druckerpapier. Kürzer geht type (aus der alten Eingabeaufforderung) oder cat (aus Linux). So liest du schnell eine Textdatei, etwa eine Notiz oder ein Protokoll, ohne ein Programm zu öffnen."
     },
     {
       "text": "Leg einen Ordner an: New-Item -Name Projekt -ItemType Directory",
@@ -92,7 +95,7 @@
       "ziel": {
         "verzeichnis:C:\\Users\\mberger\\Documents\\Projekt": true
       },
-      "danach": "New-Item legt Neues an. -ItemType Directory heißt Ordner, -ItemType File wäre eine Datei. Kürzer für Ordner: mkdir Projekt."
+      "danach": "New-Item legt ein neues Element an. -Name sagt, wie es heißen soll (hier Projekt), -ItemType (Element-Art), was es wird: Directory heißt Ordner, File wäre eine Datei. Ohne -ItemType legt New-Item im Dateisystem eine Datei an – für einen Ordner brauchst du den Zusatz also. Die Ausgabe zeigt das neue Element wie bei Get-ChildItem: Das d in der Spalte Mode heißt Ordner. Kürzer für Ordner: mkdir Projekt (make directory, Ordner anlegen)."
     },
     {
       "text": "Kopiere die Einkaufsliste hinein: Copy-Item Einkaufsliste.txt Projekt",
@@ -102,22 +105,22 @@
           "nicht": null
         }
       },
-      "danach": "Copy-Item kopiert: erst was (Quelle), dann wohin (Ziel). Die Datei gibt es jetzt zweimal. Keine Ausgabe heißt in der Konsole: hat geklappt."
+      "danach": "Copy-Item kopiert: erst was (die Quelle), dann wohin (das Ziel). Ist das Ziel ein Ordner, landet die Kopie darin und behält ihren Namen. Die Datei gibt es jetzt zweimal – das Original in Documents bleibt. Keine Ausgabe heißt in der Konsole: hat geklappt."
     },
     {
       "text": "Benenne die Kopie um: Move-Item Projekt\\Einkaufsliste.txt Projekt\\Liste-alt.txt",
       "eingabe": "Move-Item Projekt\\Einkaufsliste.txt Projekt\\Liste-alt.txt",
-      "danach": "Move-Item verschiebt – bleibt der Ordner gleich und ändert sich nur der Name, ist das Umbenennen."
+      "danach": "Move-Item verschiebt: Die Datei verschwindet an der Quelle und liegt danach am Ziel – es gibt sie nur einmal. Bleibt der Ordner gleich und ändert sich nur der Name, ist das Umbenennen: Aus Einkaufsliste.txt im Ordner Projekt wird Liste-alt.txt. Projekt\\Einkaufsliste.txt ist ein relativer Pfad: der Ordner Projekt im aktuellen Ordner, darin die Datei. Auch hier: keine Ausgabe heißt, es hat geklappt."
     },
     {
       "text": "Sieh nach: Get-ChildItem Projekt",
       "eingabe": "Get-ChildItem Projekt",
-      "danach": "Im Ordner Projekt liegt jetzt Liste-alt.txt."
+      "danach": "Mit einem Ordnernamen dahinter zeigt Get-ChildItem den Inhalt dieses Ordners, ohne dass du hineinwechseln musst. Im Ordner Projekt liegt jetzt nur Liste-alt.txt – das Umbenennen hat geklappt. Nach dem Kopieren oder Verschieben kurz nachsehen ist eine gute Gewohnheit."
     },
     {
       "text": "Lösch die Datei: Remove-Item Projekt\\Liste-alt.txt",
       "eingabe": "Remove-Item Projekt\\Liste-alt.txt",
-      "danach": "Weg – ohne Rückfrage und ohne Papierkorb. Darum vor dem Löschen immer erst nachsehen (Get-ChildItem), was genau gelöscht wird."
+      "danach": "Remove-Item entfernt die Datei – ohne Rückfrage und ohne Papierkorb. Darum vor dem Löschen immer erst nachsehen (Get-ChildItem), was genau gelöscht wird. Ein leerer Ordner geht genauso. Bei einem Ordner, in dem noch etwas liegt, fragt die echte PowerShell vorher nach; mit dem Zusatz -Recurse (rekursiv: mit allem, was darin liegt) löscht sie ihn samt Inhalt ohne diese Rückfrage."
     }
   ],
   "aufgaben": [
@@ -135,7 +138,7 @@
         "cd C:\\Users\\mberger\\Documents",
         "mkdir Archiv"
       ],
-      "danach": "Gut! New-Item -ItemType Directory oder mkdir."
+      "danach": "New-Item -Name Archiv -ItemType Directory (oder kurz mkdir Archiv) legt den Ordner an – wie vorhin Projekt, nur mit anderem Namen. Die Ausgabe zeigt den neuen Ordner mit d in der Spalte Mode. So legst du z. B. einen Ordner für alte Dateien an, bevor du aufräumst."
     },
     {
       "aufgabe": "Kopiere die Datei Pfannkuchen.txt aus dem Ordner Rezepte in den Ordner Archiv.",
@@ -153,7 +156,7 @@
         "cd C:\\Users\\mberger\\Documents",
         "Copy-Item Rezepte\\Pfannkuchen.txt Archiv"
       ],
-      "danach": "Richtig: Copy-Item Quelle Ziel."
+      "danach": "Copy-Item Rezepte\\Pfannkuchen.txt Archiv: erst die Quelle mit ihrem Ordner davor, dann das Ziel. Weil Archiv ein Ordner ist, landet die Kopie darin und behält ihren Namen; das Original in Rezepte bleibt. Kopieren statt verschieben nimmst du, wenn du eine Sicherung willst und das Original noch brauchst."
     },
     {
       "aufgabe": "Lösch den Ordner Projekt.",
@@ -169,13 +172,13 @@
         "cd C:\\Users\\mberger\\Documents",
         "Remove-Item Projekt"
       ],
-      "danach": "Erledigt. Ein Ordner mit Inhalt braucht -Recurse – ohne fragt die echte PowerShell vorher nach."
+      "danach": "Remove-Item Projekt hat den Ordner gelöscht. Er war leer (Liste-alt.txt hattest du schon gelöscht), darum ging es ohne Zusatz. Wäre noch etwas darin gewesen, hätte die echte PowerShell nachgefragt; mit -Recurse löscht sie den Inhalt gleich mit. Prüf vorher immer mit Get-ChildItem, was darin liegt – zurückholen geht nicht."
     }
   ],
   "fertig": [
     "Get-Content zeigt den Inhalt einer Datei.",
     "New-Item (oder mkdir) legt Dateien und Ordner an.",
     "Copy-Item kopiert, Move-Item verschiebt oder benennt um.",
-    "Remove-Item löscht – sofort und ohne Papierkorb."
+    "Remove-Item löscht – sofort und ohne Papierkorb; -Recurse nimmt den Inhalt eines Ordners mit."
   ]
 }

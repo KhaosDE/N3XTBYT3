@@ -61,7 +61,11 @@
     "Dateien liegen in Ordnern, Ordner liegen in Ordnern – wie Schubladen in Schubladen.",
     "Der Weg zu einer Datei heißt Pfad, z. B. C:\\Users\\mberger\\Documents. C: ist das Laufwerk,",
     "die einzelnen Ordner trennt ein Backslash (\\). Die Konsole steht immer in einem Ordner,",
-    "dem aktuellen Ordner – er steht im Prompt. Befehle wie „zeig, was hier liegt“ beziehen sich auf ihn."
+    "dem aktuellen Ordner – er steht im Prompt. Befehle wie „zeig, was hier liegt“ beziehen sich auf ihn.",
+    "",
+    "Die PowerShell-Befehle in dieser Lektion sind nach einem festen Bauplan benannt: erst ein Verb, dann ein",
+    "Nomen, dazwischen ein Bindestrich. Get heißt holen/anzeigen, Set heißt setzen/einstellen, Location heißt Ort.",
+    "Get-Location zeigt also den Ort, an dem du bist, Set-Location stellt einen anderen Ort ein."
   ],
   "begriffe": {
     "Pfad": "Der Weg zu einer Datei oder einem Ordner, z. B. C:\\Users\\mberger\\Documents.",
@@ -75,12 +79,12 @@
     {
       "text": "Wo bist du gerade? Tippe Get-Location",
       "eingabe": "Get-Location",
-      "danach": "Get-Location zeigt den aktuellen Ordner: C:\\Users\\mberger – dein Benutzerordner. Kürzer geht pwd."
+      "danach": "Get-Location heißt wörtlich „hole den Ort“: Es zeigt den aktuellen Ordner. Die Ausgabe hat eine Überschrift (Path = Pfad) und darunter den Pfad: C:\\Users\\mberger – dein Benutzerordner. Kürzer geht pwd (aus der Linux-Welt: „print working directory“, zeige den Arbeitsordner). Das brauchst du, bevor du etwas anlegst, kopierst oder löschst: Erst wissen, wo du bist."
     },
     {
       "text": "Was liegt hier? Tippe Get-ChildItem",
       "eingabe": "Get-ChildItem",
-      "danach": "Get-ChildItem listet den Inhalt. In der Spalte Mode steht d für Ordner (directory), a für Datei. Length ist die Größe in Bytes, LastWriteTime die letzte Änderung."
+      "danach": "Get-ChildItem heißt „hole die Kind-Elemente“ – gemeint ist alles, was in einem Ordner liegt. Ohne weitere Angabe zeigt es den aktuellen Ordner. So liest du die Tabelle: In der Spalte Mode steht vorn ein d bei Ordnern (directory); Dateien haben dort einen Strich und meist ein a (archive, ein Merkmal von Dateien). Das r bei Desktop, Documents und Downloads setzt Windows bei solchen besonderen Ordnern – du kannst trotzdem darin arbeiten. LastWriteTime ist die letzte Änderung, Length die Größe in Bytes (bei Ordnern leer), Name der Name. So siehst du, ob eine Datei da ist, die du suchst."
     },
     {
       "text": "Wechsle in den Ordner Documents: Set-Location Documents",
@@ -91,12 +95,12 @@
       "ziel": {
         "pfad": "C:\\Users\\mberger\\Documents"
       },
-      "danach": "Sieh auf den Prompt: Jetzt bist du in Documents. „Documents“ ist ein relativer Pfad – er geht von dort aus, wo du gerade bist."
+      "danach": "Set-Location heißt „setze den Ort“: Es wechselt in einen anderen Ordner, dahinter steht, wohin – hier Documents. Bei Erfolg gibt es keine Ausgabe; du siehst den Wechsel am Prompt: Jetzt steht dort PS C:\\Users\\mberger\\Documents>. „Documents“ ist ein relativer Pfad – er geht von dort aus, wo du gerade bist; darum klappt er nur, weil Documents im aktuellen Ordner liegt. Ordner wechseln brauchst du ständig, bevor du mit den Dateien darin arbeitest."
     },
     {
       "text": "Tippe dir",
       "eingabe": "dir",
-      "danach": "dir ist ein Alias (Zweitname) für Get-ChildItem – ls geht auch. Hier liegen ein Ordner und eine Datei."
+      "danach": "dir ist ein Alias (Zweitname) für Get-ChildItem. Der Name kommt von „directory“ (Verzeichnis, also Ordner) und stammt aus der alten Eingabeaufforderung; ls (aus Linux, „list“) geht auch. Die Ausgabe ist dieselbe wie bei Get-ChildItem: Hier in Documents liegen ein Ordner (Rezepte, mit d) und eine Datei (Einkaufsliste.txt). Aliase sparen Tipparbeit; in Anleitungen stehen oft die vollen Namen – beide meinen dasselbe."
     },
     {
       "text": "Eine Ebene zurück nach oben: cd ..",
@@ -104,15 +108,15 @@
       "ziel": {
         "pfad": "C:\\Users\\mberger"
       },
-      "danach": "cd ist der Alias für Set-Location. Zwei Punkte (..) stehen immer für den Ordner darüber. Achte auf das Leerzeichen zwischen cd und den Punkten."
+      "danach": "cd ist der Alias für Set-Location (von „change directory“, Ordner wechseln). Zwei Punkte (..) stehen immer für den Ordner eine Ebene darüber – von Documents also zurück nach C:\\Users\\mberger. Achte auf das Leerzeichen zwischen cd und den Punkten. So kommst du Ebene für Ebene nach oben, ohne den ganzen Pfad zu tippen."
     },
     {
-      "text": "Jetzt mit einem absoluten Pfad: cd C:\\Users\\mberger\\Documents\\Rezepte",
-      "eingabe": "cd C:\\Users\\mberger\\Documents\\Rezepte",
+      "text": "Jetzt mit einem absoluten Pfad: cd C:\\Users\\mberger\\Desktop",
+      "eingabe": "cd C:\\Users\\mberger\\Desktop",
       "ziel": {
-        "pfad": "C:\\Users\\mberger\\Documents\\Rezepte"
+        "pfad": "C:\\Users\\mberger\\Desktop"
       },
-      "danach": "Ein absoluter Pfad beginnt mit dem Laufwerk und funktioniert von überall. Tipp fürs echte Windows: Tippe den Anfang (cd Doc) und drück die Tab-Taste – die PowerShell ergänzt den Namen. Das spart Tippfehler. In dieser Simulation ist Tab nicht nachgebaut."
+      "danach": "Ein absoluter Pfad beginnt mit dem Laufwerk (C:\\) und nennt jeden Ordner bis zum Ziel, getrennt durch Backslashes. Er funktioniert von überall – egal, in welchem Ordner du gerade stehst. Der Prompt zeigt jetzt den Desktop. Tipp fürs echte Windows: Tippe den Anfang (cd Desk) und drück die Tab-Taste – die PowerShell ergänzt den Namen. Das spart Tippfehler. In dieser Simulation ist Tab nicht nachgebaut."
     },
     {
       "text": "Zurück nach Hause: cd ~",
@@ -120,7 +124,7 @@
       "ziel": {
         "pfad": "C:\\Users\\mberger"
       },
-      "danach": "Die Tilde (~) steht für deinen Benutzerordner. So kommst du von überall schnell zurück."
+      "danach": "Die Tilde (~) steht für deinen Benutzerordner, hier C:\\Users\\mberger. cd ~ bringt dich also mit einem kurzen Befehl von überall nach Hause. Auf der deutschen Tastatur tippst du die Tilde mit AltGr und +. Praktisch, wenn du dich in tiefen Ordnern verlaufen hast."
     }
   ],
   "aufgaben": [
@@ -144,7 +148,7 @@
         "cd Downloads",
         "dir"
       ],
-      "danach": "Richtig. Erst den Ordner wechseln (cd Downloads), dann anzeigen (dir)."
+      "danach": "Erst cd Downloads (ein relativer Pfad, weil Downloads in deinem Benutzerordner liegt), dann dir – genau wie vorhin bei Documents. Die Ausgabe zeigt die Datei Anleitung-Drucker.txt. Dieses Paar – hineingehen, nachsehen – ist der Grundgriff, wenn du etwas suchst."
     },
     {
       "aufgabe": "Zeig an, in welchem Ordner du gerade bist.",
@@ -158,7 +162,7 @@
         "Get-… und dann das englische Wort für Ort.",
         "Tippe: Get-Location"
       ],
-      "danach": "Genau. Get-Location (oder pwd) – und der Prompt verrät es auch."
+      "danach": "Get-Location (oder pwd) zeigt den Pfad des aktuellen Ordners – nach Aufgabe 1 meist C:\\Users\\mberger\\Downloads. Der Prompt verrät es zwar auch, aber Get-Location gibt den Pfad als eigene Ausgabe, die du z. B. kopieren kannst. Vor jedem Löschen oder Kopieren lohnt der kurze Blick, wo du gerade stehst."
     },
     {
       "aufgabe": "Geh mit einem einzigen Befehl in den Ordner Rezepte – egal, wo du gerade bist.",
@@ -173,7 +177,7 @@
       "loesung": [
         "cd C:\\Users\\mberger\\Documents\\Rezepte"
       ],
-      "danach": "Gut! Mit dem absoluten Pfad kommst du von überall hin."
+      "danach": "Mit dem absoluten Pfad C:\\Users\\mberger\\Documents\\Rezepte kommst du von überall hin – wie vorhin zum Desktop. Ein relativer Pfad (Documents\\Rezepte) ginge nur vom Benutzerordner aus. Absolute Pfade nimmst du, wenn du nicht sicher bist, wo du gerade stehst, oder wenn du einen Pfad aus einer Anleitung übernimmst."
     },
     {
       "aufgabe": "Geh zurück in deinen Benutzerordner.",
@@ -188,7 +192,7 @@
       "loesung": [
         "cd ~"
       ],
-      "danach": "Prima – cd ~ ist der schnellste Weg nach Hause."
+      "danach": "cd ~ bringt dich von überall in deinen Benutzerordner C:\\Users\\mberger – die Tilde steht für ihn. Mit cd .. wärst du auch angekommen, aber Ebene für Ebene. Merk dir cd ~ als „Nach Hause“-Knopf."
     }
   ],
   "fertig": [

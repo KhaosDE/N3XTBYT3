@@ -187,22 +187,22 @@
     {
       "text": "Lass dir einen Befehl erklären: Get-Help Get-Service",
       "eingabe": "Get-Help Get-Service",
-      "danach": "Get-Help erklärt einen Befehl. NAME: wie er heißt. SYNOPSIS: was er tut („holt die Dienste“). SYNTAX: wie man ihn aufruft. Was in eckigen Klammern [ ] steht, darf man weglassen. Die echte Hilfe ist länger – hier ist sie gekürzt. (Fehlen die Hilfedateien, bietet die PowerShell an, sie mit Update-Help zu laden.)"
+      "danach": "Get-Help (Hilfe holen) erklärt den Befehl, dessen Namen du dahinter schreibst. Die Ausgabe hat Abschnitte: NAME – wie er heißt. SYNOPSIS (Kurzfassung) – was er tut: „Gets the services …“, holt die Dienste. SYNTAX – wie man ihn aufruft: Was in eckigen Klammern [ ] steht, darf man weglassen, und <System.String[]> heißt, dass dort ein Text hingehört (auch mehrere, mit Komma getrennt), z. B. ein Name. Die echte Hilfe ist länger – hier ist sie gekürzt. Kürzer tippst du help Get-Service. (Fehlen die Hilfedateien, bietet die PowerShell an, sie mit Update-Help zu laden.)"
     },
     {
       "text": "Nur die Beispiele: Get-Help Get-Service -Examples",
       "eingabe": "Get-Help Get-Service -Examples",
-      "danach": "Mit -Examples zeigt die Hilfe nur Beispiele. Das ist oft der schnellste Weg: Beispiel abschauen, anpassen, ausprobieren. Beispiel 1 der echten Hilfe ist einfach „Get-Service“ – zeigt alle Dienste. (In der Simulation stehen die Beispiele nicht drin.)"
+      "danach": "Der Zusatz -Examples (Beispiele) sorgt dafür, dass die Hilfe statt der Übersicht die Beispiele zeigt; ohne ihn bekommst du die Übersicht wie eben. Das ist oft der schnellste Weg: Beispiel abschauen, anpassen, ausprobieren. Beispiel 1 der echten Hilfe ist einfach „Get-Service“ – zeigt alle Dienste. (In der Simulation stehen die Beispiele nicht drin.)"
     },
     {
       "text": "Befehle suchen: Get-Command *-Service",
       "eingabe": "Get-Command *-Service",
-      "danach": "Get-Command sucht Befehle. Der Stern (*) ist ein Platzhalter: *-Service heißt „alles, was auf -Service endet“. So siehst du alle Befehle rund um Dienste – an den Verben erkennst du sofort, was sie tun."
+      "danach": "Get-Command (Befehle holen) sucht Befehle. Der Stern (*) ist ein Platzhalter für beliebige Zeichen: *-Service heißt „alles, was auf -Service endet“. So liest du die Tabelle: CommandType ist die Art (Cmdlet = eingebauter PowerShell-Befehl), Name der Befehl, Version und Source sagen, aus welcher Befehlssammlung (Modul) er kommt. Wichtig ist die Spalte Name: An den Verben – Get, Start, Stop, Restart … – erkennst du sofort, was jeder Befehl mit Diensten tut."
     },
     {
       "text": "Hilfe bei älteren Programmen: ipconfig /?",
       "eingabe": "ipconfig /?",
-      "danach": "Ältere Windows-Programme (ipconfig, ping, tasklist …) kennen Get-Help nicht. Bei ihnen zeigt /? die eingebaute Hilfe."
+      "danach": "Ältere Windows-Programme (ipconfig, ping, tasklist …) sind keine PowerShell-Befehle und kennen Get-Help nicht. Bei ihnen zeigt /? (Schrägstrich und Fragezeichen) die eingebaute Hilfe: wie man das Programm aufruft und welche Schalter es gibt. Viele dieser Programme schreiben ihre Zusätze mit Schrägstrich (z. B. /all), PowerShell-Befehle dagegen mit Bindestrich (z. B. -Examples)."
     }
   ],
   "aufgaben": [
@@ -219,7 +219,7 @@
         "Get-Help und dahinter der Name des Befehls.",
         "Tippe: Get-Help Get-Process"
       ],
-      "danach": "Richtig. Get-Process holt die laufenden Programme (Prozesse) – das lernst du in Lektion 6."
+      "danach": "Get-Help Get-Process zeigt die Hilfe zu Get-Process – laut SYNOPSIS holt es die Prozesse, also die laufenden Programme. Genauso bekommst du zu jedem anderen PowerShell-Befehl die Hilfe: Get-Help und dahinter der Name. Get-Process selbst lernst du in Lektion 6."
     },
     {
       "aufgabe": "Finde mit einem Platzhalter alle Befehle, die mit Prozessen (Process) zu tun haben.",
@@ -234,7 +234,7 @@
         "Der Platzhalter ist der Stern. Gesucht: alles, was auf -Process endet.",
         "Tippe: Get-Command *-Process"
       ],
-      "danach": "Gut! Debug, Get, Start, Stop, Wait – an den Verben siehst du, was jeder Befehl tut."
+      "danach": "*-Process findet alle Befehle, deren Name auf -Process endet: Debug, Get, Start, Stop und Wait. An den Verben siehst du, was jeder tut – Stop-Process beendet einen Prozess, Start-Process startet einen. So findest du einen Befehl, dessen genauen Namen du nicht kennst: Nomen raten, Platzhalter davor, Get-Command."
     },
     {
       "aufgabe": "Zeig die eingebaute Hilfe des Programms ping an.",
@@ -246,7 +246,7 @@
         "Ältere Programme zeigen ihre Hilfe mit Schrägstrich und Fragezeichen.",
         "Tippe: ping /?"
       ],
-      "danach": "Genau – /? funktioniert bei fast allen älteren Windows-Programmen."
+      "danach": "Bei ping zeigt /? die eingebaute Hilfe mit allen Schaltern – im echten Windows z. B. -n (Anzahl der Pakete) und -t (pingen, bis du abbrichst). /? funktioniert bei fast allen älteren Windows-Programmen, Get-Help kennt sie nicht. Merke: PowerShell-Befehl (Verb-Nomen) → Get-Help; älteres Programm → /?."
     }
   ],
   "fertig": [
