@@ -5,7 +5,9 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview",
-    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enter-pssession?view=powershell-5.1"
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/enter-pssession?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/exit-pssession?view=powershell-5.1",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_remote_requirements?view=powershell-5.1"
   ],
   "datum": "2026-11-05",
   "voraussetzung": "gk-win-fehlersuche",
@@ -15,79 +17,143 @@
       "zustand": {
         "hostname": "SRV-DATEI01"
       }
+    },
+    "srv-druck01": {
+      "system": "windows_server",
+      "zustand": {
+        "hostname": "SRV-DRUCK01",
+        "geprueft": false
+      },
+      "befehle": [
+        {
+          "muster": [
+            "hostname"
+          ],
+          "faelle": [
+            {
+              "setze": {
+                "geprueft": true
+              },
+              "ausgabe": "{hostname}"
+            }
+          ]
+        },
+        {
+          "muster": [
+            "$env:COMPUTERNAME"
+          ],
+          "shell": "powershell",
+          "faelle": [
+            {
+              "setze": {
+                "geprueft": true
+              },
+              "ausgabe": "{hostname}"
+            }
+          ]
+        }
+      ]
     }
   },
   "erklaeren": [
     "Ein Server ist ein Computer, der Dienste für andere bereitstellt: Dateien, Anmeldung, Drucker, Webseiten.",
     "In einer Firma hängen alle Computer und Benutzer an einer Domäne (hier firma.internal). Die Konten liegen",
     "zentral im Active Directory (AD) auf dem Domänencontroller (DC01). Wer sich anmeldet, wird dort geprüft.",
-    "Server bedienst du meist aus der Ferne: Mit Enter-PSSession arbeitest du in der PowerShell eines anderen",
-    "Servers, als säßest du davor. Dieser Kurs baut auf dem Windows-Grundkurs auf."
+    "",
+    "Server bedienst du meist aus der Ferne. Dafür lernst du Enter-PSSession: Enter heißt „betreten“, PSSession ist",
+    "eine PowerShell-Sitzung. Du betrittst also die PowerShell eines anderen Servers und arbeitest dort, als säßest",
+    "du davor. Mit Exit-PSSession (oder kurz exit) kommst du zurück. Neben DC01 gibt es in dieser Firma den",
+    "Dateiserver SRV-DATEI01 und den Druckserver SRV-DRUCK01. Dieser Kurs baut auf dem Windows-Grundkurs auf."
   ],
   "begriffe": {
     "Server": "Computer, der Dienste für andere bereitstellt (Dateien, Anmeldung, Web …).",
     "Domäne": "Firmennetz mit zentraler Verwaltung von Benutzern und Computern, z. B. firma.internal.",
     "Active Directory (AD)": "Verzeichnis aller Benutzer, Gruppen und Computer einer Domäne.",
     "Domänencontroller (DC)": "Server, der das Active Directory bereithält und Anmeldungen prüft.",
-    "Remoting": "Befehle auf einem anderen Computer ausführen, z. B. mit Enter-PSSession."
+    "Domänenkonto": "Konto aus dem Active Directory (DOMÄNE\\name). Es gilt auf allen Computern der Domäne – ein lokales Konto (COMPUTER\\name) nur auf dem einen Computer.",
+    "Remoting": "Befehle auf einem anderen Computer ausführen, z. B. mit Enter-PSSession. Dahinter steckt der Dienst WinRM (Windows-Remoteverwaltung); auf Windows Server ist das von Haus aus eingeschaltet.",
+    "Prompt": "Der Text vor deiner Eingabe (PS C:\\…>). Bei einer Fernverbindung steht vorne in eckigen Klammern der Name des anderen Computers, z. B. [SRV-DATEI01]:."
   },
   "mitmachen": [
     {
-      "text": "Wo bist du? hostname",
+      "text": "Wo bist du gerade? Tippe hostname",
       "eingabe": "hostname",
-      "danach": "DC01 – der Domänencontroller. Auf ihm liegt das Active Directory."
+      "danach": "DC01 – du sitzt am Domänencontroller. hostname kennst du aus dem Windows-Kurs: Es zeigt den Namen des Computers, auf dem deine Befehle gerade laufen. Das wird gleich wichtig, denn bald arbeitest du auf einem anderen Server und willst sicher wissen, wo du bist."
     },
     {
-      "text": "Und wer? whoami",
+      "text": "Mit welchem Konto arbeitest du? Tippe whoami",
       "eingabe": "whoami",
-      "danach": "firma\\administrator: Vor dem Backslash steht jetzt die Domäne FIRMA, nicht der Computer. Es ist ein Domänenkonto – es gilt auf allen Computern der Domäne."
+      "danach": "firma\\administrator: Vor dem Backslash steht diesmal nicht der Name des Computers, sondern die Domäne FIRMA. Es ist also ein Domänenkonto – es liegt im Active Directory und gilt auf allen Computern der Domäne. Ein lokales Konto wie PC-BUERO-07\\mberger aus dem Windows-Kurs gilt dagegen nur auf seinem einen Computer."
     },
     {
       "text": "Verbinde dich mit dem Dateiserver: Enter-PSSession -ComputerName srv-datei01",
       "eingabe": "Enter-PSSession -ComputerName srv-datei01",
-      "danach": "Sieh auf den Prompt: Vorne steht [SRV-DATEI01]. Alles, was du jetzt tippst, läuft auf dem Dateiserver."
+      "danach": "Enter-PSSession startet eine Sitzung auf einem anderen Computer. -ComputerName sagt, auf welchem: Dahinter steht der Name des Servers (der volle Name srv-datei01.firma.internal ginge auch). Das Wort -ComputerName darfst du weglassen, wenn der Name direkt hinter dem Befehl steht: Enter-PSSession srv-datei01. Ganz ohne Namen verbindet sich Enter-PSSession mit dem eigenen Computer – das bringt dir nichts. Sieh auf den Prompt: Vorne steht jetzt [SRV-DATEI01]:, alles, was du ab jetzt tippst, läuft auf dem Dateiserver. Die echte PowerShell meldet beim Verbinden nichts, sie ändert nur den Prompt; die blaue Zeile ist eine Meldung der Simulation."
     },
     {
-      "text": "Prüf nach: hostname",
+      "text": "Prüf nach, wo du jetzt bist: hostname",
       "eingabe": "hostname",
-      "danach": "SRV-DATEI01 – du arbeitest wirklich auf dem anderen Server."
+      "danach": "SRV-DATEI01 – derselbe Befehl wie vorhin, aber eine andere Antwort, weil er jetzt auf dem Dateiserver läuft. Mach das nach jedem Verbinden: So verhinderst du, dass du aus Versehen auf dem falschen Server etwas änderst."
     },
     {
-      "text": "Zurück zu DC01: exit",
-      "eingabe": "exit",
-      "danach": "exit (oder Exit-PSSession) beendet die Fernverbindung. Der Prompt ist wieder der von DC01."
+      "text": "Und mit welchem Konto? whoami",
+      "eingabe": "whoami",
+      "danach": "Wieder firma\\administrator. Enter-PSSession hat dich mit deinem Domänenkonto angemeldet – ein Passwort musstest du nicht eingeben, weil das Konto im Active Directory liegt und auf allen Computern der Domäne gilt. Damit Enter-PSSession klappt, muss das Konto auf dem anderen Server Administrator sein; firma\\administrator ist das auf allen Servern der Domäne."
+    },
+    {
+      "text": "Beende die Verbindung: Exit-PSSession",
+      "eingabe": "Exit-PSSession",
+      "danach": "Exit-PSSession heißt „PowerShell-Sitzung verlassen“: Die Verbindung zu SRV-DATEI01 ist getrennt, der Prompt zeigt wieder DC01 ohne eckige Klammern davor. Kürzer geht es mit exit – in einer Fernverbindung bewirken beide dasselbe. Trenn Verbindungen, sobald du fertig bist, damit du nicht aus Versehen auf dem falschen Server weitertippst."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Verbinde dich noch einmal mit dem Dateiserver srv-datei01.",
+      "aufgabe": "Der Druckserver heißt srv-druck01. Verbinde dich mit ihm.",
       "eingabe": [
-        "Enter-PSSession -ComputerName srv-datei01",
-        "Enter-PSSession srv-datei01"
+        "Enter-PSSession -ComputerName srv-druck01",
+        "Enter-PSSession srv-druck01"
       ],
       "hinweise": [
-        "Der Befehl beginnt mit dem Verb Enter.",
-        "Enter-PSSession mit -ComputerName und dem Servernamen.",
-        "Tippe: Enter-PSSession -ComputerName srv-datei01"
+        "Wie hast du dich vorhin mit dem Dateiserver verbunden? Nur der Name ist anders.",
+        "Enter-PSSession mit -ComputerName und dem Namen des Druckservers.",
+        "Tippe: Enter-PSSession -ComputerName srv-druck01"
       ],
-      "danach": "Verbunden. -ComputerName darf man auch weglassen."
+      "danach": "Verbunden – der Prompt beginnt jetzt mit [SRV-DRUCK01]:. Es ist derselbe Befehl wie beim Dateiserver, nur mit einem anderen Namen hinter -ComputerName. So erreichst du jeden Server der Domäne, ohne hinzugehen."
     },
     {
-      "aufgabe": "Beende die Verbindung mit dem PowerShell-Befehl dafür (nicht exit).",
+      "aufgabe": "Prüf nach, ob du wirklich auf dem Druckserver arbeitest.",
       "eingabe": [
-        "Exit-PSSession"
+        "hostname",
+        "$env:COMPUTERNAME"
+      ],
+      "wenn": {
+        "srv-druck01:geprueft": true
+      },
+      "hinweise": [
+        "Mit welchem Befehl hast du auf dem Dateiserver nachgesehen, wo du bist?",
+        "Der Befehl zeigt den Namen des Computers.",
+        "Tippe: hostname"
+      ],
+      "danach": "SRV-DRUCK01 – du bist auf dem Druckserver. Nach jedem Verbinden kurz hostname: Das kostet eine Sekunde und schützt dich davor, eine Änderung auf dem falschen Server zu machen."
+    },
+    {
+      "aufgabe": "Du bist fertig auf dem Druckserver. Beende die Verbindung.",
+      "eingabe": [
+        "Exit-PSSession",
+        "exit"
       ],
       "hinweise": [
-        "Das Gegenteil von Enter ist …",
-        "Exit-PSSession.",
+        "Wie hast du die Verbindung zum Dateiserver beendet?",
+        "Das Gegenteil von Enter ist Exit.",
         "Tippe: Exit-PSSession"
       ],
-      "danach": "Exit-PSSession macht dasselbe wie exit – nur ausdrücklich."
+      "danach": "Zurück auf DC01 – der Prompt hat keine eckigen Klammern mehr. Ob du Exit-PSSession oder exit tippst, ist in einer Fernverbindung egal. Im Alltag verbindest du dich so nacheinander mit vielen Servern, ohne dich jedes Mal an einen anderen Bildschirm zu setzen."
     }
   ],
   "fertig": [
     "Du weißt, was Server, Domäne, Active Directory und Domänencontroller sind.",
-    "whoami zeigt ein Domänenkonto als DOMÄNE\\benutzer.",
-    "Enter-PSSession -ComputerName … verbindet dich mit einem anderen Server, exit bringt dich zurück."
+    "whoami zeigt ein Domänenkonto als DOMÄNE\\benutzer – es gilt auf allen Computern der Domäne.",
+    "Enter-PSSession -ComputerName <Server> verbindet dich; der Prompt zeigt dann [SERVER]:.",
+    "hostname prüft, wo du bist; Exit-PSSession oder exit bringt dich zurück."
   ]
 }

@@ -5,49 +5,134 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/servermanager/get-windowsfeature",
-    "https://learn.microsoft.com/powershell/module/servermanager/install-windowsfeature"
+    "https://learn.microsoft.com/powershell/module/servermanager/install-windowsfeature",
+    "https://learn.microsoft.com/windows-server/administration/windows-commands/telnet",
+    "https://learn.microsoft.com/exchange/mail-flow/test-smtp-telnet"
   ],
   "datum": "2026-11-05",
   "szenario": "srv-feature-fehlt",
   "shell": "powershell",
+  "zustand": {
+    "telnet_installiert": false
+  },
   "erklaeren": [
     "Windows Server bringt viele Bausteine mit, die erst installiert werden müssen: Rollen (z. B. DNS, DHCP,",
-    "Dateiserver) und Features (z. B. Windows Server-Sicherung). Fehlt ein Baustein, fehlen auch seine Befehle.",
-    "Get-WindowsFeature zeigt, was installiert ist, Install-WindowsFeature installiert. Hier, auf SRV-DATEI01,",
-    "soll eine Datensicherung mit wbadmin laufen."
+    "Dateiserver) und Features (z. B. Windows Server-Sicherung). Fehlt ein Baustein, fehlen auch seine Programme",
+    "und Befehle. Du lernst zwei Befehle: Get-WindowsFeature zeigt, was installiert ist, Install-WindowsFeature",
+    "installiert. Installieren braucht Adminrechte – die hast du.",
+    "",
+    "Du bist auf dem Dateiserver SRV-DATEI01. Hier soll eine Datensicherung mit wbadmin laufen. Außerdem wünscht",
+    "sich ein Kollege den Telnet-Client – an ihm übst du das Installieren."
   ],
   "begriffe": {
     "Rolle": "Hauptaufgabe eines Servers, z. B. DNS-Server oder DHCP-Server.",
     "Feature": "Zusätzlicher Baustein, z. B. Windows Server-Sicherung.",
-    "Install State": "Installed = installiert, Available = verfügbar, aber nicht installiert."
+    "Install State": "Installed = installiert, Available = verfügbar, aber nicht installiert.",
+    "Platzhalter *": "Steht für beliebig viele beliebige Zeichen: *Backup* passt auf alles, was Backup enthält.",
+    "Telnet-Client": "Kleines Programm, mit dem man von Hand prüft, ob ein anderer Rechner auf einem bestimmten Port antwortet (z. B. ein Mailserver auf Port 25). Bei Windows nicht von Haus aus installiert."
   },
+  "befehle": [
+    {
+      "muster": [
+        "Get-WindowsFeature Telnet-Client",
+        "Get-WindowsFeature -Name Telnet-Client",
+        "Get-WindowsFeature *Telnet*",
+        "Get-WindowsFeature -Name *Telnet*"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "telnet_installiert": false
+          },
+          "ausgabe": [
+            "",
+            "Display Name                                            Name                       Install State",
+            "------------                                            ----                       -------------",
+            "[ ] Telnet Client                                       Telnet-Client                  Available",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "Display Name                                            Name                       Install State",
+            "------------                                            ----                       -------------",
+            "[X] Telnet Client                                       Telnet-Client                  Installed",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Install-WindowsFeature Telnet-Client",
+        "Install-WindowsFeature -Name Telnet-Client"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "telnet_installiert": true
+          },
+          "sim": true,
+          "ausgabe": "Der Telnet-Client ist schon installiert. (Was die echte PowerShell dann meldet, ist hier nicht nachgebaut.)"
+        },
+        {
+          "setze": {
+            "telnet_installiert": true
+          },
+          "ausgabe": [
+            "",
+            "Success Restart Needed Exit Code      Feature Result",
+            "------- -------------- ---------      --------------",
+            "True    No             Success        {Telnet Client}",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Versuch die Sicherung: wbadmin",
       "eingabe": "wbadmin",
-      "danach": "„is not recognized“ – das Programm gibt es hier nicht. Der Grund: Das Feature fehlt."
+      "danach": "Rote Meldung: „is not recognized as the name of a cmdlet, function, script file, or operable program“ – die PowerShell kennt kein Programm mit diesem Namen. Das heißt entweder Tippfehler oder: Das Programm ist auf diesem Server gar nicht installiert. wbadmin gehört zum Feature Windows Server-Sicherung – ob das da ist, prüfst du jetzt."
     },
     {
-      "text": "Was ist installiert? Get-WindowsFeature *Backup*",
+      "text": "Ist die Sicherung installiert? Get-WindowsFeature *Backup*",
       "eingabe": "Get-WindowsFeature *Backup*",
-      "danach": "[ ] und Available: Windows Server Backup ist verfügbar, aber nicht installiert. [X] hieße installiert."
+      "danach": "Get-WindowsFeature heißt „hole Windows-Features“ und listet Rollen und Features. Der Text dahinter ist der Name (ausgeschrieben -Name *Backup*). Die Sternchen sind Platzhalter: *Backup* findet alles, dessen Name Backup enthält. Ganz ohne Namen listet Get-WindowsFeature alle Bausteine – eine sehr lange Liste. So liest du die Zeile: Display Name ist der Anzeigename, Name der Name für Befehle, Install State der Zustand. [ ] und Available heißen verfügbar, aber nicht installiert; [X] und Installed hieße installiert."
+    },
+    {
+      "text": "Ist der Telnet-Client da? Get-WindowsFeature Telnet-Client",
+      "eingabe": "Get-WindowsFeature Telnet-Client",
+      "danach": "[ ] Telnet Client, Available – auch nicht installiert. Diesmal steht der genaue Name ohne Sternchen dahinter, darum kommt genau diese eine Zeile. Den Namen aus der Spalte Name (Telnet-Client, mit Bindestrich) brauchst du gleich zum Installieren."
+    },
+    {
+      "text": "Installiere ihn: Install-WindowsFeature Telnet-Client",
+      "eingabe": "Install-WindowsFeature Telnet-Client",
+      "danach": "Install-WindowsFeature installiert den Baustein mit diesem Namen (ausgeschrieben -Name Telnet-Client). So liest du das Ergebnis: Success True heißt geklappt. Restart Needed No heißt, ein Neustart ist nicht nötig – stünde dort Yes, wirkt der Baustein erst nach einem Neustart, den du dann mit den Kollegen planst. Feature Result zeigt, was installiert wurde. Bei Rollen wie DNS hängt man oft -IncludeManagementTools an: Ohne diesen Zusatz installiert Install-WindowsFeature keine Verwaltungsprogramme (die Fenster zum Einstellen)."
+    },
+    {
+      "text": "Prüf nach: Get-WindowsFeature Telnet-Client",
+      "eingabe": "Get-WindowsFeature Telnet-Client",
+      "danach": "[X] und Installed – der Telnet-Client ist jetzt installiert. Derselbe Befehl wie vorher zeigt dir den Unterschied direkt: vorher [ ], jetzt [X]."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Installiere das Feature Windows-Server-Backup.",
+      "aufgabe": "Jetzt die Sicherung: Installiere das Feature Windows-Server-Backup.",
       "ziel": {
         "installiert": true
       },
       "hinweise": [
-        "Installieren heißt Install.",
-        "Install-WindowsFeature und der Name aus der Spalte Name.",
+        "Wie hast du den Telnet-Client installiert? Nur der Name ist anders.",
+        "Install-WindowsFeature und der Name aus der Spalte Name (Windows-Server-Backup).",
         "Tippe: Install-WindowsFeature Windows-Server-Backup"
       ],
       "loesung": [
         "Install-WindowsFeature Windows-Server-Backup"
       ],
-      "danach": "Success: True, Restart Needed: No – fertig, ohne Neustart."
+      "danach": "Success True, Restart Needed No – die Windows Server-Sicherung ist installiert, ohne Neustart. Du hast den Namen aus der Spalte Name genommen (Windows-Server-Backup), genau wie beim Telnet-Client. Merke: Fehlt auf einem Server ein Programm oder Befehl, prüf mit Get-WindowsFeature, ob ein Baustein fehlt."
     },
     {
       "aufgabe": "Prüf nach, dass es jetzt installiert ist.",
@@ -62,16 +147,17 @@
         "installiert": true
       },
       "hinweise": [
-        "Wie hast du vorhin nachgesehen?",
+        "Wie hast du vorhin nachgesehen, ob die Sicherung installiert ist?",
         "Get-WindowsFeature mit *Backup*.",
         "Tippe: Get-WindowsFeature *Backup*"
       ],
-      "danach": "[X] Installed – und wbadmin ist jetzt da."
+      "danach": "Installiert – Get-WindowsFeature zeigt jetzt [X] Installed, und wbadmin gibt keine rote Meldung mehr. So schließt sich der Kreis: Fehler gesehen, Ursache gefunden, behoben, nachgeprüft."
     }
   ],
   "fertig": [
     "Rollen und Features sind Bausteine, die man installieren muss.",
-    "Get-WindowsFeature zeigt den Stand ([X] = installiert).",
-    "Install-WindowsFeature <Name> installiert einen Baustein."
+    "Get-WindowsFeature <Name> zeigt den Stand ([X] = installiert, [ ] = verfügbar); * ist ein Platzhalter.",
+    "Install-WindowsFeature <Name> installiert; Restart Needed sagt, ob ein Neustart nötig ist.",
+    "„is not recognized“ kann heißen: Das Programm ist nicht installiert."
   ]
 }

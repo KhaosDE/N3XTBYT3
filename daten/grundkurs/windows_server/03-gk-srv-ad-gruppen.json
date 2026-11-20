@@ -11,43 +11,135 @@
   "datum": "2026-11-05",
   "szenario": "srv-ad-gruppe-fehlt",
   "shell": "powershell",
+  "zustand": {
+    "in_gruppe_einkauf": false
+  },
   "erklaeren": [
     "Rechte (z. B. auf den Ordner Vertrieb) gibt man in Firmen nicht einzelnen Personen, sondern Gruppen.",
     "Wer in der Gruppe GG-Vertrieb ist, darf in den Vertriebsordner. Kommt jemand neu dazu, nimmt man ihn in",
-    "die Gruppe auf – fertig. Hier: Nina Becker (nbecker) ist neu im Vertrieb und kommt nicht an die Dateien."
+    "die Gruppe auf – fertig. Du lernst drei Befehle: Get-ADGroupMember (wer ist in einer Gruppe?),",
+    "Get-ADPrincipalGroupMembership (in welchen Gruppen ist jemand?) und Add-ADGroupMember (jemanden aufnehmen).",
+    "",
+    "Zum Üben: Lukas Hofmann (lhofmann) ist neu im Einkauf und braucht die Gruppe GG-Einkauf. Danach der",
+    "eigentliche Fall: Nina Becker (nbecker) ist neu im Vertrieb und kommt nicht an die Dateien."
   ],
   "begriffe": {
     "Gruppe": "Sammlung von Benutzern. Rechte bekommt die Gruppe, alle Mitglieder erben sie.",
     "Sicherheitsgruppe": "Gruppe, die für Rechte benutzt wird (GroupCategory: Security).",
-    "Mitglied": "Ein Benutzer (oder eine Gruppe), der zu einer Gruppe gehört."
+    "Mitglied": "Ein Benutzer (oder eine Gruppe), der zu einer Gruppe gehört.",
+    "Domain Users": "Gruppe, in der jedes Benutzerkonto der Domäne automatisch ist.",
+    "GG-": "Vorsilbe für die Rechte-Gruppen dieser Firma (eine Namensregel der Firma, kein Windows-Muss)."
   },
+  "befehle": [
+    {
+      "muster": [
+        "Get-ADGroupMember GG-Einkauf",
+        "Get-ADGroupMember -Identity GG-Einkauf"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "in_gruppe_einkauf": false
+          },
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Petra Wolf,OU=Einkauf,DC=firma,DC=internal",
+            "name              : Petra Wolf",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1178-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : pwolf",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1178",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "distinguishedName : CN=Petra Wolf,OU=Einkauf,DC=firma,DC=internal",
+            "name              : Petra Wolf",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1178-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : pwolf",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1178",
+            "",
+            "distinguishedName : CN=Lukas Hofmann,OU=Einkauf,DC=firma,DC=internal",
+            "name              : Lukas Hofmann",
+            "objectClass       : user",
+            "objectGUID        : 8c1d2e3f-1211-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : lhofmann",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1211",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-ADGroupMember -Identity GG-Einkauf -Members lhofmann",
+        "Add-ADGroupMember GG-Einkauf lhofmann",
+        "Add-ADGroupMember GG-Einkauf -Members lhofmann"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "in_gruppe_einkauf": true
+          }
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
-      "text": "Wer ist in der Gruppe? Get-ADGroupMember GG-Vertrieb",
-      "eingabe": "Get-ADGroupMember GG-Vertrieb",
-      "danach": "Die Mitglieder der Gruppe GG-Vertrieb. Nina Becker fehlt."
+      "text": "Wer ist in der Gruppe GG-Einkauf? Get-ADGroupMember GG-Einkauf",
+      "eingabe": "Get-ADGroupMember GG-Einkauf",
+      "danach": "Get-ADGroupMember heißt „hole AD-Gruppenmitglieder“. Der Name dahinter ist die Gruppe – ausgeschrieben -Identity GG-Einkauf; wie bei Get-ADUser darfst du -Identity weglassen. Für jedes Mitglied kommt ein Block: name ist der Anzeigename, SamAccountName der Anmeldename, objectClass sagt, ob es ein Benutzer (user) oder selbst eine Gruppe (group) ist. Nur Petra Wolf ist Mitglied – Lukas fehlt noch."
+    },
+    {
+      "text": "Nimm Lukas auf: Add-ADGroupMember -Identity GG-Einkauf -Members lhofmann",
+      "eingabe": "Add-ADGroupMember -Identity GG-Einkauf -Members lhofmann",
+      "danach": "Add-ADGroupMember heißt „AD-Gruppenmitglied hinzufügen“. Achtung: Hier ist -Identity die Gruppe, die ein neues Mitglied bekommt – nicht die Person. -Members (Mitglieder) sagt, wer hinein soll; mehrere trennst du mit Komma. Beide Angaben sind Pflicht, fehlt eine, fragt die PowerShell nach. Bei Erfolg kommt keine Ausgabe."
+    },
+    {
+      "text": "Prüf nach: Get-ADGroupMember GG-Einkauf",
+      "eingabe": "Get-ADGroupMember GG-Einkauf",
+      "danach": "Jetzt stehen zwei Blöcke da: Petra Wolf und Lukas Hofmann. Lukas hat damit alle Rechte der Gruppe GG-Einkauf. Er muss sich aber einmal ab- und wieder anmelden, denn Windows liest die Gruppen eines Benutzers bei der Anmeldung ein."
     },
     {
       "text": "Andersherum: In welchen Gruppen ist Nina? Get-ADPrincipalGroupMembership nbecker",
       "eingabe": "Get-ADPrincipalGroupMembership nbecker",
-      "danach": "Nur in Domain Users – darin ist jeder. GG-Vertrieb fehlt: Darum kommt sie nicht an die Dateien."
+      "danach": "Get-ADPrincipalGroupMembership fragt andersherum: In welchen Gruppen ist dieses Konto Mitglied? Principal ist der Oberbegriff für alles, was Rechte bekommen kann – Benutzer, Computer, Gruppen. Der Name dahinter ist wieder die Identity, hier Nina. Je Gruppe kommt ein Block; GroupCategory: Security heißt Sicherheitsgruppe. Nina ist nur in Domain Users, darin ist jedes Konto. GG-Vertrieb fehlt – darum kommt sie nicht an die Vertriebsdateien."
     }
   ],
   "aufgaben": [
+    {
+      "aufgabe": "Sieh nach, wer in der Gruppe GG-Vertrieb ist.",
+      "eingabe": [
+        "Get-ADGroupMember GG-Vertrieb",
+        "Get-ADGroupMember -Identity GG-Vertrieb"
+      ],
+      "hinweise": [
+        "Wie hast du die Mitglieder von GG-Einkauf angezeigt? Nur die Gruppe ist anders.",
+        "Get-ADGroupMember und der Gruppenname.",
+        "Tippe: Get-ADGroupMember GG-Vertrieb"
+      ],
+      "danach": "Kai Wagner und Jonas Klein sind Mitglied, Nina Becker fehlt. Das bestätigt, was Get-ADPrincipalGroupMembership von Ninas Seite gezeigt hat. Zwei Blickrichtungen auf dieselbe Sache helfen, wenn du nicht sicher bist, wo das Problem liegt."
+    },
     {
       "aufgabe": "Nimm nbecker in die Gruppe GG-Vertrieb auf.",
       "ziel": {
         "in_gruppe": true
       },
       "hinweise": [
-        "Hinzufügen heißt Add.",
+        "Wie hast du Lukas aufgenommen? Gruppe und Person sind anders.",
         "Add-ADGroupMember mit -Identity (die Gruppe) und -Members (wer dazu soll).",
         "Tippe: Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker"
       ],
       "loesung": [
         "Add-ADGroupMember -Identity GG-Vertrieb -Members nbecker"
       ],
-      "danach": "Aufgenommen. Nina muss sich einmal ab- und wieder anmelden, damit die neue Gruppe wirkt."
+      "danach": "Nina ist in GG-Vertrieb – mit demselben Befehl wie bei Lukas: -Identity ist die Gruppe, -Members die neue Person. Sie muss sich einmal ab- und wieder anmelden, dann wirkt die Gruppe und sie kommt an die Dateien. Rechte gibst du so immer über die Gruppe, nie direkt an die Person: Wechselt jemand die Abteilung, nimmst du ihn einfach aus der alten Gruppe heraus."
     },
     {
       "aufgabe": "Prüf nach, dass Nina jetzt Mitglied ist.",
@@ -61,16 +153,17 @@
         "in_gruppe": true
       },
       "hinweise": [
-        "Einer der beiden Befehle vom Mitmachen zeigt es.",
+        "Einer der Befehle vom Mitmachen zeigt es.",
         "Get-ADGroupMember mit dem Gruppennamen.",
         "Tippe: Get-ADGroupMember GG-Vertrieb"
       ],
-      "danach": "Nina steht in der Liste."
+      "danach": "Nina steht jetzt in der Liste. Ob du von der Gruppe aus (Get-ADGroupMember) oder von der Person aus (Get-ADPrincipalGroupMembership) prüfst, ist egal – beide zeigen dieselbe Mitgliedschaft. Nachprüfen gehört wie immer zum Abschluss."
     }
   ],
   "fertig": [
     "Rechte hängen an Gruppen, nicht an Personen.",
-    "Get-ADGroupMember zeigt, wer in einer Gruppe ist; Get-ADPrincipalGroupMembership, worin jemand ist.",
-    "Add-ADGroupMember -Identity <Gruppe> -Members <Benutzer> nimmt jemanden auf."
+    "Get-ADGroupMember <Gruppe> zeigt, wer in einer Gruppe ist.",
+    "Get-ADPrincipalGroupMembership <Benutzer> zeigt, in welchen Gruppen jemand ist.",
+    "Add-ADGroupMember -Identity <Gruppe> -Members <Benutzer> nimmt jemanden auf; danach neu anmelden."
   ]
 }

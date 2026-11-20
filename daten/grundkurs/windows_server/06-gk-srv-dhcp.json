@@ -11,47 +11,293 @@
   "datum": "2026-11-05",
   "szenario": "srv-dhcp-bereich-voll",
   "shell": "powershell",
+  "zustand": {
+    "lager_gross": false
+  },
   "erklaeren": [
-    "Der DHCP-Server verteilt IP-Adressen automatisch. Er hat dafür einen Bereich (Scope), z. B. 192.168.10.100",
-    "bis .150. Jede vergebene Adresse ist für eine Zeit verliehen (Lease). Ist der Bereich voll, bekommen neue",
-    "Geräte keine Adresse – unter Windows zeigen sie dann eine 169.254-Adresse (APIPA). Hier bekommen die",
-    "Schulungslaptops keine Adresse."
+    "Der DHCP-Server verteilt IP-Adressen automatisch. Er hat dafür je Netz einen Bereich (Scope), z. B.",
+    "192.168.10.100 bis .150. Jede vergebene Adresse ist für eine Zeit verliehen (Lease). Ist der Bereich voll,",
+    "bekommen neue Geräte keine Adresse – unter Windows zeigen sie dann eine 169.254-Adresse (APIPA).",
+    "",
+    "Auf DC01 gibt es zwei Bereiche: Buero (192.168.10.0) und Lager (192.168.20.0). Du lernst, wie voll ein",
+    "Bereich ist, wie groß er ist und wie du ihn vergrößerst – geübt am Lager. Danach der Fall: Die",
+    "Schulungslaptops im Büro bekommen keine Adresse."
   ],
   "begriffe": {
-    "Scope (Bereich)": "Die Adressen, die ein DHCP-Server verteilen darf.",
+    "Scope (Bereich)": "Die Adressen, die ein DHCP-Server in einem Netz verteilen darf.",
+    "ScopeId": "Die Netzadresse, unter der ein Bereich geführt wird, z. B. 192.168.10.0. Damit sagst du Befehlen, welchen Bereich du meinst.",
     "Lease": "Ausleihe einer Adresse für eine bestimmte Zeit.",
-    "APIPA": "Notadresse 169.254.x.x, wenn kein DHCP-Server antwortet."
+    "APIPA": "Notadresse 169.254.x.x, wenn kein DHCP-Server eine Adresse liefert.",
+    "v4": "IPv4 – Adressen der Form 192.168.10.57. Für IPv6 gibt es eigene Befehle mit v6 im Namen."
   },
-  "mitmachen": [
+  "befehle": [
     {
-      "text": "Wie voll ist der Bereich? Get-DhcpServerv4ScopeStatistics",
-      "eingabe": "Get-DhcpServerv4ScopeStatistics",
-      "danach": "Free 0, PercentageInUse 100: Keine Adresse mehr frei."
+      "muster": [
+        "Get-DhcpServerv4ScopeStatistics"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "bereich_gross": true,
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    50         51         50.4950495049505  0          0",
+            "192.168.20.0    40         10         20                0          0",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "bereich_gross": true,
+            "lager_gross": false
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    50         51         50.4950495049505  0          0",
+            "192.168.20.0    10         10         50                0          0",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "bereich_gross": false,
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    0          51         100               0          0",
+            "192.168.20.0    40         10         20                0          0",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.10.0    0          51         100               0          0",
+            "192.168.20.0    10         10         50                0          0",
+            ""
+          ]
+        }
+      ]
     },
     {
-      "text": "Wie groß ist er? Get-DhcpServerv4Scope",
+      "muster": [
+        "Get-DhcpServerv4ScopeStatistics -ScopeId 192.168.20.0"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.20.0    40         10         20                0          0",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         Free       InUse      PercentageInUse   Reserved   Pending    SuperscopeName",
+            "-------         ----       -----      ---------------   --------   -------    --------------",
+            "192.168.20.0    10         10         50                0          0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DhcpServerv4Scope"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "bereich_gross": true,
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.200  8.00:00:00",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.149  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "bereich_gross": true,
+            "lager_gross": false
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.200  8.00:00:00",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.119  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "bereich_gross": false,
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.150  8.00:00:00",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.149  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.150  8.00:00:00",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.119  8.00:00:00",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DhcpServerv4Scope -ScopeId 192.168.20.0"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "lager_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.149  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.20.0    255.255.255.0   Lager          Active   192.168.20.100  192.168.20.119  8.00:00:00",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DhcpServerv4Scope -ScopeId 192.168.10.0"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "bereich_gross": true
+          },
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.200  8.00:00:00",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "ScopeId         SubnetMask      Name           State    StartRange      EndRange        LeaseDuration",
+            "-------         ----------      ----           -----    ----------      --------        -------------",
+            "192.168.10.0    255.255.255.0   Buero          Active   192.168.10.100  192.168.10.150  8.00:00:00",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.20.0 -StartRange 192.168.20.100 -EndRange 192.168.20.149"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "lager_gross": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Set-DhcpServerv4Scope -ScopeId 192.168.20.0 -EndRange 192.168.20.149",
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+      ],
+      "faelle": [
+        {
+          "sim": true,
+          "ausgabe": "Hier fehlt -StartRange. Wer den Bereich ändert, gibt Anfang und Ende zusammen an: -StartRange und -EndRange. Die echte PowerShell würde jetzt nach dem fehlenden Wert fragen („Supply values for the following parameters“) – das ist hier nicht nachgebaut."
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Wie voll sind die Bereiche? Get-DhcpServerv4ScopeStatistics",
+      "eingabe": "Get-DhcpServerv4ScopeStatistics",
+      "danach": "Get-DhcpServerv4ScopeStatistics setzt sich zusammen aus Get (hole), DhcpServer, v4 (IPv4), Scope (Bereich) und Statistics (Statistik). Ohne Zusatz zeigt der Befehl alle Bereiche, eine Zeile je Bereich. So liest du sie: Free = noch freie Adressen, InUse = vergeben, PercentageInUse = wie viel Prozent belegt sind, Reserved = fest reservierte Adressen. Der Bereich 192.168.10.0 hat Free 0 und 100 Prozent – er ist voll. Im Lager ist noch die Hälfte frei."
+    },
+    {
+      "text": "Wie groß sind sie? Get-DhcpServerv4Scope",
       "eingabe": "Get-DhcpServerv4Scope",
-      "danach": "StartRange und EndRange zeigen den Bereich. Er ist zu klein für alle Geräte."
+      "danach": "Get-DhcpServerv4Scope zeigt die Einstellungen jedes Bereichs: ScopeId (welcher Bereich), Name, State (Active = verteilt Adressen), StartRange und EndRange (erste und letzte Adresse, die verteilt wird) und LeaseDuration (8.00:00:00 heißt 8 Tage, 0 Stunden). Der Büro-Bereich geht von .100 bis .150 – das sind nur 51 Adressen, zu wenig für alle Geräte."
+    },
+    {
+      "text": "Im Lager kommen bald 30 Scanner dazu. Vergrößere den Lager-Bereich bis .149: Set-DhcpServerv4Scope -ScopeId 192.168.20.0 -StartRange 192.168.20.100 -EndRange 192.168.20.149",
+      "eingabe": "Set-DhcpServerv4Scope -ScopeId 192.168.20.0 -StartRange 192.168.20.100 -EndRange 192.168.20.149",
+      "danach": "Set-DhcpServerv4Scope ändert die Einstellungen eines Bereichs. -ScopeId sagt, welcher Bereich gemeint ist – ohne sie wüsste der Befehl nicht, was er ändern soll. -StartRange und -EndRange legen Anfang und Ende neu fest. Sie gehören zusammen: Willst du den Bereich ändern, gibst du beide an, auch wenn sich nur das Ende ändert. Bei Erfolg kommt keine Ausgabe. Achte im echten Netz darauf, dass im neuen Bereich keine Adressen liegen, die Geräte schon fest eingestellt haben."
+    },
+    {
+      "text": "Prüf nach: Get-DhcpServerv4Scope -ScopeId 192.168.20.0",
+      "eingabe": "Get-DhcpServerv4Scope -ScopeId 192.168.20.0",
+      "danach": "Mit -ScopeId zeigt Get-DhcpServerv4Scope nur diesen einen Bereich. EndRange ist jetzt 192.168.20.149 – der Lager-Bereich hat 50 Adressen statt 20. Dasselbe geht bei der Statistik: Get-DhcpServerv4ScopeStatistics -ScopeId … zeigt nur den einen Bereich."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Vergrößere den Bereich 192.168.10.0: Er soll bis 192.168.10.200 gehen.",
+      "aufgabe": "Jetzt das Büro: Vergrößere den Bereich 192.168.10.0. Er soll weiter bei 192.168.10.100 beginnen und bis 192.168.10.200 gehen.",
       "ziel": {
         "bereich_gross": true
       },
       "hinweise": [
-        "Einstellungen ändern: Set-…",
-        "Set-DhcpServerv4Scope mit -ScopeId und -EndRange.",
-        "Tippe: Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+        "Wie hast du den Lager-Bereich vergrößert? Bereich und Adressen sind anders.",
+        "Set-DhcpServerv4Scope mit -ScopeId, -StartRange und -EndRange.",
+        "Tippe: Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200"
       ],
       "loesung": [
-        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -EndRange 192.168.10.200"
+        "Set-DhcpServerv4Scope -ScopeId 192.168.10.0 -StartRange 192.168.10.100 -EndRange 192.168.10.200"
       ],
-      "danach": "Der Bereich ist größer."
+      "danach": "Der Büro-Bereich geht jetzt bis .200 – 101 Adressen statt 51. Du hast denselben Befehl wie im Lager benutzt: -ScopeId für den Bereich, -StartRange und -EndRange für Anfang und Ende. Neue Geräte bekommen ab sofort wieder eine Adresse; ein Laptop mit 169.254-Adresse fragt beim nächsten Versuch erneut, nachhelfen kannst du dort mit ipconfig /renew."
     },
     {
-      "aufgabe": "Prüf nach, ob wieder Adressen frei sind.",
+      "aufgabe": "Prüf nach, ob im Büro wieder Adressen frei sind.",
       "eingabe": [
         "Get-DhcpServerv4ScopeStatistics",
         "Get-DhcpServerv4ScopeStatistics -ScopeId 192.168.10.0"
@@ -64,12 +310,13 @@
         "Get-DhcpServerv4ScopeStatistics.",
         "Tippe: Get-DhcpServerv4ScopeStatistics"
       ],
-      "danach": "Free 50 – die Laptops bekommen wieder Adressen."
+      "danach": "Free 50, PercentageInUse rund 50 – im Büro sind wieder 50 Adressen frei, die Laptops bekommen eine. Schau dir die Statistik auch ohne Störung ab und zu an: Geht PercentageInUse Richtung 100, vergrößerst du den Bereich rechtzeitig."
     }
   ],
   "fertig": [
     "DHCP verteilt Adressen aus einem Bereich (Scope), verliehen als Lease.",
-    "Get-DhcpServerv4ScopeStatistics zeigt, wie voll der Bereich ist.",
-    "Set-DhcpServerv4Scope ändert den Bereich."
+    "Get-DhcpServerv4ScopeStatistics zeigt, wie voll die Bereiche sind (Free, PercentageInUse).",
+    "Get-DhcpServerv4Scope zeigt StartRange, EndRange und Lease-Dauer.",
+    "Set-DhcpServerv4Scope -ScopeId … -StartRange … -EndRange … ändert den Bereich."
   ]
 }

@@ -11,45 +11,124 @@
   "datum": "2026-11-05",
   "szenario": "srv-ad-konto-abgelaufen",
   "shell": "powershell",
+  "zustand": {
+    "ablauf_mlang": "keins"
+  },
   "erklaeren": [
     "Dieselben fünf Schritte wie im Windows-Kurs: beschreiben, Infos sammeln, vermuten, gezielt beheben,",
     "nachprüfen und notieren. Der Fall: Tom Richter (trichter), Praktikant, kann sich seit heute nicht mehr",
-    "anmelden. Sein Praktikum wurde bis Ende Februar verlängert. Passwort und Sperre hast du schon im Blick –",
-    "aber hier steckt etwas anderes dahinter."
+    "anmelden. Sein Praktikum wurde bis Ende Februar verlängert. Gesperrt (Lektion 2) ist nicht die einzige",
+    "Möglichkeit: Ein Konto kann auch ein Ablaufdatum haben.",
+    "",
+    "Den Befehl zum Einstellen des Ablaufdatums lernst du vorher an einem anderen Konto: Die Aushilfe Mia Lang",
+    "(mlang) arbeitet bis einschließlich 18. Dezember 2026 bei euch."
   ],
   "begriffe": {
-    "Kontoablauf (AccountExpirationDate)": "Datum, ab dem ein Konto nicht mehr gilt – gut für Praktikanten und Aushilfen."
+    "Kontoablauf (AccountExpirationDate)": "Datum, ab dem ein Konto nicht mehr gilt – gut für Praktikanten und Aushilfen. Das Konto läuft zu Beginn dieses Tages (0:00 Uhr) ab.",
+    "Datum in der Ausgabe": "Die PowerShell zeigt Daten hier amerikanisch: Monat/Tag/Jahr. 3/1/2027 ist der 1. März 2027, 12:00:00 AM ist 0:00 Uhr."
   },
+  "befehle": [
+    {
+      "muster": [
+        "Set-ADAccountExpiration -Identity mlang -DateTime 2026-12-19",
+        "Set-ADAccountExpiration mlang -DateTime 2026-12-19"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "ablauf_mlang": "gesetzt"
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ADUser mlang -Properties AccountExpirationDate",
+        "Get-ADUser -Identity mlang -Properties AccountExpirationDate"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "ablauf_mlang": "gesetzt"
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate : 12/19/2026 12:00:00 AM",
+            "DistinguishedName     : CN=Mia Lang,OU=Aushilfen,DC=firma,DC=internal",
+            "Enabled               : True",
+            "GivenName             : Mia",
+            "Name                  : Mia Lang",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1224-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName        : mlang",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1224",
+            "Surname               : Lang",
+            "UserPrincipalName     : mlang@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Mia Lang,OU=Aushilfen,DC=firma,DC=internal",
+            "Enabled               : True",
+            "GivenName             : Mia",
+            "Name                  : Mia Lang",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1224-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName        : mlang",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1224",
+            "Surname               : Lang",
+            "UserPrincipalName     : mlang@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Infos sammeln: Get-ADUser trichter -Properties AccountExpirationDate",
       "eingabe": "Get-ADUser trichter -Properties AccountExpirationDate",
-      "danach": "AccountExpirationDate 11/1/2026: Das Konto ist abgelaufen. Vermutung: Bei der Verlängerung wurde das Ablaufdatum vergessen."
+      "danach": "Wie in Lektion 2 holst du mit -Properties eine Eigenschaft dazu, diesmal AccountExpirationDate (Ablaufdatum des Kontos). Dort steht 11/1/2026 12:00:00 AM – amerikanisch geschrieben, Monat/Tag/Jahr: der 1. November 2026, 0:00 Uhr. Seitdem gilt das Konto nicht mehr. Vermutung: Bei der Verlängerung des Praktikums wurde das Ablaufdatum nicht geändert."
     },
     {
       "text": "Gibt es noch mehr abgelaufene Konten? Search-ADAccount -AccountExpired",
       "eingabe": "Search-ADAccount -AccountExpired",
-      "danach": "Nur Tom – es ist kein größeres Problem."
+      "danach": "Der Schalter -AccountExpired (Konto abgelaufen) lässt Search-ADAccount nach Konten suchen, deren Ablaufdatum vorbei ist – so wie -LockedOut nach gesperrten. Nur Tom taucht auf: Es ist kein größeres Problem, etwa ein falsches Datum bei vielen Konten. Das zu wissen ist wichtig, bevor du etwas änderst."
+    },
+    {
+      "text": "Lerne den Befehl zum Einstellen an Mias Konto: Set-ADAccountExpiration -Identity mlang -DateTime 2026-12-19",
+      "eingabe": "Set-ADAccountExpiration -Identity mlang -DateTime 2026-12-19",
+      "danach": "Set-ADAccountExpiration heißt „Kontoablauf einstellen“. -Identity sagt wie immer, welches Konto. -DateTime ist das Datum, an dem das Konto abläuft – und zwar zu Beginn des Tages um 0:00 Uhr. Darum steht hier der 19. Dezember: Mia arbeitet bis einschließlich 18. Dezember, ab dem 19. gilt ihr Konto nicht mehr. Schreib das Datum als Jahr-Monat-Tag (2026-12-19), dann ist es nicht zu verwechseln. Bei Erfolg kommt keine Ausgabe."
+    },
+    {
+      "text": "Prüf nach: Get-ADUser mlang -Properties AccountExpirationDate",
+      "eingabe": "Get-ADUser mlang -Properties AccountExpirationDate",
+      "danach": "12/19/2026 12:00:00 AM – also der 19. Dezember 2026, 0:00 Uhr. Mias Konto läuft damit nach ihrem letzten Arbeitstag von selbst ab; niemand muss daran denken, es auszuschalten. Genau so ein Datum ist bei Tom abgelaufen."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Beheben: Setz das Ablaufdatum auf den 1. März 2027 (Format 2027-03-01) – der Tag nach dem letzten Praktikumstag.",
+      "aufgabe": "Beheben: Toms Praktikum geht bis einschließlich 28. Februar 2027. Setz sein Ablaufdatum so, dass er an diesem Tag noch arbeiten kann (Datum als Jahr-Monat-Tag).",
       "ziel": {
         "ablauf": "verlaengert"
       },
       "hinweise": [
-        "Das Verb zum Einstellen ist Set.",
-        "Set-ADAccountExpiration mit -Identity und -DateTime.",
+        "Wie hast du Mias Ablaufdatum gesetzt? Denk daran: Das Konto läuft zu Beginn des Tages ab.",
+        "Set-ADAccountExpiration mit -Identity trichter und -DateTime – dem Tag nach dem letzten Praktikumstag.",
         "Tippe: Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01"
       ],
       "loesung": [
         "Set-ADAccountExpiration -Identity trichter -DateTime 2027-03-01"
       ],
-      "danach": "Gesetzt. Das Konto läuft zu Beginn des 1. März ab – Tom kann bis einschließlich 28. Februar arbeiten."
+      "danach": "Gesetzt: Das Konto läuft am 1. März 2027 um 0:00 Uhr ab – Tom kann bis einschließlich 28. Februar arbeiten. Hättest du den 28. Februar eingetragen, wäre er an seinem letzten Tag schon ausgesperrt. Weil das Ablaufdatum jetzt in der Zukunft liegt, kann Tom sich sofort wieder anmelden."
     },
     {
-      "aufgabe": "Nachprüfen: Zeig das neue Ablaufdatum an.",
+      "aufgabe": "Nachprüfen: Zeig Toms neues Ablaufdatum an.",
       "eingabe": [
         "Get-ADUser trichter -Properties AccountExpirationDate",
         "Get-ADUser -Identity trichter -Properties AccountExpirationDate"
@@ -62,12 +141,13 @@
         "Get-ADUser mit -Properties AccountExpirationDate.",
         "Tippe: Get-ADUser trichter -Properties AccountExpirationDate"
       ],
-      "danach": "3/1/2027 – passt. Notiz: „Konto abgelaufen (Verlängerung nicht eingetragen); Ablauf auf 01.03.2027 gesetzt.“"
+      "danach": "3/1/2027 12:00:00 AM – passt. Zum Abschluss Schritt 5 der Fehlersuche, die Notiz: „Konto abgelaufen (Verlängerung nicht eingetragen); Ablauf auf 01.03.2027 gesetzt.“ So weiß der Nächste Bescheid, falls Tom im März wieder anruft."
     }
   ],
   "fertig": [
     "Die fünf Schritte der Fehlersuche funktionieren auch am Server.",
     "Konten können gesperrt, deaktiviert oder abgelaufen sein – -Properties zeigt, was zutrifft.",
-    "Set-ADAccountExpiration setzt das Ablaufdatum (es gilt ab Beginn des Tages)."
+    "Search-ADAccount -AccountExpired findet abgelaufene Konten.",
+    "Set-ADAccountExpiration -Identity … -DateTime … setzt das Ablaufdatum (es gilt ab 0:00 Uhr dieses Tages)."
   ]
 }

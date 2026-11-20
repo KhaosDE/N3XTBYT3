@@ -11,26 +11,238 @@
   "datum": "2026-11-05",
   "szenario": "srv-dns-eintrag-fehlt",
   "shell": "powershell",
+  "zustand": {
+    "eintrag_scanner": false
+  },
   "erklaeren": [
     "Aus dem Windows-Kurs kennst du DNS: Es übersetzt Namen in IP-Adressen. In der Firma ist DC01 der",
     "DNS-Server. Die Namen stehen dort in einer Zone (firma.internal) als Einträge – ein A-Eintrag verbindet",
-    "einen Namen mit einer IPv4-Adresse. Hier: Der neue Drucker drucker02 (192.168.10.42) geht nur per IP."
+    "einen Namen mit einer IPv4-Adresse. Du lernst, Einträge anzusehen (Get-DnsServerResourceRecord) und",
+    "anzulegen (Add-DnsServerResourceRecordA).",
+    "",
+    "Zum Üben bekommt der neue Scanner scanner01 (192.168.10.45) einen Namen. Danach der Fall: Der neue Drucker",
+    "drucker02 (192.168.10.42) geht nur per IP-Adresse, nicht per Namen."
   ],
   "begriffe": {
     "Zone": "Bereich, für den ein DNS-Server zuständig ist, z. B. firma.internal.",
     "A-Eintrag": "DNS-Eintrag: Name → IPv4-Adresse.",
-    "TTL": "Wie lange eine DNS-Antwort zwischengespeichert werden darf."
+    "Resource Record (RR)": "Englisch für DNS-Eintrag. A, AAAA, CNAME, MX sind Arten (Typen) von Einträgen.",
+    "FQDN": "Voller Name mit Zone, z. B. drucker02.firma.internal (Fully Qualified Domain Name).",
+    "TTL": "Time to Live: wie lange andere eine DNS-Antwort zwischenspeichern dürfen, z. B. 01:00:00 = eine Stunde."
   },
+  "befehle": [
+    {
+      "muster": [
+        "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag": true,
+            "eintrag_scanner": true
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "scanner01                A          1          0                    01:00:00        192.168.10.45",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "eintrag": true,
+            "eintrag_scanner": false
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "eintrag": false,
+            "eintrag_scanner": true
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "scanner01                A          1          0                    01:00:00        192.168.10.45",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-DnsServerResourceRecord -ZoneName firma.internal"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag": true,
+            "eintrag_scanner": true
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "scanner01                A          1          0                    01:00:00        192.168.10.45",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ],
+          "notiz": "Gekürzt: Ohne -RRType stehen im echten System auch Einträge anderer Typen da (z. B. NS, SOA und SRV)."
+        },
+        {
+          "wenn": {
+            "eintrag": true,
+            "eintrag_scanner": false
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "drucker02                A          1          0                    01:00:00        192.168.10.42",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ],
+          "notiz": "Gekürzt: Ohne -RRType stehen im echten System auch Einträge anderer Typen da (z. B. NS, SOA und SRV)."
+        },
+        {
+          "wenn": {
+            "eintrag": false,
+            "eintrag_scanner": true
+          },
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "scanner01                A          1          0                    01:00:00        192.168.10.45",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ],
+          "notiz": "Gekürzt: Ohne -RRType stehen im echten System auch Einträge anderer Typen da (z. B. NS, SOA und SRV)."
+        },
+        {
+          "ausgabe": [
+            "",
+            "HostName                 RecordType Type       Timestamp            TimeToLive      RecordData",
+            "--------                 ---------- ----       ---------            ----------      ----------",
+            "@                        A          1          0                    00:10:00        192.168.10.5",
+            "dc01                     A          1          0                    01:00:00        192.168.10.5",
+            "drucker01                A          1          0                    01:00:00        192.168.10.41",
+            "intranet                 A          1          0                    01:00:00        192.168.10.25",
+            "srv-datei01              A          1          0                    01:00:00        192.168.10.12",
+            ""
+          ],
+          "notiz": "Gekürzt: Ohne -RRType stehen im echten System auch Einträge anderer Typen da (z. B. NS, SOA und SRV)."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name scanner01 -IPv4Address 192.168.10.45",
+        "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name scanner01 -IPv4Address 192.168.10.45 -CreatePtr"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "eintrag_scanner": true
+          }
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Resolve-DnsName scanner01.firma.internal",
+        "Resolve-DnsName -Name scanner01.firma.internal"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "eintrag_scanner": false
+          },
+          "fehler": true,
+          "ausgabe": "Resolve-DnsName : scanner01.firma.internal : DNS name does not exist"
+        },
+        {
+          "ausgabe": [
+            "",
+            "Name                                           Type   TTL   Section    IPAddress",
+            "----                                           ----   ---   -------    ---------",
+            "scanner01.firma.internal                       A      3600  Answer     192.168.10.45",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
       "text": "Kennt DNS den Drucker? Resolve-DnsName drucker02.firma.internal",
       "eingabe": "Resolve-DnsName drucker02.firma.internal",
-      "danach": "„DNS name does not exist“ – der Name ist nicht eingetragen."
+      "danach": "Resolve-DnsName (Namen auflösen) kennst du aus dem Windows-Kurs: Es fragt den DNS-Server nach der Adresse zu einem Namen. Die rote Antwort „DNS name does not exist“ heißt: Diesen Namen gibt es im DNS nicht – nicht etwa, dass der Drucker kaputt ist. Ob der Eintrag wirklich fehlt, siehst du jetzt direkt auf dem DNS-Server nach."
     },
     {
       "text": "Was steht in der Zone? Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
       "eingabe": "Get-DnsServerResourceRecord -ZoneName firma.internal -RRType A",
-      "danach": "Alle A-Einträge der Zone. drucker02 fehlt."
+      "danach": "Get-DnsServerResourceRecord heißt „hole Einträge vom DNS-Server“ (Resource Record = DNS-Eintrag). -ZoneName sagt, aus welcher Zone – das ist Pflicht, denn ein DNS-Server kann viele Zonen haben. -RRType (Resource-Record-Typ) A zeigt nur A-Einträge; ohne -RRType kommen alle Typen, auch die Verwaltungseinträge der Zone. So liest du die Tabelle: HostName ist der Name ohne Zone (@ steht für die Zone selbst), TimeToLive die TTL, RecordData die IP-Adresse. drucker02 fehlt – und scanner01 auch."
+    },
+    {
+      "text": "Leg zum Üben den Scanner an: Add-DnsServerResourceRecordA -ZoneName firma.internal -Name scanner01 -IPv4Address 192.168.10.45",
+      "eingabe": "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name scanner01 -IPv4Address 192.168.10.45",
+      "danach": "Add-DnsServerResourceRecordA heißt „DNS-Eintrag vom Typ A hinzufügen“ – das A am Ende ist der Typ. -ZoneName ist die Zone, -Name nur der vordere Teil (scanner01 ohne .firma.internal, die Zone hängt der Server selbst an), -IPv4Address die Adresse. Alle drei sind Pflicht; fehlt einer, fragt die PowerShell nach. Bei Erfolg kommt keine Ausgabe."
+    },
+    {
+      "text": "Prüf nach: Resolve-DnsName scanner01.firma.internal",
+      "eingabe": "Resolve-DnsName scanner01.firma.internal",
+      "danach": "Jetzt kommt eine Tabelle statt der roten Meldung. Name ist der volle Name, Type der Typ A, TTL 3600 Sekunden (eine Stunde), Section Answer heißt „Antwort auf deine Frage“, IPAddress die Adresse 192.168.10.45. Der Scanner ist jetzt per Namen erreichbar."
     }
   ],
   "aufgaben": [
@@ -40,17 +252,17 @@
         "eintrag": true
       },
       "hinweise": [
-        "Ein A-Eintrag wird hinzugefügt: Add-DnsServerResourceRecord…",
+        "Wie hast du den Scanner eingetragen? Name und Adresse sind anders.",
         "Add-DnsServerResourceRecordA mit -ZoneName, -Name und -IPv4Address.",
         "Tippe: Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42"
       ],
       "loesung": [
         "Add-DnsServerResourceRecordA -ZoneName firma.internal -Name drucker02 -IPv4Address 192.168.10.42"
       ],
-      "danach": "Eingetragen."
+      "danach": "Eingetragen – genau wie beim Scanner, nur mit anderem Namen und anderer Adresse. Ab jetzt bekommt jeder, der den DNS-Server nach drucker02.firma.internal fragt, die Adresse 192.168.10.42. Im Alltag legst du so Einträge für Geräte mit fester Adresse an: Drucker, Scanner, Server."
     },
     {
-      "aufgabe": "Prüf nach, ob der Name jetzt aufgelöst wird.",
+      "aufgabe": "Prüf nach, ob der Name drucker02.firma.internal jetzt aufgelöst wird.",
       "eingabe": [
         "Resolve-DnsName drucker02.firma.internal",
         "Resolve-DnsName -Name drucker02.firma.internal"
@@ -59,16 +271,17 @@
         "eintrag": true
       },
       "hinweise": [
-        "Wie hast du es am Anfang geprüft?",
-        "Resolve-DnsName mit dem vollen Namen.",
+        "Wie hast du den Scanner geprüft?",
+        "Resolve-DnsName mit dem vollen Namen des Druckers.",
         "Tippe: Resolve-DnsName drucker02.firma.internal"
       ],
-      "danach": "192.168.10.42 – der Drucker ist per Namen erreichbar."
+      "danach": "192.168.10.42 – der Drucker ist per Namen erreichbar. Vorsicht im echten Alltag: Hat ein Computer den Namen kurz vorher schon einmal erfolglos abgefragt, merkt er sich eine Weile auch die Antwort „gibt es nicht“ (DNS-Cache). Dann leerst du den Cache mit ipconfig /flushdns oder wartest ein paar Minuten."
     }
   ],
   "fertig": [
     "Ein DNS-Server hat Zonen mit Einträgen; ein A-Eintrag verbindet Name und IPv4-Adresse.",
-    "Get-DnsServerResourceRecord zeigt Einträge, Add-DnsServerResourceRecordA legt einen an.",
+    "Get-DnsServerResourceRecord -ZoneName … -RRType A zeigt die A-Einträge einer Zone.",
+    "Add-DnsServerResourceRecordA -ZoneName … -Name … -IPv4Address … legt einen an.",
     "Resolve-DnsName prüft, ob ein Name aufgelöst wird."
   ]
 }

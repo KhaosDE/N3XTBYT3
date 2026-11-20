@@ -5,6 +5,8 @@
   "pruefstatus": "ungeprueft",
   "quelle": [
     "https://learn.microsoft.com/powershell/module/microsoft.powershell.diagnostics/get-winevent",
+    "https://learn.microsoft.com/powershell/scripting/samples/creating-get-winevent-queries-with-filterhashtable",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/format-list?view=powershell-5.1",
     "https://learn.microsoft.com/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs"
   ],
   "datum": "2026-11-05",
@@ -12,19 +14,115 @@
   "shell": "powershell",
   "erklaeren": [
     "Windows schreibt fast alles mit, was passiert: Starts, Fehler, Anmeldungen. Diese Ereignisse stehen in",
-    "Protokollen (System, Application, Security). Jedes Ereignis hat eine Nummer (Id). Get-WinEvent liest sie –",
-    "wie die Ereignisanzeige, nur in der Konsole. Hier: Der Server DC01 wurde heute Nacht neu gestartet. Von wem?"
+    "Protokollen (System, Application, Security). Jedes Ereignis hat eine Nummer (Id), eine Quelle (ProviderName)",
+    "und eine Stufe (Information, Warnung, Fehler). Get-WinEvent („hole Windows-Ereignisse“) liest sie – wie die",
+    "Ereignisanzeige, nur in der Konsole. Du lernst, die neuesten Ereignisse zu zeigen, gezielt nach einer Id zu",
+    "filtern und ein Ereignis ungekürzt anzuzeigen.",
+    "",
+    "Der Fall: Der Server DC01 wurde heute Nacht neu gestartet. Von wem?"
   ],
   "begriffe": {
     "Ereignisprotokoll": "Liste aller Ereignisse eines Bereichs, z. B. System.",
-    "Ereignis-Id": "Nummer eines Ereignistyps, z. B. 1074 = Neustart wurde ausgelöst.",
-    "Ereignisanzeige": "Das Windows-Programm mit Fenster, das dieselben Protokolle zeigt (eventvwr)."
+    "Ereignis-Id": "Nummer eines Ereignistyps, z. B. 6005 = Ereignisprotokoll-Dienst gestartet (beim Hochfahren), 1074 = ein Neustart oder Herunterfahren wurde ausgelöst.",
+    "Ereignisanzeige": "Das Windows-Programm mit Fenster, das dieselben Protokolle zeigt (eventvwr).",
+    "Hashtabelle @{…}": "Paare aus Schlüssel und Wert in @{ }, getrennt durch Semikolon, z. B. @{LogName='System'; Id=6005}.",
+    "Pipe (|)": "Gibt das Ergebnis eines Befehls an den nächsten weiter."
   },
+  "befehle": [
+    {
+      "muster": [
+        "Get-WinEvent -LogName System -MaxEvents 3",
+        "Get-WinEvent -LogName System -MaxEvents 5",
+        "Get-WinEvent -LogName System -MaxEvents 10"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "",
+            "   ProviderName: EventLog",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:44:05 PM         6005 Information      The Event log service was started.",
+            "11/3/2026 10:42:31 PM         6006 Information      The Event log service was stopped.",
+            "",
+            "",
+            "   ProviderName: User32",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:42:17 PM         1074 Information      The process C:\\Windows\\system32\\shutdown.exe (DC01) has initiated the restart of compute...",
+            ""
+          ],
+          "notiz": "Vereinfacht: Auf einem echten Server stünden nach einem Neustart noch viele neuere Ereignisse davor (z. B. von startenden Diensten). Hier siehst du nur die rund um den Neustart."
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1 | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1 | fl",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} | fl",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005} -MaxEvents 1 | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005} -MaxEvents 1 | fl",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005} | Format-List",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005} | fl"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "",
+            "TimeCreated  : 11/3/2026 10:44:05 PM",
+            "ProviderName : EventLog",
+            "Id           : 6005",
+            "Message      : The Event log service was started.",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1",
+        "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005}",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005} -MaxEvents 1",
+        "Get-WinEvent -FilterHashtable @{LogName='System';Id=6005}"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "",
+            "   ProviderName: EventLog",
+            "",
+            "TimeCreated                     Id LevelDisplayName Message",
+            "-----------                     -- ---------------- -------",
+            "11/3/2026 10:44:05 PM         6005 Information      The Event log service was started.",
+            ""
+          ]
+        }
+      ]
+    }
+  ],
   "mitmachen": [
     {
-      "text": "Die neuesten Systemereignisse: Get-WinEvent -LogName System -MaxEvents 5",
-      "eingabe": "Get-WinEvent -LogName System -MaxEvents 5",
-      "danach": "-MaxEvents begrenzt auf die neuesten. Du siehst den Neustart (Event log service started), aber nicht, wer ihn ausgelöst hat."
+      "text": "Die neuesten Ereignisse im Protokoll System: Get-WinEvent -LogName System -MaxEvents 3",
+      "eingabe": "Get-WinEvent -LogName System -MaxEvents 3",
+      "danach": "-LogName sagt, welches Protokoll – hier System, wo Windows selbst Starts, Dienste und Treiber einträgt. -MaxEvents 3 begrenzt auf die drei neuesten; ohne -MaxEvents liefert Get-WinEvent das ganze Protokoll, oft Tausende Einträge. Die Ausgabe ist nach Quelle gruppiert (ProviderName), das Neueste steht oben. TimeCreated ist der Zeitpunkt, Id die Nummer, LevelDisplayName die Stufe, Message der Text. Du siehst das Stoppen (6006) und den Start (6005) des Ereignisprotokolls und ein Ereignis 1074 – dessen Text ist aber abgeschnitten (…)."
+    },
+    {
+      "text": "Nur ein bestimmtes Ereignis: Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1",
+      "eingabe": "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1",
+      "danach": "-FilterHashtable filtert gezielt. Dahinter steht eine Hashtabelle: in @{ } Paare aus Schlüssel und Wert, getrennt durch ein Semikolon. LogName='System' wählt das Protokoll (Text in Anführungszeichen), Id=6005 die Nummer; das Protokoll steht jetzt in der Hashtabelle statt hinter -LogName. -MaxEvents 1 nimmt davon nur das neueste. Ohne Filter müsstest du dich durch alle Ereignisse arbeiten – so kommt genau eins: der letzte Start des Ereignisprotokolls, also der letzte Windows-Start."
+    },
+    {
+      "text": "Jetzt ausführlich – dasselbe mit | Format-List dahinter: Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1 | Format-List",
+      "eingabe": "Get-WinEvent -FilterHashtable @{LogName='System'; Id=6005} -MaxEvents 1 | Format-List",
+      "danach": "Der senkrechte Strich | (Pipe) reicht das Ergebnis an Format-List weiter. Format-List („als Liste formatieren“) zeigt jede Eigenschaft in einer eigenen Zeile – links der Name, rechts der Wert – und schneidet lange Texte nicht ab. Ohne Format-List kommt die Tabelle, in der lange Meldungen mit … enden. Die Kurzform ist fl. Das brauchst du immer, wenn eine Meldung zu lang für die Tabelle ist."
     }
   ],
   "aufgaben": [
@@ -34,19 +132,21 @@
         "gefunden": true
       },
       "hinweise": [
-        "Gefiltert wird mit -FilterHashtable @{…}.",
-        "In die Klammern gehören LogName='System' und Id=1074, dahinter | Format-List.",
+        "Wie hast du Ereignis 6005 ausführlich angezeigt? Nur die Id ist anders.",
+        "Get-WinEvent mit -FilterHashtable @{LogName='System'; Id=1074}, -MaxEvents 1 und | Format-List.",
         "Tippe: Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
       ],
       "loesung": [
         "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1074} -MaxEvents 1 | Format-List"
       ],
-      "danach": "Ereignis 1074: azubi01 hat den Neustart mit shutdown.exe ausgelöst. Mit -FilterHashtable filterst du gezielt nach Protokoll und Id, Format-List zeigt alles untereinander."
+      "danach": "Ereignis 1074 von der Quelle User32: Das Programm shutdown.exe hat den Neustart von DC01 ausgelöst – im Auftrag von FIRMA\\azubi01; einen Grund (Comment) hat niemand eingetragen. Du hast denselben Filter wie für 6005 benutzt, nur mit einer anderen Id. Im Alltag beantwortet 1074 genau diese Frage: Wer oder welches Programm hat neu gestartet? Fehlt ein 1074 und es gibt stattdessen 41 oder 6008, war der Neustart unerwartet (Absturz oder Stromausfall)."
     }
   ],
   "fertig": [
-    "Windows protokolliert Ereignisse mit einer Id in Protokollen wie System.",
-    "Get-WinEvent -LogName System -MaxEvents 5 zeigt die neuesten.",
-    "-FilterHashtable @{LogName='System'; Id=1074} filtert gezielt; | Format-List zeigt alles."
+    "Windows protokolliert Ereignisse mit Id, Quelle und Stufe in Protokollen wie System.",
+    "Get-WinEvent -LogName System -MaxEvents 3 zeigt die neuesten.",
+    "-FilterHashtable @{LogName='System'; Id=1074} filtert gezielt nach Protokoll und Id.",
+    "| Format-List zeigt ein Ereignis ungekürzt untereinander.",
+    "1074 verrät, wer neu gestartet hat; 6005 markiert den Start."
   ]
 }

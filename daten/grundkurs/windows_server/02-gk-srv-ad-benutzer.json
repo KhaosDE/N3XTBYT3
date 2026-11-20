@@ -11,53 +11,258 @@
   "datum": "2026-11-05",
   "szenario": "srv-ad-konto-gesperrt",
   "shell": "powershell",
+  "zustand": {
+    "gesperrt_lschmidt": true
+  },
   "erklaeren": [
-    "Jeder Mitarbeiter hat im Active Directory ein Benutzerkonto. Typische Anrufe: „Ich komme nicht rein!“ –",
-    "das Konto ist gesperrt (zu oft falsches Passwort), deaktiviert oder abgelaufen. Die AD-Befehle der",
-    "PowerShell heißen alle …-AD…: Get-ADUser zeigt ein Konto, Search-ADAccount sucht Konten mit Problemen.",
-    "Hier ruft Kai Wagner (kwagner) aus dem Vertrieb an: Er kommt nach dem Urlaub nicht mehr rein."
+    "Jeder Mitarbeiter hat im Active Directory ein Benutzerkonto. Typischer Anruf: „Ich komme nicht rein!“ – dann",
+    "ist das Konto oft gesperrt (zu oft ein falsches Passwort), deaktiviert oder abgelaufen. Die AD-Befehle der",
+    "PowerShell haben alle „AD“ im Namen. Du lernst drei: Get-ADUser zeigt ein Konto, Search-ADAccount sucht",
+    "Konten mit einem bestimmten Problem, Unlock-ADAccount entsperrt eins.",
+    "",
+    "Heute Morgen hat schon Lena Schmidt (lschmidt) aus der Buchhaltung angerufen: Sie ist ausgesperrt. An ihrem",
+    "Konto lernst du das Entsperren. Dann ruft Kai Wagner (kwagner) aus dem Vertrieb an – er kommt nach dem",
+    "Urlaub nicht mehr rein."
   ],
   "begriffe": {
     "SamAccountName": "Der Anmeldename eines Kontos, z. B. kwagner.",
     "DistinguishedName": "Der volle Pfad eines Objekts im AD, z. B. CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal.",
     "OU": "Organisationseinheit: ein Ordner im AD, z. B. für eine Abteilung.",
-    "Gesperrt (LockedOut)": "Nach zu vielen falschen Passwörtern sperrt das AD das Konto für eine Zeit."
+    "Eigenschaft": "Ein Wert eines Kontos, z. B. Enabled oder LockedOut. In der Ausgabe steht links der Name, rechts nach dem Doppelpunkt der Wert.",
+    "-Identity": "Sagt einem AD-Befehl, welches Objekt gemeint ist: Anmeldename, DistinguishedName, GUID oder SID.",
+    "Gesperrt (LockedOut)": "Nach zu vielen falschen Passwörtern sperrt das AD das Konto (Schutz gegen Ausprobieren).",
+    "Deaktiviert (Enabled: False)": "Ein Admin hat das Konto absichtlich ausgeschaltet – etwas anderes als gesperrt."
   },
-  "mitmachen": [
+  "befehle": [
     {
-      "text": "Sieh dir das Konto an: Get-ADUser kwagner",
-      "eingabe": "Get-ADUser kwagner",
-      "danach": "Enabled: True heißt: das Konto ist aktiv. Ob es gesperrt ist, zeigt Get-ADUser von sich aus nicht – dafür muss man die Eigenschaft ausdrücklich anfordern."
+      "muster": [
+        "Search-ADAccount -LockedOut",
+        "Search-ADAccount -LockedOut -UsersOnly"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "gesperrt": true,
+            "gesperrt_lschmidt": true
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 10/17/2026 4:51:12 PM",
+            "LockedOut             : True",
+            "Name                  : Kai Wagner",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : kwagner",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "UserPrincipalName     : kwagner@firma.internal",
+            "",
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Lena Schmidt,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 11/2/2026 7:58:12 AM",
+            "LockedOut             : True",
+            "Name                  : Lena Schmidt",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1167-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : lschmidt",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1167",
+            "UserPrincipalName     : lschmidt@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "gesperrt": true,
+            "gesperrt_lschmidt": false
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Kai Wagner,OU=Vertrieb,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 10/17/2026 4:51:12 PM",
+            "LockedOut             : True",
+            "Name                  : Kai Wagner",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1142-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : kwagner",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1142",
+            "UserPrincipalName     : kwagner@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "wenn": {
+            "gesperrt": false,
+            "gesperrt_lschmidt": true
+          },
+          "ausgabe": [
+            "",
+            "AccountExpirationDate :",
+            "DistinguishedName     : CN=Lena Schmidt,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled               : True",
+            "LastLogonDate         : 11/2/2026 7:58:12 AM",
+            "LockedOut             : True",
+            "Name                  : Lena Schmidt",
+            "ObjectClass           : user",
+            "ObjectGUID            : 8c1d2e3f-1167-4a5b-9c6d-7e8f9a0b1c2d",
+            "PasswordExpired       : False",
+            "PasswordNeverExpires  : False",
+            "SamAccountName        : lschmidt",
+            "SID                   : S-1-5-21-3102466718-2850364093-1407842133-1167",
+            "UserPrincipalName     : lschmidt@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": ""
+        }
+      ]
     },
     {
-      "text": "Mit der Eigenschaft LockedOut: Get-ADUser kwagner -Properties LockedOut",
+      "muster": [
+        "Get-ADUser lschmidt",
+        "Get-ADUser -Identity lschmidt"
+      ],
+      "faelle": [
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Lena Schmidt,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Lena",
+            "Name              : Lena Schmidt",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1167-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : lschmidt",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1167",
+            "Surname           : Schmidt",
+            "UserPrincipalName : lschmidt@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Get-ADUser lschmidt -Properties LockedOut",
+        "Get-ADUser -Identity lschmidt -Properties LockedOut"
+      ],
+      "faelle": [
+        {
+          "wenn": {
+            "gesperrt_lschmidt": true
+          },
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Lena Schmidt,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Lena",
+            "LockedOut         : True",
+            "Name              : Lena Schmidt",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1167-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : lschmidt",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1167",
+            "Surname           : Schmidt",
+            "UserPrincipalName : lschmidt@firma.internal",
+            "",
+            ""
+          ]
+        },
+        {
+          "ausgabe": [
+            "",
+            "DistinguishedName : CN=Lena Schmidt,OU=Buchhaltung,DC=firma,DC=internal",
+            "Enabled           : True",
+            "GivenName         : Lena",
+            "LockedOut         : False",
+            "Name              : Lena Schmidt",
+            "ObjectClass       : user",
+            "ObjectGUID        : 8c1d2e3f-1167-4a5b-9c6d-7e8f9a0b1c2d",
+            "SamAccountName    : lschmidt",
+            "SID               : S-1-5-21-3102466718-2850364093-1407842133-1167",
+            "Surname           : Schmidt",
+            "UserPrincipalName : lschmidt@firma.internal",
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "muster": [
+        "Unlock-ADAccount lschmidt",
+        "Unlock-ADAccount -Identity lschmidt"
+      ],
+      "faelle": [
+        {
+          "setze": {
+            "gesperrt_lschmidt": false
+          }
+        }
+      ]
+    }
+  ],
+  "mitmachen": [
+    {
+      "text": "Sieh dir Kais Konto an: Get-ADUser kwagner",
+      "eingabe": "Get-ADUser kwagner",
+      "danach": "Get-ADUser heißt „hole AD-Benutzer“: Es zeigt ein Benutzerkonto aus dem Active Directory. Der Name dahinter sagt, welches Konto – ausgeschrieben Get-ADUser -Identity kwagner; -Identity darfst du weglassen, wenn der Name direkt hinter dem Befehl steht. Lies die Ausgabe zeilenweise: links die Eigenschaft, rechts ihr Wert. Enabled: True heißt, das Konto ist eingeschaltet (nicht deaktiviert); SamAccountName ist der Anmeldename, DistinguishedName der Platz im AD (Kai liegt in der OU Vertrieb). Ob das Konto gesperrt ist, steht hier nicht: Get-ADUser zeigt von sich aus nur ein paar Standard-Eigenschaften."
+    },
+    {
+      "text": "Hol die Eigenschaft LockedOut dazu: Get-ADUser kwagner -Properties LockedOut",
       "eingabe": "Get-ADUser kwagner -Properties LockedOut",
-      "danach": "LockedOut: True – das Konto ist gesperrt. Mit -Properties holst du Eigenschaften dazu, die standardmäßig nicht angezeigt werden."
+      "danach": "-Properties (Eigenschaften) holt Eigenschaften dazu, die Get-ADUser sonst weglässt – hier LockedOut (ausgesperrt). Ohne -Properties siehst du nur die Standardliste von eben. Jetzt steht da LockedOut: True – Kais Konto ist gesperrt."
     },
     {
       "text": "Wer ist noch gesperrt? Search-ADAccount -LockedOut",
       "eingabe": "Search-ADAccount -LockedOut",
-      "danach": "Search-ADAccount sucht Konten mit einem Problem – hier alle gesperrten. Nur Kai."
+      "danach": "Search-ADAccount heißt „suche AD-Konten“. Der Schalter -LockedOut sagt, wonach: nach gesperrten Konten. Ein Schalter ist ein Zusatz ohne Wert dahinter, er schaltet nur etwas ein. Einer dieser Schalter muss immer dabei sein, er legt fest, wonach gesucht wird – andere sind z. B. -AccountDisabled (deaktiviert) oder -AccountExpired (abgelaufen). Ergebnis: Zwei Konten sind gesperrt, Kai und Lena (LockedOut: True). So findest du gesperrte Konten, ohne jeden Namen einzeln zu prüfen."
+    },
+    {
+      "text": "Lena hat angerufen – entsperre ihr Konto: Unlock-ADAccount -Identity lschmidt",
+      "eingabe": "Unlock-ADAccount -Identity lschmidt",
+      "danach": "Unlock-ADAccount heißt „AD-Konto entsperren“. -Identity sagt, welches Konto: hier der Anmeldename lschmidt. Der Wert ist Pflicht – fehlt er, fragt die PowerShell nach, welches Konto gemeint ist. Das Wort -Identity selbst darfst du weglassen (Unlock-ADAccount lschmidt). Bei Erfolg kommt keine Ausgabe: keine rote Zeile heißt, es hat geklappt. Das Passwort bleibt dabei gleich."
+    },
+    {
+      "text": "Prüf nach: Get-ADUser lschmidt -Properties LockedOut",
+      "eingabe": "Get-ADUser lschmidt -Properties LockedOut",
+      "danach": "LockedOut: False – Lenas Konto ist frei, sie kann sich wieder anmelden. Nach jeder Änderung prüfst du so nach, ob sie gewirkt hat. Erst dann sagst du der Kollegin, dass es wieder geht."
     }
   ],
   "aufgaben": [
     {
-      "aufgabe": "Entsperre das Konto von kwagner.",
+      "aufgabe": "Jetzt Kai: Entsperre das Konto kwagner.",
       "ziel": {
         "gesperrt": false
       },
       "hinweise": [
-        "Das Verb für „entsperren“ ist Unlock.",
-        "Unlock-ADAccount mit -Identity und dem Anmeldenamen.",
+        "Wie hast du Lenas Konto entsperrt? Nur der Anmeldename ist anders.",
+        "Unlock-ADAccount mit -Identity und Kais Anmeldenamen.",
         "Tippe: Unlock-ADAccount -Identity kwagner"
       ],
       "loesung": [
         "Unlock-ADAccount -Identity kwagner"
       ],
-      "danach": "Entsperrt. Ein neues Passwort war nicht nötig – Kai kennt sein Passwort ja wieder."
+      "danach": "Kais Konto ist entsperrt – mit demselben Befehl wie bei Lena, nur mit seinem Anmeldenamen hinter -Identity. Ein neues Passwort war nicht nötig: Kai kennt sein richtiges Passwort ja wieder, gesperrt war er nur wegen der vielen Fehlversuche. Merke den Unterschied: Ein gesperrtes Konto entsperrst du mit Unlock-ADAccount; ein deaktiviertes Konto (Enabled: False) hat jemand absichtlich ausgeschaltet."
     },
     {
-      "aufgabe": "Prüf nach, dass das Konto nicht mehr gesperrt ist.",
+      "aufgabe": "Prüf nach, dass Kais Konto nicht mehr gesperrt ist.",
       "eingabe": [
         "Get-ADUser kwagner -Properties LockedOut",
         "Get-ADUser -Identity kwagner -Properties LockedOut",
@@ -67,16 +272,17 @@
         "gesperrt": false
       },
       "hinweise": [
-        "Mit welchem Befehl hast du die Sperre vorhin gesehen?",
-        "Get-ADUser mit -Properties LockedOut.",
+        "Mit welchem Befehl hast du bei Lena nachgeprüft?",
+        "Get-ADUser mit Kais Anmeldenamen und -Properties LockedOut.",
         "Tippe: Get-ADUser kwagner -Properties LockedOut"
       ],
-      "danach": "LockedOut: False – Kai kann sich wieder anmelden."
+      "danach": "Kai kann sich wieder anmelden. Bei Get-ADUser mit -Properties LockedOut steht jetzt LockedOut: False; Search-ADAccount -LockedOut gibt gar nichts mehr aus, weil kein Konto mehr gesperrt ist. Im Alltag sagst du erst nach dieser Prüfung Bescheid."
     }
   ],
   "fertig": [
-    "Get-ADUser <name> zeigt ein Konto; -Properties … holt weitere Eigenschaften.",
-    "Search-ADAccount -LockedOut findet gesperrte Konten.",
-    "Unlock-ADAccount -Identity <name> entsperrt ein Konto."
+    "Get-ADUser <name> zeigt ein Konto; -Properties … holt weitere Eigenschaften wie LockedOut.",
+    "Search-ADAccount -LockedOut findet alle gesperrten Konten.",
+    "Unlock-ADAccount -Identity <name> entsperrt ein Konto – ohne Ausgabe, das Passwort bleibt.",
+    "-Identity sagt einem AD-Befehl, welches Konto gemeint ist."
   ]
 }
