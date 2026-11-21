@@ -1,6 +1,6 @@
-# SITZUNGEN — N3XTBYT3
+# Sitzungen
 
-Ein Einzeiler pro Sitzung, nur anhängen.
+Je erledigter Aufgabe eine Zeile, nur anhängen, neueste unten.
 
 - 04.11.2026 — Repository eingerichtet: Regeln, Plan M1–M4, Stand-Dateien (Chat „Ideen Entwickeln“).
 - 04.11.2026 — M1 bis M4 umgesetzt (Claude Code): Kern, Oberfläche, Spielstand, Lernkartei, Befehls-Training, Auswertung, 62 Szenarien für alle vier Systeme, Linux-Dateisystem mit Editor, Tickets über mehrere Rechner, MCP-Server, Windows-.exe per GitHub Actions; alles ungeprüft, Abnahmetests durch Tobi offen.
@@ -14,3 +14,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 20.11.2026 — Chat: Didaktik-Prüfung verschärft (erklärt statt nur gezeigt): Grundkurs 103, Szenarien 22 Befunde. Lernprinzip in `CLAUDE.md`, Auftrag „Lernprinzip“ in `IDEEN.md` freigegeben (ersetzt Eintrag vom 12.11.).
 - 20.11.2026 — Lernprinzip aus IDEEN.md (Claude Code): alle vier Grundkurse und 62 Szenarien überarbeitet – jeder Befehl und Zusatz wird vor der Aufgabe erklärt, Erklärungen mit mindestens zwei Sätzen, Szenarien erklären die Lösung Schritt für Schritt; Windows-Lektion 6 neu; Korrekturen (DHCP-Bereich, host und /etc/hosts); tests/test_didaktik.py mit 0 Befunden.
 - 21.11.2026 — Arbeitsweise: Prüf- und Fertig-Regel (Testbefehl auch für die Cloud), Plan-, Eine-Aufgabe- und Prüf-Subagent-Regel in `CLAUDE.md`; Projektbeschreibung und Aussehen nach `docs/projekt.md`; `STAND.md` gekürzt (Fertig und Entscheidungen wortgleich nach `docs/verlauf.md`)
+- 21.11.2026 — Standard KhaosDE eingeführt: gemeinsamer Arbeitsweise-Block in CLAUDE.md (Autonomie- und main-Regel bleiben als Projektregel), IDEEN.md nur offene Ideen mit Status (3 erledigte gelöscht), Lernprinzip und dauerhafte Regeln daraus nach docs/lernprinzip.md, Technik nach docs/technik.md, Entscheidungen nach docs/entscheidungen.md, docs/verlauf.md gelöscht, Notiz-Prüfung als Stop-Hook (.claude/); letzter Stand in Commit 6781491.

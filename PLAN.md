@@ -119,7 +119,8 @@ liefert der MCP-Server die Auswertung eines Systems.
 ## G — Grundkurs „Konsole von den Babyschuhen an“ (aus IDEEN.md, freigegeben 05.11.2026)
 
 Ein geführter Grundkurs je System, der bei null anfängt, dazu Befehlsbuch und Lexikon.
-Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Grundkurs“.
+Ausführliche Beschreibung: bis 21.11.2026 `IDEEN.md`, Eintrag „Grundkurs“ (`git show 6781491:IDEEN.md`);
+Aufbau einer Lektion: `docs/lernprinzip.md`.
 
 - G1 Kern: Lektionen als Daten (`daten/grundkurs/<system>/<nr>-<id>.json`, Format in
   `daten/grundkurs/SCHEMA.md`), Lektionsablauf (Erklären → Mitmachen → Selbst probieren →
@@ -141,7 +142,7 @@ Systeme vorhanden.
 
 ## L — Logikprüfung: Tippfehler erkennen, gleichwertige Eingaben annehmen (aus IDEEN.md, freigegeben 07.11.2026)
 
-Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Logikprüfung“. Prüfwerkzeug: `werkzeuge/logikpruefung.py`.
+Ausführliche Beschreibung: bis 21.11.2026 `IDEEN.md`, Eintrag „Logikprüfung“ (`git show 6781491:IDEEN.md`). Prüfwerkzeug: `werkzeuge/logikpruefung.py`.
 
 - L1 Tippfehler-Abstand (Damerau-Levenshtein) und Meldungen: Befehlsname („Meintest du …?“, auch nach
   `sudo`), Argument/Option („Fast! Schau dir … an“), Pfade (echte Fehlermeldung plus „Meintest du …?“),
@@ -157,7 +158,7 @@ Schritt; Tobis Fall `get-command *-prcoess` nennt „prcoess“; Bericht: 0 „n
 
 ## D — Lernprinzip: Alles wird erklärt, bevor es verlangt wird (aus IDEEN.md, freigegeben 20.11.2026)
 
-Ausführliche Beschreibung: `IDEEN.md`, Eintrag „Lernprinzip“; Regeln auch in `CLAUDE.md` und
+Ausführliche Beschreibung: bis 21.11.2026 `IDEEN.md`, Eintrag „Lernprinzip“ (`git show 6781491:IDEEN.md`); Regeln auch in `CLAUDE.md` und
 `daten/grundkurs/SCHEMA.md`. Prüfwerkzeug: `werkzeuge/didaktikpruefung.py`.
 
 - D1 Kern: Lektionsschritte kennen `suchaufgabe` und `absichtlich_unbekannt`; die Prüfung verlangt

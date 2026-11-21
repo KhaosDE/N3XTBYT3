@@ -1,6 +1,9 @@
 # STAND — N3XTBYT3
 
-Stand: 20.11.2026.
+Notizen seit 21.11.2026 nach dem Standard KhaosDE (Aufträge in `IDEEN.md`, Entscheidungen in
+`docs/entscheidungen.md`, Notiz-Prüfung als Hook in `.claude/`).
+
+Stand: 21.11.2026.
 
 ## Aktuell
 
@@ -12,27 +15,9 @@ Stand: 20.11.2026.
 Das Repository ist seit 05.11.2026 öffentlich; der feste Download-Link und der echte Update-Ablauf
 (Release laden, Prüfsumme, Austausch) sind von außen geprüft.
 
-**Neu (07.11.2026): Große Bugsuche.** Vier Prüfer haben Befehlsauswertung, Linux- und Windows-Dateisystem,
-Editor und Oberfläche durchgesehen, dazu Fuzzing (Zufallseingaben) von Kern und Oberfläche. Rund 60 echte Fehler
-sind behoben, jeder mit Test (`tests/test_bugfixes.py`, `tests/test_oberflaeche.py`). Einzelheiten in `docs/verlauf.md` unter
-„Bugsuche 07.11.2026“.
-
-**Neu (07.11.2026): Logikprüfung (L, aus `IDEEN.md`).** Tippfehler werden jetzt beim Namen genannt –
-im Grundkurs und in allen Szenarien, auf allen vier Systemen. Echte PowerShell-Aliase (`gsv`, `dir`, `ri` …)
-und `-Name` werden angenommen. Einzelheiten in `docs/verlauf.md` unter „Logikprüfung 07.11.2026“.
-
-**Neu (20.11.2026): Lernprinzip (D, aus `IDEEN.md`).** Grundkurs und Szenarien erklären jetzt jeden Befehl und
-jeden Zusatz, bevor eine Aufgabe ihn verlangt; jede Erklärung erklärt wirklich etwas. Einzelheiten in `docs/verlauf.md` unter
-„Lernprinzip 20.11.2026“.
-
 **Nächster Schritt:** Deine Tests und Rückmeldungen – vor allem: Kommst du ohne Vorwissen durch die
 Windows-Lektionen 1–10? Danach laufend: deine echten Fehler als Szenarien aufnehmen und Ausgaben,
 die vom echten System abweichen, korrigieren.
-
-## Fertig
-
-Alles Erledigte (Meilensteine M1–M4, Grundkurs G, Selbst-Update, Lernprinzip, Logikprüfung, Bugsuche)
-samt abgehakter Abnahmen steht wortgleich in `docs/verlauf.md`, Abschnitt „Fertig“.
 
 ## Offene Punkte
 
@@ -53,11 +38,6 @@ samt abgehakter Abnahmen steht wortgleich in `docs/verlauf.md`, Abschnitt „Fer
   - `whatis` (Spaltenbreite) und Ubuntus Meldung „Command 'Whoami' not found, did you mean:“ (gekürzt).
   - Neue Dateien unter Linux: `rw-rw-r--` (Ubuntu-Standard für normale Benutzer, umask 002).
   - `Get-Help`, `man`, `systeminfo`, Prozess- und Dienstlisten sind gekürzt (blaue Notiz darunter).
-
-## Entscheidungen
-
-Neue Entscheidungen hier eintragen. Die bisherigen (04.11.–20.11.2026) stehen wortgleich in
-`docs/verlauf.md`, Abschnitt „Entscheidungen“.
 
 ## Für Tobi zum Testen
 
