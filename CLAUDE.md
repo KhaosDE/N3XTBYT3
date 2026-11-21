@@ -1,26 +1,10 @@
 # CLAUDE.md — Regeln für Sitzungen an N3XTBYT3
 
-## Was N3XTBYT3 ist
+## Was N3XTBYT3 ist (Kurzfassung)
 
-N3XTBYT3 ist Tobis **Lernplattform für IT-Themen**. Erster und wichtigster Baustein ist der
-Wartungs-Simulator; die Weiterbildung zum Netzwerkadministrator ist ein wichtiger, aber nicht
-der einzige Zweck. Weitere IT-Themen dürfen als eigene Bereiche dazukommen, auch ohne Terminal
-(z. B. Subnetting-Rechnen, Theorie-Quiz). Die Beschränkung „nur Terminal“ oder „nur
-Weiterbildung“ gilt nicht (Entscheidung Tobi, 12.11.2026).
-
-Der Wartungs-Simulator: Tobi lernt darin über ein **nachgebautes Terminal**,
-Fehler an Systemen zu erkennen und zu beheben — Befehle, Fachbegriffe und Vorgehen.
-Im Hauptmenü wählt er eines von vier Systemen: **Windows, Windows Server, Linux,
-Linux Server**. Die Simulation wählt Szenarien aus, gibt gestufte Hinweise und speichert
-den Fortschritt je System.
-
-- **Nutzer:** nur Tobi, reines Lernwerkzeug. Keine Veröffentlichung, kein Shop, keine Konten.
-- **Kern:** Probleme und Fehler erkennen, die Lösung lernen und kennen. Tickets und
-  andere Abläufe sind nur Abwechslung, nie der Kern.
-- **Zweck:** Vorbereitung auf eine IT-Weiterbildung (Netzwerkadministration, Windows
-  Server) und bessere Wartungskenntnisse für den Alltag.
-- **Szenarien aus der Wirklichkeit:** Echte Fehler, die Tobi löst, kommen laufend als
-  neue Szenarien dazu. Das Programm muss das ohne Codeänderung erlauben.
+Tobis Lernplattform für IT-Themen; erster Baustein ist der Wartungs-Simulator (nachgebautes Terminal,
+vier Systeme). Nur für Tobi, reines Lernwerkzeug. Ausführlich – Zweck, Kern, Szenarien aus der
+Wirklichkeit, Aussehen – in `docs/projekt.md`. Lies sie vor neuen Bereichen oder Änderungen am Aussehen.
 
 ## Lernprinzip
 
@@ -68,6 +52,18 @@ das den Test nicht besteht, ist nicht fertig.
    Zweifel die Abwehr-Seite bauen (Lücke erkennen und schließen), nie die Angriffs-Seite. Das
    gilt auch für neue IT-Bereiche der Lernplattform. Entscheidung Tobi, 12.11.2026.
 
+## Prüfen – Pflicht, bevor du „fertig“ sagst
+
+- Alle Tests: `python -m unittest` (Windows und Linux, Python 3.12, `pip install -r requirements.txt`).
+  In der Cloud-Sitzung: `python3.12 -m pip install --break-system-packages -r requirements.txt`, dann
+  `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy python3.12 -m unittest` (Stand 21.11.2026:
+  „Ran 236 tests … OK“, etwa 10 Sekunden).
+- Fertig ist eine Aufgabe erst, wenn die Prüfung grün ist. Zeige die letzte Zeile der Ausgabe im Bericht.
+  In der Cloud nicht prüfbar, deshalb ausdrücklich „ungeprüft“ nennen: Aussehen und Bedienung am echten
+  Bildschirm, die `.exe` und ihr Selbst-Update unter Windows, der MCP-Server in Claude Desktop, und ob
+  Ausgaben zum echten System passen (das bestätigt nur Tobi, Regel 2).
+- Ursachen beheben, keine Tests abschwächen oder überspringen, damit sie grün werden.
+
 ## Arbeitsweise: selbstständig durchlaufen
 
 Tobi will, dass du **ohne Unterbrechungen** arbeitest.
@@ -76,6 +72,11 @@ Tobi will, dass du **ohne Unterbrechungen** arbeitest.
   Einträge mit `Status: freigegeben` haben Vorrang vor allem anderen (Regel unten:
   „Ideen aus den Chats“).
 - Arbeite `PLAN.md` der Reihe nach ab: Meilenstein für Meilenstein, Schritt für Schritt.
+- **Plan vor dem Bauen:** Sind mehrere Dateien betroffen oder ist der Weg unklar, schreib zuerst einen
+  kurzen Plan (Dateien, Prüfung) und setz ihn dann ohne Rückfrage um. Größere Vorhaben kommen erst als
+  Idee in `IDEEN.md` und werden nach `Status: freigegeben` in einer neuen Sitzung gebaut.
+- **Eine Aufgabe pro Sitzung:** eine freigegebene Idee oder ein Meilenstein aus `PLAN.md`. Kommt eine
+  fremde Aufgabe dazu, notier sie in `IDEEN.md` (`Status: offen`) und schlag eine neue Sitzung vor.
 - Musst du etwas entscheiden, das der Plan offenlässt: entscheide selbst, nimm die
   einfachere Lösung, und schreib die Entscheidung mit Begründung in `STAND.md`,
   Abschnitt „Entscheidungen“. Nicht anhalten, nicht nachfragen.
@@ -87,6 +88,9 @@ Tobi will, dass du **ohne Unterbrechungen** arbeitest.
 - **Zweig:** Direkt auf `main` committen und pushen, sobald die Tests grün sind
   (Entscheidung Tobi, 04.11.2026). Ist `main` geschützt oder lehnt ab: Arbeitszweig,
   Pull Request, selbst zusammenführen, wenn die Tests grün sind.
+- **Vor dem Push nach `main`:** einen Prüf-Subagenten in frischem Kontext den Diff gegen den Auftrag
+  prüfen lassen (nur Fehler zu Richtigkeit oder Auftrag, keine Stilwünsche). Jeder Push nach `main`
+  veröffentlicht ein Release, aus dem sich Tobis `.exe` beim Start selbst aktualisiert.
 - Am Ende eines Meilensteins: Abnahmekriterien aus `PLAN.md` abhaken, in `STAND.md`
   festhalten, was Tobi testen soll (kurze Liste, in einfachen Worten).
 
@@ -100,8 +104,11 @@ Die Chats auf claude.ai lesen den Stand über GitHub. Deshalb führt das Reposit
 | `SITZUNGEN.md` | wird **angehängt** | ein Einzeiler pro Sitzung: Datum — was erledigt wurde |
 | `IDEEN.md` | wird überarbeitet | Ideen für das Programm, jede mit Status (siehe unten) |
 | `PLAN.md` | wird nur bei Planänderung überarbeitet | Meilensteine und Abnahmekriterien |
+| `docs/verlauf.md` | wird **angehängt** | Erledigtes, abgehakte Abnahmen und ältere Entscheidungen aus `STAND.md` |
 
 Jede Sitzung endet mit aktualisiertem `STAND.md` und einer neuen Zeile in `SITZUNGEN.md`.
+`STAND.md` kurz halten (Richtwert ≤ 150 Zeilen): Erledigtes nach `docs/verlauf.md` verschieben
+(wortgleich), in `STAND.md` nur ein Verweis.
 
 ### Ideen aus den Chats
 
@@ -132,12 +139,6 @@ Fassung landet in `IDEEN.md` mit einem Status:
 - **Windows-Programmdatei:** GitHub Actions baut bei jedem Push nach `main` eine `.exe`
   (PyInstaller), testet unter Windows und veröffentlicht sie als Release `build-<Laufnummer>`.
   Aus dem neuesten Release aktualisiert sich die `.exe` beim Start selbst (Ausnahme zu Regel 1).
-
-## Aussehen
-
-Angelehnt an Tobis Spiel Shellbreaker: dunkler Hintergrund, Terminalschrift in Grün,
-Neon-/Matrix-Stil. Aufteilung: links das Terminal, rechts ein Bereich für Hinweise,
-Erklärungen und Begriffe. Gut lesbar bei 1920 × 1080, Schriftgröße einstellbar.
 
 ## Sprache
 
